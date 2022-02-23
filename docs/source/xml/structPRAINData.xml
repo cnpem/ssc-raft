@@ -1,0 +1,270 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="structPRAINData" kind="struct" language="C++" prot="public">
+    <compoundname>PRAINData</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structPRAINData_1acaa43dd708d5395bf026b4b4e34e048b" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex* PRAINData::image</definition>
+        <argsstring></argsstring>
+        <name>image</name>
+        <qualifiedname>PRAINData::image</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="63" column="14" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a66c50b8adae434b9a3642e3988e918cc" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * PRAINData::image0</definition>
+        <argsstring></argsstring>
+        <name>image0</name>
+        <qualifiedname>PRAINData::image0</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="63" column="20" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a64d6c54d634126051737adccd51ff706" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * PRAINData::prop</definition>
+        <argsstring></argsstring>
+        <name>prop</name>
+        <qualifiedname>PRAINData::prop</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="63" column="27" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1ab0e37ab2f0c7ceec96f6f651422921f1" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * PRAINData::kernel</definition>
+        <argsstring></argsstring>
+        <name>kernel</name>
+        <qualifiedname>PRAINData::kernel</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="63" column="32" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a5e6434e8d98f39387b6eb45e585bb5af" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * PRAINData::beer</definition>
+        <argsstring></argsstring>
+        <name>beer</name>
+        <qualifiedname>PRAINData::beer</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="63" column="39" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a0b07122ed677dafeec103db2b7f795d5" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * PRAINData::ans</definition>
+        <argsstring></argsstring>
+        <name>ans</name>
+        <qualifiedname>PRAINData::ans</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="63" column="44" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a02a3f6d7082e4e8e6e0953ca37dc5c07" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * PRAINData::temp</definition>
+        <argsstring></argsstring>
+        <name>temp</name>
+        <qualifiedname>PRAINData::temp</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="63" column="48" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a0b81fc2c58c20d6462df1058947cb6a4" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex* PRAINData::p</definition>
+        <argsstring></argsstring>
+        <name>p</name>
+        <qualifiedname>PRAINData::p</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="64" column="14" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a8c6878572b7773a80cf8e43846338fd7" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * PRAINData::r</definition>
+        <argsstring></argsstring>
+        <name>r</name>
+        <qualifiedname>PRAINData::r</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="64" column="16" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1aed9b91377ef1397c1c94cac5c79e90a5" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * PRAINData::Mp</definition>
+        <argsstring></argsstring>
+        <name>Mp</name>
+        <qualifiedname>PRAINData::Mp</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="64" column="18" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a64ad1c59ed4482de0b56d5b4f68bd1ea" prot="public" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float* PRAINData::lambda</definition>
+        <argsstring></argsstring>
+        <name>lambda</name>
+        <qualifiedname>PRAINData::lambda</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="64" column="27" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1ac1677eb2cdb7bfea6a26040fa9c44cfd" prot="public" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float * PRAINData::beta</definition>
+        <argsstring></argsstring>
+        <name>beta</name>
+        <qualifiedname>PRAINData::beta</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="64" column="34" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="64" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a3911c5e5ea5c5e353c33474877ca9d45" prot="public" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float* PRAINData::intensity</definition>
+        <argsstring></argsstring>
+        <name>intensity</name>
+        <qualifiedname>PRAINData::intensity</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="65" column="7" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1ad9f4b2b6770d37aa836d5241c4962c68" prot="public" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float * PRAINData::Idata</definition>
+        <argsstring></argsstring>
+        <name>Idata</name>
+        <qualifiedname>PRAINData::Idata</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="65" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a712b468c3dc3b42d4424cd63033d51d6" prot="public" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float * PRAINData::norm</definition>
+        <argsstring></argsstring>
+        <name>norm</name>
+        <qualifiedname>PRAINData::norm</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="65" column="23" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1a82ea9c70ab0e7a18edf9e505bdee3711" prot="public" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float * PRAINData::rhsnorm</definition>
+        <argsstring></argsstring>
+        <name>rhsnorm</name>
+        <qualifiedname>PRAINData::rhsnorm</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="65" column="28" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPRAINData_1aba354f28d28cf7dd7f33d4dfa2ed2a8b" prot="public" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float * PRAINData::mask</definition>
+        <argsstring></argsstring>
+        <name>mask</name>
+        <qualifiedname>PRAINData::mask</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="65" column="36" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="61" column="1" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="62" bodyend="66"/>
+    <listofallmembers>
+      <member refid="structPRAINData_1a0b07122ed677dafeec103db2b7f795d5" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>ans</name></member>
+      <member refid="structPRAINData_1a5e6434e8d98f39387b6eb45e585bb5af" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>beer</name></member>
+      <member refid="structPRAINData_1ac1677eb2cdb7bfea6a26040fa9c44cfd" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>beta</name></member>
+      <member refid="structPRAINData_1ad9f4b2b6770d37aa836d5241c4962c68" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>Idata</name></member>
+      <member refid="structPRAINData_1acaa43dd708d5395bf026b4b4e34e048b" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>image</name></member>
+      <member refid="structPRAINData_1a66c50b8adae434b9a3642e3988e918cc" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>image0</name></member>
+      <member refid="structPRAINData_1a3911c5e5ea5c5e353c33474877ca9d45" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>intensity</name></member>
+      <member refid="structPRAINData_1ab0e37ab2f0c7ceec96f6f651422921f1" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>kernel</name></member>
+      <member refid="structPRAINData_1a64ad1c59ed4482de0b56d5b4f68bd1ea" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>lambda</name></member>
+      <member refid="structPRAINData_1aba354f28d28cf7dd7f33d4dfa2ed2a8b" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>mask</name></member>
+      <member refid="structPRAINData_1aed9b91377ef1397c1c94cac5c79e90a5" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>Mp</name></member>
+      <member refid="structPRAINData_1a712b468c3dc3b42d4424cd63033d51d6" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>norm</name></member>
+      <member refid="structPRAINData_1a0b81fc2c58c20d6462df1058947cb6a4" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>p</name></member>
+      <member refid="structPRAINData_1a64d6c54d634126051737adccd51ff706" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>prop</name></member>
+      <member refid="structPRAINData_1a8c6878572b7773a80cf8e43846338fd7" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>r</name></member>
+      <member refid="structPRAINData_1a82ea9c70ab0e7a18edf9e505bdee3711" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>rhsnorm</name></member>
+      <member refid="structPRAINData_1a02a3f6d7082e4e8e6e0953ca37dc5c07" prot="public" virt="non-virtual"><scope>PRAINData</scope><name>temp</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

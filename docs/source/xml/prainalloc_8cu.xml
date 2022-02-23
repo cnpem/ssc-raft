@@ -1,0 +1,493 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="prainalloc_8cu" kind="file" language="C++">
+    <compoundname>prainalloc.cu</compoundname>
+    <includes refid="include_8h" local="yes">../inc/include.h</includes>
+    <includes refid="logerror_8hpp" local="yes">../inc/common/logerror.hpp</includes>
+    <incdepgraph>
+      <node id="28">
+        <label>../inc/common/logerror.hpp</label>
+        <link refid="logerror_8hpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="9">
+        <label>helper_cuda.h</label>
+        <link refid="helper__cuda_8h_source"/>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>helper_string.h</label>
+        <link refid="helper__string_8h_source"/>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>../inc/include.h</label>
+        <link refid="include_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+        <childnode refid="22" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="23" relation="include">
+        </childnode>
+        <childnode refid="24" relation="include">
+        </childnode>
+        <childnode refid="25" relation="include">
+        </childnode>
+        <childnode refid="26" relation="include">
+        </childnode>
+        <childnode refid="27" relation="include">
+        </childnode>
+      </node>
+      <node id="18">
+        <label>../inc/prain.h</label>
+        <link refid="prain_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu</label>
+        <link refid="prainalloc_8cu"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="28" relation="include">
+        </childnode>
+      </node>
+      <node id="20">
+        <label>cassert</label>
+      </node>
+      <node id="25">
+        <label>chrono</label>
+      </node>
+      <node id="5">
+        <label>complex.h</label>
+      </node>
+      <node id="23">
+        <label>cublas.h</label>
+      </node>
+      <node id="3">
+        <label>cuda.h</label>
+      </node>
+      <node id="7">
+        <label>cuda_runtime_api.h</label>
+      </node>
+      <node id="4">
+        <label>cufft.h</label>
+      </node>
+      <node id="14">
+        <label>fstream</label>
+      </node>
+      <node id="24">
+        <label>future</label>
+      </node>
+      <node id="19">
+        <label>iostream</label>
+      </node>
+      <node id="27">
+        <label>omp.h</label>
+      </node>
+      <node id="22">
+        <label>sstream</label>
+      </node>
+      <node id="10">
+        <label>stdint.h</label>
+      </node>
+      <node id="8">
+        <label>stdio.h</label>
+      </node>
+      <node id="11">
+        <label>stdlib.h</label>
+      </node>
+      <node id="15">
+        <label>string</label>
+      </node>
+      <node id="12">
+        <label>string.h</label>
+      </node>
+      <node id="16">
+        <label>strings.h</label>
+      </node>
+      <node id="6">
+        <label>tgmath.h</label>
+      </node>
+      <node id="26">
+        <label>thread</label>
+      </node>
+      <node id="17">
+        <label>time.h</label>
+      </node>
+      <node id="21">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="prainalloc_8cu_1a3f37103aaa7ca7a626a04959bfc0b809" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void set_prain_parameters</definition>
+        <argsstring>(PAR *param, float *parameters, size_t *iterations, size_t *volumesize, int *devices)</argsstring>
+        <name>set_prain_parameters</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref> *</type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>parameters</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>iterations</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>volumesize</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>devices</declname>
+        </param>
+        <briefdescription>
+<para>Set the prain parameters object. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PAR struct with parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>parameters</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing {fresnel, fresnel, alpha, gamma, ratio, 1E-5, 1E-5}. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>iterations</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing the number of maximum Newton iterations, the number of maximum conjugate gradient iteration and the block size, respectively. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>volumesize</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Size-4 array containing the number of voxels that will be processed in x, y and z and the block size. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>devices</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing the range {0, 1, 2, ..., ndev - 1}. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" line="4" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="4" bodyend="35"/>
+      </memberdef>
+      <memberdef kind="function" id="prainalloc_8cu_1a94e822f02d46673219e6e6dd397e5b02" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void set_prop_parameters</definition>
+        <argsstring>(PAR *param, float *parameters, size_t *volumesize, int *devs)</argsstring>
+        <name>set_prop_parameters</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref> *</type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>parameters</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>volumesize</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>devs</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" line="37" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="37" bodyend="59"/>
+      </memberdef>
+      <memberdef kind="function" id="prainalloc_8cu_1af26c1c330c19117793a15c51019a1fe6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+        <definition>PRAINDAT * allocateprain</definition>
+        <argsstring>(PRAINDAT *workspace, PAR param)</argsstring>
+        <name>allocateprain</name>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>workspace</declname>
+        </param>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" line="61" column="10" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="61" bodyend="88"/>
+      </memberdef>
+      <memberdef kind="function" id="prainalloc_8cu_1a53cd20ea82c3ef126930bea2a12dd9f4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void freeprain</definition>
+        <argsstring>(PRAINDAT *prain)</argsstring>
+        <name>freeprain</name>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" line="90" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="90" bodyend="111"/>
+      </memberdef>
+      <memberdef kind="function" id="prainalloc_8cu_1a37896fa2819ccbe4a847177495aadd0e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="structPropagation" kindref="compound">PRPG</ref> *</type>
+        <definition>PRPG * allocatePropagation</definition>
+        <argsstring>(PRPG *workspace, PAR param)</argsstring>
+        <name>allocatePropagation</name>
+        <param>
+          <type><ref refid="structPropagation" kindref="compound">PRPG</ref> *</type>
+          <declname>workspace</declname>
+        </param>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" line="113" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="113" bodyend="124"/>
+      </memberdef>
+      <memberdef kind="function" id="prainalloc_8cu_1a1ba0f478f91581ff626e0824008e135e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void freeData</definition>
+        <argsstring>(PRPG *prop)</argsstring>
+        <name>freeData</name>
+        <param>
+          <type><ref refid="structPropagation" kindref="compound">PRPG</ref> *</type>
+          <declname>prop</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" line="126" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="126" bodyend="133"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="preprocessor">#include<sp/>&quot;../inc/include.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;../inc/common/logerror.hpp&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="4"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a3f37103aaa7ca7a626a04959bfc0b809" kindref="member">set_prain_parameters</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>*param,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*parameters,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*iterations,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*volumesize,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*devices)</highlight></codeline>
+<codeline lineno="5"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="6"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Initialize<sp/>PRAIN<sp/>parameters<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="7"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;Fx<sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>parameters[0];</highlight></codeline>
+<codeline lineno="8"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;Fy<sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>parameters[1];</highlight></codeline>
+<codeline lineno="9"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;alpha<sp/><sp/><sp/>=<sp/>parameters[2];</highlight></codeline>
+<codeline lineno="10"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;gamma<sp/><sp/><sp/>=<sp/>parameters[3];</highlight></codeline>
+<codeline lineno="11"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;ratio<sp/><sp/><sp/>=<sp/>parameters[4];</highlight></codeline>
+<codeline lineno="12"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;TolCG<sp/><sp/><sp/>=<sp/>parameters[5];</highlight></codeline>
+<codeline lineno="13"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;TolN<sp/><sp/><sp/><sp/>=<sp/>parameters[6];</highlight></codeline>
+<codeline lineno="14"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;itmaxN<sp/><sp/>=<sp/>iterations[0];</highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;itmaxCG<sp/>=<sp/>iterations[1];</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;regularization<sp/>=<sp/>iterations[2];</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;stopcriteria<sp/>=<sp/>100.0;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;stopcriteriaCG<sp/>=<sp/>100.0;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Dimensions<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>volumesize[0];<sp/>param-&gt;<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref><sp/>=<sp/>volumesize[1];<sp/>param-&gt;<ref refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kindref="member">Nz</ref><sp/>=<sp/>volumesize[2];<sp/></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;<ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref><sp/><sp/><sp/><sp/><sp/>=<sp/>param-&gt;<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref><sp/>*<sp/>param-&gt;<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref>;<sp/></highlight><highlight class="comment">//<sp/>slice<sp/>size</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;blocksize<sp/>=<sp/>volumesize[3];<sp/></highlight></codeline>
+<codeline lineno="24"><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>GPUs<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;<ref refid="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" kindref="member">devices</ref><sp/><sp/><sp/>=<sp/>devices;</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>Nsx<sp/>=<sp/>128,<sp/>Nsy<sp/>=<sp/>1,<sp/>Nsz<sp/>=<sp/>1;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Initialize<sp/>Device<sp/>sizes<sp/>variables<sp/>*/</highlight><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;BT<sp/>=<sp/>dim3(Nsx,Nsy,Nsz);</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>bx<sp/>=<sp/>(param-&gt;<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref><sp/>+<sp/>Nsx<sp/>-<sp/>1)/Nsx;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>by<sp/>=<sp/>(param-&gt;<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref><sp/>+<sp/>Nsy<sp/>-<sp/>1)/Nsy;</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>bz<sp/>=<sp/>(param-&gt;<ref refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kindref="member">Nz</ref><sp/>+<sp/>Nsz<sp/>-<sp/>1)/Nsz;</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;Grd<sp/>=<sp/>dim3(bx,by,bz);</highlight></codeline>
+<codeline lineno="35"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>set_prop_parameters(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>*param,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*parameters,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*volumesize,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*devs)</highlight></codeline>
+<codeline lineno="38"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Initialize<sp/>fresnel<sp/>propagation<sp/>parameters<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;Fx<sp/><sp/><sp/><sp/>=<sp/>parameters[0];</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;Fy<sp/><sp/><sp/><sp/>=<sp/>parameters[1];</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;ratio<sp/>=<sp/>parameters[2];</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Dimensions<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>=<sp/>volumesize[0];<sp/>param-&gt;<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref><sp/>=<sp/>volumesize[1];<sp/>param-&gt;<ref refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kindref="member">Nz</ref><sp/>=<sp/>volumesize[2];<sp/></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;<ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref><sp/><sp/><sp/><sp/><sp/>=<sp/>param-&gt;<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref><sp/>*<sp/>param-&gt;<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref>;<sp/></highlight><highlight class="comment">//<sp/>slice<sp/>size</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;blocksize<sp/>=<sp/>volumesize[3];<sp/></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Conditionals<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;<ref refid="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" kindref="member">devices</ref><sp/>=<sp/>devs;</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>Nsx<sp/>=<sp/>128,<sp/>Nsy<sp/>=<sp/>1,<sp/>Nsz<sp/>=<sp/>1;</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Initialize<sp/>Device<sp/>sizes<sp/>variables<sp/>*/</highlight><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;BT<sp/>=<sp/>dim3(Nsx,Nsy,Nsz);</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>bx<sp/>=<sp/>(param-&gt;<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref><sp/>+<sp/>Nsx<sp/>-<sp/>1)/Nsx;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>by<sp/>=<sp/>(param-&gt;<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref><sp/>+<sp/>Nsy<sp/>-<sp/>1)/Nsy;</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>bz<sp/>=<sp/>(param-&gt;<ref refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kindref="member">Nz</ref><sp/>+<sp/>Nsz<sp/>-<sp/>1)/Nsz;</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/>param-&gt;Grd<sp/>=<sp/>dim3(bx,by,bz);</highlight></codeline>
+<codeline lineno="59"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*allocateprain(<ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*workspace,<sp/><ref refid="structParameters" kindref="compound">PAR</ref><sp/>param)</highlight></codeline>
+<codeline lineno="62"><highlight class="normal">{<sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Allocate<sp/>struct<sp/>prain<sp/>with<sp/>all<sp/>GPU<sp/>the<sp/>variables<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain<sp/>=<sp/>workspace;</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>GPU<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>n<sp/>=<sp/>param.<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref>*param.<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref>*param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref>;</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Complex<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;image,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;image0,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;prop,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;beer,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;kernel,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;ans,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;temp,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;p<sp/>,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;r<sp/>,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;Mp,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Float<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;lambda,<sp/>param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref><sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)));</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;beta,<sp/>param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref><sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)));</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;intensity,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;Idata,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;mask,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;rhsnorm,<sp/>param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref><sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)));</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc((</highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>**)&amp;prain-&gt;norm,<sp/>param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref><sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)));</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"></highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>prain;</highlight></codeline>
+<codeline lineno="88"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>freeprain(<ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain)</highlight></codeline>
+<codeline lineno="91"><highlight class="normal">{<sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Free<sp/>struct<sp/>prain<sp/>with<sp/>all<sp/>the<sp/>GPU<sp/>variables<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>GPU<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;temp));</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;kernel));<sp/><sp/></highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;prop));</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;intensity));</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;beer));</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;image));</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;image0));</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;ans));</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;Idata));</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;rhsnorm));</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;norm));</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;p));</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;r));</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;Mp));</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;lambda));</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;beta));</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prain-&gt;mask));</highlight></codeline>
+<codeline lineno="111"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"></highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>*allocatePropagation(<ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>*workspace,<sp/><ref refid="structParameters" kindref="compound">PAR</ref><sp/>param)</highlight></codeline>
+<codeline lineno="114"><highlight class="normal">{<sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Allocate<sp/>struct<sp/>prop<sp/><sp/>with<sp/>all<sp/>the<sp/>GPU<sp/>variables<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>*prop<sp/>=<sp/>workspace;</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>GPU<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Complex<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>n<sp/>=<sp/>param.<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref>*param.<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref>*param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref>;</highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc(&amp;prop-&gt;data,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc(&amp;prop-&gt;kernel,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex)<sp/>*<sp/>n));</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Float<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMalloc(&amp;prop-&gt;intense,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)<sp/>*<sp/>n));<sp/></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>prop;</highlight></codeline>
+<codeline lineno="124"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>freeData(<ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>*prop)</highlight></codeline>
+<codeline lineno="127"><highlight class="normal">{<sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Free<sp/>struct<sp/>prop<sp/>with<sp/>all<sp/>GPU<sp/>the<sp/>variables*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>GPU<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prop-&gt;data));</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prop-&gt;kernel));</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaFree(prop-&gt;intense));</highlight></codeline>
+<codeline lineno="133"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu"/>
+  </compounddef>
+</doxygen>

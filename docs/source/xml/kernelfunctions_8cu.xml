@@ -1,0 +1,2046 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="kernelfunctions_8cu" kind="file" language="C++">
+    <compoundname>kernelfunctions.cu</compoundname>
+    <includes refid="include_8h" local="yes">../inc/include.h</includes>
+    <includes refid="devicefunctions_8hpp" local="yes">../inc/common/devicefunctions.hpp</includes>
+    <incdepgraph>
+      <node id="28">
+        <label>../inc/common/devicefunctions.hpp</label>
+        <link refid="devicefunctions_8hpp_source"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="9">
+        <label>helper_cuda.h</label>
+        <link refid="helper__cuda_8h_source"/>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>helper_string.h</label>
+        <link refid="helper__string_8h_source"/>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>../inc/include.h</label>
+        <link refid="include_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+        <childnode refid="22" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="23" relation="include">
+        </childnode>
+        <childnode refid="24" relation="include">
+        </childnode>
+        <childnode refid="25" relation="include">
+        </childnode>
+        <childnode refid="26" relation="include">
+        </childnode>
+        <childnode refid="27" relation="include">
+        </childnode>
+      </node>
+      <node id="18">
+        <label>../inc/prain.h</label>
+        <link refid="prain_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu</label>
+        <link refid="kernelfunctions_8cu"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="28" relation="include">
+        </childnode>
+      </node>
+      <node id="20">
+        <label>cassert</label>
+      </node>
+      <node id="25">
+        <label>chrono</label>
+      </node>
+      <node id="5">
+        <label>complex.h</label>
+      </node>
+      <node id="23">
+        <label>cublas.h</label>
+      </node>
+      <node id="3">
+        <label>cuda.h</label>
+      </node>
+      <node id="7">
+        <label>cuda_runtime_api.h</label>
+      </node>
+      <node id="4">
+        <label>cufft.h</label>
+      </node>
+      <node id="14">
+        <label>fstream</label>
+      </node>
+      <node id="24">
+        <label>future</label>
+      </node>
+      <node id="19">
+        <label>iostream</label>
+      </node>
+      <node id="27">
+        <label>omp.h</label>
+      </node>
+      <node id="22">
+        <label>sstream</label>
+      </node>
+      <node id="10">
+        <label>stdint.h</label>
+      </node>
+      <node id="8">
+        <label>stdio.h</label>
+      </node>
+      <node id="11">
+        <label>stdlib.h</label>
+      </node>
+      <node id="15">
+        <label>string</label>
+      </node>
+      <node id="12">
+        <label>string.h</label>
+      </node>
+      <node id="16">
+        <label>strings.h</label>
+      </node>
+      <node id="6">
+        <label>tgmath.h</label>
+      </node>
+      <node id="26">
+        <label>thread</label>
+      </node>
+      <node id="17">
+        <label>time.h</label>
+      </node>
+      <node id="21">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="kernelfunctions_8cu_1a598a3330b3c21701223ee0ca14316eca" prot="public" static="no">
+        <name>PI</name>
+        <initializer>3.14159265359</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para><formula id="0">$\pi$</formula> value. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="15" column="10" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="15" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="kernelfunctions_8cu_1a3dad3f55a1895c9048c29f51eb52a855" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void FourierFresnelKernel</definition>
+        <argsstring>(cufftComplex *kernel, float fresnelx, float fresnely, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>FourierFresnelKernel</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>kernel</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>fresnelx</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>fresnely</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Explicit function for the 1st kernel <formula id="17">$\mathscr{F}[k](w) = \exp[-i \pi w(x^2 + y^2)/ (\eta_x + \eta_y)]$</formula>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>kernel</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>fresnelx</parametername>
+<parametername>fresnely</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><formula id="18">$\eta_x$</formula> and <formula id="19">$\eta_y$</formula>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="17" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="17" bodyend="33"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a063528102c250eaf517c817fe3bfe143" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CConvolve</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CConvolve</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Multiply two Complex vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors to be multiplied. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="35" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="35" bodyend="44"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a2fc56d80f7b074c1681e84f65f4dc36c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void Cabsolute2</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>Cabsolute2</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Computes <formula id="25">$\texttt{a}_i \cdot \overline{\texttt{b}_i}$</formula>, for all components of <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="46" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="46" bodyend="55"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1ada8b6f04bf75f95523b6a210b82bdc8f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CMultAmplitude</definition>
+        <argsstring>(float *A, cufftComplex *c, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CMultAmplitude</name>
+        <param>
+          <type>float *</type>
+          <declname>A</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Multiply a complex vector <emphasis>c</emphasis> by a float vector <emphasis>A</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>A</parametername>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="57" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="57" bodyend="66"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a5fec253ce36b4527d9b0a7fd5017bbd7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CMultComplexAmplitude</definition>
+        <argsstring>(cufftComplex *A, cufftComplex *c, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CMultComplexAmplitude</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>A</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Multiply a complex vector <emphasis>c</emphasis> by the real parte of a complex vector <emphasis>A</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>A</parametername>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="68" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="68" bodyend="77"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1acd3388a8a27c9c4268dc0c3e8e0ada5c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CAddScalar</definition>
+        <argsstring>(float *A, cufftComplex *a, cufftComplex *b, cufftComplex *ans, int expoente, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CAddScalar</name>
+        <param>
+          <type>float *</type>
+          <declname>A</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>expoente</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Sums or subtracts 2 complex vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>, with <emphasis>b</emphasis> multiplied by a float vector <emphasis>A</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>If <emphasis>expoente</emphasis> is equal to one, then it computes <formula id="26">$\texttt{a}_i + \texttt{A}_i\cdot\texttt{b}_i$</formula>, for all components of <emphasis>A</emphasis>, <emphasis>a</emphasis> and <emphasis>b</emphasis>.</para>
+<para>If <emphasis>expoente</emphasis> is equal to zero, then it computes <formula id="27">$\texttt{a}_i - \texttt{A}_i\cdot\texttt{b}_i$</formula>, for all components of <emphasis>A</emphasis>, <emphasis>a</emphasis> and <emphasis>b</emphasis>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>A</parametername>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="79" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="79" bodyend="91"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a4571d6a2c0b8419a7b09b8a48fa5ac17" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CRealPart</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CRealPart</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Get the real part of a complex vector <emphasis>a</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vector. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="93" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="93" bodyend="103"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a28e4509435faef2365f827637b942085" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void beerslaw</definition>
+        <argsstring>(cufftComplex *data, cufftComplex *ans, float ratio, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>beerslaw</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>ratio</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Exponential of a complex data. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data to take the exponential. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ratio</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Ratio of Beer&apos;s law. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="105" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="105" bodyend="120"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a4e017977cae93b3b3b14ea7bb9de9386" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void fftshiftKernel</definition>
+        <argsstring>(cufftComplex *c, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>fftshiftKernel</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Shift of a complex vector. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector to be shifted. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="122" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="122" bodyend="151"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a736224b0bc11ce0e5e5cbf69ba9723d2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void fftNormalize</definition>
+        <argsstring>(cufftComplex *c, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>fftNormalize</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Normalize a complex vector <emphasis>c</emphasis> by the number of entries <emphasis>sizex</emphasis> <formula id="28">$\times$</formula> <emphasis>sizey</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vector to be normalized. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="153" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="153" bodyend="163"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1aac1153e191282d4cc53272e55ea0f46d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void OperatorA</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *beer, cufftComplex *ans, float scalar, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>OperatorA</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>beer</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>scalar</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Computes <formula id="22">$\texttt{scalar}\times\texttt{a}_i\times\overline{\texttt{beer}_i}$</formula>, for each component of <emphasis>a</emphasis> and <emphasis>beer</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>beer</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>scalar</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input number. Generally, scalar is equal to 4. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="165" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="165" bodyend="175"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1ac4f3ca040bc526adc26549e33de0515d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void minimum_regularization</definition>
+        <argsstring>(cufftComplex *p, cufftComplex *f, cufftComplex *in, cufftComplex *ans, float gamma, float indicator, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>minimum_regularization</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>gamma</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>indicator</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Computes a operator if <emphasis>indicator</emphasis> is equal to zero and another operator if <emphasis>indicator</emphasis> is equal to one. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>If <emphasis>indicator</emphasis> = 0, then computes <formula id="23">$\Re(Mp) + \gamma m^2\Re(p)$</formula> (mat CG)</para>
+<para>If <emphasis>indicator</emphasis> = 1, then computes <formula id="24">$\Re(rhs) + \gamma m \min(\Re(f),0)$</formula> (RHS)</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>p</parametername>
+<parametername>f</parametername>
+<parametername>in</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>gamma</parametername>
+<parametername>indicator</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input numbers. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="177" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="177" bodyend="191"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a498ca34fdaaf50c2598b846b84a030e5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CLaplacemat</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *ans, float alpha, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CLaplacemat</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>alpha</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Laplace finite difference approximation of a complex vector <emphasis>a</emphasis> multiplied by <emphasis>alpha</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vector. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>alpha</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Generally, it is the regularization factor <formula id="20">$(\alpha)$</formula>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="193" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="193" bodyend="211"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a0fcea4e7a9854adf81d75275df744b81" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CLaplacerhs</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, cufftComplex *ans, float alpha, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CLaplacerhs</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>alpha</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Laplace finite difference approximation of the difference of two complex vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>, multiplied by <emphasis>alpha</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>alpha</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Generally, it is the regularization factor <formula id="20">$(\alpha)$</formula>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="213" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="213" bodyend="231"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1ada58bf5b67fb2a884a6959b29e53b5f4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CDifference</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, cufftComplex *ans, float alpha, float beta, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CDifference</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>alpha</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>beta</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Computes <formula id="21">$\alpha\beta(\texttt{a} - \texttt{b})$</formula>, where <emphasis>a</emphasis> and <emphasis>b</emphasis> are vectors. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>alpha</parametername>
+<parametername>beta</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input number. Generally, <emphasis>alpha</emphasis> is the regularization factor <formula id="20">$(\alpha)$</formula>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="233" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="233" bodyend="243"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a7718e0af6947aae776b3d1311377fdcc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void FSub</definition>
+        <argsstring>(float *a, float *b, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>FSub</name>
+        <param>
+          <type>float *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Float sum and subtraction. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="245" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="245" bodyend="254"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a27219273c347a293484a13eaba6e4664" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void FDivZ</definition>
+        <argsstring>(float *a, float *b, float *ans, size_t N)</argsstring>
+        <name>FDivZ</name>
+        <param>
+          <type>float *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>N</declname>
+        </param>
+        <briefdescription>
+<para>Float division. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>N</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x direction. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="256" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="256" bodyend="262"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a8ea4f7a7bcc1746db2db17e1462b87b6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CSum</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CSum</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Complex sum of two vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="264" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="264" bodyend="274"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a665de576d4b44afa6d3ec6d18149cb6f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void FInnerProd</definition>
+        <argsstring>(float *a, float *b, float *norm, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>FInnerProd</name>
+        <param>
+          <type>float *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Float Inner Product by blocks of two vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>norm</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="276" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="276" bodyend="285"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1ac9dc46e31d6652af059364a3a7801bf5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CInnerProd</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, float *norm, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CInnerProd</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Complex Inner Product by blocks of two vector <emphasis>b</emphasis> and the conjugate of <emphasis>a</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>norm</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="287" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="287" bodyend="310"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a60ac7e4bbb4df7af1e9524c946322b80" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CIntensity</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, float *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CIntensity</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Real part of a multiplication of a complex vector <emphasis>a</emphasis> and the conjugated of a complex vector <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="312" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="312" bodyend="321"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1afa5ed2c6092b89ffa34094f9782a401d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void CprintDev</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, size_t sizex, size_t sizey, size_t sizez, int k)</argsstring>
+        <name>CprintDev</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>k</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="323" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="323" bodyend="339"/>
+      </memberdef>
+      <memberdef kind="function" id="kernelfunctions_8cu_1a1a6511e11994a09b88c514293c6b1656" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FprintDev</definition>
+        <argsstring>(float *a, float *b, size_t sizex, size_t sizey, size_t sizez, int k)</argsstring>
+        <name>FprintDev</name>
+        <param>
+          <type>float *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>k</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" line="341" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="341" bodyend="356"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>File containig device functions called from host. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="author"><para>your name (<ulink url="mailto:you@domain.com">you@domain.com</ulink>) </para>
+</simplesect>
+<simplesect kind="version"><para>0.1 </para>
+</simplesect>
+<simplesect kind="date"><para>2021-06-14</para>
+</simplesect>
+<simplesect kind="copyright"><para>Copyright (c) 2021 </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;../inc/include.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;../inc/common/devicefunctions.hpp&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#<sp/>define<sp/>PI<sp/>3.14159265359<sp/><sp/><sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a3dad3f55a1895c9048c29f51eb52a855" kindref="member">FourierFresnelKernel</ref>(cufftComplex<sp/>*kernel,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>fresnelx,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>fresnely,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="18"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>N<sp/>=<sp/><sp/>1.0<sp/>/<sp/>(sizex<sp/>*<sp/>sizey);</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>nyq<sp/>=<sp/>0.5;</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>x<sp/>=<sp/>-nyq<sp/>+<sp/>(float)i*2*nyq/(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)(sizex);</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>y<sp/>=<sp/>-nyq<sp/>+<sp/>(float)j*2*nyq/(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">)(sizey);</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/>x<sp/>=<sp/>x*x;<sp/>y<sp/>=<sp/>y*y;</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>expoente<sp/>=<sp/>float(M_PI)<sp/>*<sp/>(<sp/>(x/fresnelx)<sp/>+<sp/>(y/fresnely)<sp/>);</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/>kernel[index]<sp/>=<sp/><ref refid="prain_8h_1a998918e6c4af873db28b5f894329ac2e" kindref="member">exp1j</ref>(-expoente);<sp/></highlight><highlight class="comment">//kernel[index].y<sp/>=<sp/>__sinf(-expoente);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a063528102c250eaf517c817fe3bfe143" kindref="member">CConvolve</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="36"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index]<sp/>=<sp/><ref refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" kindref="member">ComplexMult</ref>(a[index],b[index]);<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="44"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a2fc56d80f7b074c1681e84f65f4dc36c" kindref="member">Cabsolute2</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="47"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index]<sp/>=<sp/><ref refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" kindref="member">ComplexMult</ref>(a[index],<ref refid="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" kindref="member">ComplexConj</ref>(b[index]));</highlight></codeline>
+<codeline lineno="55"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight></codeline>
+<codeline lineno="57"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1ada8b6f04bf75f95523b6a210b82bdc8f" kindref="member">CMultAmplitude</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*A,<sp/>cufftComplex<sp/>*c,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="58"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index]<sp/>=<sp/><ref refid="prain_8h_1aefda406ec17eff4118e9e881105c0a69" kindref="member">ComplexMultConst</ref>(c[index],<sp/>A[index]);</highlight></codeline>
+<codeline lineno="66"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a5fec253ce36b4527d9b0a7fd5017bbd7" kindref="member">CMultComplexAmplitude</ref>(cufftComplex<sp/>*A,<sp/>cufftComplex<sp/>*c,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="69"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="74"><highlight class="normal"></highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].x<sp/>=<sp/>c[index].x<sp/>*<sp/>A[index].x;<sp/>ans[index].y<sp/>=<sp/>c[index].y<sp/>*<sp/>A[index].x;</highlight></codeline>
+<codeline lineno="77"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1acd3388a8a27c9c4268dc0c3e8e0ada5c" kindref="member">CAddScalar</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*A,<sp/>cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>expoente,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="80"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"></highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"></highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>aux<sp/>=<sp/>pow(-1,expoente)*A[k];</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].x<sp/>=<sp/>a[index].x<sp/>+<sp/>aux<sp/>*<sp/>b[index].x;</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].y<sp/>=<sp/>a[index].y<sp/>+<sp/>aux<sp/>*<sp/>b[index].y;</highlight></codeline>
+<codeline lineno="91"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a4571d6a2c0b8419a7b09b8a48fa5ac17" kindref="member">CRealPart</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="94"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].x<sp/>=<sp/>a[index].x;</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].y<sp/>=<sp/>0.0;</highlight></codeline>
+<codeline lineno="103"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="104"><highlight class="normal"></highlight></codeline>
+<codeline lineno="105"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a28e4509435faef2365f827637b942085" kindref="member">beerslaw</ref>(cufftComplex<sp/>*data,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>ratio,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="106"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"></highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(ratio<sp/>==<sp/>0.0){</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ans[index].x<sp/>=<sp/><sp/><sp/>__expf(-data[index].x)<sp/>*<sp/>__cosf(data[index].y);<sp/><sp/></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ans[index].y<sp/>=<sp/>-<sp/>__expf(-data[index].x)<sp/>*<sp/>__sinf(data[index].y);<sp/></highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight><highlight class="keywordflow">else</highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ans[index].x<sp/>=<sp/><sp/><sp/>__expf(-data[index].y/ratio)<sp/>*<sp/>__cosf(data[index].y);<sp/><sp/></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>ans[index].y<sp/>=<sp/>-<sp/>__expf(-data[index].y/ratio)<sp/>*<sp/>__sinf(data[index].y);<sp/></highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="120"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"></highlight></codeline>
+<codeline lineno="122"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a4e017977cae93b3b3b14ea7bb9de9386" kindref="member">fftshiftKernel</ref>(cufftComplex<sp/>*c,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="123"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>shift,<sp/>N<sp/>=<sp/>(<sp/>(sizex<sp/>*<sp/>sizey)<sp/>+<sp/>sizex<sp/>)<sp/>/<sp/>2<sp/>;<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>M<sp/>=<sp/>(<sp/>(sizex<sp/>*<sp/>sizey)<sp/>-<sp/>sizex<sp/>)<sp/>/<sp/>2<sp/>;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/>cufftComplex<sp/>temp;</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index;<sp/></highlight></codeline>
+<codeline lineno="131"><highlight class="normal"></highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>i<sp/>&lt;<sp/>(<sp/>sizex<sp/>/<sp/>2<sp/>)<sp/>){<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>j<sp/>&lt;<sp/>(<sp/>sizey<sp/>/<sp/>2<sp/>)<sp/>){<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>index<sp/>=<sp/>sizex<sp/>*<sp/>(k*sizey<sp/>+<sp/>j)<sp/><sp/>+<sp/>i;</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>shift<sp/>=<sp/>index<sp/>+<sp/>N;</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>temp<sp/><sp/><sp/><sp/><sp/>=<sp/>c[index];<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>c[index]<sp/>=<sp/>c[shift];<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>c[shift]<sp/>=<sp/>temp;</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight><highlight class="keywordflow">else</highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>j<sp/>&lt;<sp/>(<sp/>sizey<sp/>/<sp/>2<sp/>)<sp/>){</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>index<sp/>=<sp/>sizex<sp/>*<sp/>(k*sizey<sp/>+<sp/>j)<sp/><sp/>+<sp/>i;</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>shift<sp/>=<sp/>index<sp/>+<sp/>M;</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>temp<sp/><sp/><sp/><sp/><sp/>=<sp/>c[index];<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>c[index]<sp/>=<sp/>c[shift];<sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>c[shift]<sp/>=<sp/>temp;</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="151"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"></highlight></codeline>
+<codeline lineno="153"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a736224b0bc11ce0e5e5cbf69ba9723d2" kindref="member">fftNormalize</ref>(cufftComplex<sp/>*c,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="154"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>N<sp/>=<sp/>(<sp/>sizex<sp/>*<sp/>sizey<sp/>);<sp/><sp/></highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/>c[index].x<sp/>/=<sp/>N;<sp/>c[index].y<sp/>/=<sp/>N;</highlight></codeline>
+<codeline lineno="163"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="164"><highlight class="normal"></highlight></codeline>
+<codeline lineno="165"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1aac1153e191282d4cc53272e55ea0f46d" kindref="member">OperatorA</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*beer,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>scalar,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="166"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="171"><highlight class="normal"></highlight></codeline>
+<codeline lineno="172"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="173"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index]<sp/>=<sp/><ref refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" kindref="member">ComplexMult</ref>(<ref refid="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" kindref="member">ComplexConj</ref>(beer[index]),<sp/>a[index]);</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].x<sp/>=<sp/>scalar*ans[index].x;<sp/>ans[index].y<sp/>=<sp/>scalar*ans[index].y;</highlight></codeline>
+<codeline lineno="175"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="176"><highlight class="normal"></highlight></codeline>
+<codeline lineno="177"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1ac4f3ca040bc526adc26549e33de0515d" kindref="member">minimum_regularization</ref>(cufftComplex<sp/>*p,<sp/>cufftComplex<sp/>*f,<sp/>cufftComplex<sp/>*in,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>gamma,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>indicator,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="178"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="179"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="180"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="181"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="182"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="183"><highlight class="normal"></highlight></codeline>
+<codeline lineno="184"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="185"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>m<sp/><sp/><sp/><sp/>=<sp/>fminf(<ref refid="prain_8h_1abfd67e8248b5e14cdad335f8f0f16fa1" kindref="member">sign</ref>(f[index].x),0);</highlight></codeline>
+<codeline lineno="186"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>minf<sp/>=<sp/>fminf(f[index].x<sp/><sp/><sp/><sp/><sp/><sp/>,0);</highlight></codeline>
+<codeline lineno="187"><highlight class="normal"></highlight></codeline>
+<codeline lineno="188"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>aux<sp/>=<sp/>gamma<sp/>*<sp/>m<sp/>*<sp/>(<sp/>(1<sp/>-<sp/>indicator)*m*p[index].x<sp/>+<sp/>indicator*minf<sp/>);</highlight></codeline>
+<codeline lineno="189"><highlight class="normal"></highlight></codeline>
+<codeline lineno="190"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].x<sp/>=<sp/>in[index].x<sp/>+<sp/>aux;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="191"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="192"><highlight class="normal"></highlight></codeline>
+<codeline lineno="193"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a498ca34fdaaf50c2598b846b84a030e5" kindref="member">CLaplacemat</ref>(cufftComplex*<sp/>a,<sp/>cufftComplex*<sp/>ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="194"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="195"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="196"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="197"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="198"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="199"><highlight class="normal"></highlight></codeline>
+<codeline lineno="200"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="201"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>coefs[]<sp/>=<sp/>{-0,-1,-0,-1,4,-1,-0,-1,-0};</highlight></codeline>
+<codeline lineno="202"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ii<sp/>=<sp/>-1;<sp/>ii<sp/>&lt;<sp/>2;<sp/>ii++){</highlight></codeline>
+<codeline lineno="203"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>jj<sp/>=<sp/>-1;<sp/>jj<sp/>&lt;<sp/>2;<sp/>jj++){</highlight></codeline>
+<codeline lineno="204"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>idx<sp/>=<sp/>i<sp/>+<sp/>ii;<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>idy<sp/>=<sp/>j<sp/>+<sp/>jj;</highlight></codeline>
+<codeline lineno="205"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(<ref refid="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" kindref="member">is_valid</ref>(idx,sizex)<sp/>&amp;&amp;<sp/><ref refid="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" kindref="member">is_valid</ref>(idy,sizey)){</highlight></codeline>
+<codeline lineno="206"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>atomicAdd(&amp;(ans[index].x),<sp/>alpha*a[sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>idx)<sp/><sp/>+<sp/>idy].x*coefs[jj+1<sp/>+<sp/>3*(ii+1)]);</highlight></codeline>
+<codeline lineno="207"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>atomicAdd(&amp;(ans[index].y),<sp/>alpha*a[sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>idx)<sp/><sp/>+<sp/>idy].y*coefs[jj+1<sp/>+<sp/>3*(ii+1)]);</highlight></codeline>
+<codeline lineno="208"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="209"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="210"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="211"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="212"><highlight class="normal"></highlight></codeline>
+<codeline lineno="213"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a0fcea4e7a9854adf81d75275df744b81" kindref="member">CLaplacerhs</ref>(cufftComplex*<sp/>a,<sp/>cufftComplex*<sp/>b,<sp/>cufftComplex*<sp/>ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="214"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="215"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="216"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="217"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="218"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="219"><highlight class="normal"></highlight></codeline>
+<codeline lineno="220"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>coefs[]<sp/>=<sp/>{-0,-1,-0,-1,4,-1,-0,-1,-0};</highlight></codeline>
+<codeline lineno="222"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ii<sp/>=<sp/>-1;<sp/>ii<sp/>&lt;<sp/>2;<sp/>ii++){</highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>jj<sp/>=<sp/>-1;<sp/>jj<sp/>&lt;<sp/>2;<sp/>jj++){</highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>idx<sp/>=<sp/>i<sp/>+<sp/>ii;<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>idy<sp/>=<sp/>j<sp/>+<sp/>jj;</highlight></codeline>
+<codeline lineno="225"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(<ref refid="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" kindref="member">is_valid</ref>(idx,sizex)<sp/>&amp;&amp;<sp/><ref refid="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" kindref="member">is_valid</ref>(idy,sizey)){</highlight></codeline>
+<codeline lineno="226"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>atomicAdd(&amp;(ans[index].x),<sp/>alpha*(a[sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>idx)<sp/><sp/>+<sp/>idy].x<sp/>-<sp/>b[sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>idx)<sp/><sp/>+<sp/>idy].x)*coefs[jj+1<sp/>+<sp/>3*(ii+1)]);</highlight></codeline>
+<codeline lineno="227"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>atomicAdd(&amp;(ans[index].y),<sp/>alpha*(a[sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>idx)<sp/><sp/>+<sp/>idy].y<sp/>-<sp/>b[sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>idx)<sp/><sp/>+<sp/>idy].y)*coefs[jj+1<sp/>+<sp/>3*(ii+1)]);</highlight></codeline>
+<codeline lineno="228"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="229"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="230"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="231"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="232"><highlight class="normal"></highlight></codeline>
+<codeline lineno="233"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1ada58bf5b67fb2a884a6959b29e53b5f4" kindref="member">CDifference</ref>(cufftComplex*<sp/>a,<sp/>cufftComplex*<sp/>b,<sp/>cufftComplex*<sp/>ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>beta,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="234"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="235"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="236"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="237"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="238"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="239"><highlight class="normal"></highlight></codeline>
+<codeline lineno="240"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="241"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].x<sp/>=<sp/>alpha<sp/>*<sp/>beta<sp/>*<sp/>(a[index].x<sp/>-<sp/>b[index].x);</highlight></codeline>
+<codeline lineno="242"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index].y<sp/>=<sp/>alpha<sp/>*<sp/>beta<sp/>*<sp/>(a[index].y<sp/>-<sp/>b[index].y);</highlight></codeline>
+<codeline lineno="243"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="244"><highlight class="normal"></highlight></codeline>
+<codeline lineno="245"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a7718e0af6947aae776b3d1311377fdcc" kindref="member">FSub</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*b,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="246"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="247"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="248"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="249"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="250"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="251"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="252"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="253"><highlight class="normal"><sp/><sp/><sp/><sp/>a[index]<sp/>=<sp/>b[index]<sp/>-<sp/>a[index];</highlight></codeline>
+<codeline lineno="254"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="255"><highlight class="normal"></highlight></codeline>
+<codeline lineno="256"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a27219273c347a293484a13eaba6e4664" kindref="member">FDivZ</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*b,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>N)</highlight></codeline>
+<codeline lineno="257"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="258"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="259"><highlight class="normal"></highlight></codeline>
+<codeline lineno="260"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(k<sp/>&gt;=<sp/>N)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="261"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[k]<sp/>=<sp/>a[k]<sp/>/<sp/>(b[k]+1e-10);</highlight></codeline>
+<codeline lineno="262"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="263"><highlight class="normal"></highlight></codeline>
+<codeline lineno="264"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a8ea4f7a7bcc1746db2db17e1462b87b6" kindref="member">CSum</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="265"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="266"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="267"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="268"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="269"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="270"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="271"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="272"><highlight class="normal"><sp/><sp/><sp/><sp/>a[index].x<sp/>+=<sp/>b[index].x;<sp/></highlight></codeline>
+<codeline lineno="273"><highlight class="normal"><sp/><sp/><sp/><sp/>a[index].y<sp/>+=<sp/>b[index].y;</highlight></codeline>
+<codeline lineno="274"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="275"><highlight class="normal"></highlight></codeline>
+<codeline lineno="276"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a665de576d4b44afa6d3ec6d18149cb6f" kindref="member">FInnerProd</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*b,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*norm,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="277"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="278"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="279"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="280"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="281"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="282"><highlight class="normal"></highlight></codeline>
+<codeline lineno="283"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="284"><highlight class="normal"><sp/><sp/><sp/><sp/>atomicAdd(norm+k,<ref refid="prain_8h_1abf851cf3d7333991f33eaeb272267621" kindref="member">FloatMultConst</ref>(a[index],<sp/>b[index]));</highlight></codeline>
+<codeline lineno="285"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="286"><highlight class="normal"></highlight></codeline>
+<codeline lineno="287"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1ac9dc46e31d6652af059364a3a7801bf5" kindref="member">CInnerProd</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*norm,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="288"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="289"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="290"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="291"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="292"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="293"><highlight class="normal"></highlight></codeline>
+<codeline lineno="294"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="295"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/>__shared__<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>temp[];</highlight></codeline>
+<codeline lineno="296"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>if<sp/>sizex<sp/>not<sp/>multiple<sp/>of<sp/>128<sp/>(e.g.<sp/>gnomio),<sp/>then<sp/>fill<sp/>temp<sp/>with<sp/>zeros,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="297"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>beacuse<sp/>threads<sp/>will<sp/>pass<sp/>the<sp/>image<sp/>limits</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="298"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(sizex<sp/>&lt;<sp/>blockDim.x<sp/>||<sp/>sizey<sp/>&lt;<sp/>blockDim.y<sp/>||<sp/>sizez<sp/>&lt;<sp/>blockDim.z)<sp/>{</highlight></codeline>
+<codeline lineno="299"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ii<sp/>=<sp/>0;<sp/>ii<sp/>&lt;<sp/>blockDim.x*blockDim.y*blockDim.z;<sp/>ii++)</highlight></codeline>
+<codeline lineno="300"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>temp[ii]<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="301"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="302"><highlight class="normal"><sp/><sp/><sp/><sp/>temp[blockDim.y*(threadIdx.z*blockDim.x<sp/>+<sp/>threadIdx.x)<sp/><sp/>+<sp/>threadIdx.y]<sp/>=<sp/><ref refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" kindref="member">ComplexMult</ref>(<ref refid="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" kindref="member">ComplexConj</ref>(a[index]),b[index]).x;</highlight></codeline>
+<codeline lineno="303"><highlight class="normal"><sp/><sp/><sp/><sp/>__syncthreads();</highlight></codeline>
+<codeline lineno="304"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(threadIdx.x<sp/>==<sp/>0<sp/>&amp;&amp;<sp/>threadIdx.y<sp/>==<sp/>0)<sp/>{<sp/></highlight><highlight class="comment">//<sp/>for<sp/>each<sp/>slice<sp/>in<sp/>z,<sp/>only<sp/>one<sp/>thread/block<sp/>runs</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="305"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>sum<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="306"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ii<sp/>=<sp/>0;<sp/>ii<sp/>&lt;<sp/>blockDim.x*blockDim.y;<sp/>ii++)</highlight></codeline>
+<codeline lineno="307"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sum<sp/>+=<sp/>temp[ii<sp/>+<sp/>threadIdx.z*blockDim.x*blockDim.y];</highlight></codeline>
+<codeline lineno="308"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>atomicAdd(norm<sp/>+<sp/>k,<sp/>sum);</highlight></codeline>
+<codeline lineno="309"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="310"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="311"><highlight class="normal"></highlight></codeline>
+<codeline lineno="312"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="kernelfunctions_8cu_1a60ac7e4bbb4df7af1e9524c946322b80" kindref="member">CIntensity</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez)</highlight></codeline>
+<codeline lineno="313"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="314"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>blockIdx.x*blockDim.x<sp/>+<sp/>threadIdx.x;</highlight></codeline>
+<codeline lineno="315"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>blockIdx.y*blockDim.y<sp/>+<sp/>threadIdx.y;</highlight></codeline>
+<codeline lineno="316"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k<sp/>=<sp/>blockIdx.z*blockDim.z<sp/>+<sp/>threadIdx.z;</highlight></codeline>
+<codeline lineno="317"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="318"><highlight class="normal"></highlight></codeline>
+<codeline lineno="319"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(<sp/>(i<sp/>&gt;=<sp/>sizex)<sp/>||<sp/>(j<sp/>&gt;=<sp/>sizey)<sp/>||<sp/>(k<sp/>&gt;=<sp/>sizez)<sp/>)<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="320"><highlight class="normal"><sp/><sp/><sp/><sp/>ans[index]<sp/>=<sp/><ref refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" kindref="member">ComplexMult</ref>(a[index],<ref refid="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" kindref="member">ComplexConj</ref>(b[index])).x;</highlight></codeline>
+<codeline lineno="321"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="322"><highlight class="normal"></highlight></codeline>
+<codeline lineno="323"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>CprintDev(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k)</highlight></codeline>
+<codeline lineno="324"><highlight class="normal">{<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="325"><highlight class="normal"><sp/><sp/><sp/><sp/>cufftComplex<sp/>*host<sp/>=<sp/>(cufftComplex<sp/>*)calloc(sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex));</highlight></codeline>
+<codeline lineno="326"><highlight class="normal"><sp/><sp/><sp/><sp/>cufftComplex<sp/>*hostt<sp/>=<sp/>(cufftComplex<sp/>*)calloc(sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex));</highlight></codeline>
+<codeline lineno="327"><highlight class="normal"></highlight></codeline>
+<codeline lineno="328"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaMemcpy(host,<sp/>a,<sp/>sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez<sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex),<sp/>cudaMemcpyDeviceToHost);</highlight></codeline>
+<codeline lineno="329"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaMemcpy(hostt,<sp/>b,<sp/>sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez<sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex),<sp/>cudaMemcpyDeviceToHost);</highlight></codeline>
+<codeline lineno="330"><highlight class="normal"></highlight></codeline>
+<codeline lineno="331"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>index;<sp/></highlight></codeline>
+<codeline lineno="332"><highlight class="normal"></highlight></codeline>
+<codeline lineno="333"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>0;<sp/>i<sp/>&lt;<sp/>sizex;<sp/>i++)</highlight></codeline>
+<codeline lineno="334"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>0;<sp/>j<sp/>&lt;<sp/>sizey;<sp/>j++){</highlight></codeline>
+<codeline lineno="335"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="336"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>printf(</highlight><highlight class="stringliteral">&quot;%e<sp/>+<sp/>i<sp/>%e,<sp/>%e<sp/>+<sp/>i<sp/>%e<sp/>\n&quot;</highlight><highlight class="normal">,host[index].x,host[index].y,hostt[index].x,hostt[index].y);</highlight></codeline>
+<codeline lineno="337"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="338"><highlight class="normal"><sp/><sp/><sp/><sp/>free(host);<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="339"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="340"><highlight class="normal"></highlight></codeline>
+<codeline lineno="341"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>FprintDev(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*b,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k)</highlight></codeline>
+<codeline lineno="342"><highlight class="normal">{<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="343"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*host<sp/>=<sp/>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*)calloc(sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">));</highlight></codeline>
+<codeline lineno="344"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*hostt<sp/>=<sp/>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*)calloc(sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez,<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">));</highlight></codeline>
+<codeline lineno="345"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaMemcpy(host,<sp/>a,<sp/>sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez<sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">),<sp/>cudaMemcpyDeviceToHost);</highlight></codeline>
+<codeline lineno="346"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaMemcpy(hostt,<sp/>b,<sp/>sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez<sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">),<sp/>cudaMemcpyDeviceToHost);</highlight></codeline>
+<codeline lineno="347"><highlight class="normal"></highlight></codeline>
+<codeline lineno="348"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>index;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="349"><highlight class="normal"></highlight></codeline>
+<codeline lineno="350"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i<sp/>=<sp/>0;<sp/>i<sp/>&lt;<sp/>sizex;<sp/>i++)</highlight></codeline>
+<codeline lineno="351"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>j<sp/>=<sp/>0;<sp/>j<sp/>&lt;<sp/>sizey;<sp/>j++){</highlight></codeline>
+<codeline lineno="352"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>index<sp/>=<sp/>sizey<sp/>*<sp/>(k*sizex<sp/>+<sp/>i)<sp/><sp/>+<sp/>j;</highlight></codeline>
+<codeline lineno="353"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>printf(</highlight><highlight class="stringliteral">&quot;%e,<sp/>%e\n&quot;</highlight><highlight class="normal">,host[index],hostt[index]);</highlight></codeline>
+<codeline lineno="354"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="355"><highlight class="normal"><sp/><sp/><sp/><sp/>free(host);<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="356"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,473 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="structParameters" kind="struct" language="C++" prot="public">
+    <compoundname>Parameters</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structParameters_1aea9fb13a195854a7399520b4fe27ed02" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>PAR::Nx</definition>
+        <argsstring></argsstring>
+        <name>Nx</name>
+        <qualifiedname>Parameters::Nx</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Nx is the number of voxels in x direction. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="40" column="8" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a566aab9822535e5633cd4c175d954986" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>PAR::Ny</definition>
+        <argsstring></argsstring>
+        <name>Ny</name>
+        <qualifiedname>Parameters::Ny</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Ny is the number of voxels in y direction. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="40" column="11" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>PAR::Nz</definition>
+        <argsstring></argsstring>
+        <name>Nz</name>
+        <qualifiedname>Parameters::Nz</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Nx is the number of voxels in z direction. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="40" column="14" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a887645bc370c242e3bdc03d4188b0517" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>PAR::zblock</definition>
+        <argsstring></argsstring>
+        <name>zblock</name>
+        <qualifiedname>Parameters::zblock</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Block size in cuda z direction. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="40" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a7c85c8bed08270e5779e5200d05fd3b0" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t Parameters::nangles</definition>
+        <argsstring></argsstring>
+        <name>nangles</name>
+        <qualifiedname>Parameters::nangles</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="40" column="24" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="40" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1ac89573efcf725c5a89c94272bc5f155d" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t Parameters::blocksize</definition>
+        <argsstring></argsstring>
+        <name>blocksize</name>
+        <qualifiedname>Parameters::blocksize</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="41" column="8" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>PAR::slice</definition>
+        <argsstring></argsstring>
+        <name>slice</name>
+        <qualifiedname>Parameters::slice</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>slice size, i.e., Nx*Ny. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="41" column="18" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a04b9542df5ea50ad3e4962323950b740" prot="public" static="no" mutable="no">
+        <type>size_t</type>
+        <definition>size_t Parameters::subvolume</definition>
+        <argsstring></argsstring>
+        <name>subvolume</name>
+        <qualifiedname>Parameters::subvolume</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="41" column="24" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="41" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1abca7e4e0db3b2b98d24cf7ff036ea1d3" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Parameters::regularization</definition>
+        <argsstring></argsstring>
+        <name>regularization</name>
+        <qualifiedname>Parameters::regularization</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="43" column="5" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="43" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a3502cb28c49d8a69b1fef156e2551bae" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Parameters::ndev</definition>
+        <argsstring></argsstring>
+        <name>ndev</name>
+        <qualifiedname>Parameters::ndev</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="43" column="20" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="43" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" prot="public" static="no" mutable="no">
+        <type>int *</type>
+        <definition>PAR::devices</definition>
+        <argsstring></argsstring>
+        <name>devices</name>
+        <qualifiedname>Parameters::devices</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Array containing the range {0, 1, 2, …, ndev - 1}. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="43" column="25" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="43" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a6e4da5b8b1975578eb83f7766f87b978" prot="public" static="no" mutable="no">
+        <type>cufftHandle</type>
+        <definition>PAR::mplan</definition>
+        <argsstring></argsstring>
+        <name>mplan</name>
+        <qualifiedname>Parameters::mplan</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Cuda FFT plan. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="44" column="13" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="44" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a655440251722ee5443cb6248380f64db" prot="public" static="no" mutable="no">
+        <type>cufftHandle</type>
+        <definition>PAR::mplan2</definition>
+        <argsstring></argsstring>
+        <name>mplan2</name>
+        <qualifiedname>Parameters::mplan2</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+<para>Cuda FFT plan. </para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="44" column="19" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="44" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1ac37ea168a85c749f181716ec4872d9ea" prot="public" static="no" mutable="no">
+        <type>cudaStream_t *</type>
+        <definition>cudaStream_t* Parameters::streams</definition>
+        <argsstring></argsstring>
+        <name>streams</name>
+        <qualifiedname>Parameters::streams</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="45" column="14" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="45" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a8ba46d1bb6fd8825435fac91728afa7b" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Parameters::num_streams</definition>
+        <argsstring></argsstring>
+        <name>num_streams</name>
+        <qualifiedname>Parameters::num_streams</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="46" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="46" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a65e61a7672b937fbe67b21abdf22002d" prot="public" static="no" mutable="no">
+        <type>dim3</type>
+        <definition>dim3 Parameters::BT</definition>
+        <argsstring></argsstring>
+        <name>BT</name>
+        <qualifiedname>Parameters::BT</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="47" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a89a0623e864ef253c09a98460f6a9c11" prot="public" static="no" mutable="no">
+        <type>dim3</type>
+        <definition>dim3 Parameters::Grd</definition>
+        <argsstring></argsstring>
+        <name>Grd</name>
+        <qualifiedname>Parameters::Grd</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="47" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="47" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a25f315866dd8b09f40c7e7397aa825ae" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::Fx</definition>
+        <argsstring></argsstring>
+        <name>Fx</name>
+        <qualifiedname>Parameters::Fx</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="50" column="7" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a9ca819b5ec30965401a69b9c80b36a6d" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::Fy</definition>
+        <argsstring></argsstring>
+        <name>Fy</name>
+        <qualifiedname>Parameters::Fy</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="50" column="10" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a4dbae049b4f95f53621e02e80827b9f2" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::ratio</definition>
+        <argsstring></argsstring>
+        <name>ratio</name>
+        <qualifiedname>Parameters::ratio</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="50" column="13" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a91b91258f03d69287748d11bda7c8d3b" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::alpha</definition>
+        <argsstring></argsstring>
+        <name>alpha</name>
+        <qualifiedname>Parameters::alpha</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="53" column="7" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a1c670d4a1b7c1621bf98ad379a0578d8" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::gamma</definition>
+        <argsstring></argsstring>
+        <name>gamma</name>
+        <qualifiedname>Parameters::gamma</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="53" column="13" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1aedda6c12d17750bee0bba47c969bb15b" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::TolN</definition>
+        <argsstring></argsstring>
+        <name>TolN</name>
+        <qualifiedname>Parameters::TolN</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="54" column="7" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a8b164a0515cdc0adc197fb50bc1fcf3b" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::TolCG</definition>
+        <argsstring></argsstring>
+        <name>TolCG</name>
+        <qualifiedname>Parameters::TolCG</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="54" column="12" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="54" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1ac66e765590f97b74b84945c45427a0d4" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Parameters::itmaxN</definition>
+        <argsstring></argsstring>
+        <name>itmaxN</name>
+        <qualifiedname>Parameters::itmaxN</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="55" column="5" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a5c92342a1afcf50fdabd0dabcdec5e91" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Parameters::itmaxCG</definition>
+        <argsstring></argsstring>
+        <name>itmaxCG</name>
+        <qualifiedname>Parameters::itmaxCG</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="55" column="12" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1ac68fd3b923da32e62014788003fffcc6" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::stopcriteria</definition>
+        <argsstring></argsstring>
+        <name>stopcriteria</name>
+        <qualifiedname>Parameters::stopcriteria</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="57" column="7" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a820d1b6b3e1bbe49620f8d72a8c742b3" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::stopcriteriaCG</definition>
+        <argsstring></argsstring>
+        <name>stopcriteriaCG</name>
+        <qualifiedname>Parameters::stopcriteriaCG</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="57" column="20" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1ab65df24ba5c622136ebec512b6b051f5" prot="public" static="no" mutable="no">
+        <type>float</type>
+        <definition>float Parameters::norm_init</definition>
+        <argsstring></argsstring>
+        <name>norm_init</name>
+        <qualifiedname>Parameters::norm_init</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="57" column="35" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structParameters_1a852a4b8f74b80d08e7f586c827777de2" prot="public" static="no" mutable="no">
+        <type>int</type>
+        <definition>int Parameters::max</definition>
+        <argsstring></argsstring>
+        <name>max</name>
+        <qualifiedname>Parameters::max</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="58" column="5" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="58" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="38" column="1" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="39" bodyend="59"/>
+    <listofallmembers>
+      <member refid="structParameters_1a91b91258f03d69287748d11bda7c8d3b" prot="public" virt="non-virtual"><scope>Parameters</scope><name>alpha</name></member>
+      <member refid="structParameters_1ac89573efcf725c5a89c94272bc5f155d" prot="public" virt="non-virtual"><scope>Parameters</scope><name>blocksize</name></member>
+      <member refid="structParameters_1a65e61a7672b937fbe67b21abdf22002d" prot="public" virt="non-virtual"><scope>Parameters</scope><name>BT</name></member>
+      <member refid="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" prot="public" virt="non-virtual"><scope>Parameters</scope><name>devices</name></member>
+      <member refid="structParameters_1a25f315866dd8b09f40c7e7397aa825ae" prot="public" virt="non-virtual"><scope>Parameters</scope><name>Fx</name></member>
+      <member refid="structParameters_1a9ca819b5ec30965401a69b9c80b36a6d" prot="public" virt="non-virtual"><scope>Parameters</scope><name>Fy</name></member>
+      <member refid="structParameters_1a1c670d4a1b7c1621bf98ad379a0578d8" prot="public" virt="non-virtual"><scope>Parameters</scope><name>gamma</name></member>
+      <member refid="structParameters_1a89a0623e864ef253c09a98460f6a9c11" prot="public" virt="non-virtual"><scope>Parameters</scope><name>Grd</name></member>
+      <member refid="structParameters_1a5c92342a1afcf50fdabd0dabcdec5e91" prot="public" virt="non-virtual"><scope>Parameters</scope><name>itmaxCG</name></member>
+      <member refid="structParameters_1ac66e765590f97b74b84945c45427a0d4" prot="public" virt="non-virtual"><scope>Parameters</scope><name>itmaxN</name></member>
+      <member refid="structParameters_1a852a4b8f74b80d08e7f586c827777de2" prot="public" virt="non-virtual"><scope>Parameters</scope><name>max</name></member>
+      <member refid="structParameters_1a6e4da5b8b1975578eb83f7766f87b978" prot="public" virt="non-virtual"><scope>Parameters</scope><name>mplan</name></member>
+      <member refid="structParameters_1a655440251722ee5443cb6248380f64db" prot="public" virt="non-virtual"><scope>Parameters</scope><name>mplan2</name></member>
+      <member refid="structParameters_1a7c85c8bed08270e5779e5200d05fd3b0" prot="public" virt="non-virtual"><scope>Parameters</scope><name>nangles</name></member>
+      <member refid="structParameters_1a3502cb28c49d8a69b1fef156e2551bae" prot="public" virt="non-virtual"><scope>Parameters</scope><name>ndev</name></member>
+      <member refid="structParameters_1ab65df24ba5c622136ebec512b6b051f5" prot="public" virt="non-virtual"><scope>Parameters</scope><name>norm_init</name></member>
+      <member refid="structParameters_1a8ba46d1bb6fd8825435fac91728afa7b" prot="public" virt="non-virtual"><scope>Parameters</scope><name>num_streams</name></member>
+      <member refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" prot="public" virt="non-virtual"><scope>Parameters</scope><name>Nx</name></member>
+      <member refid="structParameters_1a566aab9822535e5633cd4c175d954986" prot="public" virt="non-virtual"><scope>Parameters</scope><name>Ny</name></member>
+      <member refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" prot="public" virt="non-virtual"><scope>Parameters</scope><name>Nz</name></member>
+      <member refid="structParameters_1a4dbae049b4f95f53621e02e80827b9f2" prot="public" virt="non-virtual"><scope>Parameters</scope><name>ratio</name></member>
+      <member refid="structParameters_1abca7e4e0db3b2b98d24cf7ff036ea1d3" prot="public" virt="non-virtual"><scope>Parameters</scope><name>regularization</name></member>
+      <member refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" prot="public" virt="non-virtual"><scope>Parameters</scope><name>slice</name></member>
+      <member refid="structParameters_1ac68fd3b923da32e62014788003fffcc6" prot="public" virt="non-virtual"><scope>Parameters</scope><name>stopcriteria</name></member>
+      <member refid="structParameters_1a820d1b6b3e1bbe49620f8d72a8c742b3" prot="public" virt="non-virtual"><scope>Parameters</scope><name>stopcriteriaCG</name></member>
+      <member refid="structParameters_1ac37ea168a85c749f181716ec4872d9ea" prot="public" virt="non-virtual"><scope>Parameters</scope><name>streams</name></member>
+      <member refid="structParameters_1a04b9542df5ea50ad3e4962323950b740" prot="public" virt="non-virtual"><scope>Parameters</scope><name>subvolume</name></member>
+      <member refid="structParameters_1a8b164a0515cdc0adc197fb50bc1fcf3b" prot="public" virt="non-virtual"><scope>Parameters</scope><name>TolCG</name></member>
+      <member refid="structParameters_1aedda6c12d17750bee0bba47c969bb15b" prot="public" virt="non-virtual"><scope>Parameters</scope><name>TolN</name></member>
+      <member refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" prot="public" virt="non-virtual"><scope>Parameters</scope><name>zblock</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

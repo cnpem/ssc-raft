@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="group__CUDA__MATH__INTRINSIC__HALF" kind="group">
+    <compoundname>CUDA_MATH_INTRINSIC_HALF</compoundname>
+    <title>Half Precision Intrinsics</title>
+    <innergroup refid="group__CUDA__MATH____HALF__ARITHMETIC">Half Arithmetic Functions</innergroup>
+    <innergroup refid="group__CUDA__MATH____HALF2__ARITHMETIC">Half2 Arithmetic Functions</innergroup>
+    <innergroup refid="group__CUDA__MATH____HALF__COMPARISON">Half Comparison Functions</innergroup>
+    <innergroup refid="group__CUDA__MATH____HALF2__COMPARISON">Half2 Comparison Functions</innergroup>
+    <innergroup refid="group__CUDA__MATH____HALF__MISC">Half Precision Conversion and Data Movement</innergroup>
+    <innergroup refid="group__CUDA__MATH____HALF__FUNCTIONS">Half Math Functions</innergroup>
+    <innergroup refid="group__CUDA__MATH____HALF2__FUNCTIONS">Half2 Math Functions</innergroup>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para>This section describes half precision intrinsic functions that are only supported in device code. To use these functions, include the header file <computeroutput><ref refid="cuda__fp16_8h_source" kindref="compound">cuda_fp16.h</ref></computeroutput> in your program. </para>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

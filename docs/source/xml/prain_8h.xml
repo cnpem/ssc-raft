@@ -1,0 +1,3480 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="prain_8h" kind="file" language="C++">
+    <compoundname>prain.h</compoundname>
+    <includes refid="include_8h" local="yes">../inc/include.h</includes>
+    <includedby refid="include_8h" local="yes">/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/include.h</includedby>
+    <incdepgraph>
+      <node id="9">
+        <label>helper_cuda.h</label>
+        <link refid="helper__cuda_8h_source"/>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>helper_string.h</label>
+        <link refid="helper__string_8h_source"/>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>../inc/include.h</label>
+        <link refid="include_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="1" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="22" relation="include">
+        </childnode>
+        <childnode refid="23" relation="include">
+        </childnode>
+        <childnode refid="24" relation="include">
+        </childnode>
+        <childnode refid="25" relation="include">
+        </childnode>
+        <childnode refid="26" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h</label>
+        <link refid="prain_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="19">
+        <label>cassert</label>
+      </node>
+      <node id="24">
+        <label>chrono</label>
+      </node>
+      <node id="5">
+        <label>complex.h</label>
+      </node>
+      <node id="22">
+        <label>cublas.h</label>
+      </node>
+      <node id="3">
+        <label>cuda.h</label>
+      </node>
+      <node id="7">
+        <label>cuda_runtime_api.h</label>
+      </node>
+      <node id="4">
+        <label>cufft.h</label>
+      </node>
+      <node id="14">
+        <label>fstream</label>
+      </node>
+      <node id="23">
+        <label>future</label>
+      </node>
+      <node id="18">
+        <label>iostream</label>
+      </node>
+      <node id="26">
+        <label>omp.h</label>
+      </node>
+      <node id="21">
+        <label>sstream</label>
+      </node>
+      <node id="10">
+        <label>stdint.h</label>
+      </node>
+      <node id="8">
+        <label>stdio.h</label>
+      </node>
+      <node id="11">
+        <label>stdlib.h</label>
+      </node>
+      <node id="15">
+        <label>string</label>
+      </node>
+      <node id="12">
+        <label>string.h</label>
+      </node>
+      <node id="16">
+        <label>strings.h</label>
+      </node>
+      <node id="6">
+        <label>tgmath.h</label>
+      </node>
+      <node id="25">
+        <label>thread</label>
+      </node>
+      <node id="17">
+        <label>time.h</label>
+      </node>
+      <node id="20">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="3">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp</label>
+        <link refid="devicefunctions_8hpp_source"/>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="5">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp</label>
+        <link refid="logerror_8hpp"/>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/include.h</label>
+        <link refid="include_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="1" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h</label>
+        <link refid="prain_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="4">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu</label>
+        <link refid="kernelfunctions_8cu"/>
+      </node>
+      <node id="6">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu</label>
+        <link refid="propagation_8cu"/>
+      </node>
+    </invincdepgraph>
+    <innerclass refid="structParameters" prot="public">Parameters</innerclass>
+    <innerclass refid="structPRAINData" prot="public">PRAINData</innerclass>
+    <innerclass refid="structPropagation" prot="public">Propagation</innerclass>
+    <innerclass refid="structProfiling" prot="public">Profiling</innerclass>
+      <sectiondef kind="typedef">
+      <memberdef kind="typedef" id="prain_8h_1a470d37834c4662d58f989efd0e21db09" prot="public" static="no">
+        <type>struct <ref refid="structParameters" kindref="compound">Parameters</ref></type>
+        <definition>PAR</definition>
+        <argsstring></argsstring>
+        <name>PAR</name>
+        <briefdescription>
+<para>parameters for image. </para>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="59" column="4"/>
+      </memberdef>
+      <memberdef kind="typedef" id="prain_8h_1ac054c91022a58ae4381c3a2226b26973" prot="public" static="no">
+        <type>struct <ref refid="structPRAINData" kindref="compound">PRAINData</ref></type>
+        <definition>typedef struct PRAINData PRAINDAT</definition>
+        <argsstring></argsstring>
+        <name>PRAINDAT</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="66" column="9"/>
+      </memberdef>
+      <memberdef kind="typedef" id="prain_8h_1a5d7280ef01b20d674a0f51fce1d60920" prot="public" static="no">
+        <type>struct <ref refid="structPropagation" kindref="compound">Propagation</ref></type>
+        <definition>typedef struct Propagation PRPG</definition>
+        <argsstring></argsstring>
+        <name>PRPG</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="72" column="5"/>
+      </memberdef>
+      <memberdef kind="typedef" id="prain_8h_1aba53204af70d9878800b6c384d854be5" prot="public" static="no">
+        <type>struct <ref refid="structProfiling" kindref="compound">Profiling</ref></type>
+        <definition>typedef struct Profiling PROF</definition>
+        <argsstring></argsstring>
+        <name>PROF</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="77" column="5"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="prain_8h_1a3f37103aaa7ca7a626a04959bfc0b809" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void set_prain_parameters</definition>
+        <argsstring>(PAR *param, float *parameters, size_t *iterations, size_t *volumesize, int *devices)</argsstring>
+        <name>set_prain_parameters</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref> *</type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>parameters</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>iterations</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>volumesize</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>devices</declname>
+        </param>
+        <briefdescription>
+<para>Set the prain parameters object. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>PAR struct with parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>parameters</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing {fresnel, fresnel, alpha, gamma, ratio, 1E-5, 1E-5}. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>iterations</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing the number of maximum Newton iterations, the number of maximum conjugate gradient iteration and the block size, respectively. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>volumesize</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Size-4 array containing the number of voxels that will be processed in x, y and z and the block size. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>devices</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing the range {0, 1, 2, ..., ndev - 1}. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="93" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="4" bodyend="35" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="93" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a94e822f02d46673219e6e6dd397e5b02" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void set_prop_parameters</definition>
+        <argsstring>(PAR *param, float *parameters, size_t *volumesize, int *devs)</argsstring>
+        <name>set_prop_parameters</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref> *</type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>parameters</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>volumesize</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>devs</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="94" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="37" bodyend="59" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="94" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1af26c1c330c19117793a15c51019a1fe6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+        <definition>PRAINDAT * allocateprain</definition>
+        <argsstring>(PRAINDAT *workspace, PAR param)</argsstring>
+        <name>allocateprain</name>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>workspace</declname>
+        </param>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="95" column="10" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="61" bodyend="88" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="95" declcolumn="10"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a53cd20ea82c3ef126930bea2a12dd9f4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void freeprain</definition>
+        <argsstring>(PRAINDAT *prain)</argsstring>
+        <name>freeprain</name>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="96" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="90" bodyend="111" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="96" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a1ba0f478f91581ff626e0824008e135e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void freeData</definition>
+        <argsstring>(PRPG *prop)</argsstring>
+        <name>freeData</name>
+        <param>
+          <type><ref refid="structPropagation" kindref="compound">PRPG</ref> *</type>
+          <declname>prop</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="97" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="126" bodyend="133" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="97" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a37896fa2819ccbe4a847177495aadd0e" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type><ref refid="structPropagation" kindref="compound">PRPG</ref> *</type>
+        <definition>PRPG * allocatePropagation</definition>
+        <argsstring>(PRPG *workspace, PAR param)</argsstring>
+        <name>allocatePropagation</name>
+        <param>
+          <type><ref refid="structPropagation" kindref="compound">PRPG</ref> *</type>
+          <declname>workspace</declname>
+        </param>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="98" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu" bodystart="113" bodyend="124" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="98" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ad6c6fdd31953cee3c330069cd1483c66" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void propagation</definition>
+        <argsstring>(PAR param, PROF *prof, float _Complex *phantom, float *intensity, int ndev)</argsstring>
+        <name>propagation</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>phantom</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>intensity</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+<para>Computes <formula id="2">$\mathscr{F}^{-1}(\mathscr{F}(e^{-f} \cdot \hat{k})$</formula>, the fresnel propagation operator. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>phantom</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>intensity</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ndev</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="109" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" bodystart="15" bodyend="40" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="109" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a98090967a1166b836366ae69e8f05e83" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void _CPUpropagation</definition>
+        <argsstring>(PAR param, PROF *prof, float _Complex *phantom, float *intensity, int ndev)</argsstring>
+        <name>_CPUpropagation</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>phantom</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>intensity</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="110" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" bodystart="107" bodyend="144" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="110" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a6816c137d33bc85ad0538cb28c19719d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void CPUpropagation</definition>
+        <argsstring>(float _Complex *phantom, float *intensity, float *parameters, size_t *volumesize, int *devices, int ndev)</argsstring>
+        <name>CPUpropagation</name>
+        <param>
+          <type>float _Complex *</type>
+          <declname>phantom</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>intensity</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>parameters</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>volumesize</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>devices</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="112" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" bodystart="43" bodyend="104" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="112" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ae2567f8f414c410c3cdb8c4eed2ed420" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>float</type>
+        <definition>float computeAlpha0</definition>
+        <argsstring>(PAR param, PRAINDAT *prain, PROF *prof)</argsstring>
+        <name>computeAlpha0</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="115" column="7" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="549" bodyend="595" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="115" declcolumn="7"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a52939b56be33d9ed5ece7cd328e45e59" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void computeFresnelKernel</definition>
+        <argsstring>(PAR param, PRAINDAT *prain, PROF *prof, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>computeFresnelKernel</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Compute the kernel before iterations: computed only once. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prain</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with some data info that was or will be computed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct for profile info. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="125" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="541" bodyend="547" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="125" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ab7b201bb107324ed760787152865bdad" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fresnelpropagationConj</definition>
+        <argsstring>(PAR param, cufftComplex *data, cufftComplex *kernel, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>fresnelpropagationConj</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>kernel</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>This function computes the conjugate fresnel propagation operator: <formula id="3">$\mathscr{F}^{-1}(\overline{\mathscr{F}[k]}\,^* \mathscr{F}[e^{-f}])$</formula>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>kernel</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="137" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="528" bodyend="539" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="137" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a6ec3713d1edf8c9426202daca15f5cba" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void fresnelpropagation</definition>
+        <argsstring>(PAR param, cufftComplex *data, cufftComplex *kernel, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>fresnelpropagation</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>kernel</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>This function computes the fresnel propagation operator: <formula id="4">$\mathscr{F}^{-1}(\mathscr{F}[k]^* \mathscr{F}[\text{data}])$</formula>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>kernel</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="149" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="515" bodyend="526" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="149" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a309aa8610b184af433ffa486c218bbcf" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void conjugateGradientTik</definition>
+        <argsstring>(PAR param, PRAINDAT *prain, PROF *prof)</argsstring>
+        <name>conjugateGradientTik</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <briefdescription>
+<para>Solves the linear system <formula id="5">$Mx = b$</formula>, using conjugate gradient method. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prain</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with some data info that was or will be computed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct for profile info. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="158" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="444" bodyend="513" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="158" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a50e7ad0603036289864e9592b1017160" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void computeRHSTik</definition>
+        <argsstring>(PAR param, PRAINDAT *prain, PROF *prof)</argsstring>
+        <name>computeRHSTik</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <briefdescription>
+<para>Computate RHS of the linear system <formula id="5">$Mx = b$</formula> and it&apos;s norm. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><formula id="6">$b$</formula> is writting as <formula id="7">$b = A + B + C$</formula>, where:<itemizedlist>
+<listitem><para><formula id="8">$A = F&apos;[f]^*(\text{intensity}) = -2\overline{e^{-f}} \mathcal{F}^*(\text{intensity}\times\mathcal{F}(e^{-f}))$</formula>;</para>
+</listitem><listitem><para><formula id="9">$B = \alpha \Delta(f_0 - f) \qquad \text{or} \qquad \alpha(f_0 - f)$</formula>;</para>
+</listitem><listitem><para><formula id="10">$C = \gamma m \min(0,\Re(f))$</formula>.</para>
+</listitem></itemizedlist>
+</para>
+<para><simplesect kind="note"><para><formula id="6">$b$</formula> is saved in <emphasis>prain.ans</emphasis> and it&apos;s norm in <emphasis>prain.rhsnorm</emphasis>.</para>
+</simplesect>
+<parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prain</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with some data info that was or will be computed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct for profile info. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="175" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="413" bodyend="442" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="175" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1abe3c86803c3f8cf810fb7a359aa5e0c4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MatrixOperatorTik</definition>
+        <argsstring>(PAR param, PRAINDAT *prain, PROF *prof)</argsstring>
+        <name>MatrixOperatorTik</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <briefdescription>
+<para>Computates the matrix <formula id="11">$M$</formula> of the linear system <formula id="5">$Mx = b$</formula>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><formula id="11">$M$</formula> applied in a vector <formula id="12">$p$</formula> is writting as <formula id="13">$Mp = A + B + C$</formula>, where:<itemizedlist>
+<listitem><para><formula id="14">$A = F&apos;[f]^*(F&apos;[f]p) = 4\overline{e^{-f}} \mathcal{F}^*\left(\Re\left(\overline{\mathcal{F}(e^{-f})}\mathcal{F}(e^{-f}p)\right)\mathcal{F}(e^{-f})\right)$</formula>;</para>
+</listitem><listitem><para><formula id="15">$B = \alpha \Delta p \qquad \text{or} \qquad B = \alpha p$</formula>;</para>
+</listitem><listitem><para><formula id="16">$C = \gamma m^2 \Re(p)$</formula>.</para>
+</listitem></itemizedlist>
+</para>
+<para><simplesect kind="note"><para><formula id="11">$M$</formula> is saved in <emphasis>prain.Mp</emphasis>.</para>
+</simplesect>
+<parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prain</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with some data info that was or will be computed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct for profile info. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="192" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="381" bodyend="411" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="192" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a7da9ddffb985a367999f3789ae7e4eba" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void conjugateGradientLaplace</definition>
+        <argsstring>(PAR param, PRAINDAT *prain, PROF *prof)</argsstring>
+        <name>conjugateGradientLaplace</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <briefdescription>
+<para>Solves the linear system <formula id="5">$Mx = b$</formula>, using conjugate gradient method. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prain</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with some data info that was or will be computed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct for profile info. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="201" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="308" bodyend="379" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="201" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ae82c8ee6724dfdec21c49e45a71e3cb7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void computeRHSLaplace</definition>
+        <argsstring>(PAR param, PRAINDAT *prain, PROF *prof)</argsstring>
+        <name>computeRHSLaplace</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <briefdescription>
+<para>Computate RHS of the linear system <formula id="5">$Mx = b$</formula> and it&apos;s norm. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><formula id="6">$b$</formula> is writting as <formula id="7">$b = A + B + C$</formula>, where:<itemizedlist>
+<listitem><para><formula id="8">$A = F&apos;[f]^*(\text{intensity}) = -2\overline{e^{-f}} \mathcal{F}^*(\text{intensity}\times\mathcal{F}(e^{-f}))$</formula>;</para>
+</listitem><listitem><para><formula id="9">$B = \alpha \Delta(f_0 - f) \qquad \text{or} \qquad \alpha(f_0 - f)$</formula>;</para>
+</listitem><listitem><para><formula id="10">$C = \gamma m \min(0,\Re(f))$</formula>.</para>
+</listitem></itemizedlist>
+</para>
+<para><simplesect kind="note"><para><formula id="6">$b$</formula> is saved in <emphasis>prain.ans</emphasis> and it&apos;s norm in <emphasis>prain.rhsnorm</emphasis>.</para>
+</simplesect>
+<parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prain</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with some data info that was or will be computed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct for profile info. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="218" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="277" bodyend="306" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="218" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ac8a2c2f22654a6c456274b15688ad5db" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void MatrixOperatorLaplace</definition>
+        <argsstring>(PAR param, PRAINDAT *prain, PROF *prof)</argsstring>
+        <name>MatrixOperatorLaplace</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref> *</type>
+          <declname>prain</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <briefdescription>
+<para>Computates the matrix <formula id="11">$M$</formula> of the linear system <formula id="5">$Mx = b$</formula>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><formula id="11">$M$</formula> applied in a vector <formula id="12">$p$</formula> is writting as <formula id="13">$Mp = A + B + C$</formula>, where:<itemizedlist>
+<listitem><para><formula id="14">$A = F&apos;[f]^*(F&apos;[f]p) = 4\overline{e^{-f}} \mathcal{F}^*\left(\Re\left(\overline{\mathcal{F}(e^{-f})}\mathcal{F}(e^{-f}p)\right)\mathcal{F}(e^{-f})\right)$</formula>;</para>
+</listitem><listitem><para><formula id="15">$B = \alpha \Delta p \qquad \text{or} \qquad B = \alpha p$</formula>;</para>
+</listitem><listitem><para><formula id="16">$C = \gamma m^2 \Re(p)$</formula>.</para>
+</listitem></itemizedlist>
+</para>
+<para><simplesect kind="note"><para><formula id="11">$M$</formula> is saved in <emphasis>prain.Mp</emphasis>.</para>
+</simplesect>
+<parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with image parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prain</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct with some data info that was or will be computed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct for profile info. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="235" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="246" bodyend="275" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="235" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a6b3de020266bb5542cc72fe36ba00ec1" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void praincall</definition>
+        <argsstring>(PAR param, PROF *prof, float *projections, float _Complex *recovery, float _Complex *initialGuessN, float *compact, int ndev)</argsstring>
+        <name>praincall</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>projections</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>recovery</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>initialGuessN</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>compact</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+<para>Computes Newthon method. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct containing parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct containing profile members. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>projections</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>An amount of the sample data that will be processed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>recovery</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>An amount of the image that will be processed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>initialGuessN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>An amount of the image initial guess that will be processed. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>compact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>? </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ndev</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Number of the device that will be launched by the current CPU thread. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="248" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="131" bodyend="244" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="248" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a983dc33b3b6bd82ebfc75619bce997bc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void _CPUprain</definition>
+        <argsstring>(PAR param, PROF *prof, float *projections, float _Complex *recovery, float _Complex *initialGuessN, float *compact, int ndev)</argsstring>
+        <name>_CPUprain</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>projections</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>recovery</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>initialGuessN</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>compact</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+<para>PRAIN call 3D: Solve 3D batches of 32 volumes at a time each batch is solved in parallel threads. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct containing parameters. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Struct containing profile members. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>projections</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>An amount of the sample data that will be lauched by the thread running the current function. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>recovery</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>An amount of the image that will be lauched by the thread running the current function. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>initialGuessN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>An amount of the image initial guess that will be lauched by the thread running the current function. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>compact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>? </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ndev</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Number of the device that will be launched by the current CPU thread.</para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="note"><para>The size of <emphasis>projection</emphasis>, <emphasis>recovery</emphasis>, <emphasis>initialGuessN</emphasis> and <emphasis>compact</emphasis> is <emphasis>param.subvolume*</emphasis> <emphasis>param.slice</emphasis> for each one. It may be less than this amount if the data is not divisible by the number of devices. </para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="269" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="90" bodyend="129" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="269" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a3d2d554269bd29eceed8475f94858b47" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void CPUprain</definition>
+        <argsstring>(float *projections, float _Complex *recovery, float _Complex *initialGuessN, float *compact, float *parameters, size_t *iterations, size_t *volumesize, int *devices, int ndev)</argsstring>
+        <name>CPUprain</name>
+        <param>
+          <type>float *</type>
+          <declname>projections</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>recovery</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>initialGuessN</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>compact</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>parameters</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>iterations</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>volumesize</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>devices</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+<para>Extern C function to recover the phase and attenuation of an image (reconstruction) given a data (sino) and an initial guess <emphasis>initialGuessN</emphasis> by Regularized Gauss-Newton Iterations together with a Conjugate Gradient method. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>projections</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Sample data. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>recovery</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Image to be reconstructed. Starts with zeros. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>initialGuessN</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Image initial guess. Starts with zeros. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>compact</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>? </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>parameters</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing {fresnel, fresnel, alpha, gamma, ratio, 1E-5, 1E-5}. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>iterations</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing the number of maximum Newton iterations, the number of maximum conjugate gradient iteration and the block size, respectively. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>volumesize</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Size-4 array containing the number of voxels that will be processed in x, y and z and the block size. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>devices</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Array containing the range {0, 1, 2, ..., ndev - 1}. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ndev</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Number of devices (GPUs) that will be used. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="288" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu" bodystart="21" bodyend="87" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="288" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1abff295f063562b0b1f52686d351c41d5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void getDeviceProperties</definition>
+        <argsstring>()</argsstring>
+        <name>getDeviceProperties</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="293" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="16" bodyend="24" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="293" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a3dad3f55a1895c9048c29f51eb52a855" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void FourierFresnelKernel</definition>
+        <argsstring>(cufftComplex *kernel, float fresnelx, float fresnely, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>FourierFresnelKernel</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>kernel</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>fresnelx</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>fresnely</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Explicit function for the 1st kernel <formula id="17">$\mathscr{F}[k](w) = \exp[-i \pi w(x^2 + y^2)/ (\eta_x + \eta_y)]$</formula>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>kernel</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>fresnelx</parametername>
+<parametername>fresnely</parametername>
+</parameternamelist>
+<parameterdescription>
+<para><formula id="18">$\eta_x$</formula> and <formula id="19">$\eta_y$</formula>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="306" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="17" bodyend="33" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="306" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a28e4509435faef2365f827637b942085" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void beerslaw</definition>
+        <argsstring>(cufftComplex *data, cufftComplex *ans, float ratio, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>beerslaw</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>data</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>ratio</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Exponential of a complex data. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>data</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data to take the exponential. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ratio</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Ratio of Beer&apos;s law. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="316" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="105" bodyend="120" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="316" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a0fcea4e7a9854adf81d75275df744b81" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CLaplacerhs</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, cufftComplex *ans, float alpha, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CLaplacerhs</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>alpha</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Laplace finite difference approximation of the difference of two complex vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>, multiplied by <emphasis>alpha</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>alpha</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Generally, it is the regularization factor <formula id="20">$(\alpha)$</formula>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="327" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="213" bodyend="231" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="327" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a498ca34fdaaf50c2598b846b84a030e5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CLaplacemat</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *ans, float alpha, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CLaplacemat</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>alpha</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Laplace finite difference approximation of a complex vector <emphasis>a</emphasis> multiplied by <emphasis>alpha</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vector. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>alpha</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Generally, it is the regularization factor <formula id="20">$(\alpha)$</formula>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="337" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="193" bodyend="211" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="337" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ada58bf5b67fb2a884a6959b29e53b5f4" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CDifference</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, cufftComplex *ans, float alpha, float beta, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CDifference</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>alpha</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>beta</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Computes <formula id="21">$\alpha\beta(\texttt{a} - \texttt{b})$</formula>, where <emphasis>a</emphasis> and <emphasis>b</emphasis> are vectors. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>alpha</parametername>
+<parametername>beta</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input number. Generally, <emphasis>alpha</emphasis> is the regularization factor <formula id="20">$(\alpha)$</formula>. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="347" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="233" bodyend="243" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="347" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1aac1153e191282d4cc53272e55ea0f46d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void OperatorA</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *beer, cufftComplex *ans, float scalar, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>OperatorA</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>beer</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>scalar</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Computes <formula id="22">$\texttt{scalar}\times\texttt{a}_i\times\overline{\texttt{beer}_i}$</formula>, for each component of <emphasis>a</emphasis> and <emphasis>beer</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>beer</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>scalar</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input number. Generally, scalar is equal to 4. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="358" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="165" bodyend="175" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="358" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ac4f3ca040bc526adc26549e33de0515d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void minimum_regularization</definition>
+        <argsstring>(cufftComplex *p, cufftComplex *f, cufftComplex *in, cufftComplex *ans, float gamma, float indicator, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>minimum_regularization</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>p</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>f</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>in</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>gamma</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>indicator</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Computes a operator if <emphasis>indicator</emphasis> is equal to zero and another operator if <emphasis>indicator</emphasis> is equal to one. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>If <emphasis>indicator</emphasis> = 0, then computes <formula id="23">$\Re(Mp) + \gamma m^2\Re(p)$</formula> (mat CG)</para>
+<para>If <emphasis>indicator</emphasis> = 1, then computes <formula id="24">$\Re(rhs) + \gamma m \min(\Re(f),0)$</formula> (RHS)</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>p</parametername>
+<parametername>f</parametername>
+<parametername>in</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>gamma</parametername>
+<parametername>indicator</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input numbers. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="373" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="177" bodyend="191" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="373" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a2fc56d80f7b074c1681e84f65f4dc36c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void Cabsolute2</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>Cabsolute2</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Computes <formula id="25">$\texttt{a}_i \cdot \overline{\texttt{b}_i}$</formula>, for all components of <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="383" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="46" bodyend="55" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="383" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1acd3388a8a27c9c4268dc0c3e8e0ada5c" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CAddScalar</definition>
+        <argsstring>(float *A, cufftComplex *a, cufftComplex *b, cufftComplex *ans, int expoente, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CAddScalar</name>
+        <param>
+          <type>float *</type>
+          <declname>A</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>expoente</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Sums or subtracts 2 complex vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>, with <emphasis>b</emphasis> multiplied by a float vector <emphasis>A</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para>If <emphasis>expoente</emphasis> is equal to one, then it computes <formula id="26">$\texttt{a}_i + \texttt{A}_i\cdot\texttt{b}_i$</formula>, for all components of <emphasis>A</emphasis>, <emphasis>a</emphasis> and <emphasis>b</emphasis>.</para>
+<para>If <emphasis>expoente</emphasis> is equal to zero, then it computes <formula id="27">$\texttt{a}_i - \texttt{A}_i\cdot\texttt{b}_i$</formula>, for all components of <emphasis>A</emphasis>, <emphasis>a</emphasis> and <emphasis>b</emphasis>.</para>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>A</parametername>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="399" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="79" bodyend="91" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="399" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ada8b6f04bf75f95523b6a210b82bdc8f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CMultAmplitude</definition>
+        <argsstring>(float *A, cufftComplex *c, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CMultAmplitude</name>
+        <param>
+          <type>float *</type>
+          <declname>A</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Multiply a complex vector <emphasis>c</emphasis> by a float vector <emphasis>A</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>A</parametername>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="408" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="57" bodyend="66" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="408" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a5fec253ce36b4527d9b0a7fd5017bbd7" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CMultComplexAmplitude</definition>
+        <argsstring>(cufftComplex *A, cufftComplex *c, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CMultComplexAmplitude</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>A</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Multiply a complex vector <emphasis>c</emphasis> by the real parte of a complex vector <emphasis>A</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>A</parametername>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="417" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="68" bodyend="77" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="417" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a60ac7e4bbb4df7af1e9524c946322b80" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CIntensity</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, float *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CIntensity</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Real part of a multiplication of a complex vector <emphasis>a</emphasis> and the conjugated of a complex vector <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="427" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="312" bodyend="321" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="427" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a063528102c250eaf517c817fe3bfe143" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CConvolve</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CConvolve</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Multiply two Complex vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors to be multiplied. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="436" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="35" bodyend="44" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="436" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a4571d6a2c0b8419a7b09b8a48fa5ac17" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CRealPart</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CRealPart</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Get the real part of a complex vector <emphasis>a</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vector. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="445" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="93" bodyend="103" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="445" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1ac9dc46e31d6652af059364a3a7801bf5" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CInnerProd</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, float *norm, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CInnerProd</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Complex Inner Product by blocks of two vector <emphasis>b</emphasis> and the conjugate of <emphasis>a</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>norm</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="454" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="287" bodyend="310" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="454" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a8ea4f7a7bcc1746db2db17e1462b87b6" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void CSum</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>CSum</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Complex sum of two vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="462" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="264" bodyend="274" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="462" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a4e017977cae93b3b3b14ea7bb9de9386" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void fftshiftKernel</definition>
+        <argsstring>(cufftComplex *c, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>fftshiftKernel</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Shift of a complex vector. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector to be shifted. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="470" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="122" bodyend="151" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="470" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a736224b0bc11ce0e5e5cbf69ba9723d2" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void fftNormalize</definition>
+        <argsstring>(cufftComplex *c, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>fftNormalize</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>c</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Normalize a complex vector <emphasis>c</emphasis> by the number of entries <emphasis>sizex</emphasis> <formula id="28">$\times$</formula> <emphasis>sizey</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vector to be normalized. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="479" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="153" bodyend="163" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="479" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a665de576d4b44afa6d3ec6d18149cb6f" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void FInnerProd</definition>
+        <argsstring>(float *a, float *b, float *norm, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>FInnerProd</name>
+        <param>
+          <type>float *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>norm</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Float Inner Product by blocks of two vectors <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>norm</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="490" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="276" bodyend="285" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="490" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a7718e0af6947aae776b3d1311377fdcc" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void FSub</definition>
+        <argsstring>(float *a, float *b, size_t sizex, size_t sizey, size_t sizez)</argsstring>
+        <name>FSub</name>
+        <param>
+          <type>float *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <briefdescription>
+<para>Float sum and subtraction. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>sizex</parametername>
+<parametername>sizey</parametername>
+<parametername>sizez</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x, y and z directions. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="498" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="245" bodyend="254" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="498" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a27219273c347a293484a13eaba6e4664" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>__global__ void</type>
+        <definition>__global__ void FDivZ</definition>
+        <argsstring>(float *a, float *b, float *ans, size_t N)</argsstring>
+        <name>FDivZ</name>
+        <param>
+          <type>float *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>ans</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>N</declname>
+        </param>
+        <briefdescription>
+<para>Float division. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Input vectors. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ans</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Vector containing the result of this function operation. </para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>N</parametername>
+</parameternamelist>
+<parameterdescription>
+<para>Data boundary in cuda x direction. </para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="507" column="17" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="256" bodyend="262" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="507" declcolumn="17"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a998918e6c4af873db28b5f894329ac2e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ cufftComplex</type>
+        <definition>__device__ cufftComplex exp1j</definition>
+        <argsstring>(float f)</argsstring>
+        <name>exp1j</name>
+        <param>
+          <type>float</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+<para>complex exponencial. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>f</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="520" column="25" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="26" bodyend="26" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="520" declcolumn="25"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ cufftComplex</type>
+        <definition>__device__ cufftComplex ComplexMult</definition>
+        <argsstring>(cufftComplex a, cufftComplex b)</argsstring>
+        <name>ComplexMult</name>
+        <param>
+          <type>cufftComplex</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+<para>Multiplies two complex numbers <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="529" column="25" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="28" bodyend="28" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="529" declcolumn="25"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ cufftComplex</type>
+        <definition>__device__ cufftComplex ComplexConj</definition>
+        <argsstring>(cufftComplex c)</argsstring>
+        <name>ComplexConj</name>
+        <param>
+          <type>cufftComplex</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Complex Conjugate. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="537" column="25" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="32" bodyend="32" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="537" declcolumn="25"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1aefda406ec17eff4118e9e881105c0a69" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ cufftComplex</type>
+        <definition>__device__ cufftComplex ComplexMultConst</definition>
+        <argsstring>(cufftComplex a, float alpha)</argsstring>
+        <name>ComplexMultConst</name>
+        <param>
+          <type>cufftComplex</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>alpha</declname>
+        </param>
+        <briefdescription>
+<para>Complex multiplication by a constant <emphasis>alpha</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>alpha</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="546" column="25" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="30" bodyend="30" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="546" declcolumn="25"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1abf851cf3d7333991f33eaeb272267621" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ float</type>
+        <definition>__device__ float FloatMultConst</definition>
+        <argsstring>(float a, float b)</argsstring>
+        <name>FloatMultConst</name>
+        <param>
+          <type>float</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+<para>Float multiplication by a constant. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="556" column="18" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="34" bodyend="34" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="556" declcolumn="18"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1abfd67e8248b5e14cdad335f8f0f16fa1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ float</type>
+        <definition>__device__ float sign</definition>
+        <argsstring>(float a)</argsstring>
+        <name>sign</name>
+        <param>
+          <type>float</type>
+          <declname>a</declname>
+        </param>
+        <briefdescription>
+<para>Float get sign. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="564" column="18" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="36" bodyend="36" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="564" declcolumn="18"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ size_t</type>
+        <definition>__device__ size_t is_valid</definition>
+        <argsstring>(int x, size_t n)</argsstring>
+        <name>is_valid</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>n</declname>
+        </param>
+        <briefdescription>
+<para>Is a valid pixel. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>n</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="574" column="19" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="38" bodyend="38" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="574" declcolumn="19"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1a1a6511e11994a09b88c514293c6b1656" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void FprintDev</definition>
+        <argsstring>(float *a, float *b, size_t sizex, size_t sizey, size_t sizez, int k)</argsstring>
+        <name>FprintDev</name>
+        <param>
+          <type>float *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>k</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="577" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="341" bodyend="356" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="577" declcolumn="6"/>
+      </memberdef>
+      <memberdef kind="function" id="prain_8h_1afa5ed2c6092b89ffa34094f9782a401d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void CprintDev</definition>
+        <argsstring>(cufftComplex *a, cufftComplex *b, size_t sizex, size_t sizey, size_t sizez, int k)</argsstring>
+        <name>CprintDev</name>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex *</type>
+          <declname>b</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizex</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizey</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>sizez</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>k</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="578" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu" bodystart="323" bodyend="339" declfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" declline="578" declcolumn="6"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Header file for scr files. </para>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="author"><para>your name (<ulink url="mailto:you@domain.com">you@domain.com</ulink>) </para>
+</simplesect>
+<simplesect kind="version"><para>0.1 </para>
+</simplesect>
+<simplesect kind="date"><para>2021-06-12</para>
+</simplesect>
+<simplesect kind="copyright"><para>Copyright (c) 2021 </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>PRAIN_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>PRAIN_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;../inc/include.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="38" refid="structParameters" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structParameters" kindref="compound">Parameters</ref></highlight></codeline>
+<codeline lineno="39"><highlight class="normal">{<sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>General<sp/>Parameters:<sp/>Dimensions<sp/>and<sp/>Cuda*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40" refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/><ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref>,<sp/><ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref>,<sp/><ref refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kindref="member">Nz</ref>,<sp/><ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref>,<sp/>nangles;</highlight></codeline>
+<codeline lineno="41" refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>blocksize,<sp/><ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref>,<sp/>subvolume;</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight></codeline>
+<codeline lineno="43" refid="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>regularization,<sp/>ndev,<sp/>*<ref refid="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" kindref="member">devices</ref>;</highlight></codeline>
+<codeline lineno="44" refid="structParameters_1a6e4da5b8b1975578eb83f7766f87b978" refkind="member"><highlight class="normal"><sp/><sp/><sp/><sp/>cufftHandle<sp/><ref refid="structParameters_1a6e4da5b8b1975578eb83f7766f87b978" kindref="member">mplan</ref>,<sp/><ref refid="structParameters_1a655440251722ee5443cb6248380f64db" kindref="member">mplan2</ref>;</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaStream_t<sp/>*streams;</highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>num_streams;</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/>dim3<sp/>BT,<sp/>Grd;<sp/><sp/></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>General<sp/>parameters<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>Fx,<sp/>Fy,<sp/>ratio;</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>General<sp/>PRAIN<sp/>parameters<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha,<sp/>gamma;</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>TolN,<sp/>TolCG;</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>itmaxN,<sp/>itmaxCG;</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Stop<sp/>Criteria<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>stopcriteria,<sp/>stopcriteriaCG,<sp/>norm_init;</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>max;</highlight></codeline>
+<codeline lineno="59" refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" refkind="member"><highlight class="normal">}<ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref>;</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61" refid="structPRAINData" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structPRAINData" kindref="compound">PRAINData</ref></highlight></codeline>
+<codeline lineno="62"><highlight class="normal">{<sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>GPU<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/>cufftComplex<sp/>*image,<sp/>*image0,<sp/>*prop,<sp/>*kernel,<sp/>*beer,<sp/>*ans,<sp/>*temp;<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"><sp/><sp/><sp/><sp/>cufftComplex<sp/>*p,<sp/>*r,<sp/>*Mp;<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*lambda,<sp/>*beta;<sp/></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*intensity,<sp/>*Idata,<sp/>*norm,<sp/>*rhsnorm,<sp/>*mask;</highlight></codeline>
+<codeline lineno="66"><highlight class="normal">}<ref refid="structPRAINData" kindref="compound">PRAINDAT</ref>;</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="68" refid="structPropagation" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structPropagation" kindref="compound">Propagation</ref></highlight></codeline>
+<codeline lineno="69"><highlight class="normal">{<sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>GPU<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/>cufftComplex<sp/>*data,<sp/>*kernel;<sp/></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*intense;</highlight></codeline>
+<codeline lineno="72"><highlight class="normal">}<ref refid="structPropagation" kindref="compound">PRPG</ref>;</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight></codeline>
+<codeline lineno="74" refid="structProfiling" refkind="compound"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal"><ref refid="structProfiling" kindref="compound">Profiling</ref></highlight></codeline>
+<codeline lineno="75"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"></highlight></codeline>
+<codeline lineno="77"><highlight class="normal">}<ref refid="structProfiling" kindref="compound">PROF</ref>;</highlight></codeline>
+<codeline lineno="78"><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Host<sp/>functions<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a3f37103aaa7ca7a626a04959bfc0b809" kindref="member">set_prain_parameters</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>*param,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*parameters,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*iterations,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*volumesize,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*devices);</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>set_prop_parameters(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>*param,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*parameters,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*volumesize,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*devs);</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*allocateprain(<ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*workspace,<sp/><ref refid="structParameters" kindref="compound">PAR</ref><sp/>param);</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>freeprain(<ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain);</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>freeData(<ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>*prop);</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>*allocatePropagation(<ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>*workspace,<sp/><ref refid="structParameters" kindref="compound">PAR</ref><sp/>param);</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight></codeline>
+<codeline lineno="109"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1ad6c6fdd31953cee3c330069cd1483c66" kindref="member">propagation</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*phantom,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*intensity,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev);</highlight></codeline>
+<codeline lineno="110"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>_CPUpropagation(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*phantom,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*<sp/>intensity,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev);</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;C&quot;</highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>CPUpropagation(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*phantom,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*intensity,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*parameters,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*volumesize,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*devices,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev);</highlight></codeline>
+<codeline lineno="113"><highlight class="normal">}<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="114"><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>computeAlpha0(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof);</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a52939b56be33d9ed5ece7cd328e45e59" kindref="member">computeFresnelKernel</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"></highlight></codeline>
+<codeline lineno="137"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1ab7b201bb107324ed760787152865bdad" kindref="member">fresnelpropagationConj</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/>cufftComplex<sp/>*data,<sp/>cufftComplex<sp/>*kernel,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"></highlight></codeline>
+<codeline lineno="149"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a6ec3713d1edf8c9426202daca15f5cba" kindref="member">fresnelpropagation</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/>cufftComplex<sp/>*data,<sp/>cufftComplex<sp/>*kernel,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="150"><highlight class="normal"></highlight></codeline>
+<codeline lineno="158"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a309aa8610b184af433ffa486c218bbcf" kindref="member">conjugateGradientTik</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof);</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"></highlight></codeline>
+<codeline lineno="175"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a50e7ad0603036289864e9592b1017160" kindref="member">computeRHSTik</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof);</highlight></codeline>
+<codeline lineno="176"><highlight class="normal"></highlight></codeline>
+<codeline lineno="192"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1abe3c86803c3f8cf810fb7a359aa5e0c4" kindref="member">MatrixOperatorTik</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof);</highlight></codeline>
+<codeline lineno="193"><highlight class="normal"></highlight></codeline>
+<codeline lineno="201"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a7da9ddffb985a367999f3789ae7e4eba" kindref="member">conjugateGradientLaplace</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof);</highlight></codeline>
+<codeline lineno="202"><highlight class="normal"></highlight></codeline>
+<codeline lineno="218"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1ae82c8ee6724dfdec21c49e45a71e3cb7" kindref="member">computeRHSLaplace</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof);</highlight></codeline>
+<codeline lineno="219"><highlight class="normal"></highlight></codeline>
+<codeline lineno="235"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1ac8a2c2f22654a6c456274b15688ad5db" kindref="member">MatrixOperatorLaplace</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structPRAINData" kindref="compound">PRAINDAT</ref><sp/>*prain,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof);</highlight></codeline>
+<codeline lineno="236"><highlight class="normal"></highlight></codeline>
+<codeline lineno="248"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a6b3de020266bb5542cc72fe36ba00ec1" kindref="member">praincall</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*projections,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*recovery,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*initialGuessN,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*compact,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev);</highlight></codeline>
+<codeline lineno="249"><highlight class="normal"></highlight></codeline>
+<codeline lineno="269"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a983dc33b3b6bd82ebfc75619bce997bc" kindref="member">_CPUprain</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*projections,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*recovery,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*initialGuessN,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*compact,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev);</highlight></codeline>
+<codeline lineno="270"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;C&quot;</highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="288"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a3d2d554269bd29eceed8475f94858b47" kindref="member">CPUprain</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*projections,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*recovery,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*initialGuessN,<sp/></highlight></codeline>
+<codeline lineno="289"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*compact,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*parameters,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*iterations,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*volumesize,<sp/></highlight></codeline>
+<codeline lineno="290"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*devices,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev);</highlight></codeline>
+<codeline lineno="291"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="292"><highlight class="normal"></highlight></codeline>
+<codeline lineno="293"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>getDeviceProperties();</highlight></codeline>
+<codeline lineno="294"><highlight class="normal"></highlight></codeline>
+<codeline lineno="295"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Global<sp/>cuda<sp/>kernels<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="296"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Complex<sp/>Functions<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="297"><highlight class="normal"></highlight></codeline>
+<codeline lineno="306"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a3dad3f55a1895c9048c29f51eb52a855" kindref="member">FourierFresnelKernel</ref>(cufftComplex<sp/>*kernel,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>fresnelx,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>fresnely,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="307"><highlight class="normal"></highlight></codeline>
+<codeline lineno="316"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a28e4509435faef2365f827637b942085" kindref="member">beerslaw</ref>(cufftComplex<sp/>*data,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>ratio,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="317"><highlight class="normal"></highlight></codeline>
+<codeline lineno="327"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a0fcea4e7a9854adf81d75275df744b81" kindref="member">CLaplacerhs</ref>(cufftComplex*<sp/>a,<sp/>cufftComplex*<sp/>b,<sp/>cufftComplex*<sp/>ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="328"><highlight class="normal"></highlight></codeline>
+<codeline lineno="337"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a498ca34fdaaf50c2598b846b84a030e5" kindref="member">CLaplacemat</ref>(cufftComplex*<sp/>a,<sp/>cufftComplex*<sp/>ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="338"><highlight class="normal"></highlight></codeline>
+<codeline lineno="347"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1ada58bf5b67fb2a884a6959b29e53b5f4" kindref="member">CDifference</ref>(cufftComplex*<sp/>a,<sp/>cufftComplex*<sp/>b,<sp/>cufftComplex*<sp/>ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>beta,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="348"><highlight class="normal"></highlight></codeline>
+<codeline lineno="358"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1aac1153e191282d4cc53272e55ea0f46d" kindref="member">OperatorA</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*beer,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>scalar,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="359"><highlight class="normal"></highlight></codeline>
+<codeline lineno="373"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1ac4f3ca040bc526adc26549e33de0515d" kindref="member">minimum_regularization</ref>(cufftComplex<sp/>*p,<sp/>cufftComplex<sp/>*f,<sp/>cufftComplex<sp/>*in,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>gamma,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>indicator,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="374"><highlight class="normal"></highlight></codeline>
+<codeline lineno="383"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a2fc56d80f7b074c1681e84f65f4dc36c" kindref="member">Cabsolute2</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="384"><highlight class="normal"></highlight></codeline>
+<codeline lineno="399"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1acd3388a8a27c9c4268dc0c3e8e0ada5c" kindref="member">CAddScalar</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*A,<sp/>cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>expoente,<sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="400"><highlight class="normal"></highlight></codeline>
+<codeline lineno="408"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1ada8b6f04bf75f95523b6a210b82bdc8f" kindref="member">CMultAmplitude</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*A,<sp/>cufftComplex<sp/>*c,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="409"><highlight class="normal"></highlight></codeline>
+<codeline lineno="417"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a5fec253ce36b4527d9b0a7fd5017bbd7" kindref="member">CMultComplexAmplitude</ref>(cufftComplex<sp/>*A,<sp/>cufftComplex<sp/>*c,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="418"><highlight class="normal"></highlight></codeline>
+<codeline lineno="427"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a60ac7e4bbb4df7af1e9524c946322b80" kindref="member">CIntensity</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="428"><highlight class="normal"></highlight></codeline>
+<codeline lineno="436"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a063528102c250eaf517c817fe3bfe143" kindref="member">CConvolve</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="437"><highlight class="normal"></highlight></codeline>
+<codeline lineno="445"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a4571d6a2c0b8419a7b09b8a48fa5ac17" kindref="member">CRealPart</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="446"><highlight class="normal"></highlight></codeline>
+<codeline lineno="454"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1ac9dc46e31d6652af059364a3a7801bf5" kindref="member">CInnerProd</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*norm,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="455"><highlight class="normal"></highlight></codeline>
+<codeline lineno="462"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a8ea4f7a7bcc1746db2db17e1462b87b6" kindref="member">CSum</ref>(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="463"><highlight class="normal"></highlight></codeline>
+<codeline lineno="470"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a4e017977cae93b3b3b14ea7bb9de9386" kindref="member">fftshiftKernel</ref>(cufftComplex<sp/>*c,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="471"><highlight class="normal"></highlight></codeline>
+<codeline lineno="479"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a736224b0bc11ce0e5e5cbf69ba9723d2" kindref="member">fftNormalize</ref>(cufftComplex<sp/>*c,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="480"><highlight class="normal"></highlight></codeline>
+<codeline lineno="481"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Float<sp/>functions<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="482"><highlight class="normal"></highlight></codeline>
+<codeline lineno="490"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a665de576d4b44afa6d3ec6d18149cb6f" kindref="member">FInnerProd</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*b,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*norm,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="491"><highlight class="normal"></highlight></codeline>
+<codeline lineno="498"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a7718e0af6947aae776b3d1311377fdcc" kindref="member">FSub</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*b,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez);</highlight></codeline>
+<codeline lineno="499"><highlight class="normal"></highlight></codeline>
+<codeline lineno="507"><highlight class="normal">__global__<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1a27219273c347a293484a13eaba6e4664" kindref="member">FDivZ</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*b,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*ans,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>N);</highlight></codeline>
+<codeline lineno="508"><highlight class="normal"></highlight></codeline>
+<codeline lineno="509"><highlight class="normal"></highlight></codeline>
+<codeline lineno="510"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Device<sp/>functions<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="511"><highlight class="normal"></highlight></codeline>
+<codeline lineno="512"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Complex<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="513"><highlight class="normal"></highlight></codeline>
+<codeline lineno="520"><highlight class="normal">__device__<sp/>cufftComplex<sp/><ref refid="prain_8h_1a998918e6c4af873db28b5f894329ac2e" kindref="member">exp1j</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>f);</highlight></codeline>
+<codeline lineno="521"><highlight class="normal"></highlight></codeline>
+<codeline lineno="529"><highlight class="normal">__device__<sp/>cufftComplex<sp/><ref refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" kindref="member">ComplexMult</ref>(cufftComplex<sp/>a,<sp/>cufftComplex<sp/>b);</highlight></codeline>
+<codeline lineno="530"><highlight class="normal"></highlight></codeline>
+<codeline lineno="537"><highlight class="normal">__device__<sp/>cufftComplex<sp/><ref refid="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" kindref="member">ComplexConj</ref>(cufftComplex<sp/>c);</highlight></codeline>
+<codeline lineno="538"><highlight class="normal"></highlight></codeline>
+<codeline lineno="546"><highlight class="normal">__device__<sp/>cufftComplex<sp/><ref refid="prain_8h_1aefda406ec17eff4118e9e881105c0a69" kindref="member">ComplexMultConst</ref>(cufftComplex<sp/>a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha);</highlight></codeline>
+<codeline lineno="547"><highlight class="normal"></highlight></codeline>
+<codeline lineno="548"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>Float<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="556"><highlight class="normal">__device__<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1abf851cf3d7333991f33eaeb272267621" kindref="member">FloatMultConst</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>b);</highlight></codeline>
+<codeline lineno="557"><highlight class="normal"></highlight></codeline>
+<codeline lineno="564"><highlight class="normal">__device__<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1abfd67e8248b5e14cdad335f8f0f16fa1" kindref="member">sign</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>a);</highlight></codeline>
+<codeline lineno="565"><highlight class="normal"></highlight></codeline>
+<codeline lineno="566"><highlight class="normal"></highlight><highlight class="comment">/*<sp/>int<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="574"><highlight class="normal">__device__<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" kindref="member">is_valid</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>n);</highlight></codeline>
+<codeline lineno="575"><highlight class="normal"></highlight></codeline>
+<codeline lineno="576"><highlight class="normal"></highlight></codeline>
+<codeline lineno="577"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>FprintDev(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*b,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k);</highlight></codeline>
+<codeline lineno="578"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>CprintDev(cufftComplex<sp/>*a,<sp/>cufftComplex<sp/>*b,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>k);</highlight></codeline>
+<codeline lineno="579"><highlight class="normal"></highlight></codeline>
+<codeline lineno="580"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h"/>
+  </compounddef>
+</doxygen>

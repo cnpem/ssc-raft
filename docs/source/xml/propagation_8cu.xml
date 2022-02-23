@@ -1,0 +1,468 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="propagation_8cu" kind="file" language="C++">
+    <compoundname>propagation.cu</compoundname>
+    <includes refid="include_8h" local="yes">../inc/include.h</includes>
+    <includes refid="logerror_8hpp" local="yes">../inc/common/logerror.hpp</includes>
+    <incdepgraph>
+      <node id="28">
+        <label>../inc/common/logerror.hpp</label>
+        <link refid="logerror_8hpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="9">
+        <label>helper_cuda.h</label>
+        <link refid="helper__cuda_8h_source"/>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>helper_string.h</label>
+        <link refid="helper__string_8h_source"/>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>../inc/include.h</label>
+        <link refid="include_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+        <childnode refid="22" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="23" relation="include">
+        </childnode>
+        <childnode refid="24" relation="include">
+        </childnode>
+        <childnode refid="25" relation="include">
+        </childnode>
+        <childnode refid="26" relation="include">
+        </childnode>
+        <childnode refid="27" relation="include">
+        </childnode>
+      </node>
+      <node id="18">
+        <label>../inc/prain.h</label>
+        <link refid="prain_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu</label>
+        <link refid="propagation_8cu"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="28" relation="include">
+        </childnode>
+      </node>
+      <node id="20">
+        <label>cassert</label>
+      </node>
+      <node id="25">
+        <label>chrono</label>
+      </node>
+      <node id="5">
+        <label>complex.h</label>
+      </node>
+      <node id="23">
+        <label>cublas.h</label>
+      </node>
+      <node id="3">
+        <label>cuda.h</label>
+      </node>
+      <node id="7">
+        <label>cuda_runtime_api.h</label>
+      </node>
+      <node id="4">
+        <label>cufft.h</label>
+      </node>
+      <node id="14">
+        <label>fstream</label>
+      </node>
+      <node id="24">
+        <label>future</label>
+      </node>
+      <node id="19">
+        <label>iostream</label>
+      </node>
+      <node id="27">
+        <label>omp.h</label>
+      </node>
+      <node id="22">
+        <label>sstream</label>
+      </node>
+      <node id="10">
+        <label>stdint.h</label>
+      </node>
+      <node id="8">
+        <label>stdio.h</label>
+      </node>
+      <node id="11">
+        <label>stdlib.h</label>
+      </node>
+      <node id="15">
+        <label>string</label>
+      </node>
+      <node id="12">
+        <label>string.h</label>
+      </node>
+      <node id="16">
+        <label>strings.h</label>
+      </node>
+      <node id="6">
+        <label>tgmath.h</label>
+      </node>
+      <node id="26">
+        <label>thread</label>
+      </node>
+      <node id="17">
+        <label>time.h</label>
+      </node>
+      <node id="21">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="propagation_8cu_1ad6c6fdd31953cee3c330069cd1483c66" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void propagation</definition>
+        <argsstring>(PAR param, PROF *prof, float _Complex *phantom, float *intensity, int ndev)</argsstring>
+        <name>propagation</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>phantom</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>intensity</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+<para>Computes <formula id="2">$\mathscr{F}^{-1}(\mathscr{F}(e^{-f} \cdot \hat{k})$</formula>, the fresnel propagation operator. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>param</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>prof</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>phantom</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>intensity</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>ndev</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" line="15" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" bodystart="15" bodyend="40"/>
+      </memberdef>
+      <memberdef kind="function" id="propagation_8cu_1a6816c137d33bc85ad0538cb28c19719d" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void CPUpropagation</definition>
+        <argsstring>(float _Complex *phantom, float *intensity, float *parameters, size_t *volumesize, int *devices, int ndev)</argsstring>
+        <name>CPUpropagation</name>
+        <param>
+          <type>float _Complex *</type>
+          <declname>phantom</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>intensity</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>parameters</declname>
+        </param>
+        <param>
+          <type>size_t *</type>
+          <declname>volumesize</declname>
+        </param>
+        <param>
+          <type>int *</type>
+          <declname>devices</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" line="43" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" bodystart="43" bodyend="104"/>
+      </memberdef>
+      <memberdef kind="function" id="propagation_8cu_1a98090967a1166b836366ae69e8f05e83" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void _CPUpropagation</definition>
+        <argsstring>(PAR param, PROF *prof, float _Complex *phantom, float *intensity, int ndev)</argsstring>
+        <name>_CPUpropagation</name>
+        <param>
+          <type><ref refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kindref="member">PAR</ref></type>
+          <declname>param</declname>
+        </param>
+        <param>
+          <type><ref refid="structProfiling" kindref="compound">PROF</ref> *</type>
+          <declname>prof</declname>
+        </param>
+        <param>
+          <type>float _Complex *</type>
+          <declname>phantom</declname>
+        </param>
+        <param>
+          <type>float *</type>
+          <declname>intensity</declname>
+        </param>
+        <param>
+          <type>int</type>
+          <declname>ndev</declname>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" line="107" column="6" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu" bodystart="107" bodyend="144"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="author"><para>your name (<ulink url="mailto:you@domain.com">you@domain.com</ulink>) </para>
+</simplesect>
+<simplesect kind="version"><para>0.1 </para>
+</simplesect>
+<simplesect kind="date"><para>2021-06-14</para>
+</simplesect>
+<simplesect kind="copyright"><para>Copyright (c) 2021 </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;../inc/include.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;../inc/common/logerror.hpp&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="propagation_8cu_1ad6c6fdd31953cee3c330069cd1483c66" kindref="member">propagation</ref>(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*phantom,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*intensity,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev)</highlight></codeline>
+<codeline lineno="16"><highlight class="normal">{</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizex<sp/>=<sp/>param.<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref>;</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizey<sp/>=<sp/>param.<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref>;</highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>sizez<sp/>=<sp/>param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref>;</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Initialize<sp/>device<sp/>variables<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>workspace;<sp/><ref refid="structPropagation" kindref="compound">PRPG</ref><sp/>*prop<sp/>=<sp/>allocatePropagation(&amp;workspace,<sp/>param);</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>aux;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Copy<sp/>phantom<sp/>from<sp/>host<sp/>to<sp/>device<sp/>DATA<sp/>*/</highlight><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMemcpy(prop-&gt;data,<sp/>phantom,<sp/>sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez<sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(cufftComplex),<sp/>cudaMemcpyHostToDevice));</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/>printf(</highlight><highlight class="stringliteral">&quot;ratio<sp/>=<sp/>%e\n&quot;</highlight><highlight class="normal">,param.ratio);</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="kernelfunctions_8cu_1a28e4509435faef2365f827637b942085" kindref="member">beerslaw</ref>&lt;&lt;&lt;param.Grd,param.BT&gt;&gt;&gt;(prop-&gt;data,<sp/>prop-&gt;data,<sp/>param.ratio,<sp/>sizex,<sp/>sizey,<sp/>sizez);</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="kernelfunctions_8cu_1a3dad3f55a1895c9048c29f51eb52a855" kindref="member">FourierFresnelKernel</ref>&lt;&lt;&lt;param.Grd,param.BT&gt;&gt;&gt;(prop-&gt;kernel,<sp/>param.Fx,<sp/>param.Fy,<sp/>sizex,<sp/>sizey,<sp/>sizez);</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="kernelfunctions_8cu_1a4e017977cae93b3b3b14ea7bb9de9386" kindref="member">fftshiftKernel</ref>&lt;&lt;&lt;param.Grd,param.BT&gt;&gt;&gt;(prop-&gt;kernel,<sp/>sizex,<sp/>sizey,<sp/>sizez);</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="prain_8h_1a6ec3713d1edf8c9426202daca15f5cba" kindref="member">fresnelpropagation</ref>(param,<sp/>prop-&gt;data,<sp/>prop-&gt;kernel,<sp/>prop-&gt;data,<sp/>sizex,<sp/>sizey,<sp/>sizez);</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="kernelfunctions_8cu_1a60ac7e4bbb4df7af1e9524c946322b80" kindref="member">CIntensity</ref>&lt;&lt;&lt;param.Grd,param.BT&gt;&gt;&gt;(prop-&gt;data,<sp/>prop-&gt;data,<sp/>prop-&gt;intense,<sp/>sizex,<sp/>sizey,<sp/>sizez);</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Copy<sp/>DATA<sp/>from<sp/>device<sp/>to<sp/>host<sp/>phantom<sp/>*/</highlight><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMemcpy(phantom,<sp/>prop-&gt;data,<sp/>sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez<sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex),<sp/>cudaMemcpyDeviceToHost));</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaMemcpy(intensity,<sp/>prop-&gt;intense,<sp/>sizex<sp/>*<sp/>sizey<sp/>*<sp/>sizez<sp/>*<sp/></highlight><highlight class="keyword">sizeof</highlight><highlight class="normal">(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal">),<sp/>cudaMemcpyDeviceToHost));</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Free<sp/>prop<sp/>*/</highlight><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"><sp/><sp/><sp/><sp/>freeData(prop);</highlight></codeline>
+<codeline lineno="40"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="keyword">extern</highlight><highlight class="normal"><sp/></highlight><highlight class="stringliteral">&quot;C&quot;</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>CPUpropagation(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*phantom,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*intensity,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*parameters,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>*volumesize,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>*devices,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev)</highlight></codeline>
+<codeline lineno="44"><highlight class="normal">{<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>GPUs<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>i,<sp/>Maxgpudev;</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaGetDeviceCount(&amp;Maxgpudev);</highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(i<sp/>=<sp/>0;<sp/>i<sp/>&lt;<sp/>ndev;<sp/>i++)</highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>assert(devices[i]<sp/>&lt;<sp/>Maxgpudev<sp/>&amp;&amp;<sp/></highlight><highlight class="stringliteral">&quot;Invalid<sp/>device<sp/>number.&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Initialize<sp/>Log<sp/>file<sp/>for<sp/>Newton<sp/>and<sp/>CG*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/>LogTbegin(</highlight><highlight class="stringliteral">&quot;timefileS.log&quot;</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Time<sp/>log:&quot;</highlight><highlight class="normal"><sp/>&lt;&lt;<sp/></highlight><highlight class="stringliteral">&quot;\n&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Variables<sp/>for<sp/>time<sp/>profile<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaEvent_t<sp/>start,<sp/>stop;</highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>milliseconds;</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaEventCreate(&amp;start);</highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaEventCreate(&amp;stop);</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structParameters" kindref="compound">PAR</ref><sp/>param;<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>prof;</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/>set_prop_parameters(&amp;param,<sp/>parameters,<sp/>volumesize,<sp/>devices);</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(i<sp/>=<sp/>0;<sp/>i<sp/>&lt;<sp/>ndev;<sp/>i++)</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>printf(</highlight><highlight class="stringliteral">&quot;gpu<sp/>number<sp/>%d<sp/>of<sp/>%d\n&quot;</highlight><highlight class="normal">,devices[i],ndev);</highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Start<sp/>time<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaEventRecord(start);</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"></highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/>param.subvolume<sp/>=<sp/>(param.<ref refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kindref="member">Nz</ref><sp/>+<sp/>ndev<sp/>-<sp/>1)<sp/>/<sp/>ndev;</highlight></codeline>
+<codeline lineno="72"><highlight class="normal"></highlight></codeline>
+<codeline lineno="73"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(ndev<sp/>==<sp/>1){<sp/></highlight><highlight class="comment">/*<sp/>1<sp/>device<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>_CPUpropagation(param,<sp/>&amp;prof,<sp/>phantom,<sp/>intensity,<sp/>param.<ref refid="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" kindref="member">devices</ref>[0]);</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight><highlight class="keywordflow">else</highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Launch<sp/>async<sp/>Threads<sp/>for<sp/>each<sp/>device.</highlight></codeline>
+<codeline lineno="77"><highlight class="comment"><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Each<sp/>device<sp/>solves<sp/>a<sp/>block<sp/>of<sp/>&apos;param.slice&apos;<sp/>size.</highlight></codeline>
+<codeline lineno="78"><highlight class="comment"><sp/><sp/><sp/><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>See<sp/>future<sp/>c++<sp/>async<sp/>launch</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;std::future&lt;void&gt;&gt;<sp/>threads<sp/>=<sp/>{};</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"></highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(i<sp/>=<sp/>0;<sp/>i<sp/>&lt;<sp/>ndev;<sp/>i++){</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(param.subvolume*(i+1)<sp/>&gt;<sp/>param.<ref refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kindref="member">Nz</ref>)</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>param.subvolume<sp/>=<sp/>param.<ref refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kindref="member">Nz</ref><sp/>-<sp/>param.subvolume*i;</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"></highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(param.subvolume<sp/>&lt;<sp/>1)</highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">continue</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>threads.push_back(<sp/>std::async(<sp/>std::launch::async,<sp/>_CPUpropagation,<sp/>param,<sp/>&amp;prof,<sp/>phantom<sp/>+<sp/>param.<ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref>*param.subvolume*i,<sp/>intensity<sp/>+<sp/>param.<ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref>*param.subvolume*i,<sp/>param.<ref refid="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" kindref="member">devices</ref>[i]));<sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>Log(</highlight><highlight class="stringliteral">&quot;Synchronizing<sp/>all<sp/>threads...\n&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(i<sp/>=<sp/>0;<sp/>i<sp/>&lt;<sp/>ndev;<sp/>i++)</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>threads[i].get();</highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Record<sp/>Total<sp/>time*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaEventRecord(stop);</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaEventSynchronize(stop);</highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaEventElapsedTime(&amp;milliseconds,<sp/>start,<sp/>stop);</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"><sp/><sp/><sp/><sp/>LogT(</highlight><highlight class="stringliteral">&quot;timefileS.log&quot;</highlight><highlight class="normal">,<sp/>milliseconds*1e-3<sp/>&lt;&lt;<sp/></highlight><highlight class="stringliteral">&quot;\n&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="104"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="105"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="106"><highlight class="normal"></highlight></codeline>
+<codeline lineno="107"><highlight class="normal"></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>_CPUpropagation(<ref refid="structParameters" kindref="compound">PAR</ref><sp/>param,<sp/><ref refid="structProfiling" kindref="compound">PROF</ref><sp/>*prof,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>_Complex<sp/>*phantom,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>*intensity,<sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>ndev)</highlight></codeline>
+<codeline lineno="108"><highlight class="normal">{<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="109"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Initialize<sp/>GPU<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_ERROR(cudaSetDevice(ndev))</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>bz;</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>n[]<sp/>=<sp/>{(int)param.<ref refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kindref="member">Nx</ref>,(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal">)param.<ref refid="structParameters_1a566aab9822535e5633cd4c175d954986" kindref="member">Ny</ref>};</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_FFTERROR(cufftPlanMany(&amp;param.<ref refid="structParameters_1a6e4da5b8b1975578eb83f7766f87b978" kindref="member">mplan</ref>,<sp/>2,<sp/>n,<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">,<sp/>0,<sp/>0,<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">,<sp/>0,<sp/>0,<sp/>CUFFT_C2C,<sp/>param.blocksize));</highlight></codeline>
+<codeline lineno="114"><highlight class="normal"></highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/>param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref><sp/>=<sp/>param.blocksize;</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"></highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Loop<sp/>for<sp/>each<sp/>batch<sp/>of<sp/>size<sp/>&apos;batch&apos;<sp/>in<sp/>threads<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"></highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(bz<sp/>=<sp/>0;<sp/>bz<sp/>&lt;<sp/>param.subvolume;<sp/>bz+=param.blocksize){</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"></highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(<sp/>(bz<sp/>+<sp/>param.blocksize)<sp/>&gt;<sp/>param.subvolume){</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref><sp/>=<sp/>param.subvolume<sp/>-<sp/>bz;</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal">(param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref><sp/>&lt;<sp/>1)</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">continue</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>fprintf(stderr,</highlight><highlight class="stringliteral">&quot;Prop:dev<sp/>=<sp/>%d,<sp/>subvolume<sp/>=<sp/>%ld,<sp/>blocksize<sp/>=<sp/>%ld\n&quot;</highlight><highlight class="normal">,ndev,param.subvolume,param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref>);</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>HANDLE_FFTERROR(cufftPlanMany(&amp;param.<ref refid="structParameters_1a655440251722ee5443cb6248380f64db" kindref="member">mplan2</ref>,<sp/>2,<sp/>n,<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">,<sp/>0,<sp/>0,<sp/></highlight><highlight class="keyword">nullptr</highlight><highlight class="normal">,<sp/>0,<sp/>0,<sp/>CUFFT_C2C,<sp/>param.<ref refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kindref="member">zblock</ref>));</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="propagation_8cu_1ad6c6fdd31953cee3c330069cd1483c66" kindref="member">propagation</ref>(param,<sp/>prof,<sp/>phantom<sp/>+<sp/>param.<ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref>*bz,<sp/>intensity<sp/>+<sp/>param.<ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref>*bz,<sp/><sp/>ndev);</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>HANDLE_FFTERROR(cufftDestroy(param.<ref refid="structParameters_1a6e4da5b8b1975578eb83f7766f87b978" kindref="member">mplan</ref>));</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight><highlight class="keywordflow">else</highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>fprintf(stderr,</highlight><highlight class="stringliteral">&quot;dev<sp/>=<sp/>%d,<sp/>subvolume<sp/>=<sp/>%ld,<sp/>blocksize<sp/>=<sp/>%ld\n&quot;</highlight><highlight class="normal">,ndev,param.subvolume,param.blocksize);</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="propagation_8cu_1ad6c6fdd31953cee3c330069cd1483c66" kindref="member">propagation</ref>(param,<sp/>prof,<sp/>phantom<sp/>+<sp/>param.<ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref>*bz,<sp/>intensity<sp/>+<sp/>param.<ref refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kindref="member">slice</ref>*bz,<sp/>ndev);</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"></highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Destroy<sp/>plan<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/>HANDLE_FFTERROR(cufftDestroy(param.<ref refid="structParameters_1a6e4da5b8b1975578eb83f7766f87b978" kindref="member">mplan</ref>));</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"></highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaDeviceSynchronize();</highlight></codeline>
+<codeline lineno="144"><highlight class="normal">}</highlight></codeline>
+    </programlisting>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu"/>
+  </compounddef>
+</doxygen>

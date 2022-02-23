@@ -1,0 +1,366 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygenindex xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="index.xsd" version="1.9.3" xml:lang="en-US">
+  <compound refid="structhelper__image__internal_1_1ConverterFromUByte" kind="struct"><name>helper_image_internal::ConverterFromUByte</name>
+  </compound>
+  <compound refid="structhelper__image__internal_1_1ConverterFromUByte_3_01float_01_4" kind="struct"><name>helper_image_internal::ConverterFromUByte&lt; float &gt;</name>
+    <member refid="structhelper__image__internal_1_1ConverterFromUByte_3_01float_01_4_1a8e53bbf24b7d444607972b90861fec69" kind="function"><name>operator()</name></member>
+  </compound>
+  <compound refid="structhelper__image__internal_1_1ConverterFromUByte_3_01unsigned_01char_01_4" kind="struct"><name>helper_image_internal::ConverterFromUByte&lt; unsigned char &gt;</name>
+    <member refid="structhelper__image__internal_1_1ConverterFromUByte_3_01unsigned_01char_01_4_1a33efe59a6e9dfbef50619da68c46eb4d" kind="function"><name>operator()</name></member>
+  </compound>
+  <compound refid="structhelper__image__internal_1_1ConverterToUByte" kind="struct"><name>helper_image_internal::ConverterToUByte</name>
+  </compound>
+  <compound refid="structhelper__image__internal_1_1ConverterToUByte_3_01float_01_4" kind="struct"><name>helper_image_internal::ConverterToUByte&lt; float &gt;</name>
+    <member refid="structhelper__image__internal_1_1ConverterToUByte_3_01float_01_4_1aedc92d68abeb24777e5590e010eb94da" kind="function"><name>operator()</name></member>
+  </compound>
+  <compound refid="structhelper__image__internal_1_1ConverterToUByte_3_01unsigned_01char_01_4" kind="struct"><name>helper_image_internal::ConverterToUByte&lt; unsigned char &gt;</name>
+    <member refid="structhelper__image__internal_1_1ConverterToUByte_3_01unsigned_01char_01_4_1afe997e2564da5320fc96b908c7132e6e" kind="function"><name>operator()</name></member>
+  </compound>
+  <compound refid="classException" kind="class"><name>Exception</name>
+    <member refid="classException_1ac0904205ad66f00c7287a3cbf3d17838" kind="function"><name>throw_it</name></member>
+    <member refid="classException_1a9e38551a20583643b1d2efe535577e08" kind="function"><name>throw_it</name></member>
+    <member refid="classException_1ac4bfac227d7e53fa707b91a88159d3a8" kind="function"><name>~Exception</name></member>
+    <member refid="classException_1ad7f0e1e6cdc0021d666af088b35e017d" kind="function"><name>Exception</name></member>
+    <member refid="classException_1afc2589c568718ba90fbf8daa0e2fc758" kind="function"><name>Exception</name></member>
+  </compound>
+  <compound refid="structParameters" kind="struct"><name>Parameters</name>
+    <member refid="structParameters_1aea9fb13a195854a7399520b4fe27ed02" kind="variable"><name>Nx</name></member>
+    <member refid="structParameters_1a566aab9822535e5633cd4c175d954986" kind="variable"><name>Ny</name></member>
+    <member refid="structParameters_1abe1aa5e7f516a8ae331a6aaa21abfdfc" kind="variable"><name>Nz</name></member>
+    <member refid="structParameters_1a887645bc370c242e3bdc03d4188b0517" kind="variable"><name>zblock</name></member>
+    <member refid="structParameters_1a7c85c8bed08270e5779e5200d05fd3b0" kind="variable"><name>nangles</name></member>
+    <member refid="structParameters_1ac89573efcf725c5a89c94272bc5f155d" kind="variable"><name>blocksize</name></member>
+    <member refid="structParameters_1a3fa2b2a41ac4b4aa4118f58f235cf7d7" kind="variable"><name>slice</name></member>
+    <member refid="structParameters_1a04b9542df5ea50ad3e4962323950b740" kind="variable"><name>subvolume</name></member>
+    <member refid="structParameters_1abca7e4e0db3b2b98d24cf7ff036ea1d3" kind="variable"><name>regularization</name></member>
+    <member refid="structParameters_1a3502cb28c49d8a69b1fef156e2551bae" kind="variable"><name>ndev</name></member>
+    <member refid="structParameters_1ab9706f98139825fbfb4c2e7fd8abdd9a" kind="variable"><name>devices</name></member>
+    <member refid="structParameters_1a6e4da5b8b1975578eb83f7766f87b978" kind="variable"><name>mplan</name></member>
+    <member refid="structParameters_1a655440251722ee5443cb6248380f64db" kind="variable"><name>mplan2</name></member>
+    <member refid="structParameters_1ac37ea168a85c749f181716ec4872d9ea" kind="variable"><name>streams</name></member>
+    <member refid="structParameters_1a8ba46d1bb6fd8825435fac91728afa7b" kind="variable"><name>num_streams</name></member>
+    <member refid="structParameters_1a65e61a7672b937fbe67b21abdf22002d" kind="variable"><name>BT</name></member>
+    <member refid="structParameters_1a89a0623e864ef253c09a98460f6a9c11" kind="variable"><name>Grd</name></member>
+    <member refid="structParameters_1a25f315866dd8b09f40c7e7397aa825ae" kind="variable"><name>Fx</name></member>
+    <member refid="structParameters_1a9ca819b5ec30965401a69b9c80b36a6d" kind="variable"><name>Fy</name></member>
+    <member refid="structParameters_1a4dbae049b4f95f53621e02e80827b9f2" kind="variable"><name>ratio</name></member>
+    <member refid="structParameters_1a91b91258f03d69287748d11bda7c8d3b" kind="variable"><name>alpha</name></member>
+    <member refid="structParameters_1a1c670d4a1b7c1621bf98ad379a0578d8" kind="variable"><name>gamma</name></member>
+    <member refid="structParameters_1aedda6c12d17750bee0bba47c969bb15b" kind="variable"><name>TolN</name></member>
+    <member refid="structParameters_1a8b164a0515cdc0adc197fb50bc1fcf3b" kind="variable"><name>TolCG</name></member>
+    <member refid="structParameters_1ac66e765590f97b74b84945c45427a0d4" kind="variable"><name>itmaxN</name></member>
+    <member refid="structParameters_1a5c92342a1afcf50fdabd0dabcdec5e91" kind="variable"><name>itmaxCG</name></member>
+    <member refid="structParameters_1ac68fd3b923da32e62014788003fffcc6" kind="variable"><name>stopcriteria</name></member>
+    <member refid="structParameters_1a820d1b6b3e1bbe49620f8d72a8c742b3" kind="variable"><name>stopcriteriaCG</name></member>
+    <member refid="structParameters_1ab65df24ba5c622136ebec512b6b051f5" kind="variable"><name>norm_init</name></member>
+    <member refid="structParameters_1a852a4b8f74b80d08e7f586c827777de2" kind="variable"><name>max</name></member>
+  </compound>
+  <compound refid="structPRAINData" kind="struct"><name>PRAINData</name>
+    <member refid="structPRAINData_1acaa43dd708d5395bf026b4b4e34e048b" kind="variable"><name>image</name></member>
+    <member refid="structPRAINData_1a66c50b8adae434b9a3642e3988e918cc" kind="variable"><name>image0</name></member>
+    <member refid="structPRAINData_1a64d6c54d634126051737adccd51ff706" kind="variable"><name>prop</name></member>
+    <member refid="structPRAINData_1ab0e37ab2f0c7ceec96f6f651422921f1" kind="variable"><name>kernel</name></member>
+    <member refid="structPRAINData_1a5e6434e8d98f39387b6eb45e585bb5af" kind="variable"><name>beer</name></member>
+    <member refid="structPRAINData_1a0b07122ed677dafeec103db2b7f795d5" kind="variable"><name>ans</name></member>
+    <member refid="structPRAINData_1a02a3f6d7082e4e8e6e0953ca37dc5c07" kind="variable"><name>temp</name></member>
+    <member refid="structPRAINData_1a0b81fc2c58c20d6462df1058947cb6a4" kind="variable"><name>p</name></member>
+    <member refid="structPRAINData_1a8c6878572b7773a80cf8e43846338fd7" kind="variable"><name>r</name></member>
+    <member refid="structPRAINData_1aed9b91377ef1397c1c94cac5c79e90a5" kind="variable"><name>Mp</name></member>
+    <member refid="structPRAINData_1a64ad1c59ed4482de0b56d5b4f68bd1ea" kind="variable"><name>lambda</name></member>
+    <member refid="structPRAINData_1ac1677eb2cdb7bfea6a26040fa9c44cfd" kind="variable"><name>beta</name></member>
+    <member refid="structPRAINData_1a3911c5e5ea5c5e353c33474877ca9d45" kind="variable"><name>intensity</name></member>
+    <member refid="structPRAINData_1ad9f4b2b6770d37aa836d5241c4962c68" kind="variable"><name>Idata</name></member>
+    <member refid="structPRAINData_1a712b468c3dc3b42d4424cd63033d51d6" kind="variable"><name>norm</name></member>
+    <member refid="structPRAINData_1a82ea9c70ab0e7a18edf9e505bdee3711" kind="variable"><name>rhsnorm</name></member>
+    <member refid="structPRAINData_1aba354f28d28cf7dd7f33d4dfa2ed2a8b" kind="variable"><name>mask</name></member>
+  </compound>
+  <compound refid="structProfiling" kind="struct"><name>Profiling</name>
+  </compound>
+  <compound refid="structPropagation" kind="struct"><name>Propagation</name>
+    <member refid="structPropagation_1af1e07fafa7f2868093975d6aff5adaf0" kind="variable"><name>data</name></member>
+    <member refid="structPropagation_1a411f29035f90b0140e82d32dcb8fea6c" kind="variable"><name>kernel</name></member>
+    <member refid="structPropagation_1acffe81d8e21c73e2bcde2e9c0c54c798" kind="variable"><name>intense</name></member>
+  </compound>
+  <compound refid="classStopWatchInterface" kind="class"><name>StopWatchInterface</name>
+    <member refid="classStopWatchInterface_1a3b16caaf562bcb9e5b20053738729850" kind="function"><name>StopWatchInterface</name></member>
+    <member refid="classStopWatchInterface_1ae6fe6ad45faa59f367624de26b808fc4" kind="function"><name>~StopWatchInterface</name></member>
+    <member refid="classStopWatchInterface_1a753200dac75f85ed691fc496d8343248" kind="function"><name>start</name></member>
+    <member refid="classStopWatchInterface_1a53280ad65e3800cf608315afa3a20554" kind="function"><name>stop</name></member>
+    <member refid="classStopWatchInterface_1af38c96a046bc667528a8500d69106b09" kind="function"><name>reset</name></member>
+    <member refid="classStopWatchInterface_1ab2127ae16fd7cafec70246fa07f2025f" kind="function"><name>getTime</name></member>
+    <member refid="classStopWatchInterface_1a049e581ad35895795be1e04763d40cc3" kind="function"><name>getAverageTime</name></member>
+  </compound>
+  <compound refid="classStopWatchLinux" kind="class"><name>StopWatchLinux</name>
+    <member refid="classStopWatchLinux_1aeea9d454621ed9246317c5c6793db1ed" kind="variable"><name>start_time</name></member>
+    <member refid="classStopWatchLinux_1adedd72587f2caf53a4f0af0fd90090a6" kind="variable"><name>diff_time</name></member>
+    <member refid="classStopWatchLinux_1a709a9567a4868e7920132959ae8a00bf" kind="variable"><name>total_time</name></member>
+    <member refid="classStopWatchLinux_1ada79dea0dc663ac4101a6d01a12b10bb" kind="variable"><name>running</name></member>
+    <member refid="classStopWatchLinux_1a5d40c14043e5a732c908da418eeada77" kind="variable"><name>clock_sessions</name></member>
+    <member refid="classStopWatchLinux_1adb421b1d92bec2a59e564c053d94075f" kind="function"><name>StopWatchLinux</name></member>
+    <member refid="classStopWatchLinux_1a2063456840d915094595e8e3273d38c5" kind="function"><name>~StopWatchLinux</name></member>
+    <member refid="classStopWatchLinux_1a5b48161b757890313c93cdcbf6470258" kind="function"><name>start</name></member>
+    <member refid="classStopWatchLinux_1aea4fb94c36ad6d01cb371afa0aae0926" kind="function"><name>stop</name></member>
+    <member refid="classStopWatchLinux_1ae609a527c56e658941f539a8aaf43c71" kind="function"><name>reset</name></member>
+    <member refid="classStopWatchLinux_1a7e211f57179ab20e6814127318e9f0f8" kind="function"><name>getTime</name></member>
+    <member refid="classStopWatchLinux_1a702b38009675968d5798796978007376" kind="function"><name>getAverageTime</name></member>
+    <member refid="classStopWatchLinux_1a3f7b53a7d64f4ffaa243eceee6f44b83" kind="function"><name>getDiffTime</name></member>
+  </compound>
+  <compound refid="namespacehelper__image__internal" kind="namespace"><name>helper_image_internal</name>
+    <member refid="helper__image_8h_1ac91339a55ca3c89b8355df2abf470cd2" kind="variable"><name>PGMHeaderSize</name></member>
+  </compound>
+  <compound refid="devicefunctions_8hpp" kind="file"><name>devicefunctions.hpp</name>
+    <member refid="devicefunctions_8hpp_1abff295f063562b0b1f52686d351c41d5" kind="function"><name>getDeviceProperties</name></member>
+    <member refid="devicefunctions_8hpp_1a998918e6c4af873db28b5f894329ac2e" kind="function"><name>exp1j</name></member>
+    <member refid="devicefunctions_8hpp_1a401c10fa7b5faf7eccda8d2effe5b26c" kind="function"><name>ComplexMult</name></member>
+    <member refid="devicefunctions_8hpp_1aefda406ec17eff4118e9e881105c0a69" kind="function"><name>ComplexMultConst</name></member>
+    <member refid="devicefunctions_8hpp_1aa9da49f0d415978a4a8628b6681eb2d1" kind="function"><name>ComplexConj</name></member>
+    <member refid="devicefunctions_8hpp_1abf851cf3d7333991f33eaeb272267621" kind="function"><name>FloatMultConst</name></member>
+    <member refid="devicefunctions_8hpp_1abfd67e8248b5e14cdad335f8f0f16fa1" kind="function"><name>sign</name></member>
+    <member refid="devicefunctions_8hpp_1abd205e5ed0c789a5173e65792eccbedb" kind="function"><name>is_valid</name></member>
+  </compound>
+  <compound refid="logerror_8hpp" kind="file"><name>logerror.hpp</name>
+    <member refid="logerror_8hpp_1adfb85e36cfe1268c9a886608a71a83c9" kind="define"><name>cudaCheckError</name></member>
+    <member refid="logerror_8hpp_1a3f6ea8e9ef58125936d50d7e1181aa7a" kind="define"><name>gpuErrchk</name></member>
+    <member refid="logerror_8hpp_1a4e7f50fd1b48cb84f307c5fe6e55f933" kind="define"><name>LogB</name></member>
+    <member refid="logerror_8hpp_1a4da3e92114eed0c5d4a42d9c665cc013" kind="define"><name>LogE</name></member>
+    <member refid="logerror_8hpp_1a2c7ccb2d2573e1052d1220b4b57ae3f4" kind="define"><name>SyncDebug</name></member>
+    <member refid="logerror_8hpp_1a1fc2ea23cb878afb3b4591e44761034b" kind="define"><name>Log</name></member>
+    <member refid="logerror_8hpp_1adbebce03d7cc1a43831288d4455f1b99" kind="define"><name>LogTbegin</name></member>
+    <member refid="logerror_8hpp_1a04dde34f001484347efd21bb33500433" kind="define"><name>LogT</name></member>
+    <member refid="logerror_8hpp_1a16adff246b03b48011f56f2b5c7e8aa0" kind="define"><name>ErrorAssert</name></member>
+    <member refid="logerror_8hpp_1aae7b8707502344058127c0fd7fdb3338" kind="define"><name>Warning</name></member>
+    <member refid="logerror_8hpp_1afedff205bb1363539f56b8e615267d99" kind="define"><name>HANDLE_ERROR</name></member>
+    <member refid="logerror_8hpp_1a490a624dddbfc31af5237afaa1f628c4" kind="define"><name>HANDLE_FFTERROR</name></member>
+    <member refid="logerror_8hpp_1a861dd3af64e7f9937c883a125929f13e" kind="function"><name>SaveLog</name></member>
+  </compound>
+  <compound refid="cuda__fp16_8h" kind="file"><name>cuda_fp16.h</name>
+  </compound>
+  <compound refid="drvapi__error__string_8h" kind="file"><name>drvapi_error_string.h</name>
+  </compound>
+  <compound refid="exception_8h" kind="file"><name>exception.h</name>
+    <member refid="exception_8h_1a14d84c56a2433cf0b894bf62cf8a5c31" kind="define"><name>RUNTIME_EXCEPTION</name></member>
+    <member refid="exception_8h_1a994cf587529580a7865cdf9a7016514a" kind="define"><name>LOGIC_EXCEPTION</name></member>
+    <member refid="exception_8h_1ad7375e2978467b3ca52550fc2d2356d6" kind="define"><name>RANGE_EXCEPTION</name></member>
+    <member refid="exception_8h_1a35bcf04d6841d8287e250ce19096e15d" kind="function"><name>handleException</name></member>
+  </compound>
+  <compound refid="helper__cuda_8h" kind="file"><name>helper_cuda.h</name>
+    <member refid="helper__cuda_8h_1ad20838a18f49298dae4d0ee29a0bb7a9" kind="define"><name>EXIT_WAIVED</name></member>
+    <member refid="helper__cuda_8h_1a98e5ae1fe30ec3f2c1d7f60ffaf70e8e" kind="define"><name>DEVICE_RESET</name></member>
+    <member refid="helper__cuda_8h_1afa99ec4acc4ecb2dc3c2d05da15d0e3f" kind="define"><name>MAX</name></member>
+    <member refid="helper__cuda_8h_1a8170bd02e7804fbab5e561bf676decd0" kind="function"><name>check</name></member>
+    <member refid="helper__cuda_8h_1afe9ccb8dde63e20ae24933aa14b90c0e" kind="function"><name>ftoi</name></member>
+    <member refid="helper__cuda_8h_1a1d4e590d5ed3de8d5b87a04aae952725" kind="function"><name>_ConvertSMVer2Cores</name></member>
+  </compound>
+  <compound refid="helper__cuda__drvapi_8h" kind="file"><name>helper_cuda_drvapi.h</name>
+    <member refid="helper__cuda__drvapi_8h_1afa99ec4acc4ecb2dc3c2d05da15d0e3f" kind="define"><name>MAX</name></member>
+    <member refid="helper__cuda__drvapi_8h_1ad20838a18f49298dae4d0ee29a0bb7a9" kind="define"><name>EXIT_WAIVED</name></member>
+    <member refid="helper__cuda__drvapi_8h_1afe9ccb8dde63e20ae24933aa14b90c0e" kind="function"><name>ftoi</name></member>
+    <member refid="helper__cuda__drvapi_8h_1afc0adc5e6b1d11343ab0eb58db0e3e39" kind="function"><name>_ConvertSMVer2CoresDRV</name></member>
+  </compound>
+  <compound refid="helper__functions_8h" kind="file"><name>helper_functions.h</name>
+    <member refid="helper__functions_8h_1ad20838a18f49298dae4d0ee29a0bb7a9" kind="define"><name>EXIT_WAIVED</name></member>
+  </compound>
+  <compound refid="helper__image_8h" kind="file"><name>helper_image.h</name>
+    <member refid="helper__image_8h_1a3acffbd305ee72dcd4593c0d8af64a4f" kind="define"><name>MIN</name></member>
+    <member refid="helper__image_8h_1afa99ec4acc4ecb2dc3c2d05da15d0e3f" kind="define"><name>MAX</name></member>
+    <member refid="helper__image_8h_1ad20838a18f49298dae4d0ee29a0bb7a9" kind="define"><name>EXIT_WAIVED</name></member>
+    <member refid="helper__image_8h_1a98ac53af189101aa315d57a1a55cf516" kind="define"><name>FOPEN</name></member>
+    <member refid="helper__image_8h_1a898f874115493c8e5299e56578ee3d43" kind="define"><name>FOPEN_FAIL</name></member>
+    <member refid="helper__image_8h_1a26322ca1613f09e983e5b67fbeeec6ea" kind="define"><name>SSCANF</name></member>
+    <member refid="helper__image_8h_1a61f0a0c7e50d6b568dfd1b05b6afa2c5" kind="define"><name>__MIN_EPSILON_ERROR</name></member>
+    <member refid="helper__image_8h_1aaae016f4344c07e0676a748981faf00c" kind="function"><name>__loadPPM</name></member>
+    <member refid="helper__image_8h_1a2bf092720a3e1ca44183da49cf390753" kind="function"><name>sdkLoadPGM</name></member>
+    <member refid="helper__image_8h_1ad61d586b71dfda612522e00fb21da12a" kind="function"><name>sdkLoadPPM4</name></member>
+    <member refid="helper__image_8h_1adcd96a54556c48170c772d70db59bb5e" kind="function"><name>__savePPM</name></member>
+    <member refid="helper__image_8h_1af621cd95ce12825e3a7d2c32b5cf07aa" kind="function"><name>sdkSavePGM</name></member>
+    <member refid="helper__image_8h_1a28caf6a4eae286c041dccc0b45828043" kind="function"><name>sdkSavePPM4ub</name></member>
+    <member refid="helper__image_8h_1ac451b6914dfb09b724b828a0d8b82d4d" kind="function"><name>sdkReadFile</name></member>
+    <member refid="helper__image_8h_1a5a239c0f01304839721c3ebb8b08bc76" kind="function"><name>sdkReadFileBlocks</name></member>
+    <member refid="helper__image_8h_1a8840e8b51290a1fd350293b13854b4c3" kind="function"><name>sdkWriteFile</name></member>
+    <member refid="helper__image_8h_1a9ca694a425b0d1ab0f223b5a8f000946" kind="function"><name>compareData</name></member>
+    <member refid="helper__image_8h_1a83245bb1ccedc8de6de7dfbd09ad7329" kind="function"><name>compareDataAsFloatThreshold</name></member>
+    <member refid="helper__image_8h_1aa932a8c9f1c794b775bec8446c8fbd82" kind="function"><name>sdkDumpBin</name></member>
+    <member refid="helper__image_8h_1ad5844939fb4cb7a0d7a74ed6ff5ee837" kind="function"><name>sdkCompareBin2BinUint</name></member>
+    <member refid="helper__image_8h_1a994712d9c9eda3130176a9f95d242fff" kind="function"><name>sdkCompareBin2BinFloat</name></member>
+    <member refid="helper__image_8h_1a17fb04cde676a05a8957ba694b4fb696" kind="function"><name>sdkCompareL2fe</name></member>
+    <member refid="helper__image_8h_1a18a14affd56d75c41d7857434d6a52e5" kind="function"><name>sdkLoadPPMub</name></member>
+    <member refid="helper__image_8h_1a73b8893e603ef59ff2a63d92ccaaa419" kind="function"><name>sdkLoadPPM4ub</name></member>
+    <member refid="helper__image_8h_1a352e7d9477a2a8731028175e609cd47d" kind="function"><name>sdkComparePPM</name></member>
+    <member refid="helper__image_8h_1aec71acce0b4fb565a5c4231898e75b44" kind="function"><name>sdkComparePGM</name></member>
+  </compound>
+  <compound refid="helper__string_8h" kind="file"><name>helper_string.h</name>
+    <member refid="helper__string_8h_1a96baadbb7d3a25a8a5b99aef8b342392" kind="define"><name>STRCASECMP</name></member>
+    <member refid="helper__string_8h_1a9af901db56190e28d0bb87847215287c" kind="define"><name>STRNCASECMP</name></member>
+    <member refid="helper__string_8h_1a6f91b8244b0156a49518375c45b099c3" kind="define"><name>STRCPY</name></member>
+    <member refid="helper__string_8h_1a98ac53af189101aa315d57a1a55cf516" kind="define"><name>FOPEN</name></member>
+    <member refid="helper__string_8h_1a898f874115493c8e5299e56578ee3d43" kind="define"><name>FOPEN_FAIL</name></member>
+    <member refid="helper__string_8h_1a26322ca1613f09e983e5b67fbeeec6ea" kind="define"><name>SSCANF</name></member>
+    <member refid="helper__string_8h_1a92d04fe74201d58bc774099a3f5a52da" kind="define"><name>SPRINTF</name></member>
+    <member refid="helper__string_8h_1ad20838a18f49298dae4d0ee29a0bb7a9" kind="define"><name>EXIT_WAIVED</name></member>
+    <member refid="helper__string_8h_1ac58c822a5ef82babc6a997386ef77469" kind="function"><name>stringRemoveDelimiter</name></member>
+    <member refid="helper__string_8h_1a68aac3a4ecf6a6cf17b78f06d61b9c35" kind="function"><name>getFileExtension</name></member>
+    <member refid="helper__string_8h_1ac4941870cb5a1c286453eccb73e2e2a6" kind="function"><name>checkCmdLineFlag</name></member>
+    <member refid="helper__string_8h_1a885b977ee2b2ce6e95e5e80e96c6535f" kind="function"><name>getCmdLineArgumentValue</name></member>
+    <member refid="helper__string_8h_1ade9cb99a49aabcdf5ddcc8d276174576" kind="function"><name>getCmdLineArgumentInt</name></member>
+    <member refid="helper__string_8h_1a58201641910e5cd66b8ff4efde6c4fca" kind="function"><name>getCmdLineArgumentFloat</name></member>
+    <member refid="helper__string_8h_1a21bc9c16271b623400816c8839c862bb" kind="function"><name>getCmdLineArgumentString</name></member>
+    <member refid="helper__string_8h_1a2f7f20ba2a009934e429a70f5e8e99ef" kind="function"><name>sdkFindFilePath</name></member>
+  </compound>
+  <compound refid="helper__timer_8h" kind="file"><name>helper_timer.h</name>
+    <member refid="helper__timer_8h_1ad20838a18f49298dae4d0ee29a0bb7a9" kind="define"><name>EXIT_WAIVED</name></member>
+    <member refid="helper__timer_8h_1aa0a197b1848bce4d73807f7297d708df" kind="function"><name>sdkCreateTimer</name></member>
+    <member refid="helper__timer_8h_1a629749b153ff9be740765149b3c652b6" kind="function"><name>sdkDeleteTimer</name></member>
+    <member refid="helper__timer_8h_1aa5d0a7252c27daa16091863ff789e38f" kind="function"><name>sdkStartTimer</name></member>
+    <member refid="helper__timer_8h_1afef340cd9aa6f9fc7ddf20e2525bb531" kind="function"><name>sdkStopTimer</name></member>
+    <member refid="helper__timer_8h_1a700f4d51fe548d47bf77c4c029d91c75" kind="function"><name>sdkResetTimer</name></member>
+    <member refid="helper__timer_8h_1a52ab86f6d212465929808592e3a1054f" kind="function"><name>sdkGetAverageTimerValue</name></member>
+    <member refid="helper__timer_8h_1ac50364748b6574878cea082c9bd1b068" kind="function"><name>sdkGetTimerValue</name></member>
+  </compound>
+  <compound refid="nvrtc__helper_8h" kind="file"><name>nvrtc_helper.h</name>
+    <member refid="nvrtc__helper_8h_1ac2df5c42a26f2b5bdd4c18c99acbfe78" kind="define"><name>NVRTC_SAFE_CALL</name></member>
+    <member refid="nvrtc__helper_8h_1adc9fc8a191031981b48a6086e95a4db8" kind="function"><name>compileFileToPTX</name></member>
+    <member refid="nvrtc__helper_8h_1a192a46d580017b35203ab374de3a3588" kind="function"><name>loadPTX</name></member>
+  </compound>
+  <compound refid="include_8h" kind="file"><name>include.h</name>
+  </compound>
+  <compound refid="prain_8h" kind="file"><name>prain.h</name>
+    <member refid="prain_8h_1a470d37834c4662d58f989efd0e21db09" kind="typedef"><name>PAR</name></member>
+    <member refid="prain_8h_1ac054c91022a58ae4381c3a2226b26973" kind="typedef"><name>PRAINDAT</name></member>
+    <member refid="prain_8h_1a5d7280ef01b20d674a0f51fce1d60920" kind="typedef"><name>PRPG</name></member>
+    <member refid="prain_8h_1aba53204af70d9878800b6c384d854be5" kind="typedef"><name>PROF</name></member>
+    <member refid="prain_8h_1a3f37103aaa7ca7a626a04959bfc0b809" kind="function"><name>set_prain_parameters</name></member>
+    <member refid="prain_8h_1a94e822f02d46673219e6e6dd397e5b02" kind="function"><name>set_prop_parameters</name></member>
+    <member refid="prain_8h_1af26c1c330c19117793a15c51019a1fe6" kind="function"><name>allocateprain</name></member>
+    <member refid="prain_8h_1a53cd20ea82c3ef126930bea2a12dd9f4" kind="function"><name>freeprain</name></member>
+    <member refid="prain_8h_1a1ba0f478f91581ff626e0824008e135e" kind="function"><name>freeData</name></member>
+    <member refid="prain_8h_1a37896fa2819ccbe4a847177495aadd0e" kind="function"><name>allocatePropagation</name></member>
+    <member refid="prain_8h_1ad6c6fdd31953cee3c330069cd1483c66" kind="function"><name>propagation</name></member>
+    <member refid="prain_8h_1a98090967a1166b836366ae69e8f05e83" kind="function"><name>_CPUpropagation</name></member>
+    <member refid="prain_8h_1a6816c137d33bc85ad0538cb28c19719d" kind="function"><name>CPUpropagation</name></member>
+    <member refid="prain_8h_1ae2567f8f414c410c3cdb8c4eed2ed420" kind="function"><name>computeAlpha0</name></member>
+    <member refid="prain_8h_1a52939b56be33d9ed5ece7cd328e45e59" kind="function"><name>computeFresnelKernel</name></member>
+    <member refid="prain_8h_1ab7b201bb107324ed760787152865bdad" kind="function"><name>fresnelpropagationConj</name></member>
+    <member refid="prain_8h_1a6ec3713d1edf8c9426202daca15f5cba" kind="function"><name>fresnelpropagation</name></member>
+    <member refid="prain_8h_1a309aa8610b184af433ffa486c218bbcf" kind="function"><name>conjugateGradientTik</name></member>
+    <member refid="prain_8h_1a50e7ad0603036289864e9592b1017160" kind="function"><name>computeRHSTik</name></member>
+    <member refid="prain_8h_1abe3c86803c3f8cf810fb7a359aa5e0c4" kind="function"><name>MatrixOperatorTik</name></member>
+    <member refid="prain_8h_1a7da9ddffb985a367999f3789ae7e4eba" kind="function"><name>conjugateGradientLaplace</name></member>
+    <member refid="prain_8h_1ae82c8ee6724dfdec21c49e45a71e3cb7" kind="function"><name>computeRHSLaplace</name></member>
+    <member refid="prain_8h_1ac8a2c2f22654a6c456274b15688ad5db" kind="function"><name>MatrixOperatorLaplace</name></member>
+    <member refid="prain_8h_1a6b3de020266bb5542cc72fe36ba00ec1" kind="function"><name>praincall</name></member>
+    <member refid="prain_8h_1a983dc33b3b6bd82ebfc75619bce997bc" kind="function"><name>_CPUprain</name></member>
+    <member refid="prain_8h_1a3d2d554269bd29eceed8475f94858b47" kind="function"><name>CPUprain</name></member>
+    <member refid="prain_8h_1abff295f063562b0b1f52686d351c41d5" kind="function"><name>getDeviceProperties</name></member>
+    <member refid="prain_8h_1a3dad3f55a1895c9048c29f51eb52a855" kind="function"><name>FourierFresnelKernel</name></member>
+    <member refid="prain_8h_1a28e4509435faef2365f827637b942085" kind="function"><name>beerslaw</name></member>
+    <member refid="prain_8h_1a0fcea4e7a9854adf81d75275df744b81" kind="function"><name>CLaplacerhs</name></member>
+    <member refid="prain_8h_1a498ca34fdaaf50c2598b846b84a030e5" kind="function"><name>CLaplacemat</name></member>
+    <member refid="prain_8h_1ada58bf5b67fb2a884a6959b29e53b5f4" kind="function"><name>CDifference</name></member>
+    <member refid="prain_8h_1aac1153e191282d4cc53272e55ea0f46d" kind="function"><name>OperatorA</name></member>
+    <member refid="prain_8h_1ac4f3ca040bc526adc26549e33de0515d" kind="function"><name>minimum_regularization</name></member>
+    <member refid="prain_8h_1a2fc56d80f7b074c1681e84f65f4dc36c" kind="function"><name>Cabsolute2</name></member>
+    <member refid="prain_8h_1acd3388a8a27c9c4268dc0c3e8e0ada5c" kind="function"><name>CAddScalar</name></member>
+    <member refid="prain_8h_1ada8b6f04bf75f95523b6a210b82bdc8f" kind="function"><name>CMultAmplitude</name></member>
+    <member refid="prain_8h_1a5fec253ce36b4527d9b0a7fd5017bbd7" kind="function"><name>CMultComplexAmplitude</name></member>
+    <member refid="prain_8h_1a60ac7e4bbb4df7af1e9524c946322b80" kind="function"><name>CIntensity</name></member>
+    <member refid="prain_8h_1a063528102c250eaf517c817fe3bfe143" kind="function"><name>CConvolve</name></member>
+    <member refid="prain_8h_1a4571d6a2c0b8419a7b09b8a48fa5ac17" kind="function"><name>CRealPart</name></member>
+    <member refid="prain_8h_1ac9dc46e31d6652af059364a3a7801bf5" kind="function"><name>CInnerProd</name></member>
+    <member refid="prain_8h_1a8ea4f7a7bcc1746db2db17e1462b87b6" kind="function"><name>CSum</name></member>
+    <member refid="prain_8h_1a4e017977cae93b3b3b14ea7bb9de9386" kind="function"><name>fftshiftKernel</name></member>
+    <member refid="prain_8h_1a736224b0bc11ce0e5e5cbf69ba9723d2" kind="function"><name>fftNormalize</name></member>
+    <member refid="prain_8h_1a665de576d4b44afa6d3ec6d18149cb6f" kind="function"><name>FInnerProd</name></member>
+    <member refid="prain_8h_1a7718e0af6947aae776b3d1311377fdcc" kind="function"><name>FSub</name></member>
+    <member refid="prain_8h_1a27219273c347a293484a13eaba6e4664" kind="function"><name>FDivZ</name></member>
+    <member refid="prain_8h_1a998918e6c4af873db28b5f894329ac2e" kind="function"><name>exp1j</name></member>
+    <member refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" kind="function"><name>ComplexMult</name></member>
+    <member refid="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" kind="function"><name>ComplexConj</name></member>
+    <member refid="prain_8h_1aefda406ec17eff4118e9e881105c0a69" kind="function"><name>ComplexMultConst</name></member>
+    <member refid="prain_8h_1abf851cf3d7333991f33eaeb272267621" kind="function"><name>FloatMultConst</name></member>
+    <member refid="prain_8h_1abfd67e8248b5e14cdad335f8f0f16fa1" kind="function"><name>sign</name></member>
+    <member refid="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" kind="function"><name>is_valid</name></member>
+    <member refid="prain_8h_1a1a6511e11994a09b88c514293c6b1656" kind="function"><name>FprintDev</name></member>
+    <member refid="prain_8h_1afa5ed2c6092b89ffa34094f9782a401d" kind="function"><name>CprintDev</name></member>
+  </compound>
+  <compound refid="kernelfunctions_8cu" kind="file"><name>kernelfunctions.cu</name>
+    <member refid="kernelfunctions_8cu_1a598a3330b3c21701223ee0ca14316eca" kind="define"><name>PI</name></member>
+    <member refid="kernelfunctions_8cu_1a3dad3f55a1895c9048c29f51eb52a855" kind="function"><name>FourierFresnelKernel</name></member>
+    <member refid="kernelfunctions_8cu_1a063528102c250eaf517c817fe3bfe143" kind="function"><name>CConvolve</name></member>
+    <member refid="kernelfunctions_8cu_1a2fc56d80f7b074c1681e84f65f4dc36c" kind="function"><name>Cabsolute2</name></member>
+    <member refid="kernelfunctions_8cu_1ada8b6f04bf75f95523b6a210b82bdc8f" kind="function"><name>CMultAmplitude</name></member>
+    <member refid="kernelfunctions_8cu_1a5fec253ce36b4527d9b0a7fd5017bbd7" kind="function"><name>CMultComplexAmplitude</name></member>
+    <member refid="kernelfunctions_8cu_1acd3388a8a27c9c4268dc0c3e8e0ada5c" kind="function"><name>CAddScalar</name></member>
+    <member refid="kernelfunctions_8cu_1a4571d6a2c0b8419a7b09b8a48fa5ac17" kind="function"><name>CRealPart</name></member>
+    <member refid="kernelfunctions_8cu_1a28e4509435faef2365f827637b942085" kind="function"><name>beerslaw</name></member>
+    <member refid="kernelfunctions_8cu_1a4e017977cae93b3b3b14ea7bb9de9386" kind="function"><name>fftshiftKernel</name></member>
+    <member refid="kernelfunctions_8cu_1a736224b0bc11ce0e5e5cbf69ba9723d2" kind="function"><name>fftNormalize</name></member>
+    <member refid="kernelfunctions_8cu_1aac1153e191282d4cc53272e55ea0f46d" kind="function"><name>OperatorA</name></member>
+    <member refid="kernelfunctions_8cu_1ac4f3ca040bc526adc26549e33de0515d" kind="function"><name>minimum_regularization</name></member>
+    <member refid="kernelfunctions_8cu_1a498ca34fdaaf50c2598b846b84a030e5" kind="function"><name>CLaplacemat</name></member>
+    <member refid="kernelfunctions_8cu_1a0fcea4e7a9854adf81d75275df744b81" kind="function"><name>CLaplacerhs</name></member>
+    <member refid="kernelfunctions_8cu_1ada58bf5b67fb2a884a6959b29e53b5f4" kind="function"><name>CDifference</name></member>
+    <member refid="kernelfunctions_8cu_1a7718e0af6947aae776b3d1311377fdcc" kind="function"><name>FSub</name></member>
+    <member refid="kernelfunctions_8cu_1a27219273c347a293484a13eaba6e4664" kind="function"><name>FDivZ</name></member>
+    <member refid="kernelfunctions_8cu_1a8ea4f7a7bcc1746db2db17e1462b87b6" kind="function"><name>CSum</name></member>
+    <member refid="kernelfunctions_8cu_1a665de576d4b44afa6d3ec6d18149cb6f" kind="function"><name>FInnerProd</name></member>
+    <member refid="kernelfunctions_8cu_1ac9dc46e31d6652af059364a3a7801bf5" kind="function"><name>CInnerProd</name></member>
+    <member refid="kernelfunctions_8cu_1a60ac7e4bbb4df7af1e9524c946322b80" kind="function"><name>CIntensity</name></member>
+    <member refid="kernelfunctions_8cu_1afa5ed2c6092b89ffa34094f9782a401d" kind="function"><name>CprintDev</name></member>
+    <member refid="kernelfunctions_8cu_1a1a6511e11994a09b88c514293c6b1656" kind="function"><name>FprintDev</name></member>
+  </compound>
+  <compound refid="prainalloc_8cu" kind="file"><name>prainalloc.cu</name>
+    <member refid="prainalloc_8cu_1a3f37103aaa7ca7a626a04959bfc0b809" kind="function"><name>set_prain_parameters</name></member>
+    <member refid="prainalloc_8cu_1a94e822f02d46673219e6e6dd397e5b02" kind="function"><name>set_prop_parameters</name></member>
+    <member refid="prainalloc_8cu_1af26c1c330c19117793a15c51019a1fe6" kind="function"><name>allocateprain</name></member>
+    <member refid="prainalloc_8cu_1a53cd20ea82c3ef126930bea2a12dd9f4" kind="function"><name>freeprain</name></member>
+    <member refid="prainalloc_8cu_1a37896fa2819ccbe4a847177495aadd0e" kind="function"><name>allocatePropagation</name></member>
+    <member refid="prainalloc_8cu_1a1ba0f478f91581ff626e0824008e135e" kind="function"><name>freeData</name></member>
+  </compound>
+  <compound refid="propagation_8cu" kind="file"><name>propagation.cu</name>
+    <member refid="propagation_8cu_1ad6c6fdd31953cee3c330069cd1483c66" kind="function"><name>propagation</name></member>
+    <member refid="propagation_8cu_1a6816c137d33bc85ad0538cb28c19719d" kind="function"><name>CPUpropagation</name></member>
+    <member refid="propagation_8cu_1a98090967a1166b836366ae69e8f05e83" kind="function"><name>_CPUpropagation</name></member>
+  </compound>
+  <compound refid="sscprain_8cu" kind="file"><name>sscprain.cu</name>
+    <member refid="sscprain_8cu_1ae66f6b31b5ad750f1fe042a706a4e3d4" kind="function"><name>main</name></member>
+    <member refid="sscprain_8cu_1a3d2d554269bd29eceed8475f94858b47" kind="function"><name>CPUprain</name></member>
+    <member refid="sscprain_8cu_1a983dc33b3b6bd82ebfc75619bce997bc" kind="function"><name>_CPUprain</name></member>
+    <member refid="sscprain_8cu_1a6b3de020266bb5542cc72fe36ba00ec1" kind="function"><name>praincall</name></member>
+    <member refid="sscprain_8cu_1ac8a2c2f22654a6c456274b15688ad5db" kind="function"><name>MatrixOperatorLaplace</name></member>
+    <member refid="sscprain_8cu_1ae82c8ee6724dfdec21c49e45a71e3cb7" kind="function"><name>computeRHSLaplace</name></member>
+    <member refid="sscprain_8cu_1a7da9ddffb985a367999f3789ae7e4eba" kind="function"><name>conjugateGradientLaplace</name></member>
+    <member refid="sscprain_8cu_1abe3c86803c3f8cf810fb7a359aa5e0c4" kind="function"><name>MatrixOperatorTik</name></member>
+    <member refid="sscprain_8cu_1a50e7ad0603036289864e9592b1017160" kind="function"><name>computeRHSTik</name></member>
+    <member refid="sscprain_8cu_1a309aa8610b184af433ffa486c218bbcf" kind="function"><name>conjugateGradientTik</name></member>
+    <member refid="sscprain_8cu_1a6ec3713d1edf8c9426202daca15f5cba" kind="function"><name>fresnelpropagation</name></member>
+    <member refid="sscprain_8cu_1ab7b201bb107324ed760787152865bdad" kind="function"><name>fresnelpropagationConj</name></member>
+    <member refid="sscprain_8cu_1a52939b56be33d9ed5ece7cd328e45e59" kind="function"><name>computeFresnelKernel</name></member>
+    <member refid="sscprain_8cu_1ae2567f8f414c410c3cdb8c4eed2ed420" kind="function"><name>computeAlpha0</name></member>
+  </compound>
+  <compound refid="group__CUDA__MATH__INTRINSIC__HALF" kind="group"><name>CUDA_MATH_INTRINSIC_HALF</name>
+  </compound>
+  <compound refid="group__CUDA__MATH____HALF__ARITHMETIC" kind="group"><name>CUDA_MATH__HALF_ARITHMETIC</name>
+  </compound>
+  <compound refid="group__CUDA__MATH____HALF2__ARITHMETIC" kind="group"><name>CUDA_MATH__HALF2_ARITHMETIC</name>
+  </compound>
+  <compound refid="group__CUDA__MATH____HALF__COMPARISON" kind="group"><name>CUDA_MATH__HALF_COMPARISON</name>
+  </compound>
+  <compound refid="group__CUDA__MATH____HALF2__COMPARISON" kind="group"><name>CUDA_MATH__HALF2_COMPARISON</name>
+  </compound>
+  <compound refid="group__CUDA__MATH____HALF__MISC" kind="group"><name>CUDA_MATH__HALF_MISC</name>
+  </compound>
+  <compound refid="group__CUDA__MATH____HALF__FUNCTIONS" kind="group"><name>CUDA_MATH__HALF_FUNCTIONS</name>
+  </compound>
+  <compound refid="group__CUDA__MATH____HALF2__FUNCTIONS" kind="group"><name>CUDA_MATH__HALF2_FUNCTIONS</name>
+  </compound>
+  <compound refid="dir_f3ac44d66b2f8296004d081ce96200e0" kind="dir"><name>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common</name>
+  </compound>
+  <compound refid="dir_07f6a4829c9f0d8366732eddb21b7674" kind="dir"><name>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10</name>
+  </compound>
+  <compound refid="dir_7f72761faf76ad5b97d7f36c114afa29" kind="dir"><name>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda</name>
+  </compound>
+  <compound refid="dir_7bad8fb98241d550a9a3ae4d977e523a" kind="dir"><name>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc</name>
+  </compound>
+  <compound refid="dir_ea391df6eff8c05a1d61fc70822e6d3c" kind="dir"><name>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src</name>
+  </compound>
+</doxygenindex>

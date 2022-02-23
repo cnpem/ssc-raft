@@ -1,0 +1,485 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="devicefunctions_8hpp" kind="file" language="C++">
+    <compoundname>devicefunctions.hpp</compoundname>
+    <includes refid="include_8h" local="yes">../../inc/include.h</includes>
+    <includedby refid="kernelfunctions_8cu" local="yes">/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp</label>
+        <link refid="devicefunctions_8hpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="9">
+        <label>helper_cuda.h</label>
+        <link refid="helper__cuda_8h_source"/>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>helper_string.h</label>
+        <link refid="helper__string_8h_source"/>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>../../inc/include.h</label>
+        <link refid="include_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+        <childnode refid="22" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="23" relation="include">
+        </childnode>
+        <childnode refid="24" relation="include">
+        </childnode>
+        <childnode refid="25" relation="include">
+        </childnode>
+        <childnode refid="26" relation="include">
+        </childnode>
+        <childnode refid="27" relation="include">
+        </childnode>
+      </node>
+      <node id="18">
+        <label>../inc/prain.h</label>
+        <link refid="prain_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="20">
+        <label>cassert</label>
+      </node>
+      <node id="25">
+        <label>chrono</label>
+      </node>
+      <node id="5">
+        <label>complex.h</label>
+      </node>
+      <node id="23">
+        <label>cublas.h</label>
+      </node>
+      <node id="3">
+        <label>cuda.h</label>
+      </node>
+      <node id="7">
+        <label>cuda_runtime_api.h</label>
+      </node>
+      <node id="4">
+        <label>cufft.h</label>
+      </node>
+      <node id="14">
+        <label>fstream</label>
+      </node>
+      <node id="24">
+        <label>future</label>
+      </node>
+      <node id="19">
+        <label>iostream</label>
+      </node>
+      <node id="27">
+        <label>omp.h</label>
+      </node>
+      <node id="22">
+        <label>sstream</label>
+      </node>
+      <node id="10">
+        <label>stdint.h</label>
+      </node>
+      <node id="8">
+        <label>stdio.h</label>
+      </node>
+      <node id="11">
+        <label>stdlib.h</label>
+      </node>
+      <node id="15">
+        <label>string</label>
+      </node>
+      <node id="12">
+        <label>string.h</label>
+      </node>
+      <node id="16">
+        <label>strings.h</label>
+      </node>
+      <node id="6">
+        <label>tgmath.h</label>
+      </node>
+      <node id="26">
+        <label>thread</label>
+      </node>
+      <node id="17">
+        <label>time.h</label>
+      </node>
+      <node id="21">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp</label>
+        <link refid="devicefunctions_8hpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/kernelfunctions.cu</label>
+        <link refid="kernelfunctions_8cu"/>
+      </node>
+    </invincdepgraph>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="devicefunctions_8hpp_1abff295f063562b0b1f52686d351c41d5" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void getDeviceProperties</definition>
+        <argsstring>()</argsstring>
+        <name>getDeviceProperties</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" line="16" column="13" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="16" bodyend="24"/>
+      </memberdef>
+      <memberdef kind="function" id="devicefunctions_8hpp_1a998918e6c4af873db28b5f894329ac2e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ cufftComplex</type>
+        <definition>__device__ cufftComplex exp1j</definition>
+        <argsstring>(float f)</argsstring>
+        <name>exp1j</name>
+        <param>
+          <type>float</type>
+          <declname>f</declname>
+        </param>
+        <briefdescription>
+<para>complex exponencial. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>f</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" line="26" column="32" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="26" bodyend="26"/>
+      </memberdef>
+      <memberdef kind="function" id="devicefunctions_8hpp_1a401c10fa7b5faf7eccda8d2effe5b26c" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ cufftComplex</type>
+        <definition>__device__ cufftComplex ComplexMult</definition>
+        <argsstring>(cufftComplex a, cufftComplex b)</argsstring>
+        <name>ComplexMult</name>
+        <param>
+          <type>cufftComplex</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>cufftComplex</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+<para>Multiplies two complex numbers <emphasis>a</emphasis> and <emphasis>b</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" line="28" column="32" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="28" bodyend="28"/>
+      </memberdef>
+      <memberdef kind="function" id="devicefunctions_8hpp_1aefda406ec17eff4118e9e881105c0a69" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ cufftComplex</type>
+        <definition>__device__ cufftComplex ComplexMultConst</definition>
+        <argsstring>(cufftComplex a, float alpha)</argsstring>
+        <name>ComplexMultConst</name>
+        <param>
+          <type>cufftComplex</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>alpha</declname>
+        </param>
+        <briefdescription>
+<para>Complex multiplication by a constant <emphasis>alpha</emphasis>. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>alpha</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" line="30" column="32" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="30" bodyend="30"/>
+      </memberdef>
+      <memberdef kind="function" id="devicefunctions_8hpp_1aa9da49f0d415978a4a8628b6681eb2d1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ cufftComplex</type>
+        <definition>__device__ cufftComplex ComplexConj</definition>
+        <argsstring>(cufftComplex c)</argsstring>
+        <name>ComplexConj</name>
+        <param>
+          <type>cufftComplex</type>
+          <declname>c</declname>
+        </param>
+        <briefdescription>
+<para>Complex Conjugate. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>c</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" line="32" column="32" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="32" bodyend="32"/>
+      </memberdef>
+      <memberdef kind="function" id="devicefunctions_8hpp_1abf851cf3d7333991f33eaeb272267621" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ float</type>
+        <definition>__device__ float FloatMultConst</definition>
+        <argsstring>(float a, float b)</argsstring>
+        <name>FloatMultConst</name>
+        <param>
+          <type>float</type>
+          <declname>a</declname>
+        </param>
+        <param>
+          <type>float</type>
+          <declname>b</declname>
+        </param>
+        <briefdescription>
+<para>Float multiplication by a constant. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>b</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" line="34" column="25" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="34" bodyend="34"/>
+      </memberdef>
+      <memberdef kind="function" id="devicefunctions_8hpp_1abfd67e8248b5e14cdad335f8f0f16fa1" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ float</type>
+        <definition>__device__ float sign</definition>
+        <argsstring>(float a)</argsstring>
+        <name>sign</name>
+        <param>
+          <type>float</type>
+          <declname>a</declname>
+        </param>
+        <briefdescription>
+<para>Float get sign. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>a</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" line="36" column="25" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="36" bodyend="36"/>
+      </memberdef>
+      <memberdef kind="function" id="devicefunctions_8hpp_1abd205e5ed0c789a5173e65792eccbedb" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>__device__ size_t</type>
+        <definition>__device__ size_t is_valid</definition>
+        <argsstring>(int x, size_t n)</argsstring>
+        <name>is_valid</name>
+        <param>
+          <type>int</type>
+          <declname>x</declname>
+        </param>
+        <param>
+          <type>size_t</type>
+          <declname>n</declname>
+        </param>
+        <briefdescription>
+<para>Is a valid pixel. </para>
+        </briefdescription>
+        <detaileddescription>
+<para><parameterlist kind="param"><parameteritem>
+<parameternamelist>
+<parametername>x</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+<parameteritem>
+<parameternamelist>
+<parametername>n</parametername>
+</parameternamelist>
+<parameterdescription>
+<para></para>
+</parameterdescription>
+</parameteritem>
+</parameterlist>
+<simplesect kind="return"><para></para>
+</simplesect>
+</para>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" line="38" column="26" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp" bodystart="38" bodyend="38"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>DEVC_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>DEVC_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;../../inc/include.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>getDeviceProperties()</highlight></codeline>
+<codeline lineno="17"><highlight class="normal">{<sp/><sp/><sp/></highlight><highlight class="comment">/*<sp/>Get<sp/>Device<sp/>Properties<sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>gpudevices;<sp/></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaDeviceProp<sp/>prop;<sp/></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaGetDeviceCount(&amp;gpudevices);<sp/></highlight><highlight class="comment">/*<sp/>Total<sp/>Number<sp/>of<sp/>GPUs<sp/>*/</highlight><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/>printf(</highlight><highlight class="stringliteral">&quot;GPUs<sp/>number:<sp/>%d\n&quot;</highlight><highlight class="normal">,gpudevices);<sp/></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/>cudaGetDeviceProperties(&amp;prop,0);<sp/></highlight><highlight class="comment">/*<sp/>Name<sp/>of<sp/>GPU<sp/>*/</highlight><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/>printf(</highlight><highlight class="stringliteral">&quot;Device<sp/>name:<sp/>%s\n&quot;</highlight><highlight class="normal">,prop.name);<sp/><sp/></highlight></codeline>
+<codeline lineno="24"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26" refid="prain_8h_1a998918e6c4af873db28b5f894329ac2e" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>__device__<sp/>cufftComplex<sp/><ref refid="prain_8h_1a998918e6c4af873db28b5f894329ac2e" kindref="member">exp1j</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>f){<sp/>cufftComplex<sp/>c;<sp/>__sincosf(f,<sp/>&amp;c.y,<sp/>&amp;c.x);<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>c;<sp/>}</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight></codeline>
+<codeline lineno="28" refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>__device__<sp/>cufftComplex<sp/><ref refid="prain_8h_1a401c10fa7b5faf7eccda8d2effe5b26c" kindref="member">ComplexMult</ref>(cufftComplex<sp/>a,<sp/>cufftComplex<sp/>b){<sp/>cufftComplex<sp/>ans;<sp/>ans.x<sp/>=<sp/>a.x<sp/>*<sp/>b.x<sp/>-<sp/>a.y<sp/>*<sp/>b.y;<sp/>ans.y<sp/>=<sp/>a.x<sp/>*<sp/>b.y<sp/>+<sp/>a.y<sp/>*<sp/>b.x;<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ans;<sp/>}</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30" refid="prain_8h_1aefda406ec17eff4118e9e881105c0a69" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>__device__<sp/>cufftComplex<sp/><ref refid="prain_8h_1aefda406ec17eff4118e9e881105c0a69" kindref="member">ComplexMultConst</ref>(cufftComplex<sp/>a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>alpha){<sp/>cufftComplex<sp/>ans;<sp/>ans.x<sp/>=<sp/>alpha<sp/>*<sp/>a.x;<sp/>ans.y<sp/>=<sp/>alpha<sp/>*<sp/>a.y;<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ans;<sp/>}</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight></codeline>
+<codeline lineno="32" refid="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>__device__<sp/>cufftComplex<sp/><ref refid="prain_8h_1aa9da49f0d415978a4a8628b6681eb2d1" kindref="member">ComplexConj</ref>(cufftComplex<sp/>c)<sp/>{<sp/>cufftComplex<sp/>ans;<sp/>ans.x<sp/>=<sp/><sp/>c.x;<sp/>ans.y<sp/>=<sp/>-c.y;<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ans;<sp/>}</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight></codeline>
+<codeline lineno="34" refid="prain_8h_1abf851cf3d7333991f33eaeb272267621" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>__device__<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1abf851cf3d7333991f33eaeb272267621" kindref="member">FloatMultConst</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>a,<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>b){<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>ans;<sp/>ans<sp/>=<sp/>a<sp/>*<sp/>b;<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>ans;<sp/>}</highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight></codeline>
+<codeline lineno="36" refid="prain_8h_1abfd67e8248b5e14cdad335f8f0f16fa1" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>__device__<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1abfd67e8248b5e14cdad335f8f0f16fa1" kindref="member">sign</ref>(</highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>a){<sp/></highlight><highlight class="keywordtype">float</highlight><highlight class="normal"><sp/>t<sp/>=<sp/>a&lt;0<sp/>?<sp/>-1<sp/>:<sp/>0;<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>a<sp/>&gt;<sp/>0<sp/>?<sp/>1<sp/>:<sp/>t;<sp/>}</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="38" refid="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" refkind="member"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/>__device__<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/><ref refid="prain_8h_1abd205e5ed0c789a5173e65792eccbedb" kindref="member">is_valid</ref>(</highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>x,<sp/></highlight><highlight class="keywordtype">size_t</highlight><highlight class="normal"><sp/>n)<sp/>{<sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(x<sp/>&gt;=<sp/>n<sp/>||<sp/>x<sp/>&lt;<sp/>0)<sp/>?<sp/>0<sp/>:<sp/>1;<sp/>}</highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/devicefunctions.hpp"/>
+  </compounddef>
+</doxygen>

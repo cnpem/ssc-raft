@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="dir_7bad8fb98241d550a9a3ae4d977e523a" kind="dir">
+    <compoundname>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc</compoundname>
+    <innerdir refid="dir_f3ac44d66b2f8296004d081ce96200e0">/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common</innerdir>
+    <innerdir refid="dir_07f6a4829c9f0d8366732eddb21b7674">/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10</innerdir>
+    <innerfile refid="include_8h">include.h</innerfile>
+    <innerfile refid="prain_8h">prain.h</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/"/>
+  </compounddef>
+</doxygen>

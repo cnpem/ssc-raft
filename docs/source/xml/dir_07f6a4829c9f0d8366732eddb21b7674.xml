@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="dir_07f6a4829c9f0d8366732eddb21b7674" kind="dir">
+    <compoundname>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10</compoundname>
+    <innerfile refid="cuda__fp16_8h">cuda_fp16.h</innerfile>
+    <innerfile refid="drvapi__error__string_8h">drvapi_error_string.h</innerfile>
+    <innerfile refid="exception_8h">exception.h</innerfile>
+    <innerfile refid="helper__cuda_8h">helper_cuda.h</innerfile>
+    <innerfile refid="helper__cuda__drvapi_8h">helper_cuda_drvapi.h</innerfile>
+    <innerfile refid="helper__functions_8h">helper_functions.h</innerfile>
+    <innerfile refid="helper__image_8h">helper_image.h</innerfile>
+    <innerfile refid="helper__string_8h">helper_string.h</innerfile>
+    <innerfile refid="helper__timer_8h">helper_timer.h</innerfile>
+    <innerfile refid="nvrtc__helper_8h">nvrtc_helper.h</innerfile>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10/"/>
+  </compounddef>
+</doxygen>

@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="structPropagation" kind="struct" language="C++" prot="public">
+    <compoundname>Propagation</compoundname>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structPropagation_1af1e07fafa7f2868093975d6aff5adaf0" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex* Propagation::data</definition>
+        <argsstring></argsstring>
+        <name>data</name>
+        <qualifiedname>Propagation::data</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="70" column="14" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPropagation_1a411f29035f90b0140e82d32dcb8fea6c" prot="public" static="no" mutable="no">
+        <type>cufftComplex *</type>
+        <definition>cufftComplex * Propagation::kernel</definition>
+        <argsstring></argsstring>
+        <name>kernel</name>
+        <qualifiedname>Propagation::kernel</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="70" column="19" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="70" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structPropagation_1acffe81d8e21c73e2bcde2e9c0c54c798" prot="public" static="no" mutable="no">
+        <type>float *</type>
+        <definition>float* Propagation::intense</definition>
+        <argsstring></argsstring>
+        <name>intense</name>
+        <qualifiedname>Propagation::intense</qualifiedname>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="71" column="7" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="71" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" line="68" column="1" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/prain.h" bodystart="69" bodyend="72"/>
+    <listofallmembers>
+      <member refid="structPropagation_1af1e07fafa7f2868093975d6aff5adaf0" prot="public" virt="non-virtual"><scope>Propagation</scope><name>data</name></member>
+      <member refid="structPropagation_1acffe81d8e21c73e2bcde2e9c0c54c798" prot="public" virt="non-virtual"><scope>Propagation</scope><name>intense</name></member>
+      <member refid="structPropagation_1a411f29035f90b0140e82d32dcb8fea6c" prot="public" virt="non-virtual"><scope>Propagation</scope><name>kernel</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

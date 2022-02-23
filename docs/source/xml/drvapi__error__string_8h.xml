@@ -1,0 +1,222 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="drvapi__error__string_8h" kind="file" language="C++">
+    <compoundname>drvapi_error_string.h</compoundname>
+    <includes local="no">stdio.h</includes>
+    <includes local="no">stdlib.h</includes>
+    <includes local="no">string.h</includes>
+    <includedby refid="helper__cuda__drvapi_8h" local="no">/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10/helper_cuda_drvapi.h</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10/drvapi_error_string.h</label>
+        <link refid="drvapi__error__string_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>stdio.h</label>
+      </node>
+      <node id="3">
+        <label>stdlib.h</label>
+      </node>
+      <node id="4">
+        <label>string.h</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10/drvapi_error_string.h</label>
+        <link refid="drvapi__error__string_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10/helper_cuda_drvapi.h</label>
+        <link refid="helper__cuda__drvapi_8h_source"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+      </node>
+      <node id="3">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10/nvrtc_helper.h</label>
+        <link refid="nvrtc__helper_8h_source"/>
+      </node>
+    </invincdepgraph>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="comment">/*</highlight></codeline>
+<codeline lineno="2"><highlight class="comment"><sp/>*<sp/>Copyright<sp/>1993-2013<sp/>NVIDIA<sp/>Corporation.<sp/><sp/>All<sp/>rights<sp/>reserved.</highlight></codeline>
+<codeline lineno="3"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="4"><highlight class="comment"><sp/>*<sp/>Please<sp/>refer<sp/>to<sp/>the<sp/>NVIDIA<sp/>end<sp/>user<sp/>license<sp/>agreement<sp/>(EULA)<sp/>associated</highlight></codeline>
+<codeline lineno="5"><highlight class="comment"><sp/>*<sp/>with<sp/>this<sp/>source<sp/>code<sp/>for<sp/>terms<sp/>and<sp/>conditions<sp/>that<sp/>govern<sp/>your<sp/>use<sp/>of</highlight></codeline>
+<codeline lineno="6"><highlight class="comment"><sp/>*<sp/>this<sp/>software.<sp/>Any<sp/>use,<sp/>reproduction,<sp/>disclosure,<sp/>or<sp/>distribution<sp/>of</highlight></codeline>
+<codeline lineno="7"><highlight class="comment"><sp/>*<sp/>this<sp/>software<sp/>and<sp/>related<sp/>documentation<sp/>outside<sp/>the<sp/>terms<sp/>of<sp/>the<sp/>EULA</highlight></codeline>
+<codeline lineno="8"><highlight class="comment"><sp/>*<sp/>is<sp/>strictly<sp/>prohibited.</highlight></codeline>
+<codeline lineno="9"><highlight class="comment"><sp/>*</highlight></codeline>
+<codeline lineno="10"><highlight class="comment"><sp/>*/</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="11"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/><sp/>COMMON_DRVAPI_ERROR_STRING_H_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/><sp/>COMMON_DRVAPI_ERROR_STRING_H_</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;stdio.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;stdlib.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&lt;string.h&gt;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"></highlight><highlight class="preprocessor">#ifdef<sp/>__cuda_cuda_h__<sp/><sp/></highlight><highlight class="comment">//<sp/>check<sp/>to<sp/>see<sp/>if<sp/>CUDA_H<sp/>is<sp/>included<sp/>above</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="20"><highlight class="normal"></highlight></codeline>
+<codeline lineno="21"><highlight class="normal"></highlight><highlight class="comment">//<sp/>Error<sp/>Code<sp/>string<sp/>definitions<sp/>here</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="22"><highlight class="normal"></highlight><highlight class="keyword">typedef</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">struct<sp/></highlight><highlight class="normal">{</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>*error_string;</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>error_id;</highlight></codeline>
+<codeline lineno="25"><highlight class="normal">}<sp/>s_CudaErrorStr;</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="keyword">static</highlight><highlight class="normal"><sp/>s_CudaErrorStr<sp/>sCudaDrvErrorString[]<sp/>=<sp/>{</highlight></codeline>
+<codeline lineno="36"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_SUCCESS&quot;</highlight><highlight class="normal">,<sp/>0},</highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_VALUE&quot;</highlight><highlight class="normal">,<sp/>1},</highlight></codeline>
+<codeline lineno="43"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_OUT_OF_MEMORY&quot;</highlight><highlight class="normal">,<sp/>2},</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NOT_INITIALIZED&quot;</highlight><highlight class="normal">,<sp/>3},</highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_DEINITIALIZED&quot;</highlight><highlight class="normal">,<sp/>4},</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_PROFILER_DISABLED&quot;</highlight><highlight class="normal">,<sp/>5},</highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_PROFILER_NOT_INITIALIZED&quot;</highlight><highlight class="normal">,<sp/>6},</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_PROFILER_ALREADY_STARTED&quot;</highlight><highlight class="normal">,<sp/>7},</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_PROFILER_ALREADY_STOPPED&quot;</highlight><highlight class="normal">,<sp/>8},</highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NO_DEVICE<sp/>(no<sp/>CUDA-capable<sp/>devices<sp/>were<sp/>detected)&quot;</highlight><highlight class="normal">,<sp/>100},</highlight></codeline>
+<codeline lineno="86"><highlight class="normal"></highlight></codeline>
+<codeline lineno="91"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_DEVICE<sp/>(device<sp/>specified<sp/>is<sp/>not<sp/>a<sp/>valid<sp/>CUDA<sp/>device)&quot;</highlight><highlight class="normal">,</highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/>101},</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"></highlight></codeline>
+<codeline lineno="98"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_IMAGE&quot;</highlight><highlight class="normal">,<sp/>200},</highlight></codeline>
+<codeline lineno="99"><highlight class="normal"></highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_CONTEXT&quot;</highlight><highlight class="normal">,<sp/>201},</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"></highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_CONTEXT_ALREADY_CURRENT&quot;</highlight><highlight class="normal">,<sp/>202},</highlight></codeline>
+<codeline lineno="118"><highlight class="normal"></highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_MAP_FAILED&quot;</highlight><highlight class="normal">,<sp/>205},</highlight></codeline>
+<codeline lineno="123"><highlight class="normal"></highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_UNMAP_FAILED&quot;</highlight><highlight class="normal">,<sp/>206},</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"></highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_ARRAY_IS_MAPPED&quot;</highlight><highlight class="normal">,<sp/>207},</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"></highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_ALREADY_MAPPED&quot;</highlight><highlight class="normal">,<sp/>208},</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"></highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NO_BINARY_FOR_GPU&quot;</highlight><highlight class="normal">,<sp/>209},</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"></highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_ALREADY_ACQUIRED&quot;</highlight><highlight class="normal">,<sp/>210},</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"></highlight></codeline>
+<codeline lineno="156"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NOT_MAPPED&quot;</highlight><highlight class="normal">,<sp/>211},</highlight></codeline>
+<codeline lineno="157"><highlight class="normal"></highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NOT_MAPPED_AS_ARRAY&quot;</highlight><highlight class="normal">,<sp/>212},</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"></highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NOT_MAPPED_AS_POINTER&quot;</highlight><highlight class="normal">,<sp/>213},</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"></highlight></codeline>
+<codeline lineno="174"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_ECC_UNCORRECTABLE&quot;</highlight><highlight class="normal">,<sp/>214},</highlight></codeline>
+<codeline lineno="175"><highlight class="normal"></highlight></codeline>
+<codeline lineno="180"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_UNSUPPORTED_LIMIT&quot;</highlight><highlight class="normal">,<sp/>215},</highlight></codeline>
+<codeline lineno="181"><highlight class="normal"></highlight></codeline>
+<codeline lineno="187"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_CONTEXT_ALREADY_IN_USE&quot;</highlight><highlight class="normal">,<sp/>216},</highlight></codeline>
+<codeline lineno="188"><highlight class="normal"></highlight></codeline>
+<codeline lineno="193"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_PEER_ACCESS_UNSUPPORTED&quot;</highlight><highlight class="normal">,<sp/>217},</highlight></codeline>
+<codeline lineno="194"><highlight class="normal"></highlight></codeline>
+<codeline lineno="198"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_PTX&quot;</highlight><highlight class="normal">,<sp/>218},</highlight></codeline>
+<codeline lineno="199"><highlight class="normal"></highlight></codeline>
+<codeline lineno="203"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_GRAPHICS_CONTEXT&quot;</highlight><highlight class="normal">,<sp/>219},</highlight></codeline>
+<codeline lineno="204"><highlight class="normal"></highlight></codeline>
+<codeline lineno="209"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NVLINK_UNCORRECTABLE&quot;</highlight><highlight class="normal">,<sp/>220},</highlight></codeline>
+<codeline lineno="210"><highlight class="normal"></highlight></codeline>
+<codeline lineno="214"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_JIT_COMPILER_NOT_FOUND&quot;</highlight><highlight class="normal">,<sp/>221},</highlight></codeline>
+<codeline lineno="215"><highlight class="normal"></highlight></codeline>
+<codeline lineno="219"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_SOURCE&quot;</highlight><highlight class="normal">,<sp/>300},</highlight></codeline>
+<codeline lineno="220"><highlight class="normal"></highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_FILE_NOT_FOUND&quot;</highlight><highlight class="normal">,<sp/>301},</highlight></codeline>
+<codeline lineno="225"><highlight class="normal"></highlight></codeline>
+<codeline lineno="229"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_SHARED_OBJECT_SYMBOL_NOT_FOUND&quot;</highlight><highlight class="normal">,<sp/>302},</highlight></codeline>
+<codeline lineno="230"><highlight class="normal"></highlight></codeline>
+<codeline lineno="234"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_SHARED_OBJECT_INIT_FAILED&quot;</highlight><highlight class="normal">,<sp/>303},</highlight></codeline>
+<codeline lineno="235"><highlight class="normal"></highlight></codeline>
+<codeline lineno="239"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_OPERATING_SYSTEM&quot;</highlight><highlight class="normal">,<sp/>304},</highlight></codeline>
+<codeline lineno="240"><highlight class="normal"></highlight></codeline>
+<codeline lineno="245"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_HANDLE&quot;</highlight><highlight class="normal">,<sp/>400},</highlight></codeline>
+<codeline lineno="246"><highlight class="normal"></highlight></codeline>
+<codeline lineno="251"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NOT_FOUND&quot;</highlight><highlight class="normal">,<sp/>500},</highlight></codeline>
+<codeline lineno="252"><highlight class="normal"></highlight></codeline>
+<codeline lineno="260"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NOT_READY&quot;</highlight><highlight class="normal">,<sp/>600},</highlight></codeline>
+<codeline lineno="261"><highlight class="normal"></highlight></codeline>
+<codeline lineno="269"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_ILLEGAL_ADDRESS&quot;</highlight><highlight class="normal">,<sp/>700},</highlight></codeline>
+<codeline lineno="270"><highlight class="normal"></highlight></codeline>
+<codeline lineno="280"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_LAUNCH_OUT_OF_RESOURCES&quot;</highlight><highlight class="normal">,<sp/>701},</highlight></codeline>
+<codeline lineno="281"><highlight class="normal"></highlight></codeline>
+<codeline lineno="291"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_LAUNCH_TIMEOUT&quot;</highlight><highlight class="normal">,<sp/>702},</highlight></codeline>
+<codeline lineno="292"><highlight class="normal"></highlight></codeline>
+<codeline lineno="297"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_LAUNCH_INCOMPATIBLE_TEXTURING&quot;</highlight><highlight class="normal">,<sp/>703},</highlight></codeline>
+<codeline lineno="298"><highlight class="normal"></highlight></codeline>
+<codeline lineno="304"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_PEER_ACCESS_ALREADY_ENABLED&quot;</highlight><highlight class="normal">,<sp/>704},</highlight></codeline>
+<codeline lineno="305"><highlight class="normal"></highlight></codeline>
+<codeline lineno="311"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_PEER_ACCESS_NOT_ENABLED&quot;</highlight><highlight class="normal">,<sp/>705},</highlight></codeline>
+<codeline lineno="312"><highlight class="normal"></highlight></codeline>
+<codeline lineno="317"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_PRIMARY_CONTEXT_ACTIVE&quot;</highlight><highlight class="normal">,<sp/>708},</highlight></codeline>
+<codeline lineno="318"><highlight class="normal"></highlight></codeline>
+<codeline lineno="324"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_CONTEXT_IS_DESTROYED&quot;</highlight><highlight class="normal">,<sp/>709},</highlight></codeline>
+<codeline lineno="325"><highlight class="normal"></highlight></codeline>
+<codeline lineno="332"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_ASSERT&quot;</highlight><highlight class="normal">,<sp/>710},</highlight></codeline>
+<codeline lineno="333"><highlight class="normal"></highlight></codeline>
+<codeline lineno="339"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_TOO_MANY_PEERS&quot;</highlight><highlight class="normal">,<sp/>711},</highlight></codeline>
+<codeline lineno="340"><highlight class="normal"></highlight></codeline>
+<codeline lineno="345"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_HOST_MEMORY_ALREADY_REGISTERED&quot;</highlight><highlight class="normal">,<sp/>712},</highlight></codeline>
+<codeline lineno="346"><highlight class="normal"></highlight></codeline>
+<codeline lineno="351"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_HOST_MEMORY_NOT_REGISTERED&quot;</highlight><highlight class="normal">,<sp/>713},</highlight></codeline>
+<codeline lineno="352"><highlight class="normal"></highlight></codeline>
+<codeline lineno="360"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_HARDWARE_STACK_ERROR&quot;</highlight><highlight class="normal">,<sp/>714},</highlight></codeline>
+<codeline lineno="361"><highlight class="normal"></highlight></codeline>
+<codeline lineno="368"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_ILLEGAL_INSTRUCTION&quot;</highlight><highlight class="normal">,<sp/>715},</highlight></codeline>
+<codeline lineno="369"><highlight class="normal"></highlight></codeline>
+<codeline lineno="377"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_MISALIGNED_ADDRESS&quot;</highlight><highlight class="normal">,<sp/>716},</highlight></codeline>
+<codeline lineno="378"><highlight class="normal"></highlight></codeline>
+<codeline lineno="388"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_ADDRESS_SPACE&quot;</highlight><highlight class="normal">,<sp/>717},</highlight></codeline>
+<codeline lineno="389"><highlight class="normal"></highlight></codeline>
+<codeline lineno="396"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_INVALID_PC&quot;</highlight><highlight class="normal">,<sp/>718},</highlight></codeline>
+<codeline lineno="397"><highlight class="normal"></highlight></codeline>
+<codeline lineno="406"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_LAUNCH_FAILED&quot;</highlight><highlight class="normal">,<sp/>719},</highlight></codeline>
+<codeline lineno="407"><highlight class="normal"></highlight></codeline>
+<codeline lineno="417"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_COOPERATIVE_LAUNCH_TOO_LARGE&quot;</highlight><highlight class="normal">,<sp/>720},</highlight></codeline>
+<codeline lineno="418"><highlight class="normal"></highlight></codeline>
+<codeline lineno="422"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NOT_PERMITTED&quot;</highlight><highlight class="normal">,<sp/>800},</highlight></codeline>
+<codeline lineno="423"><highlight class="normal"></highlight></codeline>
+<codeline lineno="428"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_NOT_SUPPORTED&quot;</highlight><highlight class="normal">,<sp/>801},</highlight></codeline>
+<codeline lineno="429"><highlight class="normal"></highlight></codeline>
+<codeline lineno="433"><highlight class="normal"><sp/><sp/><sp/><sp/>{</highlight><highlight class="stringliteral">&quot;CUDA_ERROR_UNKNOWN&quot;</highlight><highlight class="normal">,<sp/>999},</highlight></codeline>
+<codeline lineno="434"><highlight class="normal"><sp/><sp/><sp/><sp/>{NULL,<sp/>-1}};</highlight></codeline>
+<codeline lineno="435"><highlight class="normal"></highlight></codeline>
+<codeline lineno="436"><highlight class="normal"></highlight><highlight class="comment">//<sp/>This<sp/>is<sp/>just<sp/>a<sp/>linear<sp/>search<sp/>through<sp/>the<sp/>array,<sp/>since<sp/>the<sp/>error_id&apos;s<sp/>are<sp/>not</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="437"><highlight class="normal"></highlight><highlight class="comment">//<sp/>always<sp/>ocurring<sp/>consecutively</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="438"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*getCudaDrvErrorString(CUresult<sp/>error_id)<sp/>{</highlight></codeline>
+<codeline lineno="439"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordtype">int</highlight><highlight class="normal"><sp/>index<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="440"><highlight class="normal"></highlight></codeline>
+<codeline lineno="441"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal"><sp/>(sCudaDrvErrorString[index].error_id<sp/>!=<sp/>error_id<sp/>&amp;&amp;</highlight></codeline>
+<codeline lineno="442"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>sCudaDrvErrorString[index].error_id<sp/>!=<sp/>-1)<sp/>{</highlight></codeline>
+<codeline lineno="443"><highlight class="normal"><sp/><sp/><sp/><sp/>index++;</highlight></codeline>
+<codeline lineno="444"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="445"><highlight class="normal"></highlight></codeline>
+<codeline lineno="446"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(sCudaDrvErrorString[index].error_id<sp/>==<sp/>error_id)</highlight></codeline>
+<codeline lineno="447"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*)sCudaDrvErrorString[index].error_string;</highlight></codeline>
+<codeline lineno="448"><highlight class="normal"><sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="449"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">return</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">char</highlight><highlight class="normal"><sp/>*)</highlight><highlight class="stringliteral">&quot;CUDA_ERROR<sp/>not<sp/>found!&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="450"><highlight class="normal">}</highlight></codeline>
+<codeline lineno="451"><highlight class="normal"></highlight></codeline>
+<codeline lineno="452"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/><sp/></highlight><highlight class="comment">//<sp/>__cuda_cuda_h__</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="453"><highlight class="normal"></highlight></codeline>
+<codeline lineno="454"><highlight class="normal"></highlight><highlight class="preprocessor">#endif<sp/><sp/></highlight><highlight class="comment">//<sp/><sp/>COMMON_DRVAPI_ERROR_STRING_H_</highlight><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common10/drvapi_error_string.h"/>
+  </compounddef>
+</doxygen>

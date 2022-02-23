@@ -1,0 +1,411 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.9.3" xml:lang="en-US">
+  <compounddef id="logerror_8hpp" kind="file" language="C++">
+    <compoundname>logerror.hpp</compoundname>
+    <includes refid="include_8h" local="yes">../../inc/include.h</includes>
+    <includedby refid="prainalloc_8cu" local="yes">/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/prainalloc.cu</includedby>
+    <includedby refid="propagation_8cu" local="yes">/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu</includedby>
+    <includedby refid="sscprain_8cu" local="yes">/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/sscprain.cu</includedby>
+    <incdepgraph>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp</label>
+        <link refid="logerror_8hpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="9">
+        <label>helper_cuda.h</label>
+        <link refid="helper__cuda_8h_source"/>
+        <childnode refid="10" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="13" relation="include">
+        </childnode>
+      </node>
+      <node id="13">
+        <label>helper_string.h</label>
+        <link refid="helper__string_8h_source"/>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="11" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="12" relation="include">
+        </childnode>
+        <childnode refid="16" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>../../inc/include.h</label>
+        <link refid="include_8h"/>
+        <childnode refid="3" relation="include">
+        </childnode>
+        <childnode refid="4" relation="include">
+        </childnode>
+        <childnode refid="5" relation="include">
+        </childnode>
+        <childnode refid="6" relation="include">
+        </childnode>
+        <childnode refid="7" relation="include">
+        </childnode>
+        <childnode refid="8" relation="include">
+        </childnode>
+        <childnode refid="9" relation="include">
+        </childnode>
+        <childnode refid="17" relation="include">
+        </childnode>
+        <childnode refid="18" relation="include">
+        </childnode>
+        <childnode refid="19" relation="include">
+        </childnode>
+        <childnode refid="14" relation="include">
+        </childnode>
+        <childnode refid="20" relation="include">
+        </childnode>
+        <childnode refid="21" relation="include">
+        </childnode>
+        <childnode refid="22" relation="include">
+        </childnode>
+        <childnode refid="15" relation="include">
+        </childnode>
+        <childnode refid="23" relation="include">
+        </childnode>
+        <childnode refid="24" relation="include">
+        </childnode>
+        <childnode refid="25" relation="include">
+        </childnode>
+        <childnode refid="26" relation="include">
+        </childnode>
+        <childnode refid="27" relation="include">
+        </childnode>
+      </node>
+      <node id="18">
+        <label>../inc/prain.h</label>
+        <link refid="prain_8h"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="20">
+        <label>cassert</label>
+      </node>
+      <node id="25">
+        <label>chrono</label>
+      </node>
+      <node id="5">
+        <label>complex.h</label>
+      </node>
+      <node id="23">
+        <label>cublas.h</label>
+      </node>
+      <node id="3">
+        <label>cuda.h</label>
+      </node>
+      <node id="7">
+        <label>cuda_runtime_api.h</label>
+      </node>
+      <node id="4">
+        <label>cufft.h</label>
+      </node>
+      <node id="14">
+        <label>fstream</label>
+      </node>
+      <node id="24">
+        <label>future</label>
+      </node>
+      <node id="19">
+        <label>iostream</label>
+      </node>
+      <node id="27">
+        <label>omp.h</label>
+      </node>
+      <node id="22">
+        <label>sstream</label>
+      </node>
+      <node id="10">
+        <label>stdint.h</label>
+      </node>
+      <node id="8">
+        <label>stdio.h</label>
+      </node>
+      <node id="11">
+        <label>stdlib.h</label>
+      </node>
+      <node id="15">
+        <label>string</label>
+      </node>
+      <node id="12">
+        <label>string.h</label>
+      </node>
+      <node id="16">
+        <label>strings.h</label>
+      </node>
+      <node id="6">
+        <label>tgmath.h</label>
+      </node>
+      <node id="26">
+        <label>thread</label>
+      </node>
+      <node id="17">
+        <label>time.h</label>
+      </node>
+      <node id="21">
+        <label>vector</label>
+      </node>
+    </incdepgraph>
+    <invincdepgraph>
+      <node id="1">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp</label>
+        <link refid="logerror_8hpp"/>
+        <childnode refid="2" relation="include">
+        </childnode>
+      </node>
+      <node id="2">
+        <label>/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/src/propagation.cu</label>
+        <link refid="propagation_8cu"/>
+      </node>
+    </invincdepgraph>
+      <sectiondef kind="define">
+      <memberdef kind="define" id="logerror_8hpp_1adfb85e36cfe1268c9a886608a71a83c9" prot="public" static="no">
+        <name>cudaCheckError</name>
+        <param></param>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="17" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="17" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1a3f6ea8e9ef58125936d50d7e1181aa7a" prot="public" static="no">
+        <name>gpuErrchk</name>
+        <param><defname>ans</defname></param>
+        <initializer>{}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="26" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="26" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1a4e7f50fd1b48cb84f307c5fe6e55f933" prot="public" static="no">
+        <name>LogB</name>
+        <param><defname>x</defname></param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="49" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="49" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1a4da3e92114eed0c5d4a42d9c665cc013" prot="public" static="no">
+        <name>LogE</name>
+        <param></param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="50" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="50" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1a2c7ccb2d2573e1052d1220b4b57ae3f4" prot="public" static="no">
+        <name>SyncDebug</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="51" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="51" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1a1fc2ea23cb878afb3b4591e44761034b" prot="public" static="no">
+        <name>Log</name>
+        <param><defname>message</defname></param>
+        <initializer>{ std::cout &lt;&lt; message &lt;&lt; std::endl; }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="53" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="53" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1adbebce03d7cc1a43831288d4455f1b99" prot="public" static="no">
+        <name>LogTbegin</name>
+        <param><defname>file</defname></param>
+        <param><defname>message</defname></param>
+        <initializer>{ std::ofstream Timefile; Timefile.open(file, std::ofstream::out); Timefile &lt;&lt; message ; Timefile.close();}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="55" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="55" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1a04dde34f001484347efd21bb33500433" prot="public" static="no">
+        <name>LogT</name>
+        <param><defname>file</defname></param>
+        <param><defname>message</defname></param>
+        <initializer>{ std::ofstream Timefile; Timefile.open(file, std::ofstream::out | std::ofstream::app); Timefile &lt;&lt; message ; Timefile.close();}</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="57" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="57" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1a16adff246b03b48011f56f2b5c7e8aa0" prot="public" static="no">
+        <name>ErrorAssert</name>
+        <param><defname>statement</defname></param>
+        <param><defname>message</defname></param>
+        <initializer>{ if(!(statement)){ std::cerr &lt;&lt; __LINE__ &lt;&lt; &quot; in &quot; &lt;&lt; __FILE__ &lt;&lt; &quot;: &quot; &lt;&lt; message &lt;&lt; &quot;\n&quot; &lt;&lt; std::endl; Log(message); SaveLog(); exit(-1); } }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="59" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="59" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1aae7b8707502344058127c0fd7fdb3338" prot="public" static="no">
+        <name>Warning</name>
+        <param><defname>statement</defname></param>
+        <param><defname>message</defname></param>
+        <initializer>{ if(!(statement)){ std::cerr &lt;&lt; __LINE__ &lt;&lt; &quot; in &quot; &lt;&lt; __FILE__ &lt;&lt; &quot;: &quot; &lt;&lt; message &lt;&lt; &quot;\n&quot; &lt;&lt; std::endl; Log(message); SaveLog(); } }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="61" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="61" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1afedff205bb1363539f56b8e615267d99" prot="public" static="no">
+        <name>HANDLE_ERROR</name>
+        <param><defname>errexp</defname></param>
+        <initializer>{ cudaError_t cudaerror = errexp; ErrorAssert( cudaerror == cudaSuccess, &quot;Cuda error: &quot; &lt;&lt; std::string(cudaGetErrorString( cudaerror )) ) }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="63" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="63" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="define" id="logerror_8hpp_1a490a624dddbfc31af5237afaa1f628c4" prot="public" static="no">
+        <name>HANDLE_FFTERROR</name>
+        <param><defname>errexp</defname></param>
+        <initializer>{ cufftResult fftres = errexp; ErrorAssert( fftres == CUFFT_SUCCESS, &quot;Cufft error: &quot; &lt;&lt; std::string(_cudaGetErrorEnum( fftres )) ) }</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="65" column="9" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="65" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="logerror_8hpp_1a861dd3af64e7f9937c883a125929f13e" prot="public" static="no" const="no" explicit="no" inline="yes" virt="non-virtual">
+        <type>void</type>
+        <definition>void SaveLog</definition>
+        <argsstring>()</argsstring>
+        <name>SaveLog</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" line="48" column="13" bodyfile="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp" bodystart="48" bodyend="48"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para><simplesect kind="author"><para>your name (<ulink url="mailto:you@domain.com">you@domain.com</ulink>) </para>
+</simplesect>
+<simplesect kind="version"><para>0.1 </para>
+</simplesect>
+<simplesect kind="date"><para>2021-06-14</para>
+</simplesect>
+<simplesect kind="copyright"><para>Copyright (c) 2021 </para>
+</simplesect>
+</para>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="12"><highlight class="normal"></highlight><highlight class="preprocessor">#ifndef<sp/>LOG_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="13"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LOG_H</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="14"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"></highlight><highlight class="preprocessor">#include<sp/>&quot;../../inc/include.h&quot;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="16"><highlight class="normal"></highlight></codeline>
+<codeline lineno="17"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>cudaCheckError(){}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="18"><highlight class="normal"></highlight><highlight class="comment">//<sp/>\</highlight></codeline>
+<codeline lineno="19"><highlight class="comment">//<sp/><sp/>cudaError_t<sp/>e<sp/>=<sp/>cudaGetLastError();<sp/>\</highlight></codeline>
+<codeline lineno="20"><highlight class="comment">//<sp/><sp/>if<sp/>(e<sp/>!=<sp/>cudaSuccess){<sp/>\</highlight></codeline>
+<codeline lineno="21"><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/>fprintf(stderr,&quot;<sp/>Cuda<sp/>Failure<sp/>%s:<sp/>%d:<sp/>&apos;%s&apos;<sp/>\n&quot;,<sp/>__FILE__,__LINE__,<sp/>cudaGetErrorString(e));<sp/>\</highlight></codeline>
+<codeline lineno="22"><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/>exit(0);<sp/>\</highlight></codeline>
+<codeline lineno="23"><highlight class="comment">//<sp/><sp/>}<sp/>\</highlight></codeline>
+<codeline lineno="24"><highlight class="comment">//<sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="25"><highlight class="normal"></highlight></codeline>
+<codeline lineno="26"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>gpuErrchk(ans)<sp/>{}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="27"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/>gpuAssert((ans));<sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="28"><highlight class="normal"></highlight><highlight class="comment">//<sp/>inline<sp/>void<sp/>gpuAssert(cudaError_t<sp/>code)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="29"><highlight class="normal"></highlight><highlight class="comment">//<sp/>{</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="30"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/>if<sp/>(code<sp/>!=<sp/>cudaSuccess)<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="31"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/>{</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="32"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>fprintf(stderr,&quot;Cuda<sp/>Failure<sp/>%s<sp/>%s<sp/>%d\n&quot;,<sp/>cudaGetErrorString(code),<sp/>__FILE__,__LINE__);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="33"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>//if<sp/>(abort)<sp/>{<sp/>getchar();<sp/>exit(code);<sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>getchar();<sp/>exit(code);<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="35"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="36"><highlight class="normal"></highlight><highlight class="comment">//<sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="37"><highlight class="normal"></highlight></codeline>
+<codeline lineno="38"><highlight class="normal"></highlight><highlight class="comment">//<sp/>#define<sp/>cufftSafeCall(err)<sp/><sp/>__cufftSafeCall(err,<sp/>__FILE__,<sp/>__LINE__)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="39"><highlight class="normal"></highlight><highlight class="comment">//<sp/>inline<sp/>void<sp/>__cufftSafeCall(cufftResult<sp/>err,<sp/>const<sp/>char<sp/>*file,<sp/>const<sp/>int<sp/>line)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"></highlight><highlight class="comment">//<sp/>{</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="41"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/>if(<sp/>CUFFT_SUCCESS<sp/>!=<sp/>err)<sp/>{</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="42"><highlight class="normal"></highlight><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>fprintf(stderr,<sp/>&quot;CUFFT<sp/>error<sp/>in<sp/>file<sp/>&apos;%s&apos;,<sp/>line<sp/>%d\n<sp/>error<sp/>%d:<sp/>%s\nterminating!\n&quot;,<sp/>file,<sp/>line,<sp/>err,<sp/>_cudaGetErrorEnum(err));<sp/>\</highlight></codeline>
+<codeline lineno="43"><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>cudaDeviceReset();<sp/>assert(0);<sp/>\</highlight></codeline>
+<codeline lineno="44"><highlight class="comment">//<sp/><sp/><sp/><sp/><sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight><highlight class="comment">//<sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"></highlight></codeline>
+<codeline lineno="47"><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"></highlight><highlight class="keyword">inline</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>SaveLog(){};</highlight></codeline>
+<codeline lineno="49"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LogB(x)</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LogE()</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>SyncDebug</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"></highlight></codeline>
+<codeline lineno="53"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>Log(message){<sp/>std::cout<sp/>&lt;&lt;<sp/>message<sp/>&lt;&lt;<sp/>std::endl;<sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LogTbegin(file,<sp/>message){<sp/>std::ofstream<sp/>Timefile;<sp/>Timefile.open(file,<sp/>std::ofstream::out);<sp/>Timefile<sp/>&lt;&lt;<sp/>message<sp/>;<sp/>Timefile.close();}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="56"><highlight class="normal"></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>LogT(file,<sp/>message){<sp/>std::ofstream<sp/>Timefile;<sp/>Timefile.open(file,<sp/>std::ofstream::out<sp/>|<sp/>std::ofstream::app);<sp/>Timefile<sp/>&lt;&lt;<sp/>message<sp/>;<sp/>Timefile.close();}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="58"><highlight class="normal"></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>ErrorAssert(statement,<sp/>message){<sp/>if(!(statement)){<sp/>std::cerr<sp/>&lt;&lt;<sp/>__LINE__<sp/>&lt;&lt;<sp/>&quot;<sp/>in<sp/>&quot;</highlight><highlight class="normal"><sp/>&lt;&lt;<sp/>__FILE__<sp/>&lt;&lt;<sp/>&quot;:<sp/>&quot;<sp/>&lt;&lt;<sp/>message<sp/>&lt;&lt;<sp/>&quot;\n&quot;<sp/>&lt;&lt;<sp/>std::endl;<sp/>Log(message);<sp/>SaveLog();<sp/>exit(-1);<sp/>}<sp/>}</highlight></codeline>
+<codeline lineno="60"><highlight class="normal"></highlight></codeline>
+<codeline lineno="61"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>Warning(statement,<sp/>message){<sp/>if(!(statement)){<sp/>std::cerr<sp/>&lt;&lt;<sp/>__LINE__<sp/>&lt;&lt;<sp/>&quot;<sp/>in<sp/>&quot;</highlight><highlight class="normal"><sp/>&lt;&lt;<sp/>__FILE__<sp/>&lt;&lt;<sp/>&quot;:<sp/>&quot;<sp/>&lt;&lt;<sp/>message<sp/>&lt;&lt;<sp/>&quot;\n&quot;<sp/>&lt;&lt;<sp/>std::endl;<sp/>Log(message);<sp/>SaveLog();<sp/>}<sp/>}</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>HANDLE_ERROR(errexp){<sp/>cudaError_t<sp/>cudaerror<sp/>=<sp/>errexp;<sp/>ErrorAssert(<sp/>cudaerror<sp/>==<sp/>cudaSuccess,<sp/>&quot;Cuda<sp/>error:<sp/>&quot;</highlight><highlight class="normal"><sp/>&lt;&lt;<sp/>std::string(cudaGetErrorString(<sp/>cudaerror<sp/>))<sp/>)<sp/>}</highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"></highlight><highlight class="preprocessor">#define<sp/>HANDLE_FFTERROR(errexp){<sp/>cufftResult<sp/>fftres<sp/>=<sp/>errexp;<sp/>ErrorAssert(<sp/>fftres<sp/>==<sp/>CUFFT_SUCCESS,<sp/>&quot;Cufft<sp/>error:<sp/>&quot;</highlight><highlight class="normal"><sp/>&lt;&lt;<sp/>std::string(_cudaGetErrorEnum(<sp/>fftres<sp/>))<sp/>)<sp/>}</highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"></highlight><highlight class="preprocessor">#endif</highlight></codeline>
+    </programlisting>
+    <location file="/Users/eduardo.miqueles/Desktop/ssc-doc/ssc-prain/cuda/inc/common/logerror.hpp"/>
+  </compounddef>
+</doxygen>
