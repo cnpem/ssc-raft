@@ -42,18 +42,22 @@ def _iterations_em_mpfsupy_(sino, niter, device):
     block   = sino.shape[0]
     nangles = sino.shape[1]
     recsize = sino.shape[2]
+    tol     = 1e-5
     
-    start = time.time()
-    
-    backcounts = backprojection.ss( counts, device)
-    recon      = numpy.ones([block, recsize, recsize])
-    
-    for m in range(niter):
-        _s_ = radon.radon_gpu( recon, nangles, device)
-        _r_ = cflat * numpy.exp(-_s_)
-        recon = recon * backprojection.ss( _r_, device) / backcounts
-
-    elapsed = time.time() - start
+    if abs( sino.sum() ) < tol:
+        recon = numpy.zeros([block, recsize, recsize])
+    else:    
+        start = time.time()
+        
+        backcounts = backprojection.ss( counts, device)
+        recon      = numpy.ones([block, recsize, recsize])
+        
+        for m in range(niter):
+            _s_ = radon.radon_gpu( recon, nangles, device)
+            _r_ = cflat * numpy.exp(-_s_)
+            recon = recon * backprojection.ss( _r_, device) / backcounts
+            
+        elapsed = time.time() - start
         
     return recon
 
