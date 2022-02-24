@@ -1,0 +1,15 @@
+CHANGES.txt
+LICENSE.txt
+MANIFEST.in
+README.md
+setup.py
+cuda/benchmark.cu
+sscRaft/__init__.py
+sscRaft/rafttypes.py
+sscRaft.egg-info/PKG-INFO
+sscRaft.egg-info/SOURCES.txt
+sscRaft.egg-info/dependency_links.txt
+sscRaft.egg-info/not-zip-safe
+sscRaft.egg-info/top_level.txt
+sscRaft/parallel/__init__.py
+sscRaft/parallel/parallel.py

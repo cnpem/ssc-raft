@@ -17,10 +17,10 @@ import shutil
 
 # Set Python package requirements for installation.   
 
-#install_requires = [
+install_requires = [
 #    'numpy>=1.7.0',
 #    'scipy>=0.12.0',
-#]
+]
 
 compile_cuda = 0
 
@@ -100,17 +100,17 @@ for requirement in install_requires:
 if CUDA:
     pwd = os.getcwd()
 
-    radon_codes = set(glob.glob('cuda/*.c*'))
-    radon_include = pwd + '/cuda/common/common10/'
+    raft_codes = set(glob.glob('cuda/*.c*'))
+    raft_include = pwd + '/cuda/common/common10/'
 
-    ext_radon = Extension(name='sscRadon.lib.libradon',
-		          sources=list(radon_codes),
+    ext_raft = Extension(name='sscRaft.lib.libraft',
+		          sources=list(raft_codes),
                           library_dirs=[CUDA['lib']],
                           runtime_library_dirs=[CUDA['lib']],
                           extra_compile_args={'nvcc': ['-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
                               #'-gencode=arch=compute_35,code=sm_35']},
                           extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas'],
-                          include_dirs = [ CUDA['include'], radon_include ])
+                          include_dirs = [ CUDA['include'], raft_include ])
     
 else:
     print('ssc-raft: Error! Compile with --cuda !')
