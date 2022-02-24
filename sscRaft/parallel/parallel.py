@@ -27,7 +27,8 @@ def CNICE(darray,dtype=numpy.float32):
         return numpy.ascontiguousarray(darray)
     else:
         return darray
-    
+
+
 #LEGEND:
 #------
 #mpfsupy: (m)ulti(p)rocessing (f)rom (s)inograms (u)sing (py)thon
@@ -41,26 +42,39 @@ def _iterations_em_mpfsupy_(sino, niter, device):
     cflat  = numpy.ones(sino.shape)
     block   = sino.shape[0]
     nangles = sino.shape[1]
+    nrays   = sino.shape[2]
     recsize = sino.shape[2]
-    tol     = 1e-5
+    tol     = 1e-4
     
-    if abs( sino.sum() ) < tol:
-        recon = numpy.zeros([block, recsize, recsize])
-    else:    
-        start = time.time()
-        
-        backcounts = backprojection.ss( counts, device)
-        recon      = numpy.ones([block, recsize, recsize])
-        
-        for m in range(niter):
-            _s_ = radon.radon_gpu( recon, nangles, device)
-            _r_ = cflat * numpy.exp(-_s_)
-            recon = recon * backprojection.ss( _r_, device) / backcounts
-            
-        elapsed = time.time() - start
-        
+    start = time.time()
+    
+    '''
+    backcounts = backprojection.ss( counts, device)
+    recon      = numpy.ones([block, recsize, recsize])
+    
+    for m in range(niter):
+        _s_ = radon.radon_gpu( recon, nangles, device)
+        _r_ = cflat * numpy.exp(-_s_)
+        recon = recon * backprojection.ss( _r_, device) / backcounts
+                
     return recon
+    '''
 
+    recon   = numpy.ones([block, recsize, recsize])
+    recon_p = recon.ctypes.data_as(void_p)
+
+    c   = CNICE(counts) #count pointer
+    c_p = c.ctypes.data_as(void_p) 
+
+    f   = CNICE(cflat) #flat pointer
+    f_p = f.ctypes.data_as(void_p) 
+    
+    libraft.EM( recon_p, c_p, f_p, int32(recsize), int32(nrays), int32(nangles), int32(block),
+                int32(device), int32(niter))
+
+    elapsed = time.time() - start
+
+    return recon
 
 def _worker_em_mpfsupy_(params, idx_start,idx_end, gpu, blocksize):
 
@@ -73,8 +87,11 @@ def _worker_em_mpfsupy_(params, idx_start,idx_end, gpu, blocksize):
     for k in range(nblocks):
         _start_ = idx_start + k * blocksize
         _end_   = _start_ + blocksize
+        
+        print('--> ids,ide: GPU({})'.format(gpu), idx_start, idx_end )
+        print('  > GPU[{}]'.format(gpu),_start_, _end_)
         output[_start_:_end_,:,:] = _iterations_em_mpfsupy_(  data[_start_:_end_, :, :],  niter, gpu )
-    
+        
     
 def _build_em_mpfsupy_(params):
 

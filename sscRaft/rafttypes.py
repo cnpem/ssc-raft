@@ -37,25 +37,18 @@ def load_library(lib,ext):
     return None
 
 
-libradon  = load_library(_lib, ext)
+libraft  = load_library(_lib, ext)
 
 #########################
 
-'''
 try:
-    libradon.radonp_gpu.argtypes = [ctypes.c_void_p, ctypes.c_void_p, c_int, c_int, c_int, c_int, c_int, c_float]
-    libradon.radonp_gpu.restype  = None  
-
-    libradon.radonp_local_gpu.argtypes = [ctypes.c_void_p, ctypes.c_void_p, c_int, c_int, c_int, c_int, c_int, c_float, c_int, c_int]
-    libradon.radonp_local_gpu.restype  = None 
-
-    libradon.radonp_ray.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int, ctypes.c_int]
-    libradon.radonp_ray.restype = ctypes.c_float
+    libraft.EM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                           c_int, c_int, c_int, c_int, c_int, c_int]
+    libraft.EM.restype  = None
 
 except:
     pass
 
-'''
 
 ##############
 #|          |#
