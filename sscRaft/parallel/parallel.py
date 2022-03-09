@@ -241,7 +241,7 @@ def emfs( tomogram, dic ):
         dic: input dictionary 
         
     Returns:
-        (ndarray): stacking 3D reconstructed volume  
+        (ndarray, ndarray): stacking 3D reconstructed volume, reconstructed sinograms  
 
     * CPU function
     * This function uses a shared array through package 'SharedArray'.
