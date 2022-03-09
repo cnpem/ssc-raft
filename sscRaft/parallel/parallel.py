@@ -200,7 +200,7 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
     
     for k in range(nblocks):
         _start_ = idx_start + k * blocksize
-        _end_   = _start_ + blocksize
+        _end_   = min( _start_ + blocksize, idx_end) 
         #print('--> Process {}: GPU({}) / [{},{}]'.format(process, gpu, _start_, _end_) )
         output1[_start_:_end_,:,:], output2[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps)
         
@@ -258,13 +258,13 @@ def emfs( tomogram, dic ):
       number of iterations for EM/TV number of iterations, as indicated by Yan & Luminita`s article.
     * ``dic['regularization']``:  Regularization parameter for EM/TV
     * ``dic['epsilon']``:  Smoothness for the TV operator
-    * ``dic['methd']``:  EM-method type ``eEM``, ``tEM`` or ``EM/TV``
+    * ``dic['method']``:  EM-method type ``eEM``, ``tEM`` or ``EM/TV``
     
        #. ``eEM`` refers to the  Emission Expectation Maximization Algorithm, where we solve
           :math:`Ax = b`, being :math:`A` the discretized version for the Radon transform and 
           :math:`b` the input sinograms in the parallel geometry.
 
-       #. ``tEM``refers to the Transmission Expectation Maximization Algorithm, where we solve
+       #. ``tEM`` refers to the Transmission Expectation Maximization Algorithm, where we solve
           :math:`Ax = b` using :math:`exp(-b)` as the photon count and 1's as the flat-field 
           measurement. 
 
