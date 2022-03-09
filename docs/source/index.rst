@@ -17,8 +17,11 @@ as long as they are tested and developed by the Scientific Computing team.
 **Author(s)**
         
         Eduardo Miqueles (eduardo.miqueles@lnls.br)
+
         Paola Ferraz Cunha
+
         Gilberto Martinez Jr. 
+
         Giovanni L Baraldi 
         
 
