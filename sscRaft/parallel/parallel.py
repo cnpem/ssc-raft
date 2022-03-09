@@ -31,34 +31,133 @@ def CNICE(darray,dtype=numpy.float32):
 
 #LEGEND:
 #------
-#mpfsupy: (m)ulti(p)rocessing (f)rom (s)inograms (u)sing (py)thon
-#mpfsucu: (m)ulti(p)rocessing (f)rom (s)inograms (u)sing (cu)da
-#
+# mpfs: (m)ulti(p)rocessing (f)rom (s)inograms 
 #
 
-def _iterations_em_mpfsupy_(sino, niter, device):
+def _iterations_emtv_mpfs_(sino, niter, device, reg, eps):
     
-    counts = numpy.exp(-sino)
-    cflat  = numpy.ones(sino.shape)
     block   = sino.shape[0]
     nangles = sino.shape[1]
     nrays   = sino.shape[2]
     recsize = sino.shape[2]
-    tol     = 1e-4
+
+    def iterem(x, sino, nangles, device, b):
+        rad = radon.radon_gpu(x, nangles, device)
+        y = sino/(rad) 
+        y[ numpy.isnan(y)] = 0
+        u = x * backprojection.ss( y, device) / b
+        error = numpy.linalg.norm( u - x)
+        return u, error, rad
+
+    def itertv(y, x, sino, nangles, device, b, reg, eps):
+        sqrtA = eps + (numpy.roll(y,1,0) - y)**2 + (numpy.roll(y,1,1) - y)**2
+        A     = -reg * b * numpy.sqrt( sqrtA )
+        
+        sqrtB = eps + (y - numpy.roll(y,-1,0))**2 + (numpy.roll(numpy.roll(y,-1,0),1,1) - numpy.roll(y,-1,0))**2 
+        B     =  reg * b * numpy.sqrt( sqrtB )
+        C     = A
+        
+        sqrtD = eps + (numpy.roll(numpy.roll(y,1,0),-1,1) - numpy.roll(y,-1,1))**2 + (y - numpy.roll(y,-1,1))**2
+        D     = reg * b * numpy.sqrt( sqrtD )
+        
+        rhs = x - y * ( numpy.roll(y,1,0)/A - numpy.roll(y,-1,0)/B + numpy.roll(y,1,1)/C - numpy.roll(y,-1,1)/D )
+        u   = rhs / ( y * (-1/A + 1/B - 1/C + 1/D) + 1)
+        
+        error = numpy.linalg.norm(u - y)                    
+        return u, error
     
-    start = time.time()
+    sinoones = numpy.ones(sino.shape)
+    backones = backprojection.ss( sinoones, device)
     
-    '''
-    backcounts = backprojection.ss( counts, device)
-    recon      = numpy.ones([block, recsize, recsize])
-    
-    for m in range(niter):
-        _s_ = radon.radon_gpu( recon, nangles, device)
-        _r_ = cflat * numpy.exp(-_s_)
-        recon = recon * backprojection.ss( _r_, device) / backcounts
+    x = numpy.ones([block, recsize, recsize])
+    x, error, _ = iterem(x, sino, nangles, device, backones)
+
+    niter_em = niter[1]
+    niter_tv = niter[2]
+  
+    for m in range(niter[0]):
+
+        if True:
+            tmp = numpy.copy(x)
+            
+            #EM step
+            for k in range(niter_em):
+                x,_, rad = iterem(x, sino, nangles, device, backones)
                 
-    return recon
+            #TV step
+            y = numpy.copy(x) 
+
+            for k in range(niter_tv):
+                y,_ = itertv(y, x, sino, nangles, device, backones, reg, eps) 
+
+            x = numpy.copy(y)
+
+            _error_ = numpy.linalg.norm(x - tmp)
+            
+            #print('EMTV',m,_error_, error)
+            if _error_ > error:
+                break
+            else:
+                error = _error_
+            ###
+            
+    return x, rad
+
+def _iterations_eem_mpfs_(sino, niter, device, reg, eps):
+    
+    block   = sino.shape[0]
+    nangles = sino.shape[1]
+    nrays   = sino.shape[2]
+    recsize = sino.shape[2]
+        
+    sinoones = numpy.ones(sino.shape)
+    backones = backprojection.ss( sinoones, device)
+    
+    def iterem(x, sino, nangles, device, b):
+        rad = radon.radon_gpu(x,  nangles, device )
+        y = sino/(rad)
+        y[ numpy.isnan(y) ] = 0
+        u = x * backprojection.ss( y, device) / b
+        error = numpy.linalg.norm( u - x)
+        return u, error, rad
+
+    x = numpy.ones([block, recsize, recsize])
+    x, error, _ = iterem(x, sino, nangles, device, backones)
+
+    for m in range(niter[0]):
+        x, error2, rad = iterem(x, sino, nangles, device, backones)
+        if error2 > error:
+            break
+        else:
+            error = error2
+            
+    return x, rad
+
+def _iterations_tem_mpfs_(sino, niter, device, reg, eps):
+
+    counts = numpy.exp(-sino)
+    cflat  = numpy.ones(sino.shape)
+    
+    block   = sino.shape[0]
+    nangles = sino.shape[1]
+    nrays   = sino.shape[2]
+    recsize = sino.shape[2]
+    
+    backcounts = backprojection.ss( counts, device)
+    x          = numpy.ones([block, recsize, recsize])
+    
+    for m in range(niter[0]):
+        _s_ = radon.radon_gpu( x, nangles, device)
+        _r_ = cflat * numpy.exp(-_s_)
+        x = x * backprojection.ss( _r_, device) / backcounts
+                
+    return x, _s_
+ 
     '''
+    counts = numpy.exp(-sino)
+    cflat  = numpy.ones(sino.shape)
+
+    start = time.time()
 
     recon   = numpy.ones([block, recsize, recsize])
     recon_p = recon.ctypes.data_as(void_p)
@@ -75,25 +174,38 @@ def _iterations_em_mpfsupy_(sino, niter, device):
     elapsed = time.time() - start
 
     return recon
-
-def _worker_em_mpfsupy_(params, idx_start,idx_end, gpu, blocksize):
+    '''
+    
+def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
 
     nblocks = ( idx_end + 1 - idx_start ) // blocksize
 
-    output  = params[0]
+    output1 = params[0][0]
+    output2 = params[0][1]
     data    = params[1]
     niter   = params[6]
+    reg     = params[7]
+    eps     = params[8]
+    method  = params[9]
+
+    if method=="tEM":
+        InversionMethod = _iterations_tem_mpfs_
+    elif method=="eEM":
+        InversionMethod = _iterations_eem_mpfs_
+    elif method=="EMTV":
+        InversionMethod = _iterations_emtv_mpfs_
+    else:
+        InversionMethod = _iterations_emtv_mpfs_
+    
     
     for k in range(nblocks):
         _start_ = idx_start + k * blocksize
         _end_   = _start_ + blocksize
-        
-        print('--> ids,ide: GPU({})'.format(gpu), idx_start, idx_end )
-        print('  > GPU[{}]'.format(gpu),_start_, _end_)
-        output[_start_:_end_,:,:] = _iterations_em_mpfsupy_(  data[_start_:_end_, :, :],  niter, gpu )
+        #print('--> Process {}: GPU({}) / [{},{}]'.format(process, gpu, _start_, _end_) )
+        output1[_start_:_end_,:,:], output2[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps)
         
     
-def _build_em_mpfsupy_(params):
+def _build_em_mpfs_(params):
 
     #_params_ = ( output, data, nslices, nangles, gpus, blocksize)
  
@@ -109,7 +221,7 @@ def _build_em_mpfsupy_(params):
         begin_ = k*b
         end_   = min( (k+1)*b, nslices )
 
-        p = multiprocessing.Process(target=_worker_em_mpfsupy_, args=(params, begin_, end_, gpus[k], blocksize ))
+        p = multiprocessing.Process(target=_worker_em_mpfs_, args=(params, begin_, end_, gpus[k], blocksize,k))
         processes.append(p)
     
     for p in processes:
@@ -122,7 +234,7 @@ def _build_em_mpfsupy_(params):
 
 def emfs( tomogram, dic ):
 
-    """ Transmission expectation maximization for 3D tomographic parallel sinograms
+    """ Expectation maximization for 3D tomographic parallel sinograms
 
     Args:
         tomogram: three-dimensional stack of sinograms 
@@ -141,8 +253,24 @@ def emfs( tomogram, dic ):
     * ``dic['nangles']``:  Number of angles
     * ``dic['gpu']``:  List of GPU devices used for computation 
     * ``dic['blocksize']``:  Number of images to compute parallel radon transform 
-    * ``dic['niterations']``:  Number of iterations for the EM algorithm.
-         
+    * ``dic['niterations']``:  Tuple for number of iterations. First position refers to the global number of
+      iterations for the {Transmission,Emission}/EM algorithms. Second and Third positions refer to the local 
+      number of iterations for EM/TV number of iterations, as indicated by Yan & Luminita`s article.
+    * ``dic['regularization']``:  Regularization parameter for EM/TV
+    * ``dic['epsilon']``:  Smoothness for the TV operator
+    * ``dic['methd']``:  EM-method type ``eEM``, ``tEM`` or ``EM/TV``
+    
+       #. ``eEM`` refers to the  Emission Expectation Maximization Algorithm, where we solve
+          :math:`Ax = b`, being :math:`A` the discretized version for the Radon transform and 
+          :math:`b` the input sinograms in the parallel geometry.
+
+       #. ``tEM``refers to the Transmission Expectation Maximization Algorithm, where we solve
+          :math:`Ax = b` using :math:`exp(-b)` as the photon count and 1's as the flat-field 
+          measurement. 
+
+       #. ``EM/TV`` refers to the combination of ``eEM`` and a Total variation step, as indicated
+          in the manuscript of Yan & Luminita ``DOI:10.1117/12.878238``.
+
     """
     
     nslices   = tomogram.shape[0]
@@ -151,23 +279,31 @@ def emfs( tomogram, dic ):
     gpus      = dic['gpu']
     blocksize = dic['blocksize']
     niter     = dic['niterations']
-
+    reg       = dic['regularization']
+    eps       = dic['epsilon']
+    method    = dic['method']
+    
     if blocksize > nslices // len(gpus):
-        print('ssc-radon: Error! Please check block size!')
+        print('ssc-raft: Error! Please check block size!')
     
-    name = str( uuid.uuid4())
-    
+    name1 = str( uuid.uuid4())
+    name2 = str( uuid.uuid4())
+
     try:
-        sa.delete(name)
+        sa.delete(name1)
+        sa.delete(name2)
     except:
         pass
         
-    output  = sa.create(name,[nslices, nrays, nrays], dtype=numpy.float32)
-    
-    _params_ = ( output, tomogram, nslices, nangles, gpus, blocksize, niter)
-    
-    _build_em_mpfsupy_( _params_ )
+    output1  = sa.create(name1,[nslices, nrays, nrays], dtype=numpy.float32)
 
-    sa.delete(name)
+    output2  = sa.create(name2,[nslices, nangles, nrays], dtype=numpy.float32)
     
-    return output
+    _params_ = ( [output1,output2], tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, method)
+    
+    _build_em_mpfs_( _params_ )
+
+    sa.delete(name1)
+    sa.delete(name2)
+    
+    return output1, output2
