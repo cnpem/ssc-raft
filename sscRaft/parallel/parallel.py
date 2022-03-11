@@ -34,8 +34,9 @@ def CNICE(darray,dtype=numpy.float32):
 # mpfs: (m)ulti(p)rocessing (f)rom (s)inograms 
 #
 
-def _iterations_emtv_mpfs_(sino, niter, device, reg, eps):
-    
+def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process):
+
+    '''
     block   = sino.shape[0]
     nangles = sino.shape[1]
     nrays   = sino.shape[2]
@@ -94,7 +95,7 @@ def _iterations_emtv_mpfs_(sino, niter, device, reg, eps):
 
             _error_ = numpy.linalg.norm(x - tmp)
             
-            #print('EMTV',m,_error_, error)
+            print('EMTV/Process[{}]/Iter[{}]:'.format(process,m),_error_, error)
             if _error_ > error:
                 break
             else:
@@ -102,9 +103,35 @@ def _iterations_emtv_mpfs_(sino, niter, device, reg, eps):
             ###
             
     return x, rad
+    '''
 
-def _iterations_eem_mpfs_(sino, niter, device, reg, eps):
+    block   = sino.shape[0]
+    nangles = sino.shape[1]
+    nrays   = sino.shape[2]
+    recsize = sino.shape[2]
     
+    start = time.time()
+
+    x   = numpy.zeros([block, recsize, recsize], dtype=numpy.float32)
+    x_p = x.ctypes.data_as(void_p)
+
+    s   = CNICE(sino) #sino pointer
+    s_p = s.ctypes.data_as(void_p) 
+    
+    libraft.EMTV( x_p, s_p,
+                  int32(recsize), int32(nrays),
+                  int32(nangles), int32(block),
+                  int32(device),  int32(niter[0]),
+                  int32(niter[1]),int32(niter[2]),
+                  float32(reg), float32(eps))
+    
+    elapsed = time.time() - start
+
+    return x, numpy.zeros(sino.shape)
+
+def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process):
+
+    '''
     block   = sino.shape[0]
     nangles = sino.shape[1]
     nrays   = sino.shape[2]
@@ -116,7 +143,7 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps):
     def iterem(x, sino, nangles, device, b):
         rad = radon.radon_gpu(x,  nangles, device )
         y = sino/(rad)
-        y[ numpy.isnan(y) ] = 0
+        y[ rad==0 ] = 0
         u = x * backprojection.ss( y, device) / b
         error = numpy.linalg.norm( u - x)
         return u, error, rad
@@ -132,9 +159,34 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps):
             error = error2
             
     return x, rad
+    '''
 
-def _iterations_tem_mpfs_(sino, niter, device, reg, eps):
+    block   = sino.shape[0]
+    nangles = sino.shape[1]
+    nrays   = sino.shape[2]
+    recsize = sino.shape[2]
+    
+    start = time.time()
 
+    x   = numpy.zeros([block, recsize, recsize], dtype=numpy.float32)
+    x_p = x.ctypes.data_as(void_p)
+
+    s   = CNICE(sino) #sino pointer
+    s_p = s.ctypes.data_as(void_p) 
+    
+    libraft.eEM( x_p, s_p,
+                 int32(recsize), int32(nrays),
+                 int32(nangles), int32(block),
+                 int32(device),  int32(niter[0]))
+
+    elapsed = time.time() - start
+
+    return x, numpy.zeros(sino.shape)
+
+
+def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process):
+
+    '''
     counts = numpy.exp(-sino)
     cflat  = numpy.ones(sino.shape)
     
@@ -152,15 +204,19 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps):
         x = x * backprojection.ss( _r_, device) / backcounts
                 
     return x, _s_
- 
     '''
+    
     counts = numpy.exp(-sino)
     cflat  = numpy.ones(sino.shape)
-
+    block   = sino.shape[0]
+    nangles = sino.shape[1]
+    nrays   = sino.shape[2]
+    recsize = sino.shape[2]
+    
     start = time.time()
 
-    recon   = numpy.ones([block, recsize, recsize])
-    recon_p = recon.ctypes.data_as(void_p)
+    x   = numpy.zeros([block, recsize, recsize], dtype=numpy.float32)
+    x_p = x.ctypes.data_as(void_p)
 
     c   = CNICE(counts) #count pointer
     c_p = c.ctypes.data_as(void_p) 
@@ -168,13 +224,14 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps):
     f   = CNICE(cflat) #flat pointer
     f_p = f.ctypes.data_as(void_p) 
     
-    libraft.EM( recon_p, c_p, f_p, int32(recsize), int32(nrays), int32(nangles), int32(block),
-                int32(device), int32(niter))
-
+    libraft.tEM( x_p, c_p, f_p,
+                 int32(recsize), int32(nrays),
+                 int32(nangles), int32(block),
+                 int32(device), int32(niter[0]))
+    
     elapsed = time.time() - start
 
-    return recon
-    '''
+    return x, numpy.zeros(sino.shape)
     
 def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
 
@@ -202,9 +259,9 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
         _start_ = idx_start + k * blocksize
         _end_   = min( _start_ + blocksize, idx_end) 
         #print('--> Process {}: GPU({}) / [{},{}]'.format(process, gpu, _start_, _end_) )
-        output1[_start_:_end_,:,:], output2[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps)
+        output1[_start_:_end_,:,:], output2[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process)
         
-    
+        
 def _build_em_mpfs_(params):
 
     #_params_ = ( output, data, nslices, nangles, gpus, blocksize)

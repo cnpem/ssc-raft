@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <cublas_v2.h>
 
 #define PI 3.141592653589793238462643383279502884
 
@@ -10,6 +11,8 @@
 #define TPBY 16
 #define TPBZ 4
 #define TPBE 256
+
+#define SQR(x) ((x)*(x))
 
 extern "C" {
   __global__ void kernel_ones(float *output, int sizeImage, int nrays, int nangles,  int blockSize)
@@ -63,6 +66,28 @@ extern "C" {
 
 
 extern "C" {
+  // difference in the Feature domain: square images of order 'sizeImage'
+  // inplace: y = y - x
+  
+  __global__ void kernel_difference_F(float *y, float *x,
+				      int sizeImage, int blockSize)
+  {
+    int tx = threadIdx.x + blockIdx.x*blockDim.x;
+    int ty = threadIdx.y + blockIdx.y*blockDim.y; 
+    int tz = threadIdx.z + blockIdx.z*blockDim.z;
+  
+    if ( (tx<sizeImage) && (ty < sizeImage) && (tz<blockSize)  )
+      {
+	int voxel = tz * sizeImage * sizeImage + ty * sizeImage + tx;
+
+	// inplace!
+       	y[voxel] = y[voxel] - x[voxel];
+      }
+  }
+}
+
+
+extern "C" {
   __global__ void kernel_backprojection(float *image, float *blocksino,
 					int sizeImage, int nrays, int nangles,  int blockSize)
   {
@@ -95,8 +120,7 @@ extern "C" {
 
 	  if ( (T > -1) && (T<nrays) )
 	    {
-	      //cs = cs + blocksino[ T * nangles + k];
-	      cs += blocksino[ z * sizeImage * sizeImage + k * nrays + T];
+	      cs += blocksino[ z * nrays * nangles + k * nrays + T];
 	    }
 	}
       image[z * sizeImage * sizeImage + j * sizeImage + i]  = (cs*dth); 
@@ -143,9 +167,13 @@ extern "C" {
   }
 }
 
+//---------------------------
+// transmission-EM algorithm
+//---------------------------
+
 extern "C" {
 
-  void EM(float *output, float *count, float *flat,
+  void tEM(float *output, float *count, float *flat,
 	  int sizeImage, int nrays, int nangles, int blockSize, int device, int niter)
   {
     cudaSetDevice(device);
@@ -156,7 +184,7 @@ extern "C" {
     cudaMalloc(&d_output, sizeof(float) *sizeImage *sizeImage*blockSize);
     cudaMalloc(&d_temp, sizeof(float)  * nrays * nangles*blockSize);
     cudaMalloc(&d_back, sizeof(float) *sizeImage *sizeImage*blockSize);
-    cudaMalloc(&d_backcounts, sizeof(float) * nrays * nangles*blockSize);
+    cudaMalloc(&d_backcounts, sizeof(float) * sizeImage * sizeImage*blockSize);
     
     // Allocate GPU memory for input image and copy
     cudaMalloc(&d_count, sizeof(float) * nrays * nangles*blockSize);
@@ -168,23 +196,28 @@ extern "C" {
     
     //GRID and BLOCKS SIZE
     dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-    dim3 gridBlock((int)ceil((nrays)/threadsPerBlock.x)+1,
+    dim3 gridBlockD((int)ceil((nrays)/threadsPerBlock.x)+1,
 		   (int)ceil((nangles)/threadsPerBlock.y)+1,
 		   (int)ceil(blockSize/threadsPerBlock.z)+1);
 
-    kernel_ones<<<gridBlock, threadsPerBlock>>>(d_output, sizeImage, nrays, nangles, blockSize);
+    dim3 gridBlockF((int)ceil((sizeImage)/threadsPerBlock.x)+1,
+		   (int)ceil((sizeImage)/threadsPerBlock.y)+1,
+		   (int)ceil(blockSize/threadsPerBlock.z)+1);
 
-    kernel_backprojection<<<gridBlock, threadsPerBlock>>>(d_backcounts, d_count, sizeImage, nrays, nangles, blockSize);
+    
+    kernel_ones<<<gridBlockF, threadsPerBlock>>>(d_output, sizeImage, nrays, nangles, blockSize);
+
+    kernel_backprojection<<<gridBlockF, threadsPerBlock>>>(d_backcounts, d_count, sizeImage, nrays, nangles, blockSize);
  
     for( k=0; k < niter; k++ ) {
 
-      kernel_radon<<<gridBlock, threadsPerBlock>>>(d_temp, d_output, sizeImage, nrays, nangles, blockSize, 1.0);
+      kernel_radon<<<gridBlockD, threadsPerBlock>>>(d_temp, d_output, sizeImage, nrays, nangles, blockSize, 1.0);
       
-      kernel_flatTimesExp<<<gridBlock, threadsPerBlock>>>(d_temp, d_flat, sizeImage, nrays, nangles, blockSize);
+      kernel_flatTimesExp<<<gridBlockD, threadsPerBlock>>>(d_temp, d_flat, sizeImage, nrays, nangles, blockSize);
       
-      kernel_backprojection<<<gridBlock, threadsPerBlock>>>(d_back, d_temp, sizeImage, nrays, nangles, blockSize);
+      kernel_backprojection<<<gridBlockF, threadsPerBlock>>>(d_back, d_temp, sizeImage, nrays, nangles, blockSize);
       
-      kernel_update<<<gridBlock, threadsPerBlock>>>(d_output, d_back, d_backcounts, sizeImage, nrays, nangles, blockSize);
+      kernel_update<<<gridBlockF, threadsPerBlock>>>(d_output, d_back, d_backcounts, sizeImage, nrays, nangles, blockSize);
       
       cudaDeviceSynchronize();
     }
@@ -203,3 +236,431 @@ extern "C" {
     
   }
 }
+
+//----------------------
+// emission-EM algorithm
+//----------------------
+
+extern "C" {
+  __global__ void kernel_radonWithDivision(float *output, float *input, float *sino,
+					   int sizeImage, int nrays, int nangles,
+					   int blockSize, float a)
+  {
+    float TOLZERO = 1e-5;
+    
+    int tx = threadIdx.x + blockIdx.x*blockDim.x; 
+    int ty = threadIdx.y + blockIdx.y*blockDim.y; 
+    int tz = threadIdx.z + blockIdx.z*blockDim.z;
+  
+    if ( (tx<nrays) && (ty < nangles) && (tz<blockSize)  ){
+ 
+      int k, X, Y, voxel;
+
+      float s, x, y, linesum, ctheta, stheta, theta, t;  
+      float dt = 2.0*a/(nrays-1);
+      float dtheta = PI/(nangles-1);
+      float value;
+      
+      theta = ty * dtheta;
+      ctheta =cosf(theta);
+      stheta =sinf(theta);
+      
+      t = - a + tx * dt; 
+      
+      linesum = 0;
+      for( k = 0; k < nrays; k++ ) {
+	s = - a + k * dt;
+	x = t * ctheta - s * stheta;
+	y = t * stheta + s * ctheta;
+	X = (int) ((x + 1)/dt);
+	Y = (int) ((y + 1)/dt);	 
+	if ((X >= 0) & (X<sizeImage) & (Y>=0) & (Y<sizeImage) )
+	  linesum += input[ tz * sizeImage * sizeImage + Y * sizeImage + X ];
+      }
+
+      value = linesum * dt;
+
+      voxel = tz * nrays * nangles + ty * nrays + tx;
+      
+      if ( fabs(value) > TOLZERO ) 
+	output[ voxel ] = sino[voxel] / value;	
+      else
+	output[ voxel ] = 0.0;
+    }
+  }
+}
+
+extern "C" {
+  __global__ void kernel_backprojectionWithUpdate(float *image, float *blocksino, float *backones,
+						  int sizeImage, int nrays, int nangles,  int blockSize)
+  {
+    int i, j, k, T, z, voxel;
+    float t, cs, x, y, cosk, sink;
+    float xymin = -1.0;
+    float dxy = 2.0 / (sizeImage - 1);
+    float dt = 2.0 / (nrays - 1);
+    float dth = PI / nangles;
+    float tmin = -1.0;
+    float value; 
+    
+    i = (blockDim.x * blockIdx.x + threadIdx.x);
+    j = (blockDim.y * blockIdx.y + threadIdx.y);
+    z = (blockDim.z * blockIdx.z + threadIdx.z);
+  
+    if ( (i<sizeImage) && (j < sizeImage) && (z<blockSize)  ){
+    
+      cs = 0;
+    
+      x = xymin + i * dxy;
+      y = xymin + j * dxy;
+    
+      for(k=0; k < (nangles); k++)
+	{
+	  __sincosf(k * dth, &sink, &cosk);
+	
+	  t = x * cosk + y * sink;
+	
+	  T = (int) ((t - tmin)/dt);	     
+
+	  if ( (T > -1) && (T<nrays) )
+	    {
+	      cs += blocksino[ z * nrays * nangles+ k * nrays + T];
+	    }
+	}
+
+      voxel = z * sizeImage * sizeImage + j * sizeImage + i;
+
+      value = (cs*dth);
+      
+      image[ voxel ]  = image[ voxel ] * value / backones[ voxel ]; 
+    }
+  }
+}
+
+extern "C" {
+  __global__ void kernel_backprojectionOfOnes(float *backones,
+					      int sizeImage, int nrays, int nangles,  int blockSize)
+  {
+    int i, j, k, T, z, voxel;
+    float t, cs, x, y, cosk, sink;
+    float xymin = -1.0;
+    float dxy = 2.0 / (sizeImage - 1);
+    float dt = 2.0 / (nrays - 1);
+    float dth = PI / nangles;
+    float tmin = -1.0;
+    
+    i = (blockDim.x * blockIdx.x + threadIdx.x);
+    j = (blockDim.y * blockIdx.y + threadIdx.y);
+    z = (blockDim.z * blockIdx.z + threadIdx.z);
+  
+    if ( (i<sizeImage) && (j < sizeImage) && (z<blockSize)  ){
+    
+      cs = 0;
+    
+      x = xymin + i * dxy;
+      y = xymin + j * dxy;
+    
+      for(k=0; k < (nangles); k++)
+	{
+	  __sincosf(k * dth, &sink, &cosk);
+	
+	  t = x * cosk + y * sink;
+	
+	  T = (int) ((t - tmin)/dt);	     
+
+	  if ( (T > -1) && (T<nrays) )
+	    {
+	      cs += 1; //blocksino[ z * nrays * nangles+ k * nrays + T];
+	    }
+	}
+      
+      voxel = z * sizeImage * sizeImage + j * sizeImage + i;
+      
+      backones[ voxel ]  = (cs*dth); 
+    }
+  }
+}
+
+extern "C" {
+
+  void eEM(float *output, float *sino,
+	   int sizeImage, int nrays, int nangles, int blockSize, int device, int niter)
+  {
+    cudaSetDevice(device);
+    int k;
+    float *d_output, *d_sino, *d_backones, *d_temp, *d_ones;
+    
+    // Allocate GPU memory for the output image
+    cudaMalloc(&d_output, sizeof(float) *sizeImage *sizeImage*blockSize);
+    cudaMalloc(&d_temp, sizeof(float)  * nrays * nangles * blockSize);
+    cudaMalloc(&d_backones, sizeof(float) * sizeImage * sizeImage*blockSize);
+    cudaMalloc(&d_ones, sizeof(float) * nrays * nangles * blockSize);
+    
+    // Allocate GPU memory for input image and copy
+    cudaMalloc(&d_sino, sizeof(float) * nrays * nangles*blockSize);
+    cudaMemcpy(d_sino, sino, sizeof(float) * nrays * nangles*blockSize, cudaMemcpyHostToDevice);	
+    
+    //GRID and BLOCKS SIZE
+    dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+    dim3 gridBlockD((int)ceil((nrays)/threadsPerBlock.x)+1,
+		   (int)ceil((nangles)/threadsPerBlock.y)+1,
+		   (int)ceil(blockSize/threadsPerBlock.z)+1);
+
+    dim3 gridBlockF((int)ceil((sizeImage)/threadsPerBlock.x)+1,
+		   (int)ceil((sizeImage)/threadsPerBlock.y)+1,
+		   (int)ceil(blockSize/threadsPerBlock.z)+1);
+
+    
+    kernel_ones<<<gridBlockF, threadsPerBlock>>>(d_output, sizeImage, nrays, nangles, blockSize);
+
+    kernel_backprojectionOfOnes<<<gridBlockF, threadsPerBlock>>>(d_backones, sizeImage, nrays, nangles, blockSize);
+ 
+    for( k=0; k < niter; k++ ) {
+
+      kernel_radonWithDivision<<<gridBlockD, threadsPerBlock>>>(d_temp, d_output, d_sino, sizeImage, nrays, nangles, blockSize, 1.0);
+            
+      kernel_backprojectionWithUpdate<<<gridBlockF, threadsPerBlock>>>(d_output, d_temp, d_backones, sizeImage, nrays, nangles, blockSize);
+      
+      cudaDeviceSynchronize();
+    }
+    
+    //Copy the output image from device memory to host memory
+    cudaMemcpy (output , d_output , blockSize*sizeImage*sizeImage*sizeof(float) , cudaMemcpyDeviceToHost);
+    
+    cudaFree(d_output);
+    cudaFree(d_temp);
+    cudaFree(d_sino);
+    cudaFree(d_backones);
+    
+    cudaDeviceReset();
+    
+  }
+}
+
+//-----------------------------------------
+// emission-EM + Total Variation  algorithm
+//------------------------------------------
+
+extern "C" {
+  // y : next iterate
+  // x : current iterate
+  
+  __global__ void kernel_updateTV(float *y, float *x, float *backones,
+				  int sizeImage, int blockSize,
+				  float reg, float epsilon)
+  {
+    int i, j, z, v, vip1, vjp1, vjm1, vim1, vjm1ip1, vjp1im1;
+    float sqrtA, sqrtB, sqrtD;
+    float A, B, C, D, rhs;
+    
+    i = (blockDim.x * blockIdx.x + threadIdx.x);
+    j = (blockDim.y * blockIdx.y + threadIdx.y);
+    z = (blockDim.z * blockIdx.z + threadIdx.z);
+  
+    if ( ((i+1)<sizeImage) && ((j+1) < sizeImage) && (z<blockSize)  ){
+
+      // i: column
+      // j: row
+
+      v    = z * sizeImage * sizeImage + j * sizeImage + i;
+      
+      vip1 = z * sizeImage * sizeImage + j * sizeImage + (i+1);
+      vjp1 = z * sizeImage * sizeImage + (j+1) * sizeImage + i;
+      
+      sqrtA = epsilon + SQR( y[vjp1] - y[v]) + SQR( y[vip1] - y[v] );
+      A     = - reg * backones[v] * sqrtf(sqrtA);
+
+      vjm1  = z * sizeImage * sizeImage + (j-1) * sizeImage + i;
+      vjm1ip1 = z * sizeImage * sizeImage + (j-1) * sizeImage + (i+1);
+   
+      sqrtB = epsilon * SQR( y[v] - y[vjm1]) + SQR( y[vjm1ip1] - y[vjm1]);
+      B     = reg * backones[v] * sqrtf(sqrtB);
+      C     = A;
+
+      vjp1im1 =  z * sizeImage * sizeImage + (j+1) * sizeImage + (i-1);
+      vjm1    =  z * sizeImage * sizeImage + (j-1) * sizeImage + i;
+      
+      sqrtD = epsilon * SQR( y[vjp1im1] - y[vjm1]) + SQR(y[v] - y[vjm1]);
+      D     = reg * backones[v] * sqrtf(sqrtD); 
+
+      vim1  = z * sizeImage * sizeImage + j * sizeImage + (i-1);
+      
+      rhs = x[v] - y[v] * ( y[vjp1]/A - y[vjm1]/B + y[vip1]/C - y[vim1]/D );
+      
+      //update!
+      y[ v ] =  rhs / ( y[v] * ( -1.0/A + 1.0/B - 1.0/C + 1.0/D ) + 1.0);
+    }
+  }
+}
+
+extern "C" {
+  // L2-error in the feature domain
+  void getError_F(float *error, float *x, float *y, int N, int blockSize, int device)
+  {
+    cudaSetDevice(device);
+
+    cublasHandle_t handle;
+    cublasStatus_t stat;
+
+    //GRID and BLOCKS SIZE
+    dim3 threads(TPBX,TPBY,TPBZ);
+    dim3 gridF((int)ceil((N)/threads.x)+1,
+	       (int)ceil((N)/threads.y)+1,
+	       (int)ceil(blockSize/threads.z)+1);
+    
+    
+    // inplace: x = x - y
+    kernel_difference_F<<<gridF, threads>>>(x, y, N, blockSize);
+    
+    stat= cublasSnrm2_v2(handle, N * N * blockSize, x, 1, error);
+    if(stat != CUBLAS_STATUS_SUCCESS){
+      printf("ssc-raft: Error code %d, line(%d)\n", stat, __LINE__);
+      exit(EXIT_FAILURE);
+    } 
+  }
+  
+}
+
+extern "C" {
+  void iterEM( float *em,
+	       float *sino, float *sinotmp, float *backones,
+	       int sizeImage, int nrays, int nangles, int blockSize, int device )
+  {
+    cudaSetDevice(device);
+
+    //GRID and BLOCKS SIZE
+    dim3 threads(TPBX,TPBY,TPBZ);
+    dim3 gridD((int)ceil((nrays)/threads.x)+1,
+	       (int)ceil((nangles)/threads.y)+1,
+	       (int)ceil(blockSize/threads.z)+1);
+
+    dim3 gridF((int)ceil((sizeImage)/threads.x)+1,
+	       (int)ceil((sizeImage)/threads.y)+1,
+	       (int)ceil(blockSize/threads.z)+1);
+    
+    kernel_radonWithDivision<<<gridD, threads>>>(sinotmp, em, sino, sizeImage, nrays, nangles, blockSize, 1.0);	
+
+    kernel_backprojectionWithUpdate<<<gridF, threads>>>(em, sinotmp, backones, sizeImage, nrays, nangles, blockSize);
+  }
+}
+
+extern "C" {
+  void iterTV( float *y, float *x, float *backones,
+	       int sizeImage, int blockSize, int device, float reg, float epsilon)
+  {
+    cudaSetDevice(device);
+
+    //GRID and BLOCKS SIZE
+    dim3 threads(TPBX,TPBY,TPBZ);
+    dim3 gridF((int)ceil((sizeImage)/threads.x)+1,
+		    (int)ceil((sizeImage)/threads.y)+1,
+		    (int)ceil(blockSize/threads.z)+1);
+    
+    kernel_updateTV<<<gridF, threads>>>(y, x, backones, sizeImage, blockSize, reg, epsilon);
+  }
+}
+
+extern "C" {
+  void EMTV(float *output, float *sino,
+	    int sizeImage, int nrays, int nangles, int blockSize, int device, int niter,
+	    int niter_em, int niter_tv, float reg, float epsilon)
+  {
+    
+    int m, k;
+    float *d_em, *d_x, *d_y, *d_backones, *d_sino, *d_temp;
+    float error, _error_;
+    
+    // Allocate GPU memory for the output image
+    cudaMalloc(&d_em, sizeof(float) *sizeImage *sizeImage*blockSize);
+    cudaMalloc(&d_x,  sizeof(float) *sizeImage *sizeImage*blockSize);
+    cudaMalloc(&d_y,  sizeof(float) *sizeImage *sizeImage*blockSize);
+    
+    cudaMalloc(&d_temp, sizeof(float)  * nrays * nangles * blockSize);
+    cudaMalloc(&d_backones, sizeof(float) * sizeImage * sizeImage*blockSize);
+    cudaMalloc(&d_sino, sizeof(float) * nrays * nangles*blockSize);
+    cudaMemcpy(d_sino, sino, sizeof(float) * nrays * nangles*blockSize, cudaMemcpyHostToDevice);	
+    
+    //GRID and BLOCKS SIZE
+    dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+    dim3 gridBlockD((int)ceil((nrays)/threadsPerBlock.x)+1,
+		    (int)ceil((nangles)/threadsPerBlock.y)+1,
+		    (int)ceil(blockSize/threadsPerBlock.z)+1);
+
+    dim3 gridBlockF((int)ceil((sizeImage)/threadsPerBlock.x)+1,
+		    (int)ceil((sizeImage)/threadsPerBlock.y)+1,
+		    (int)ceil(blockSize/threadsPerBlock.z)+1);
+    
+    
+    kernel_ones<<<gridBlockF, threadsPerBlock>>>(d_em, sizeImage, nrays, nangles, blockSize);
+
+    // temp assignment to d_x in order to computer initial error estimate!
+    cudaMemcpy(d_x, d_em, sizeof(float) * sizeImage * sizeImage * blockSize, cudaMemcpyDeviceToDevice);
+    
+    kernel_backprojectionOfOnes<<<gridBlockF, threadsPerBlock>>>(d_backones, sizeImage, nrays, nangles, blockSize);
+
+    iterEM( d_em, d_sino, d_temp, d_backones,
+	    sizeImage, nrays, nangles, blockSize, device);
+
+    getError_F(&error, d_x, d_em, sizeImage, blockSize, device);
+
+    fprintf(stdout,"error %lf\n",error);
+
+    for (m = 0; m < niter; m++)
+      {
+	//get d_x pointer
+	cudaMemcpy(d_x, d_em, sizeof(float) * sizeImage * sizeImage * blockSize, cudaMemcpyDeviceToDevice);
+
+	//EM iterations
+	for( k = 0; k < niter_em; k++ )
+	  {
+	    iterEM( d_em, d_sino, d_temp, d_backones,
+		    sizeImage, nrays, nangles, blockSize, device);
+	    
+	    cudaDeviceSynchronize();
+
+	    fprintf(stderr,"EM %d\n",k);
+	  }
+	
+	//TV iterations
+	cudaMemcpy(d_y, d_em, sizeof(float) * sizeImage * sizeImage * blockSize, cudaMemcpyDeviceToDevice);
+	
+	for (k = 0; k < niter_tv; k++ )
+	  {
+	    iterTV( d_y, d_em, d_backones,
+		    sizeImage, blockSize, device, reg, epsilon);
+
+	    fprintf(stderr,"TV %d\n",k);
+
+	    cudaDeviceSynchronize();
+	  }
+
+	cudaMemcpy( d_em, d_y, sizeof(float) * sizeImage * sizeImage * blockSize, cudaMemcpyDeviceToDevice);
+
+	
+	getError_F(&_error_, d_x, d_em, sizeImage, blockSize, device);
+	
+
+	fprintf(stdout,"EM+TV: %lf %lf", _error_, error);
+	if (_error_ < error)
+	  error = _error_;
+	else
+	  break;
+	
+    }
+    
+    //Copy the output image from device memory to host memory
+    cudaMemcpy (output , d_em , blockSize*sizeImage*sizeImage*sizeof(float) , cudaMemcpyDeviceToHost);
+
+    cudaFree(d_x);
+    cudaFree(d_y);
+    cudaFree(d_em);
+    cudaFree(d_temp);
+    cudaFree(d_sino);
+    cudaFree(d_backones);
+    
+    cudaDeviceReset();
+    
+  }
+}
+
+
