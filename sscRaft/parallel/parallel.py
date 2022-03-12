@@ -252,7 +252,8 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
     elif method=="EMTV":
         InversionMethod = _iterations_emtv_mpfs_
     else:
-        InversionMethod = _iterations_emtv_mpfs_
+        print('ssc-raft: Error! Wrong')
+        return
     
     
     for k in range(nblocks):
