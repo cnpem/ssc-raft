@@ -38,9 +38,6 @@ For completeness, the following packages are used within this package:
 
         import warnings
 
-        from sscRadon import radon
-        from sscBst import backprojection
-
 MEMORY
 ******
 

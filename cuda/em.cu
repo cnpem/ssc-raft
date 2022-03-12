@@ -13,6 +13,8 @@
 #define TPBE 256
 
 #define SQR(x) ((x)*(x))
+#define SIGN(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
+#define APPROXINVX(x,e) ((SIGN(x))/(sqrtf( SQR(e) + SQR(x) )))
 
 extern "C" {
   __global__ void kernel_ones(float *output, int sizeImage, int nrays, int nangles,  int blockSize)
@@ -209,17 +211,18 @@ extern "C" {
 
     kernel_backprojection<<<gridBlockF, threadsPerBlock>>>(d_backcounts, d_count, sizeImage, nrays, nangles, blockSize);
  
-    for( k=0; k < niter; k++ ) {
-
-      kernel_radon<<<gridBlockD, threadsPerBlock>>>(d_temp, d_output, sizeImage, nrays, nangles, blockSize, 1.0);
-      
-      kernel_flatTimesExp<<<gridBlockD, threadsPerBlock>>>(d_temp, d_flat, sizeImage, nrays, nangles, blockSize);
-      
-      kernel_backprojection<<<gridBlockF, threadsPerBlock>>>(d_back, d_temp, sizeImage, nrays, nangles, blockSize);
-      
-      kernel_update<<<gridBlockF, threadsPerBlock>>>(d_output, d_back, d_backcounts, sizeImage, nrays, nangles, blockSize);
-      
-      cudaDeviceSynchronize();
+    for( k=0; k < niter; k++ )
+      {
+	
+	kernel_radon<<<gridBlockD, threadsPerBlock>>>(d_temp, d_output, sizeImage, nrays, nangles, blockSize, 1.0);
+	
+	kernel_flatTimesExp<<<gridBlockD, threadsPerBlock>>>(d_temp, d_flat, sizeImage, nrays, nangles, blockSize);
+	
+	kernel_backprojection<<<gridBlockF, threadsPerBlock>>>(d_back, d_temp, sizeImage, nrays, nangles, blockSize);
+	
+	kernel_update<<<gridBlockF, threadsPerBlock>>>(d_output, d_back, d_backcounts, sizeImage, nrays, nangles, blockSize);
+	
+	cudaDeviceSynchronize();
     }
     
     //Copy the output image from device memory to host memory
@@ -246,7 +249,7 @@ extern "C" {
 					   int sizeImage, int nrays, int nangles,
 					   int blockSize, float a)
   {
-    float TOLZERO = 1e-8;
+    float TOLZERO;
     
     int tx = threadIdx.x + blockIdx.x*blockDim.x; 
     int ty = threadIdx.y + blockIdx.y*blockDim.y; 
@@ -282,12 +285,13 @@ extern "C" {
 
       voxel = tz * nrays * nangles + ty * nrays + tx;
 
-      value = sino[voxel] / value;
-      if ( isfinite(value) )
-	output[ voxel ] = value;
-      else
-	output[ voxel ] = 0.0;
-      
+      TOLZERO = 0.0001;
+      output[ voxel ] = sino[ voxel] * APPROXINVX(value, TOLZERO);  
+
+      //enforcing positivity
+      if (output[voxel] < 0)
+	output[voxel] = 0.0;
+
       
       /*
       if ( fabs(value) > TOLZERO ) 
@@ -466,38 +470,39 @@ extern "C" {
     j = (blockDim.y * blockIdx.y + threadIdx.y);
     z = (blockDim.z * blockIdx.z + threadIdx.z);
   
-    if ( ((i+1)<sizeImage) && ((j+1) < sizeImage) && (z<blockSize)  ){
+    if ( ((i+1)<sizeImage) && ((j+1) < sizeImage) && (z<blockSize) &&
+	 ((i-1)<sizeImage) && ((j-1) < sizeImage) ){
 
-      // i: column
-      // j: row
+      // i: column (axis=1 from python)
+      // j: row    (axis=0 from python)
 
       v    = z * sizeImage * sizeImage + j * sizeImage + i;
       
       vip1 = z * sizeImage * sizeImage + j * sizeImage + (i+1);
       vjp1 = z * sizeImage * sizeImage + (j+1) * sizeImage + i;
       
-      sqrtA = epsilon + SQR( y[vjp1] - y[v]) + SQR( y[vip1] - y[v] );
+      sqrtA = epsilon + SQR( y[vjp1] - y[v]) + SQR( y[vip1] - y[v] ); //ok
       A     = - reg * backones[v] * sqrtf(sqrtA);
 
       vjm1  = z * sizeImage * sizeImage + (j-1) * sizeImage + i;
       vjm1ip1 = z * sizeImage * sizeImage + (j-1) * sizeImage + (i+1);
    
-      sqrtB = epsilon * SQR( y[v] - y[vjm1]) + SQR( y[vjm1ip1] - y[vjm1]);
+      sqrtB = epsilon * SQR( y[v] - y[vjm1]) + SQR( y[vjm1ip1] - y[vjm1]); //ok
       B     = reg * backones[v] * sqrtf(sqrtB);
       C     = A;
 
       vjp1im1 =  z * sizeImage * sizeImage + (j+1) * sizeImage + (i-1);
       vjm1    =  z * sizeImage * sizeImage + (j-1) * sizeImage + i;
-      
-      sqrtD = epsilon * SQR( y[vjp1im1] - y[vjm1]) + SQR(y[v] - y[vjm1]);
-      D     = reg * backones[v] * sqrtf(sqrtD); 
+      vim1    = z * sizeImage * sizeImage + j * sizeImage + (i-1);
 
-      vim1  = z * sizeImage * sizeImage + j * sizeImage + (i-1);
+      sqrtD = epsilon * SQR( y[vjp1im1] - y[vim1]) + SQR(y[v] - y[vim1]); //ok
+      D     = reg * backones[v] * sqrtf(sqrtD); 
       
       rhs = x[v] - y[v] * ( y[vjp1]/A - y[vjm1]/B + y[vip1]/C - y[vim1]/D );
       
       //update!
-      y[ v ] =  rhs / ( y[v] * ( -1.0/A + 1.0/B - 1.0/C + 1.0/D ) + 1.0);
+      float TOLZERO = 1e-6; 
+      y[ v ] =  rhs * APPROXINVX( y[v] * ( -1.0/A + 1.0/B - 1.0/C + 1.0/D ) + 1.0, TOLZERO );
     }
     
   }

@@ -17,8 +17,8 @@ import SharedArray as sa
 
 import warnings
 
-from sscRadon import radon
-from sscBst import backprojection
+#from sscRadon import radon
+#from sscBst import backprojection
 
 def CNICE(darray,dtype=numpy.float32):
     if darray.dtype != dtype:
@@ -37,6 +37,8 @@ def CNICE(darray,dtype=numpy.float32):
 def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process):
 
     '''
+    #Python version, for completeness: depends on ssc-radon/ssc-bst
+
     block   = sino.shape[0]
     nangles = sino.shape[1]
     nrays   = sino.shape[2]
@@ -102,9 +104,10 @@ def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process):
                 error = _error_
             ###
             
-    return x, rad
+    return x
     '''
 
+    #CUDA version
     block   = sino.shape[0]
     nangles = sino.shape[1]
     nrays   = sino.shape[2]
@@ -127,11 +130,13 @@ def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process):
     
     elapsed = time.time() - start
 
-    return x, numpy.zeros(sino.shape)
+    return x
 
 def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process):
 
     '''
+    #Python version, for completeness: depends on ssc-radon/ssc-bst
+
     block   = sino.shape[0]
     nangles = sino.shape[1]
     nrays   = sino.shape[2]
@@ -158,9 +163,10 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process):
         else:
             error = error2
             
-    return x, rad
+    return x
     '''
 
+    #CUDA version
     block   = sino.shape[0]
     nangles = sino.shape[1]
     nrays   = sino.shape[2]
@@ -181,12 +187,14 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process):
 
     elapsed = time.time() - start
 
-    return x, numpy.zeros(sino.shape)
+    return x
 
 
 def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process):
 
     '''
+    #Python version, for completeness: depends on ssc-radon/ssc-bst
+
     counts = numpy.exp(-sino)
     cflat  = numpy.ones(sino.shape)
     
@@ -203,9 +211,10 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process):
         _r_ = cflat * numpy.exp(-_s_)
         x = x * backprojection.ss( _r_, device) / backcounts
                 
-    return x, _s_
+    return x
     '''
-    
+
+    #CUDA version
     counts = numpy.exp(-sino)
     cflat  = numpy.ones(sino.shape)
     block   = sino.shape[0]
@@ -231,14 +240,13 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process):
     
     elapsed = time.time() - start
 
-    return x, numpy.zeros(sino.shape)
+    return x
     
 def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
 
-    nblocks = ( idx_end + 1 - idx_start ) // blocksize
+    nblocks = ( idx_end + 1 - idx_start ) // blocksize + 1
 
-    output1 = params[0][0]
-    output2 = params[0][1]
+    output1 = params[0]
     data    = params[1]
     niter   = params[6]
     reg     = params[7]
@@ -252,7 +260,7 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
     elif method=="EMTV":
         InversionMethod = _iterations_emtv_mpfs_
     else:
-        print('ssc-raft: Error! Wrong')
+        print('ssc-raft: Error! Wrong method: "tEM"/"eEM"/"EMTV".')
         return
     
     
@@ -260,7 +268,8 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
         _start_ = idx_start + k * blocksize
         _end_   = min( _start_ + blocksize, idx_end) 
         #print('--> Process {}: GPU({}) / [{},{}]'.format(process, gpu, _start_, _end_) )
-        output1[_start_:_end_,:,:], output2[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process)
+        output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process)
+        
         
         
 def _build_em_mpfs_(params):
@@ -326,7 +335,7 @@ def emfs( tomogram, dic ):
           :math:`Ax = b` using :math:`exp(-b)` as the photon count and 1's as the flat-field 
           measurement. 
 
-       #. ``EM/TV`` refers to the combination of ``eEM`` and a Total variation step, as indicated
+       #. ``EMTV`` refers to the combination of ``eEM`` and a Total variation step, as indicated
           in the manuscript of Yan & Luminita ``DOI:10.1117/12.878238``.
 
     """
@@ -345,23 +354,18 @@ def emfs( tomogram, dic ):
         print('ssc-raft: Error! Please check block size!')
     
     name1 = str( uuid.uuid4())
-    name2 = str( uuid.uuid4())
-
+    
     try:
         sa.delete(name1)
-        sa.delete(name2)
     except:
         pass
         
     output1  = sa.create(name1,[nslices, nrays, nrays], dtype=numpy.float32)
 
-    output2  = sa.create(name2,[nslices, nangles, nrays], dtype=numpy.float32)
-    
-    _params_ = ( [output1,output2], tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, method)
+    _params_ = ( output1, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, method)
     
     _build_em_mpfs_( _params_ )
 
     sa.delete(name1)
-    sa.delete(name2)
     
-    return output1, output2
+    return output1
