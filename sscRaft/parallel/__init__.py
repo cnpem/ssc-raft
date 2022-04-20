@@ -1,2 +1,2 @@
 from .parallel import *
-from .panoramic import *
+#from .panoramic import *
