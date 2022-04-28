@@ -30,14 +30,22 @@ dic = {}  # Declare Dictionary
 
 angle = 0 # (Coneradon) Angle in Degrees of the Cone Projection (2D) you want to obtain
 ttype = 'conical' # (Coneradon) Chose type of Radon transform: 'conical' for coneradon, 'parallel' for radon
+dic['PhantomSize']  = (1,1,1) # (Coneradon) Tuple of phantom size (Lx,Ly,Lz), where the size interval is [-Lx,Lx], [-Ly,Ly], [-Lz,Lz]
+dic['ShiftPhantom'] = (0.2,0) # (Coneradon) Tuple of phantom shift (sx,sy)
+dic['ShiftRotation'] = (1,0) # (Coneradon) Tuple of rotation center shift (rx,ry)
 
 dic['Distances'] = (2,1) # (Coneradon/Rebinning) (z1, z2) Distances source/sample (z1) and sample/detector (z2) 
 dic['Poni'] = (0.5,0) # (Coneradon/Rebinning) Tuple PONI (point of incidence) of central ray at detector (cx,cy)
-dic['ShiftPhantom'] = (0.2,0) # (Coneradon/Rebinning) Tuple of phantom shift (sx,sy)
-dic['ShiftRotation'] = (1,0)# (Coneradon/Rebinning) Tuple of rotation center shift (rx,ry)
 dic['DetectorSize'] = (1,1) # (Coneradon/Rebinning) Tuple of detector size (Dx,Dy), where the size interval is [-Dx,Dx], [-Dy,Dy]
 dic['ParDectSize'] = dic['DetectorSize'] # (Coneradon/Rebinning) Tuple of detector size (Lx,Ly), where the size interval is [-Lx,Lx], [-Ly,Ly]
-dic['PhantomSize']  = (1,1,1) # (Coneradon/Rebinning) Tuple of phantom size (Lx,Ly,Lz), where the size interval is [-Lx,Lx], [-Ly,Ly], [-Lz,Lz]
+
+dic['Type'] = 'cpu' # (Rebinning) String ('cpu','gpu','py') of function type - cpu, gpu, python, respectively - used to compute tomogram (3D). Defauts to 'cpu'.
+dic['gpus'] = [0] # (Rebinning) List of GPU devices used for computation. GPU function uses only ONE GPU.
+
+z1,z2 = dic['Distances']
+# Here we need to magnify the shifts of the rotation and pha
+dic['ShiftPhantom'] = dic['ShiftPhantom']*(z2/z1) # (Rebinning) Tuple of phantom shift (sx,sy)
+dic['ShiftRotation'] = dic['ShiftRotation']*(z2/z1) # (Rebinning) Tuple of rotation center shift (rx,ry)
 
 dic['Type'] = 'cpu' # (Rebinning) String ('cpu','gpu','py') of function type - cpu, gpu, python, respectively - used to compute tomogram (3D). Defauts to 'cpu'.
 dic['gpus'] = [0] # (Rebinning) List of GPU devices used for computation. GPU function uses only ONE GPU.

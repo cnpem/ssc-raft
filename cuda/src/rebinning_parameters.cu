@@ -24,10 +24,10 @@ void set_rebinning_parameters_cpu(PAR *param, float *parameters, size_t *volumes
 	
 	param->efft_pixel = parameters[12]; param->effr_pixel = parameters[13];
 
-	param->rt = ( parameters[6] * param->z2 ) / param->z1;
-	param->rr = ( parameters[3] * param->z2 ) / param->z1;
-	param->st = ( parameters[7] * param->z2 ) / param->z1;
-	param->sr = ( parameters[4] * param->z2 ) / param->z1;
+	param->rt = parameters[6];
+	param->rr = parameters[3];
+	param->st = parameters[7];
+	param->sr = parameters[4];
 }
 
 void set_rebinning_parameters_gpu(PAR *param, float *parameters, size_t *volumesize, int *gpus)
@@ -50,10 +50,10 @@ void set_rebinning_parameters_gpu(PAR *param, float *parameters, size_t *volumes
 	
 	param->efft_pixel = parameters[12]; param->effr_pixel = parameters[13];
 
-	param->rt = ( parameters[6] * param->z2 ) / param->z1;
-	param->rr = ( parameters[3] * param->z2 ) / param->z1;
-	param->st = ( parameters[7] * param->z2 ) / param->z1;
-	param->sr = ( parameters[4] * param->z2 ) / param->z1;
+	param->rt = parameters[6];
+	param->rr = parameters[3];
+	param->st = parameters[7];
+	param->sr = parameters[4];
 
 	/* GPUs */
 	param->gpus = gpus;
