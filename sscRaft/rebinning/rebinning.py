@@ -169,9 +169,9 @@ def rebinning_python(conesino, z1, z2, detector_size=(1, 1), pdetector_size=(1, 
 
     beta, rr, tt = np.meshgrid(bt, r, t, indexing='ij') 
 
-    ib                       = bid( ( ( (rr - cz - sz*z2/z1)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (rr - cz - rz*z2/z1 - sz*z2/z1)**2) ) + rz*z2/z1 + sz*z2/z1)
-    ia                       = aid( ( ( (tt - cx - sx*z2/z1)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (tt - cx - rx*z2/z1 - sx*z2/z1)**2) ) + rx*z2/z1 + sx*z2/z1)
-    itheta                   = thetaid( beta + np.arctan( (tt - cx - rx*z2/z1 - sx*z2/z1) / (z1+z2) ) )
+    ib                       = bid( ( ( (rr - cz - sz)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (rr - cz - rz - sz)**2) ) + rz + sz)
+    ia                       = aid( ( ( (tt - cx - sx)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (tt - cx - rx - sx)**2) ) + rx + sx)
+    itheta                   = thetaid( beta + np.arctan( (tt - cx - rx - sx) / (z1+z2) ) )
     ib[ib < 0]               = 0
     ib[ib > nb - 1]          = nb - 1
     ia[ia < 0]               = 0
@@ -219,8 +219,8 @@ def rebinning_projection(conesino, z1, z2, detector_size=(1, 1), pdetector_size=
 
     rr, tt = np.meshgrid(r, t, indexing='ij') 
 
-    ib              = bid( ( ( (rr - cz - sz*z2/z1)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (rr - cz - rz*z2/z1 - sz*z2/z1)**2) ) + rz*z2/z1 + sz*z2/z1)
-    ia              = aid( ( ( (tt - cx - sx*z2/z1)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (tt - cx - rx*z2/z1 - sx*z2/z1)**2) ) + rx*z2/z1 + sx*z2/z1)
+    ib              = bid( ( ( (rr - cz - sz)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (rr - cz - rz - sz)**2) ) + rz + sz)
+    ia              = aid( ( ( (tt - cx - sx)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (tt - cx - rx - sx)**2) ) + rx + sx)
     ib[ib < 0]      = 0
     ib[ib > nb - 1] = nb - 1
     ia[ia < 0]      = 0
