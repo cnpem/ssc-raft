@@ -121,3 +121,5 @@ REBINNING
 		elapsed = time.time() - start
 
 		print('Elapsed time for a rebinning with', dic['Type'], 'function is', elapsed, '(sec)' )
+
+	Note that ``ConeData`` and ``RebinningData`` need an axis order :math:`angles \times slices \times rays` 
