@@ -292,7 +292,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
             return tomo
         else:
             type = dic['Type']
-            logger.error(f'Error! dicictionary parameter Type = {type} is not defined')
+            logger.error(f'Error! dictionary parameter Type = {type} is not defined')
     else:
         logger.error(f'Error! Dimension {dimension} of input ndarray is not suported. Enter a 2D or 3D input ndarray.')
     
