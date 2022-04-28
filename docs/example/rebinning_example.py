@@ -39,9 +39,6 @@ dic['Poni'] = (0.5,0) # (Coneradon/Rebinning) Tuple PONI (point of incidence) of
 dic['DetectorSize'] = (1,1) # (Coneradon/Rebinning) Tuple of detector size (Dx,Dy), where the size interval is [-Dx,Dx], [-Dy,Dy]
 dic['ParDectSize'] = dic['DetectorSize'] # (Coneradon/Rebinning) Tuple of detector size (Lx,Ly), where the size interval is [-Lx,Lx], [-Ly,Ly]
 
-dic['Type'] = 'cpu' # (Rebinning) String ('cpu','gpu','py') of function type - cpu, gpu, python, respectively - used to compute tomogram (3D). Defauts to 'cpu'.
-dic['gpus'] = [0] # (Rebinning) List of GPU devices used for computation. GPU function uses only ONE GPU.
-
 z1,z2 = dic['Distances']
 # Here we need to magnify the shifts of the rotation and pha
 dic['ShiftPhantom'] = dic['ShiftPhantom']*(z2/z1) # (Rebinning) Tuple of phantom shift (sx,sy)
