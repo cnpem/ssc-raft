@@ -40,9 +40,12 @@ dic['DetectorSize'] = (1,1) # (Coneradon/Rebinning) Tuple of detector size (Dx,D
 dic['ParDectSize'] = dic['DetectorSize'] # (Coneradon/Rebinning) Tuple of detector size (Lx,Ly), where the size interval is [-Lx,Lx], [-Ly,Ly]
 
 z1,z2 = dic['Distances']
-# Here we need to magnify the shifts of the rotation and phantom
-dic['ShiftPhantom'] = dic['ShiftPhantom']*(z2/z1) # (Rebinning) Tuple of phantom shift (sx,sy)
-dic['ShiftRotation'] = dic['ShiftRotation']*(z2/z1) # (Rebinning) Tuple of rotation center shift (rx,ry)
+sx,sy = dic['ShiftPhantom']
+rx,ry = dic['ShiftRotation']
+# Here we need to magnify the shifts of the rotation and pha
+dic['ShiftPhantom'] = (sx*(z2/z1),sy*(z2/z1)) # (Rebinning) Tuple of phantom shift (sx,sy)
+dic['ShiftRotation'] = (rx*(z2/z1),ry*(z2/z1)) # (Rebinning) Tuple of rotation center shift (rx,ry)
+
 
 dic['Type'] = 'cpu' # (Rebinning) String ('cpu','gpu','py') of function type - cpu, gpu, python, respectively - used to compute tomogram (3D). Defauts to 'cpu'.
 dic['gpus'] = [0] # (Rebinning) List of GPU devices used for computation. GPU function uses only ONE GPU.

@@ -243,7 +243,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
     
     The dictionary (dic) parameters are:
 
-    * ``dic['gpu']``: List of GPU devices used for computation 
+    * ``dic['gpus']``: List of GPU devices used for computation 
     * ``dic['Distances']``: Tuple of source/sample and sample/detector, respectively (z1 = 2,z2 = 1)
     * ``dic['Poni']``: Tuple PONI (point of incidence) of central ray at detector (cx = 0,cy = 0)
     * ``dic['ShiftPhantom']``: Tuple of phantom shift (sx = 0,sy = 0) 
@@ -275,7 +275,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
         nslices = conetomo.shape[1]
         
         # Set default values for dictionary 'dic' if it is NOT defined
-        params = ('gpu','Distances','Poni','ShiftPhantom','ShiftRotation','DetectorSize','ParDectSize','PixelSize','Type')
+        params = ('gpus','Distances','Poni','ShiftPhantom','ShiftRotation','DetectorSize','ParDectSize','PixelSize','Type')
         defaut = ([0],(2,1),(0,0),(0,0),(0,0),(1,1),dic['DetectorSize'],(1/nimages,1/nslices),'cpu')
         SetDictionary(dic,params,defaut)
 
