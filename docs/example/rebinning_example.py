@@ -40,7 +40,7 @@ dic['DetectorSize'] = (1,1) # (Coneradon/Rebinning) Tuple of detector size (Dx,D
 dic['ParDectSize'] = dic['DetectorSize'] # (Coneradon/Rebinning) Tuple of detector size (Lx,Ly), where the size interval is [-Lx,Lx], [-Ly,Ly]
 
 z1,z2 = dic['Distances']
-# Here we need to magnify the shifts of the rotation and pha
+# Here we need to magnify the shifts of the rotation and phantom
 dic['ShiftPhantom'] = dic['ShiftPhantom']*(z2/z1) # (Rebinning) Tuple of phantom shift (sx,sy)
 dic['ShiftRotation'] = dic['ShiftRotation']*(z2/z1) # (Rebinning) Tuple of rotation center shift (rx,ry)
 
