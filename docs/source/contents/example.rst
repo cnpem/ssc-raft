@@ -107,7 +107,7 @@ REBINNING
 		dic['Distances'] = (2,1) # (z1, z2) Distances source/sample (z1) and sample/detector (z2) 
 		dic['Poni'] = (0.,0) # Tuple PONI (point of incidence) of central ray at detector (cx,cy)
 		dic['DetectorSize'] = (1,1) # Tuple of detector size (Dx,Dy), where the size interval is [-Dx,Dx], [-Dy,Dy]
-		dic['ParDectSize'] = dic['DetectorSize'] # Tuple of detector size (Lx,Ly), where the size interval is [-Lx,Lx], [-Ly,Ly]
+		dic['ParDectSize'] = dic['DetectorSize'] # Tuple of parallel detector size (Lx,Ly), where the size interval is [-Lx,Lx], [-Ly,Ly]
 		dic['ShiftPhantom'] = (0,0) # Tuple of phantom shift (sx,sy)
 		dic['ShiftRotation'] = (0,0) # Tuple of rotation center shift (rx,ry)
 
