@@ -41,6 +41,13 @@ libraft  = load_library(_lib, ext)
 
 #########################
 
+#########################
+#|       ssc-raft      |#
+#| Function prototypes |#
+#########################
+
+######## EM ##########
+
 try:
     libraft.tEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                            c_int, c_int, c_int, c_int, c_int, c_int]
@@ -54,6 +61,26 @@ try:
                              c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_int,
                              c_float, c_float]
     libraft.EMTV.restype  = None
+    
+except:
+    print('-.-')
+    pass
+
+######## Rebinning ##########
+
+try:
+    libraft.CPUrebinning.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
+
+    libraft.CPUrebinning.restype  = None
+    
+except:
+    print('-.-')
+    pass
+
+try:
+    libraft.GPUrebinning.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int]
+
+    libraft.GPUrebinning.restype  = None
     
 except:
     print('-.-')

@@ -8,7 +8,6 @@ from ctypes import c_float as float32
 from ctypes import POINTER
 from ctypes import c_void_p  as void_p
 
-import cupy
 import numpy
 import sys
 import gc
@@ -328,7 +327,7 @@ def emfs( tomogram, dic ):
     Parameters:
     
     * ``dic['nangles']``:  Number of angles
-    * ``dic['angles']``:  arrya of angles
+    * ``dic['angles']``:  array of angles
     * ``dic['gpu']``:  List of GPU devices used for computation 
     * ``dic['blocksize']``:  Number of images to compute parallel radon transform 
     * ``dic['niterations']``:  Tuple for number of iterations. First position refers to the global number of

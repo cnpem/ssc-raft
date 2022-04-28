@@ -6,4 +6,6 @@ except:
     pass
 
 from .rafttypes import *
-from .parallel import *
+from .parallel  import *
+from .rebinning import *
+from .tomo360   import *

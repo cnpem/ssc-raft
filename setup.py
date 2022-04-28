@@ -100,17 +100,19 @@ for requirement in install_requires:
 if CUDA:
     pwd = os.getcwd()
 
-    raft_codes = set(glob.glob('cuda/*.c*'))
-    raft_include = pwd + '/cuda/common/common10/'
+    raft_codes = set(glob.glob('cuda/src/*.c*'))
+    raft_include1 = pwd + '/cuda/inc/'
+    raft_include2 = pwd + '/cuda/inc/common/'
+    raft_include3 = pwd + '/cuda/inc/common10/'
 
     ext_raft = Extension(name='sscRaft.lib.libraft',
 		          sources=list(raft_codes),
                           library_dirs=[CUDA['lib']],
                           runtime_library_dirs=[CUDA['lib']],
-                          extra_compile_args={'nvcc': ['-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
+                          extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
                               #'-gencode=arch=compute_35,code=sm_35']},
-                          extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas'],
-                          include_dirs = [ CUDA['include'], raft_include ])
+                          extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
+                          include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3])
     
 else:
     print('ssc-raft: Error! Compile with --cuda !')
@@ -154,6 +156,7 @@ def customize_compiler_for_nvcc(self):
 class custom_build_ext(build_ext):
     def build_extensions(self):
         customize_compiler_for_nvcc(self.compiler)
+        self.compiler.set_executable('linker_so', 'nvcc -shared')
         build_ext.build_extensions(self)
 
 
@@ -171,10 +174,10 @@ setup(
     zip_safe=False,    
 
     author='Eduardo X. Miqueles / Paola Ferraz Cunha / Giovanni Baraldi / Gilberto Martinez Jr.', 
-    author_email='eduardo.miqueles@lnls.br',
+    author_email='eduardo.miqueles@lnls.br / paola.ferraz@lnls.br',
     
     description='Reconstruction algorithms for tomography',
-    keywords=['raft', 'tomography', 'radon', 'imaging'],
+    keywords=['raft', 'tomography', 'radon', 'imaging', 'conebeam'],
     url='http://www.',
     download_url='',
     

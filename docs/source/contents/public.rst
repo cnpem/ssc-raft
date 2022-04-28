@@ -9,3 +9,5 @@ FUNCTIONS
 
 .. autofunction:: sscRaft.parallel.parallel.emfs
 
+.. autofunction:: sscRaft.rebinning.rebinning.conebeam_rebinning_to_parallel
+
