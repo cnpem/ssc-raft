@@ -23,11 +23,21 @@ install_requires = [
 ]
 
 compile_cuda = 0
+compile_emfs = 0
+compile_binning = 0
 
 if '--cuda' in sys.argv:
     compile_cuda = 1
     sys.argv.remove('--cuda')
     
+if '--emfs' in sys.argv:
+    compile_emfs = 1
+    sys.argv.remove('--emfs')
+if '--binning' in sys.argv:
+    compile_binning = 1
+    sys.argv.remove('--binning')
+
+
 ########
 
 def find_in_path(name, path):
@@ -98,21 +108,62 @@ for requirement in install_requires:
 ########################################################
 
 if CUDA:
-    pwd = os.getcwd()
 
-    raft_codes = set(glob.glob('cuda/src/*.c*'))
-    raft_include1 = pwd + '/cuda/inc/'
-    raft_include2 = pwd + '/cuda/inc/common/'
-    raft_include3 = pwd + '/cuda/inc/common10/'
+    if compile_emfs == 1:
+        pwd = os.getcwd()
 
-    ext_raft = Extension(name='sscRaft.lib.libraft',
-		          sources=list(raft_codes),
-                          library_dirs=[CUDA['lib']],
-                          runtime_library_dirs=[CUDA['lib']],
-                          extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
-                              #'-gencode=arch=compute_35,code=sm_35']},
-                          extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
-                          include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3])
+        raft_em = set(glob.glob('cuda/src/emfs/em.cu'))
+        raft_include1 = pwd + '/cuda/inc/'
+        raft_include2 = pwd + '/cuda/inc/common/'
+        raft_include3 = pwd + '/cuda/inc/common10/'
+        raft_include4 = pwd + '/cuda/inc/common11/'
+
+
+        ext_raft = Extension(name='sscRaft.lib.libraft',
+                    sources=list(raft_em),
+                            library_dirs=[CUDA['lib']],
+                            runtime_library_dirs=[CUDA['lib']],
+                            extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
+                                #'-gencode=arch=compute_35,code=sm_35']},
+                            extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
+                            include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3,raft_include4])
+    elif compile_binning == 1:
+        pwd = os.getcwd()
+
+        raft_binning = set(glob.glov('cuda/src/binning/*.c*'))
+        raft_include1 = pwd + '/cuda/inc/'
+        raft_include2 = pwd + '/cuda/inc/common/'
+        raft_include3 = pwd + '/cuda/inc/common10/'
+        raft_include4 = pwd + '/cuda/inc/common11/'
+
+
+        ext_raft = Extension(name='sscRaft.lib.libraft',
+                    sources=list(raft_binning),
+                            library_dirs=[CUDA['lib']],
+                            runtime_library_dirs=[CUDA['lib']],
+                            extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
+                                #'-gencode=arch=compute_35,code=sm_35']},
+                            extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
+                            include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3,raft_include4])
+    else:
+        pwd = os.getcwd()
+
+        raft_em = set(glob.glob('cuda/src/emfs/em.cu'))
+        raft_binning = set(glob.glov('cuda/src/binning/*.c*'))
+        raft_include1 = pwd + '/cuda/inc/'
+        raft_include2 = pwd + '/cuda/inc/common/'
+        raft_include3 = pwd + '/cuda/inc/common10/'
+        raft_include4 = pwd + '/cuda/inc/common11/'
+
+
+        ext_raft = Extension(name='sscRaft.lib.libraft',
+                    sources=list(raft_em,raft_binning),
+                            library_dirs=[CUDA['lib']],
+                            runtime_library_dirs=[CUDA['lib']],
+                            extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
+                                #'-gencode=arch=compute_35,code=sm_35']},
+                            extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
+                            include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3,raft_include4])
     
 else:
     print('ssc-raft: Error! Compile with --cuda !')
