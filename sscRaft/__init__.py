@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 try:
     import pkg_resources 
-    __version__ = pkg_resources.require("raft")[0].version
+    __version__ = pkg_resources.require("sscRaft")[0].version
 except:
     pass
 
