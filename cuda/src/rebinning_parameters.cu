@@ -58,12 +58,12 @@ void set_rebinning_parameters_gpu(PAR *param, float *parameters, size_t *volumes
 	/* GPUs */
 	param->gpus = gpus;
 
-	size_t Nsx = 128, Nsy = 1, Nsz = 1;
+	size_t Nsx = 32, Nsy = 16, Nsz = 1;
 	/* Initialize Device sizes variables */	
 	param->BT = dim3(Nsx,Nsy,Nsz);
-	const int bx = (param->Nx + Nsx - 1)/Nsx;	
-	const int by = (param->Ny + Nsy - 1)/Nsy;
-	const int bz = (param->Nz + Nsz - 1)/Nsz;
+	const int bx = (param->Nx + Nsx)/Nsx + 1;	
+	const int by = (param->Ny + Nsy)/Nsy + 1;
+	const int bz = (param->Nz + Nsz)/Nsz + 1;
 	param->Grd = dim3(bx,by,bz);
 }
 

@@ -108,9 +108,8 @@ if CUDA:
     ext_raft = Extension(name='sscRaft.lib.libraft',
 		          sources=list(raft_codes),
                           library_dirs=[CUDA['lib']],
-                          runtime_library_dirs=[CUDA['lib']],
+                        #   runtime_library_dirs=[CUDA['lib']],
                           extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
-                              #'-gencode=arch=compute_35,code=sm_35']},
                           extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
                           include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3])
     
