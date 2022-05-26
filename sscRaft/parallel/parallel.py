@@ -1,20 +1,14 @@
 from ..rafttypes import *
 
-import os
-import ctypes
-
 from ctypes import c_int as int32
 from ctypes import c_float as float32
 from ctypes import POINTER
 from ctypes import c_void_p  as void_p
 
 import numpy
-import sys
-import gc
 import uuid
 import SharedArray as sa
-
-import warnings
+import time
 
 #from sscRadon import radon
 #from sscBst import backprojection
@@ -189,7 +183,7 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process, angles):
                  int32(recsize), int32(nrays),
                  int32(nangles), int32(block),
                  int32(device),  int32(niter[0]))
-
+    
     elapsed = time.time() - start
 
     return x
@@ -285,10 +279,10 @@ def _build_em_mpfs_(params):
 
     #_params_ = ( output, data, nslices, nangles, gpus, blocksize)
  
-    nslices = params[2]
-    gpus    = params[4]
+    nslices   = params[2]
+    gpus      = params[4]
     blocksize = params[5]
-    ngpus = len(gpus)
+    ngpus     = len(gpus)
     
     b = int( numpy.ceil( nslices/ngpus )  ) 
     

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
+from ..rafttypes import *
+
 import numpy
 import numpy as np
-import matplotlib.pyplot as plt 
 import ctypes
 from ctypes import * 
-from ..rafttypes import *
 import logging
 
 '''----------------------------------------------'''

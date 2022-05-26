@@ -3,11 +3,8 @@ import ctypes
 from ctypes import *
 import ctypes.util
 import multiprocessing
-import math
 import os
 import sys
-import numpy
-import time
 
 nthreads = multiprocessing.cpu_count()
 
@@ -29,13 +26,13 @@ else:
 
 def load_library(lib,ext):
     _path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + lib + ext
+    print(_path)
     try:
         lib = ctypes.CDLL(_path)
         return lib
     except:
         pass
     return None
-
 
 libraft  = load_library(_lib, ext)
 
@@ -49,13 +46,13 @@ libraft  = load_library(_lib, ext)
 ######## EM ##########
 
 try:
-    libraft.tEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+    libraft.tEM.argtypes  = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                            c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.tEM.restype  = None
+    libraft.tEM.restype   = None
 
-    libraft.eEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+    libraft.eEM.argtypes  = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                             c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.eEM.restype  = None
+    libraft.eEM.restype   = None
 
     libraft.EMTV.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                              c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_int,
