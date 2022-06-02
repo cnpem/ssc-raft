@@ -1,17 +1,11 @@
 from ..rafttypes import *
 
-import os
-import ctypes
-
 from ctypes import c_int as int32
 from ctypes import c_float as float32
 from ctypes import POINTER
 from ctypes import c_void_p  as void_p
 
-import cupy
 import numpy
-import sys
-import gc
 import uuid
 import SharedArray as sa
 import time
