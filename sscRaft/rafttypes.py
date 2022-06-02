@@ -46,19 +46,19 @@ libraft  = load_library(_lib, ext)
 ######## EM ##########
 
 try:
-    libraft.tEM.argtypes  = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+    libraft.tEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                            c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.tEM.restype   = None
+    libraft.tEM.restype  = None
 
-    libraft.eEM.argtypes  = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+    libraft.eEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
                             c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.eEM.restype   = None
+    libraft.eEM.restype  = None
 
-    libraft.EMTV.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+    libraft.EMTV.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
                              c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_int,
                              c_float, c_float]
     libraft.EMTV.restype  = None
-    
+
 except:
     print('-.-')
     pass
