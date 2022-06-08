@@ -19,9 +19,9 @@
 #include <sstream>
 #include <string>
 
-#include "../../inc/common/complex.hpp"
-#include "../../inc/common/operations.hpp"
-#include "../../inc/common/logerror.hpp"
+#include "complex.hpp"
+#include "operations.hpp"
+#include "logerror.hpp"
 
 #ifndef __host__
 #define __host__
@@ -31,9 +31,10 @@
 #define __device__
 #endif
 
-
+extern "C" {
 __global__ void KSwapZ(float* vec, size_t N);
 __global__ void KSwapZ_4gpu(float* vec0, float* vec1, float* vec2, float* vec3, int gpu, size_t N);
+}
 
 enum MemoryType
 {
@@ -930,45 +931,7 @@ struct MImage: public MultiGPU
 typedef MImage<float> rMImage;
 typedef MImage<complex> cMImage;
 
-struct CFilter
-{
-	CFilter() = default;
-	explicit CFilter(int _type, float _reg): type((EType)_type), reg(_reg) {} 
 
-	enum EType
-	{
-		none=0,
-		gaussian=1,
-		lorentz=2,
-		cosine=3,
-		rectangle=4,
-		FSC
-	};
-
-	float reg = 0;
-	EType type = EType::none;
-
-	__host__ __device__ inline 
-	float Apply(float input)
-	{
-		if(type == EType::gaussian)
-			input *= exp(	-0.693f*reg*sq( input )	);
-
-		else if(type == EType::lorentz)
-			input /= 1.0f + reg*sq( input );
-
-		else if(type == EType::cosine)
-			input *= cosf(	float(M_PI)*0.5f*input	);
-
-		else if(type == EType::rectangle)
-                {
-                        float param = fmaxf(input * reg * float(M_PI) * 0.5f, 1E-4f);
-			input *= sinf(param) / param;
-                }
-
-		return input;
-	}
-};
 
 
 #endif

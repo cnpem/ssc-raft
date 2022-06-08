@@ -8,11 +8,11 @@
 Cone-beam Rebinning to Parallel beam 3D
 */
 
-#include "../inc/include.h"
-#include "../inc/common/complex.hpp"
-#include "../inc/common/types.hpp"
-#include "../inc/common/operations.hpp"
-#include "../inc/common/logerror.hpp"
+#include "../../inc/include.h"
+#include "../../inc/common/complex.hpp"
+#include "../../inc/common/types.hpp"
+#include "../../inc/common/operations.hpp"
+#include "../../inc/common/logerror.hpp"
 
 extern "C"{
     void GPUrebinning(float *conetomo, float *tomo, float *parameters, size_t *volumesize, int *gpus, int ngpus)
@@ -69,28 +69,30 @@ extern "C"{
     }
 }
 
-void _GPUrebinning(PAR param, PROF *prof, float *conetomo, float *tomo, int ngpus)
-{	
-    /* Initialize GPU device */
-    HANDLE_ERROR(cudaSetDevice(ngpus))
-    
-    size_t sizex = param.Nx; size_t sizey = param.Ny; size_t sizez = param.Nz;
+extern "C"{
+    void _GPUrebinning(PAR param, PROF *prof, float *conetomo, float *tomo, int ngpus)
+    {	
+        /* Initialize GPU device */
+        HANDLE_ERROR(cudaSetDevice(ngpus))
+        
+        size_t sizex = param.Nx; size_t sizey = param.Ny; size_t sizez = param.Nz;
 
-    /* Alloc Rebinning Struct with gpu pointers*/
-    RDAT workspace; RDAT *reb = allocate_gpu_rebinning(&workspace, param);
+        /* Alloc Rebinning Struct with gpu pointers*/
+        RDAT workspace; RDAT *reb = allocate_gpu_rebinning(&workspace, param);
 
-    /* Copy data from host to device */
-	HANDLE_ERROR(cudaMemcpy(reb->dctomo, conetomo, sizex * sizey * sizez * sizeof(float), cudaMemcpyHostToDevice));
-	HANDLE_ERROR(cudaMemcpy(reb->dtomo , tomo    , sizex * sizey * sizez * sizeof(float), cudaMemcpyHostToDevice));
+        /* Copy data from host to device */
+        HANDLE_ERROR(cudaMemcpy(reb->dctomo, conetomo, sizex * sizey * sizez * sizeof(float), cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMemcpy(reb->dtomo , tomo    , sizex * sizey * sizez * sizeof(float), cudaMemcpyHostToDevice));
 
-    /* Call Conebeam Rebinning */
-    cone_rebinning_kernel<<<param.Grd,param.BT>>>(reb->dtomo, reb->dctomo, param);
+        /* Call Conebeam Rebinning */
+        cone_rebinning_kernel<<<param.Grd,param.BT>>>(reb->dtomo, reb->dctomo, param);
 
-    /* Copy data from device to host */
-    HANDLE_ERROR(cudaMemcpy(tomo, reb->dtomo, sizex * sizey * sizez * sizeof(float), cudaMemcpyDeviceToHost));
+        /* Copy data from device to host */
+        HANDLE_ERROR(cudaMemcpy(tomo, reb->dtomo, sizex * sizey * sizez * sizeof(float), cudaMemcpyDeviceToHost));
 
-    /* Free rebinning struct: free gpu pointers */    
-    free_gpu_rebinning(reb);
+        /* Free rebinning struct: free gpu pointers */    
+        free_gpu_rebinning(reb);
 
-    cudaDeviceSynchronize();
+        cudaDeviceSynchronize();
+    }
 }

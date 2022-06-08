@@ -1,7 +1,8 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "../../inc/include.h"
+#include <stdio.h>
+#include <string.h>
 
 #define MEGA 1048576UL
 #define GIGA 1073741824UL
@@ -72,5 +73,6 @@ typedef struct Profiling
 {
 
 }PROF;
+
 
 #endif

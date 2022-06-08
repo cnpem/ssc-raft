@@ -86,10 +86,32 @@ except:
     print('-.-')
     pass
 
+try:
+    libraft.CPUTomo360_PhaseCorrelation.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int]
+    libraft.CPUTomo360_PhaseCorrelation.restype = ctypes.c_int
+except:
+    print('-.-')
+    pass
 
-##############
-#|          |#
-##############
+try:
+    libraft.CPUTomo360_To_180.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
+except:
+    print('-.-')
+    pass
+
+
+#########################
+#|      ssc-raft       |#
+#|      Functions      |#
+#########################
+
+def CNICE(darray,dtype=numpy.float32):
+        if darray.dtype != dtype:
+                return numpy.ascontiguousarray(darray.astype(dtype))
+        elif darray.flags['C_CONTIGUOUS'] == False:
+                return numpy.ascontiguousarray(darray)
+        else:
+                return darray
 
 if __name__ == "__main__":
    pass

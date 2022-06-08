@@ -20,5 +20,9 @@
 #include <thread>
 #include <omp.h>
 #include <math.h>
-#include "../inc/rebinning.h"
-#include "../inc/common/structs.h"
+#include "common/structs.h"
+#include "filter.h"
+#include "rebinning.h"
+#include "tomoalignment.h"
+#include "fbp.h"
+#include "rings.h"

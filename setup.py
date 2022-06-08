@@ -23,21 +23,11 @@ install_requires = [
 ]
 
 compile_cuda = 0
-compile_emfs = 0
-compile_rebinning = 0
 
 if '--cuda' in sys.argv:
     compile_cuda = 1
     sys.argv.remove('--cuda')
     
-if '--emfs' in sys.argv:
-    compile_emfs = 1
-    sys.argv.remove('--emfs')
-if '--rebinning' in sys.argv:
-    compile_binning = 1
-    sys.argv.remove('--rebinning')
-
-
 ########
 
 def find_in_path(name, path):
@@ -108,57 +98,20 @@ for requirement in install_requires:
 ########################################################
 
 if CUDA:
+    pwd = os.getcwd()
 
-    if compile_emfs == 1:
-        pwd = os.getcwd()
+    raft_codes = set(glob.glob('cuda/src/**/*.c*',recursive=True))
+    raft_include1 = pwd + '/cuda/inc/'
+    raft_include2 = pwd + '/cuda/inc/common/'
+    raft_include3 = pwd + '/cuda/inc/common10/'
 
-        raft_em = set(glob.glob('cuda/src/emfs/em.cu'))
-        raft_include1 = pwd + '/cuda/inc/'
-        raft_include2 = pwd + '/cuda/inc/common/'
-        raft_include3 = pwd + '/cuda/inc/common10/'
-        raft_include4 = pwd + '/cuda/inc/common11/'
-
-
-        ext_raft = Extension(name='sscRaft.lib.libraft',
-                    sources=list(raft_em),
-                            library_dirs=[CUDA['lib']],
-                            # runtime_library_dirs=[CUDA['lib']],
-                            extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
-                            extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
-                            include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3,raft_include4])
-    elif compile_rebinning == 1:
-        pwd = os.getcwd()
-
-        raft_rebinning = set(glob.glov('cuda/src/rebinning/*.c*'))
-        raft_include1 = pwd + '/cuda/inc/'
-        raft_include2 = pwd + '/cuda/inc/common/'
-        raft_include3 = pwd + '/cuda/inc/common10/'
-        raft_include4 = pwd + '/cuda/inc/common11/'
-
-
-        ext_raft = Extension(name='sscRaft.lib.libraft',
-                    sources=list(raft_rebinning),
-                            library_dirs=[CUDA['lib']],
-                            # runtime_library_dirs=[CUDA['lib']],
-                            extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
-                            extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
-                            include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3,raft_include4])
-    else:
-        pwd = os.getcwd()
-
-        raft_src = set(glob.glob('cuda/src/**/*.c*', recursive = True)) # get recursively all files, rebinning and em
-        raft_include1 = pwd + '/cuda/inc/'
-        raft_include2 = pwd + '/cuda/inc/common/'
-        raft_include3 = pwd + '/cuda/inc/common10/'
-        raft_include4 = pwd + '/cuda/inc/common11/'
-
-        ext_raft = Extension(name='sscRaft.lib.libraft',
-                    sources=list(raft_src),
-                            library_dirs=[CUDA['lib']],
-                            # runtime_library_dirs=[CUDA['lib']],
-                            extra_compile_args={'gcc': ['-pedantic','-std=c++14'],'nvcc': ['-dc', '-G', '-g', '-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
-                            extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas', '-lcublasLt'],
-                            include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3,raft_include4])
+    ext_raft = Extension(name='sscRaft.lib.libraft',
+		          sources=list(raft_codes),
+                          library_dirs=[CUDA['lib']],
+                          runtime_library_dirs=[CUDA['lib']],
+                          extra_compile_args={'nvcc': ['-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
+                          extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas'],
+                          include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3])
     
 else:
     print('ssc-raft: Error! Compile with --cuda !')
@@ -202,7 +155,6 @@ def customize_compiler_for_nvcc(self):
 class custom_build_ext(build_ext):
     def build_extensions(self):
         customize_compiler_for_nvcc(self.compiler)
-        self.compiler.set_executable('linker_so', 'nvcc -shared')
         build_ext.build_extensions(self)
 
 
@@ -220,10 +172,10 @@ setup(
     zip_safe=False,    
 
     author='Eduardo X. Miqueles / Paola Ferraz Cunha / Giovanni Baraldi / Gilberto Martinez Jr.', 
-    author_email='eduardo.miqueles@lnls.br / paola.ferraz@lnls.br',
+    author_email='eduardo.miqueles@lnls.br',
     
     description='Reconstruction algorithms for tomography',
-    keywords=['raft', 'tomography', 'radon', 'imaging', 'conebeam'],
+    keywords=['raft', 'tomography', 'radon', 'imaging'],
     url='http://www.',
     download_url='',
     

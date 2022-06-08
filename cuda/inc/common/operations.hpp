@@ -18,13 +18,10 @@
  #define restrict
 #endif
 
-#include "../../inc/common/complex.hpp"
+#include "complex.hpp"
 #include <string>
-#include "../../inc/common/logerror.hpp"
+#include "logerror.hpp"
 
-
-//#define SyncDebug cudaDeviceSynchronize()
-#define SyncDebug
 
 inline __device__ int iabs(int n)
 {
@@ -59,6 +56,13 @@ static __device__ __host__ complex clamp(const complex& f, float a, float b)
 static __device__ __host__ complex clamp(const complex& f, const complex& a, const complex& b)
 {
     return complex(clamp(f.x,a.x,b.x),clamp(f.y,a.y,b.y));
+}
+
+inline __device__ complex exp1j(float f)
+{
+	complex c;
+	__sincosf(f, &c.y, &c.x);
+	return c;
 }
 
 template<typename Type>
@@ -108,8 +112,6 @@ struct EType
 
         TypeEnum type = TypeEnum::INVALID;
 };
-
-
 
 namespace BasicOps
 {
