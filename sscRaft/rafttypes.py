@@ -50,13 +50,13 @@ else:
 def load_library(lib,ext):
     _path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + lib + ext
 #     print(_path)
-    try:
-        lib = ctypes.CDLL(_path)
-        # print(lib)
-        return lib
-    except:
-        pass
-    return None
+#     try:
+    lib = ctypes.CDLL(_path)
+    print(lib)
+    return lib
+#     except:
+#         pass
+#     return None
 
 libraft  = load_library(_lib, ext)
 
@@ -84,7 +84,7 @@ try:
     libraft.EMTV.restype  = None
 
 except:
-    print('-.-')
+    print('-.EM-')
     pass
 
 ######## Rebinning ##########
@@ -98,7 +98,7 @@ try:
     libraft.GPUrebinning.restype  = None
     
 except:
-    print('-.-')
+    print('-.REB-')
     pass
 
 ######## Parallel Raft ##########
@@ -168,7 +168,7 @@ try:
     libraft.flatdarktransposeblock.restype  = None
     
 except:
-    print('-.-')
+    print('-.RAFT-')
     pass
 
 #########################

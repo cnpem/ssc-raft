@@ -126,6 +126,7 @@ extern "C"{
 
             blockRecon.CopyTo(recon + (size_t)b*reconsize*reconsize, 0, (size_t)reconsize*reconsize*blocksize);
         }
+        cudaDeviceSynchronize();
     }
 
     void fbpblock(int* gpus, int ngpus, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,

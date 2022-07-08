@@ -1,13 +1,3 @@
-/* 
-@file rebinning_kernel.cu
-@Paola Cunha Ferraz (paola.ferraz@lnls.br)
-@brief RAFT: Reconstruction Algorithms for Tomography
-@version 0.2
-@date 2022-04-23
-
-Cone-beam Rebinning to Parallel beam 3D
-*/
-
 #include "../../inc/include.h"
 #include "../../inc/common/complex.hpp"
 #include "../../inc/common/types.hpp"

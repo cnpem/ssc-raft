@@ -106,10 +106,6 @@ if CUDA:
                           library_dirs=[CUDA['lib']],
                           runtime_library_dirs=[CUDA['lib']],
                           extra_compile_args={'nvcc': ['-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
-<<<<<<< HEAD
-=======
-                              #'-gencode=arch=compute_35,code=sm_35']},
->>>>>>> d0a84d2ce9c208dd84b774eada2382da305357c4
                           extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas'],
                           include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3])
     
