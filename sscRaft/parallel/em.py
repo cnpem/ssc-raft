@@ -262,7 +262,7 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
     for k in range(nblocks):
         _start_ = idx_start + k * blocksize
         _end_   = min( _start_ + blocksize, idx_end) 
-        print('--> Process {}: GPU({}) / [{},{}]'.format(process, gpu, _start_, _end_) )
+        # print('--> Process {}: GPU({}) / [{},{}]'.format(process, gpu, _start_, _end_) )
         output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process)
         
         

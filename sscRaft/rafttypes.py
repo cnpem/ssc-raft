@@ -58,7 +58,6 @@ def load_library(lib,ext):
         pass
     return None
 
-
 libraft  = load_library(_lib, ext)
 
 #########################
@@ -83,7 +82,7 @@ try:
                              c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_int,
                              c_float, c_float]
     libraft.EMTV.restype  = None
-    
+
 except:
     print('-.-')
     pass
