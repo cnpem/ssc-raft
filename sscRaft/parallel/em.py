@@ -8,6 +8,9 @@ from ctypes import c_void_p  as void_p
 import numpy
 import uuid
 import SharedArray as sa
+import time
+
+import warnings
 
 #from sscRadon import radon
 #from sscBst import backprojection
@@ -26,7 +29,7 @@ def CNICE(darray,dtype=numpy.float32):
 # mpfs: (m)ulti(p)rocessing (f)rom (s)inograms 
 #
 
-def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process, angles):
+def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -112,11 +115,8 @@ def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process, angles):
 
     s   = CNICE(sino) #sino pointer
     s_p = s.ctypes.data_as(void_p) 
-
-    a   = CNICE(angles) #angles pointer
-    a_p = a.ctypes.data_as(void_p) 
-
-    libraft.EMTV( x_p, s_p, a_p,
+    
+    libraft.EMTV( x_p, s_p,
                   int32(recsize), int32(nrays),
                   int32(nangles), int32(block),
                   int32(device),  int32(niter[0]),
@@ -127,7 +127,7 @@ def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process, angles):
 
     return x
 
-def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process, angles):
+def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -174,11 +174,8 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process, angles):
 
     s   = CNICE(sino) #sino pointer
     s_p = s.ctypes.data_as(void_p) 
-
-    a   = CNICE(angles) #angles pointer
-    a_p = a.ctypes.data_as(void_p) 
     
-    libraft.eEM( x_p, s_p, a_p,
+    libraft.eEM( x_p, s_p,
                  int32(recsize), int32(nrays),
                  int32(nangles), int32(block),
                  int32(device),  int32(niter[0]))
@@ -188,7 +185,7 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process, angles):
     return x
 
 
-def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process, angles):
+def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -230,11 +227,8 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process, angles):
 
     f   = CNICE(cflat) #flat pointer
     f_p = f.ctypes.data_as(void_p) 
-
-    a   = CNICE(angles) #angles pointer
-    a_p = a.ctypes.data_as(void_p) 
     
-    libraft.tEM( x_p, c_p, f_p, a_p, 
+    libraft.tEM( x_p, c_p, f_p,
                  int32(recsize), int32(nrays),
                  int32(nangles), int32(block),
                  int32(device), int32(niter[0]))
@@ -253,7 +247,6 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
     reg     = params[7]
     eps     = params[8]
     method  = params[9]
-    angles  = params[10]
 
     if method=="tEM":
         InversionMethod = _iterations_tem_mpfs_
@@ -270,7 +263,7 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
         _start_ = idx_start + k * blocksize
         _end_   = min( _start_ + blocksize, idx_end) 
         print('--> Process {}: GPU({}) / [{},{}]'.format(process, gpu, _start_, _end_) )
-        output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process, angles)
+        output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process)
         
         
         
@@ -320,7 +313,6 @@ def emfs( tomogram, dic ):
     Parameters:
     
     * ``dic['nangles']``:  Number of angles
-    * ``dic['angles']``:  array of angles
     * ``dic['gpu']``:  List of GPU devices used for computation 
     * ``dic['blocksize']``:  Number of images to compute parallel radon transform 
     * ``dic['niterations']``:  Tuple for number of iterations. First position refers to the global number of
@@ -346,7 +338,6 @@ def emfs( tomogram, dic ):
     nslices   = tomogram.shape[0]
     nrays     = tomogram.shape[2]
     nangles   = dic['nangles']
-    angles    = dic['angles']
     gpus      = dic['gpu']
     blocksize = dic['blocksize']
     niter     = dic['niterations']
@@ -366,10 +357,11 @@ def emfs( tomogram, dic ):
         
     output1  = sa.create(name1,[nslices, nrays, nrays], dtype=numpy.float32)
 
-    _params_ = ( output1, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, method, angles)
+    _params_ = ( output1, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, method)
     
     _build_em_mpfs_( _params_ )
 
     sa.delete(name1)
     
     return output1
+

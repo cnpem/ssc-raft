@@ -39,11 +39,10 @@ struct CFilter
 		else if(type == EType::cosine)
 			input *= cosf(	float(M_PI)*0.5f*input	);
 
-		else if(type == EType::rectangle)
-                {
-                    float param = fmaxf(input * reg * float(M_PI) * 0.5f, 1E-4f);
-					input *= sinf(param) / param;
-                }
+		else if(type == EType::rectangle){
+			float param = fmaxf(input * reg * float(M_PI) * 0.5f, 1E-4f);
+			input *= sinf(param) / param;
+		}
 
 		return input;
 	}
@@ -59,6 +58,16 @@ extern "C"{
 	__global__ void KFilter(complex* x, size_t sizex, float wid);
 
 	__device__ complex DeltaFilter(complex* img, int sizeimage, float fx, float fy);
+
+	inline __global__ void SetX(complex* out, float* in, int sizex);
+
+	inline __global__ void GetX(float* out, complex* in, int sizex);
+
+	inline __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy);
+	
+	inline __global__ void BandFilterC2C(complex* vec, size_t sizex, int center, struct CFilter mfilter);
+	
+	void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, struct CFilter reg);
 
 }
 

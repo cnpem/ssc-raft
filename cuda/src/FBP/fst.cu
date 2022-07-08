@@ -115,7 +115,7 @@ extern "C"{
 		float fpx = rho*sin_t + 1E-6f;
 
 		//float lowpass = sinc(2*rho*float(M_PI)/sizeimage);
-		complex lerped = DeltaFilter(img, sizeimage, fpx, fpy)*mult;
+		complex lerped = 1; //DeltaFilter(img, sizeimage, fpx, fpy)*mult;
 		sino[ang*(sizeimage/2+1) + rho] = lerped.conj();
 	}
 

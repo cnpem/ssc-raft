@@ -52,6 +52,7 @@ extern "C"{
         HANDLE_ERROR( cudaGetLastError() );
     }
 }
+
 template<bool bShared>
 __global__ void KConvolve(float* restrict x, float* restrict p, const float* kernel, size_t sizex, int hkernelsize, float lambda, float alpha, int numiterations, float* restrict residuum2, float* restrict momentum, float beta, float* globalmem)
 {
@@ -220,16 +221,21 @@ extern "C"{
             cImage minmax(blocks.x*blocks.y,1);
             KRedVolumeMM<<<blocks,threads>>>(mbar, minmax.gpuptr, volume, sizex, sizey, slicesize);
             minmax.LoadFromGPU();
+
             cudaDeviceSynchronize();
             
             float vmin = +1E-10;
             float vmax = -1E-10;
+            // printf("Here1: %e %e \n", vmax, vmin);
+
             for(size_t i=0; i<minmax.GetSize(); i++)
             {
+                // printf("Here: %e %e %e %e %e %e\n",vmax, vmin, minmax.cpuptr[i].x,minmax.cpuptr[i].y, mbar[i], volume[i]);
                 vmin = fminf(vmin,minmax.cpuptr[i].x);
-                vmax = fmaxf(vmax,minmax.cpuptr[i].y);
+                vmax = fmaxf(vmax,minmax.cpuptr[i].y); 
             }
 
+            // printf("Here: %e %e %e %e \n",1.0f/(vmax-vmin), vmax,vmin, lambda);
             HANDLE_ERROR( cudaGetLastError() );
             return 1.0f/(vmax-vmin);
         }
@@ -409,6 +415,9 @@ extern "C"{
     {
         size_t msizex = vsizex;
         size_t msizey = vsizez;
+
+        // for (int i = 0; i < vsizey; i++)
+        //     printf("Vol = %e \n",volume[512*1024*1024 + i*1024]);
         
         rImage smooth(msizex,msizey);
         rImage sinobar(msizex,msizey);
@@ -472,11 +481,10 @@ extern "C"{
 }
 
 
-extern "C"
-{
-	void RingsCPU(int devv, float* volume, int sizex, int sizey, int sizez, float lambda)
+extern "C"{
+	void applyrings(int gpu, float* volume, int sizex, int sizey, int sizez, float lambda)
 	{
-		cudaSetDevice(devv);
+		cudaSetDevice(gpu);
 		size_t blocksize = min(sizez,32);
 
 		rImage gpuvol(sizex,sizey*blocksize);
@@ -494,9 +502,9 @@ extern "C"
 		HANDLE_ERROR( cudaGetLastError() );
 	}
 
-	void RingsEMCPU(int devv, float* sinogram, float* ptrflat, int sizex, int sizey, int sizez)
+	void applyringsEM(int gpu, float* sinogram, float* ptrflat, int sizex, int sizey, int sizez)
 	{
-		cudaSetDevice(devv);
+		cudaSetDevice(gpu);
 		size_t blocksize = min(sizez,32);
 
 		rImage gpuvol(sizex,sizey*blocksize);
@@ -516,69 +524,109 @@ extern "C"
 		}
 		HANDLE_ERROR( cudaGetLastError() );
 	}
+
+    void ringsgpu(int gpu, float* data, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks)
+	{   
+		cudaSetDevice(gpu);
+		size_t blocksize = min((size_t)nslices,32ul);
+
+        // printf("GPU: %d, %ld %d, %d, %d, %f, %d\n", gpu,blocksize, nrays,nslices,nangles,lambda_rings,ringblocks);
+
+		rImage tomogram(nrays,nangles,blocksize);
+        // float* tomogram;
+        // HANDLE_ERROR( cudaMalloc(&tomogram, sizeof(float) * nrays * nangles * (int)blocksize) );
+
+
+		for(size_t bz=0; bz<nslices; bz+=blocksize){
+			blocksize = min(blocksize,size_t(nslices)-bz);
+
+            // HANDLE_ERROR( cudaMemcpy(tomogram, data + bz*nrays*nangles, sizeof(float) * nrays * nangles * blocksize, cudaMemcpyHostToDevice) );	
+
+			tomogram.CopyFrom(data + bz*nrays*nangles, 0, nrays*nangles*blocksize);
+            
+            for (int m = 0; m < ringblocks / 2; m++){
+                // Rings(tomogram, nrays, nangles, blocksize, lambda_rings, nrays*nangles);
+                Rings(tomogram.gpuptr, nrays, nangles, blocksize, lambda_rings, nrays*nangles);
+                size_t offset = nrays*nangles;
+                size_t step = (nangles / ringblocks) * nrays;
+                float* tomptr = tomogram.gpuptr;
+                // float* tomptr = tomogram;
+
+                for (int n = 0; n < ringblocks - 1; n++){
+			        Rings(tomogram.gpuptr, nrays, nangles, blocksize, lambda_rings, nrays*nangles);
+                    // Rings(tomogram, nrays, nangles, blocksize, lambda_rings, nrays*nangles);
+
+                    tomptr += step;
+                }
+                Rings(tomptr, nrays, nangles%ringblocks + nangles/ringblocks, blocksize, lambda_rings, offset);
+
+                // HANDLE_ERROR( cudaMemcpy(data + bz*nrays*nangles, tomogram ,  nrays * nangles * blocksize * sizeof(float) , cudaMemcpyDeviceToHost) );
+
+			    tomogram.CopyTo(data + bz*nrays*nangles, 0, nrays*nangles*blocksize);
+		    }
+		
+            HANDLE_ERROR( cudaGetLastError() );
+
+	    }
+        // cudaFree(tomogram);
+        cudaDeviceSynchronize();
+    }
 }
 
-// extern "C"{ 
-//     void _rings(int gpu, char* output, float* tomogram, int nrays, int nangles, int nslices,
-//         int startslice, int blockslice, float lambda_rings, int ringblocks)
-//     {
-//         size_t memframe = 10*nrays*nangles;
-//         size_t maxusage = 1ul<<33;
-//         size_t maxblock = min(max(maxusage/memframe,size_t(1)),32ul);
+extern "C"{ 
+    void _rings(int gpu, float* tomogram, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks)
+    {
+        size_t memframe = 10*nrays*nangles;
+        size_t maxusage = 1ul<<33;
+        size_t maxblock = min(max(maxusage/memframe,size_t(1)),32ul);
 
-//         cudaSetDevice(gpu);
+        cudaSetDevice(gpu);
+        // for (int i = 0; i < nrays * nangles; i++)
+        //     printf("tomo = %e \n",tomogram[i + 1024]);
 
-//         rImage tomo(nrays, nangles, maxblock);
-//         Image2D<char> blockRecon(nrays, nrays, maxblock * sizeof(float));
+        rImage tomo(nrays, nangles, maxblock);
 
-//         for (size_t b = 0; b < nslices; b += maxblock){
+        for (size_t b = 0; b < nslices; b += maxblock){
             
-//             size_t blocksize = min(nslices - b, maxblock);
+            size_t blocksize = min(nslices - b, maxblock);
 
-//             cudaMemcpy2D(tomo.gpuptr, 2 * nrays * maxblock, tomogram + (b + startslice) * nrays, 2 * nrays * blockslice, nrays * blocksize*2, nangles, cudaMemcpyDefault);
+            cudaMemcpy2D(tomo.gpuptr, 2 * nrays * maxblock, tomogram + b * nrays, 2 * nrays, nrays * blocksize*2, nangles, cudaMemcpyDefault);
 
-//             for (int m = 0; m < ringblocks / 2; m++){
-//                 Rings(tomo.gpuptr, nrays, nangles, blocksize, lambda_rings, nrays * nangles);
-//                 size_t offset = nrays*nangles;
-//                 size_t step = (nangles / ringblocks) * nrays;
-//                 float* tomptr = tomo.gpuptr;
+            for (int m = 0; m < ringblocks / 2; m++){
+                Rings(tomo.gpuptr, nrays, nangles, blocksize, lambda_rings, nrays * nangles);
+                size_t offset = nrays*nangles;
+                size_t step = (nangles / ringblocks) * nrays;
+                float* tomptr = tomo.gpuptr;
 
-//                 for (int n = 0; n < ringblocks - 1; n++){
-//                     Rings(tomptr, nrays, nangles/ringblocks, blocksize, lambda_rings, offset);
-//                     tomptr += step;
-//                 }
-//                 Rings(tomptr, nrays, nangles%ringblocks + nangles/ringblocks, blocksize, lambda_rings, offset);
-//             }
+                for (int n = 0; n < ringblocks - 1; n++){
+                    Rings(tomptr, nrays, nangles/ringblocks, blocksize, lambda_rings, offset);
+                    tomptr += step;
+                }
+                Rings(tomptr, nrays, nangles%ringblocks + nangles/ringblocks, blocksize, lambda_rings, offset);
+            }
 
-//             // Correct the size
-//             cudaMemcpy(output + sizeof(float) * b * reconsize * reconsize, tomo.gpuptr, reconsize * reconsize * blocksize * sizeof(float), cudaMemcpyDefault);
-//         }
-//     }
+            cudaMemcpy(tomogram + sizeof(float) * b * nrays * nangles, tomo.gpuptr, nrays * nangles * blocksize * sizeof(float), cudaMemcpyDefault);
+        }
+    }
 
-//     void RingsBlock(int* gpus, int ngpus, char* output, float* tomogram, int nrays, int nangles, int nslices, int startslice, int blockslice, 
-//         float lambda_rings, int ringblocks)
-//     {
-
-//         size_t blockgpu = (nslices + ngpus - 1) / ngpus;
-        
-//         std::vector<std::future<void>> threads;
-
-//         for(size_t t = 0; t < ngpus; t++) 
-//             if(blockgpu * t < nslices){
-//                 size_t lastblock = min(nslices - blockgpu * t, blockgpu);
-//                 char* offsetptr = output + t * blockgpu * size_t(nrays*nangles);
-
-
-//                 threads.push_back(std::async( std::launch::async, _rings, 
-//                     gpus[t], offsetptr, frames, cflat, cdark, nrays, nangles, left, 
-//                     firstline + t*blockgpu, framelines, b360 != 0, centersino, reg, angles,
-//                     lambda_rings, reconsize, threshold, datatype, ringblocks, bShiftCenter
-//                 ));
-//             }
     
-//         for(auto& t : threads)
-//             t.get();
-//     }
+    void ringsblock(int* gpus, int ngpus, float* data, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks)
+    {
+        int t;
+        int blockgpu = (nslices + ngpus - 1) / ngpus;
+        
+        std::vector<std::future<void>> threads;
 
-// }
+        for(t = 0; t < ngpus; t++){ 
+            
+            blockgpu = min(nslices - blockgpu * t, blockgpu);
+
+            threads.push_back(std::async( std::launch::async, ringsgpu, gpus[t], data + (size_t)t * blockgpu * nrays*nangles, nrays, nangles, blockgpu, lambda_rings, ringblocks));
+        }
+    
+        for(auto& t : threads)
+            t.get();
+    }
+
+}
 

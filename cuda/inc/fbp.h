@@ -11,9 +11,26 @@ extern "C"{
     void GPUFBP(char* blockRecon, float* sinoblock, int nrays, int nangles, int isizez, int sizeimage, 
                     int csino, struct CFilter reg, struct EType datatype, float threshold, float* angs, bool bShiftCenter);
     
-    void CPUFBP(int* devv, int ndevs, float* blockRecon, float* sinoblock, int nrays, 
-            int nangles, int isizez, int sizeimage, int csino, float reg_val, int FilterType, float* angs, int bShiftCenter);
-        
+    void fbpsingleGPU(int gpu, float* blockRecon, float* sinoblock, int nrays, 
+            int nangles, int isizez, int sizeimage, int csino, float reg_val, int FilterType, float* angs, int bShiftCenter);  
+
+    void fbpgpu(int gpu, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+        float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter); 
+
+    void fbpblock(int* gpus, int ngpus, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+        float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter); 
+    
+    void bstgpu(int gpu, float* blockRecon, float* sinoblock, int nrays, int nangles, 
+                int isizez, int sizeimage, int csino, float reg_val, int FilterType, float* angles);
+
+    void bstblock(int* gpus, int ngpus, float* recon, float* tomogram, int nrays, int nangles, 
+        int nslices, int reconsize, int centersino, float reg_val, int FilterType, float* angles);    
+    
+    void fstgpu(int gpu, float* blockRecon, float* sinoblock, int nrays, int nangles, 
+                int isizez, int sizeimage, int csino, float reg_val, int FilterType, float* angles);
+                
+    void fstblock(int* gpus, int ngpus, float* recon, float* tomogram, int nrays, int nangles, 
+        int nslices, int reconsize, int centersino, float reg_val, int FilterType, float* angles); 
 }
 
 

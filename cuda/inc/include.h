@@ -26,3 +26,4 @@
 #include "tomoalignment.h"
 #include "fbp.h"
 #include "rings.h"
+#include "flatdark.h"

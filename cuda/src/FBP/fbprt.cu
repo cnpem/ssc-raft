@@ -1,4 +1,4 @@
-// Authors: Gilberto Martinez, Eduardo X Miqueles, Giovanni Baraldi
+// Authors: Gilberto Martinez, Eduardo X Miqueles, Giovanni Baraldi, Paola Ferraz
 
 #include "../../inc/include.h"
 #include "../../inc/common/kernel_operators.hpp"
@@ -47,12 +47,12 @@ extern "C"{
 }
 
 extern "C"{
-    void CPUFBP(int* devv, int ndevs, float* blockRecon, float* sinoblock, int nrays, 
+    void fbpsingleGPU(int gpu, float* blockRecon, float* sinoblock, int nrays, 
             int nangles, int isizez, int sizeimage, int csino, float reg_val, int FilterType, float* angs, int bShiftCenter)
     {
         CFilter reg(FilterType,reg_val);
 
-        cudaSetDevice(devv[0]);
+        cudaSetDevice(gpu);
         size_t sizez = size_t(isizez);
         
         cudaDeviceSynchronize();
@@ -101,8 +101,57 @@ extern "C"{
 }
 
 extern "C"{   
+
+    void fbpgpu(int gpu, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+        float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
+    {
+        CFilter reg(FilterType,reg_val);
+
+        EType datatype = EType((EType::TypeEnum)reconPrecision);
+
+        size_t blocksize = min((size_t)nslices,32ul);
+
+        cudaSetDevice(gpu);
+
+        rImage tomo(nrays, nangles, blocksize);
+        Image2D<char> blockRecon(nrays, nrays, blocksize * datatype.Size());
+
+        for(size_t b = 0; b < nslices; b += blocksize){
+            
+            blocksize = min(size_t(nslices) - b, blocksize);
+			
+            tomo.CopyFrom(tomogram + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
+            
+            GPUFBP(blockRecon.gpuptr, tomo.gpuptr, nrays, nangles, blocksize, reconsize, centersino, reg, datatype, threshold, angles, bShiftCenter);
+
+            blockRecon.CopyTo(recon + (size_t)b*reconsize*reconsize, 0, (size_t)reconsize*reconsize*blocksize);
+        }
+    }
+
+    void fbpblock(int* gpus, int ngpus, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+        float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
+    {
+        int t;
+        int blockgpu = (nslices + ngpus - 1) / ngpus;
+        
+        std::vector<std::future<void>> threads;
+
+        for(t = 0; t < ngpus; t++){ 
+            
+            blockgpu = min(nslices - blockgpu * t, blockgpu);
+
+            threads.push_back(std::async( std::launch::async, fbpgpu, gpus[t], recon + (size_t)t * blockgpu * reconsize*reconsize, 
+                tomogram + (size_t)t * blockgpu * nrays*nangles, nrays, nangles, blockgpu, reconsize, centersino,
+                reg_val, angles, threshold, reconPrecision, FilterType, bShiftCenter
+            ));
+        }
+    
+        for(auto& t : threads)
+            t.get();
+    }
+
     void _fbp(int gpu, char* recon, float* tomogram, float* angles, int nrays, int nangles, int nslices, int reconsize, int centersino, CFilter reg, 
-        EType datatype, float threshold, int startslice, int blockslice, int bShiftCenter)
+        EType datatype, float threshold, int bShiftCenter)
     {
         size_t memframe = 10*nrays*nangles;
         size_t maxusage = 1ul<<33;
@@ -117,16 +166,16 @@ extern "C"{
             
             size_t blocksize = min(nslices - b, maxblock);
 
-            cudaMemcpy2D(tomo.gpuptr, 2 * nrays * maxblock, tomogram + (b + startslice) * nrays, 2 * nrays * blockslice, nrays * blocksize*2, nangles, cudaMemcpyDefault);
+            HANDLE_ERROR(cudaMemcpy2D(tomo.gpuptr, 2 * nrays * maxblock, tomogram + b * nrays, 2 * nrays, nrays * blocksize*2, nangles, cudaMemcpyDefault));
             
             GPUFBP(blockRecon.gpuptr, tomo.gpuptr, nrays, nangles, blocksize, reconsize, centersino, reg, datatype, threshold, angles, bShiftCenter);
 
-            cudaMemcpy(recon + datatype.Size() * b * reconsize * reconsize, blockRecon.gpuptr, reconsize * reconsize * blocksize * datatype.Size(), cudaMemcpyDefault);
+            HANDLE_ERROR(cudaMemcpy(recon + datatype.Size() * b * reconsize * reconsize, blockRecon.gpuptr, reconsize * reconsize * blocksize * datatype.Size(), cudaMemcpyDefault));
         }
     }
 
-    void fbp_block(int* gpus, int ngpus, char* recon, float* tomogram, int nrays, int nangles, int nslices, int startslice, int blockslice, int centersino, bool Is360, 
-        float reg_val, float* angles, int reconsize, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
+    void _fbpblock(int* gpus, int ngpus, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+        float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
     {
         CFilter reg(FilterType,reg_val);
 
@@ -135,10 +184,6 @@ extern "C"{
         size_t memframe = 8*nrays*nangles;
         size_t maxusage = 1ul<<33;
         size_t maxblock = min(max(maxusage/memframe,size_t(1)),32ul);
-    
-
-        if(Is360)
-            centersino = 0;
 
         size_t blockgpu = (nslices + ngpus - 1) / ngpus;
         
@@ -152,8 +197,7 @@ extern "C"{
 
                 threads.push_back(std::async( std::launch::async, _fbp, 
                     gpus[t], offsetptr, tomogram, angles, nrays, nangles, lastblock, reconsize, 
-                    centersino, reg, datatype, threshold, startslice + t*blockgpu, blockslice,
-                    bShiftCenter
+                    centersino, reg, datatype, threshold, bShiftCenter
                 ));
             }
     
@@ -174,8 +218,7 @@ extern "C"{
         
         if ( (i>=wdI) || (j >= wdI) ) return;
 
-        norm  = 0.5f*float(M_PI)/float(nangles)/float(nrays);
-        sino += nangles*nrays*blockIdx.z; // O que é isso? 
+        norm  = 0.5f*float(M_PI)/float(nangles)/float(nrays); // This is still weird
 
         x     = -wdI/2 + i;
         y     = -wdI/2 + j;
@@ -189,7 +232,7 @@ extern "C"{
         
             if (T >= 0 && T < nrays-1){
                 frac = t-T;
-                sum += sino[k * nrays + T] * (1.0f - frac) + sino[k * nrays + T + 1] * frac;
+                sum += sino[nangles * nrays * blockIdx.z + k * nrays + T] * (1.0f - frac) + sino[k * nrays + T + 1] * frac;
             }
         }        
 

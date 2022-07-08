@@ -3,15 +3,11 @@
 
 import os
 from os.path import join as pjoin
-import warnings
 import glob
 from setuptools import setup, Extension, find_packages
 from distutils.extension import Extension
 from distutils.command.build_ext import build_ext
-import subprocess
-import numpy
 import sys
-import shutil
 
 ##########################################################
 

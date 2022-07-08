@@ -100,5 +100,70 @@ extern "C"{
 				img[(iy%sizeimage)*h2n + (ix+1)]*a*(1-b) +
 				img[((iy+1)%sizeimage)*h2n + (ix+1)]*a*b;
 	}
+	
+	inline __global__ void SetX(complex* out, float* in, int sizex)
+	{
+		size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
+		size_t ty = blockIdx.y + gridDim.y * blockIdx.z;
+		
+		if(tx < sizex)
+		{
+			out[ty*sizex + tx].x = in[ty*sizex + tx];
+			out[ty*sizex + tx].y = 0;
+		}
+	}
+	
+	inline __global__ void GetX(float* out, complex* in, int sizex)
+	{
+		size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
+		size_t ty = blockIdx.y + gridDim.y * blockIdx.z;
+		
+		if(tx < sizex)
+			out[ty*sizex + tx] = (in[ty*sizex + tx].x)/sizex;
+	}
+	
+	inline __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy)
+	{
+		size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
+		size_t ty = blockIdx.y + blockDim.y * blockIdx.z;
+		
+		if(tx >= sizex)
+			return;
+		
+		float fpixel = (in[ty*sizex + tx].x)/float(sizex);
+		 BasicOps::set_pixel(out, fpixel, tx, ty, sizex, threshold, raftDataType);
+	}
+
+	inline __global__ void BandFilterC2C(complex* vec, size_t sizex, int center, CFilter mfilter = CFilter())
+	{
+		int tx = blockIdx.x * blockDim.x + threadIdx.x;
+		int ty = blockIdx.y * blockDim.y + threadIdx.y;
+
+		float rampfilter = 2.0f*fminf(tx,sizex-tx)/(float)sizex;
+		rampfilter = mfilter.Apply(rampfilter);
+
+		if(tx < sizex)
+			vec[ty*sizex + tx] *= exp1j(-2*float(M_PI)/float(sizex) * center * tx) * rampfilter;
+	}
+
+	void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, CFilter reg)
+	{
+
+		dim3 filterblock((nrays+255)/256,nangles,1);
+		dim3 filterthread(256,1,1);
+
+		SetX<<<filterblock,filterthread>>>(filtersino, sinoblock, nrays);
+			
+		HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_FORWARD));
+			
+		BandFilterC2C<<<filterblock,filterthread>>>(filtersino, nrays, csino, reg);
+			
+		HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_INVERSE));
+		
+		GetX<<<filterblock,filterthread>>>(sinoblock, filtersino, nrays);
+
+		//cudaMemset(sinoblock, 0, nrays*nangles*4);
+	}
+
 }
 

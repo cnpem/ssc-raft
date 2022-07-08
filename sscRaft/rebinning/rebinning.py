@@ -6,21 +6,6 @@ import matplotlib.pyplot as plt
 import ctypes
 from ctypes import * 
 from ..rafttypes import *
-import logging
-
-'''----------------------------------------------'''
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
-
-'''----------------------------------------------'''
 
 def SetDic(dic, paramname, deff):
         try:
@@ -108,7 +93,7 @@ def rebinning_cpu(conetomo, dic, **kwargs):
     blocksize = sizez
 
     if blocksize > sizez:
-       print('Blocksize = {0} bigger than projections = {1}. Blocksize needs to be smaller or equal than projections size'.format(blocksize,sizez))
+       logger.error('Blocksize = {0} bigger than projections = {1}. Blocksize needs to be smaller or equal than projections size'.format(blocksize,sizez))
        quit()
 
     volumesize = numpy.array([sizex,sizey,sizez, blocksize])
