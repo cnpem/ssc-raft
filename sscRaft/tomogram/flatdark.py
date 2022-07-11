@@ -36,13 +36,9 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         dark = np.ascontiguousarray(dark.astype(np.float32))
         darkptr = dark.ctypes.data_as(void_p)
         
-        Is360pan = dic['360pan']
-
         frames = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
 
-        print("valores python:",ngpus,gpus,nrays,nangles,nslices,nflats,frames.shape,flat.shape,dark.shape)
-        
         nrays   = int32(nrays)
         nangles = int32(nangles)
         nslices = int32(nslices)
@@ -53,7 +49,7 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         return frames #np.swapaxes(frames,0,1)
 
 
-def flatdarkGPU(frames, flat, dark, dic, gpu = 0):
+def flatdarkGPU(frames, flat, dark, gpu = 0):
         
         ngpus   = gpu
 
@@ -72,8 +68,6 @@ def flatdarkGPU(frames, flat, dark, dic, gpu = 0):
         dark = np.ascontiguousarray(dark.astype(np.float32))
         darkptr = dark.ctypes.data_as(void_p)
         
-        Is360pan = dic['360pan']
-
         frames = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
         
@@ -178,7 +172,7 @@ def flatdarkLog(frames, flat, dark, dic, **kwargs):
 
         if len(gpus) == 1:
                 gpu = gpus[0]
-                output = flatdarkGPU( frames, flat, dark, dic, gpu )
+                output = flatdarkGPU( frames, flat, dark, gpu )
         else:
                 output = flatdarkMultiGPU( frames, flat, dark, dic ) 
 

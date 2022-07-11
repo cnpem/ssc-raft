@@ -14,10 +14,10 @@ extern "C"{
     void fbpsingleGPU(int gpu, float* blockRecon, float* sinoblock, int nrays, 
             int nangles, int isizez, int sizeimage, int csino, float reg_val, int FilterType, float* angs, int bShiftCenter);  
 
-    void fbpgpu(int gpu, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+    void fbpgpu(int gpu, float* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
         float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter); 
 
-    void fbpblock(int* gpus, int ngpus, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+    void fbpblock(int* gpus, int ngpus, float* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
         float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter); 
     
     void bstgpu(int gpu, float* blockRecon, float* sinoblock, int nrays, int nangles, 

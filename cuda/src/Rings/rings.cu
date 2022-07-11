@@ -482,25 +482,6 @@ extern "C"{
 
 
 extern "C"{
-	void applyrings(int gpu, float* volume, int sizex, int sizey, int sizez, float lambda)
-	{
-		cudaSetDevice(gpu);
-		size_t blocksize = min(sizez,32);
-
-		rImage gpuvol(sizex,sizey*blocksize);
-		
-		for(size_t bz=0; bz<sizez; bz+=blocksize)
-		{
-			blocksize = min(blocksize,size_t(sizez)-bz);
-
-			gpuvol.CopyFrom(volume + bz*sizex*sizey, 0, sizex*sizey*blocksize);
-			
-			Rings(gpuvol.gpuptr, sizex, sizey, blocksize, lambda, sizex*sizey);
-
-			gpuvol.CopyTo(volume + bz*sizex*sizey, 0, sizex*sizey*blocksize);
-		}
-		HANDLE_ERROR( cudaGetLastError() );
-	}
 
 	void applyringsEM(int gpu, float* sinogram, float* ptrflat, int sizex, int sizey, int sizez)
 	{
@@ -574,41 +555,6 @@ extern "C"{
 }
 
 extern "C"{ 
-    void _rings(int gpu, float* tomogram, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks)
-    {
-        size_t memframe = 10*nrays*nangles;
-        size_t maxusage = 1ul<<33;
-        size_t maxblock = min(max(maxusage/memframe,size_t(1)),32ul);
-
-        cudaSetDevice(gpu);
-        // for (int i = 0; i < nrays * nangles; i++)
-        //     printf("tomo = %e \n",tomogram[i + 1024]);
-
-        rImage tomo(nrays, nangles, maxblock);
-
-        for (size_t b = 0; b < nslices; b += maxblock){
-            
-            size_t blocksize = min(nslices - b, maxblock);
-
-            cudaMemcpy2D(tomo.gpuptr, 2 * nrays * maxblock, tomogram + b * nrays, 2 * nrays, nrays * blocksize*2, nangles, cudaMemcpyDefault);
-
-            for (int m = 0; m < ringblocks / 2; m++){
-                Rings(tomo.gpuptr, nrays, nangles, blocksize, lambda_rings, nrays * nangles);
-                size_t offset = nrays*nangles;
-                size_t step = (nangles / ringblocks) * nrays;
-                float* tomptr = tomo.gpuptr;
-
-                for (int n = 0; n < ringblocks - 1; n++){
-                    Rings(tomptr, nrays, nangles/ringblocks, blocksize, lambda_rings, offset);
-                    tomptr += step;
-                }
-                Rings(tomptr, nrays, nangles%ringblocks + nangles/ringblocks, blocksize, lambda_rings, offset);
-            }
-
-            cudaMemcpy(tomogram + sizeof(float) * b * nrays * nangles, tomo.gpuptr, nrays * nangles * blocksize * sizeof(float), cudaMemcpyDefault);
-        }
-    }
-
     
     void ringsblock(int* gpus, int ngpus, float* data, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks)
     {

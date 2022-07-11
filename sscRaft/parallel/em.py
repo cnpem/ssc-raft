@@ -344,24 +344,26 @@ def emfs( tomogram, dic ):
     reg       = dic['regularization']
     eps       = dic['epsilon']
     method    = dic['method']
+
+    print("EM param:",blocksize,niter,reg,eps,method,nangles,gpus,nrays,nslices)
     
     if blocksize > nslices // len(gpus):
         print('ssc-raft: Error! Please check block size!')
     
-    name1 = str( uuid.uuid4())
+    name = str( uuid.uuid4())
     
     try:
-        sa.delete(name1)
+        sa.delete(name)
     except:
         pass
         
-    output1  = sa.create(name1,[nslices, nrays, nrays], dtype=numpy.float32)
+    output  = sa.create(name,[nslices, nrays, nrays], dtype=numpy.float32)
 
-    _params_ = ( output1, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, method)
+    _params_ = ( output, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, method)
     
     _build_em_mpfs_( _params_ )
 
-    sa.delete(name1)
+    sa.delete(name)
     
-    return output1
+    return output
 

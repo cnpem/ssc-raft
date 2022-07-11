@@ -14,6 +14,8 @@ extern "C"{
     {
         size_t sizez = size_t(isizez);
 
+        printf("GPUFBP: %ld %d %d %d\n",sizez,nrays,nangles,sizeimage);
+
         cudaDeviceSynchronize();
         auto time0 = std::chrono::system_clock::now();
 
@@ -24,11 +26,13 @@ extern "C"{
         {
             sintable.cpuptr[i] = sin(angs[i]);
             costable.cpuptr[i] = cos(angs[i]);
+            // printf("hare\n");
         }
         else for(int i=0; i<nangles; i++)
         {
             sintable.cpuptr[i] = sin(float(i)*float(M_PI)/float(nangles));
             costable.cpuptr[i] = cos(float(i)*float(M_PI)/float(nangles));
+            // printf("no angles hare\n");
         }
 
         sintable.LoadToGPU();
@@ -102,7 +106,7 @@ extern "C"{
 
 extern "C"{   
 
-    void fbpgpu(int gpu, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+    void fbpgpu(int gpu, float* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
         float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
     {
         CFilter reg(FilterType,reg_val);
@@ -110,26 +114,30 @@ extern "C"{
         EType datatype = EType((EType::TypeEnum)reconPrecision);
 
         size_t blocksize = min((size_t)nslices,32ul);
+        // blocksize = size_t(nslices);
 
         cudaSetDevice(gpu);
 
-        rImage tomo(nrays, nangles, blocksize);
-        Image2D<char> blockRecon(nrays, nrays, blocksize * datatype.Size());
+        rImage tomo(nrays, nangles, blocksize, MemoryType::EAllocGPU);
+        rImage blockRecon(reconsize, reconsize, blocksize, MemoryType::EAllocGPU);
 
+        printf("data fbp: %d %d %d %d %d\n",gpu,nrays,nangles,nslices,reconsize);
+        // size_t b = 0;
         for(size_t b = 0; b < nslices; b += blocksize){
             
             blocksize = min(size_t(nslices) - b, blocksize);
+            printf("block: %ld %ld\n",blocksize,b);
 			
             tomo.CopyFrom(tomogram + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
             
-            GPUFBP(blockRecon.gpuptr, tomo.gpuptr, nrays, nangles, blocksize, reconsize, centersino, reg, datatype, threshold, angles, bShiftCenter);
+            GPUFBP((char*)blockRecon.gpuptr, tomo.gpuptr, nrays, nangles, blocksize, reconsize, centersino, reg, datatype, threshold, angles, bShiftCenter);
 
             blockRecon.CopyTo(recon + (size_t)b*reconsize*reconsize, 0, (size_t)reconsize*reconsize*blocksize);
         }
         cudaDeviceSynchronize();
     }
 
-    void fbpblock(int* gpus, int ngpus, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
+    void fbpblock(int* gpus, int ngpus, float* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
         float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
     {
         int t;

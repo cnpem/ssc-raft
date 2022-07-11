@@ -95,6 +95,8 @@ def fbpGPU(tomogram, dic, gpu = 0):
         output = np.zeros((nslices,reconsize,reconsize),dtype=recondtype)
         outputptr = output.ctypes.data_as(void_p)
 
+        # print("dtypes:",recondtype,output.dtype)
+
         try:
                 angles = np.ascontiguousarray(angles.astype(np.float32))
                 anglesptr = angles.ctypes.data_as(void_p)
