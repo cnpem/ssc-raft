@@ -14,7 +14,7 @@ extern "C"{
     {
         size_t sizez = size_t(isizez);
 
-        printf("GPUFBP: %ld %d %d %d\n",sizez,nrays,nangles,sizeimage);
+        // printf("GPUFBP: %ld %d %d %d\n",sizez,nrays,nangles,sizeimage);
 
         cudaDeviceSynchronize();
         auto time0 = std::chrono::system_clock::now();
@@ -121,12 +121,12 @@ extern "C"{
         rImage tomo(nrays, nangles, blocksize, MemoryType::EAllocGPU);
         rImage blockRecon(reconsize, reconsize, blocksize, MemoryType::EAllocGPU);
 
-        printf("data fbp: %d %d %d %d %d\n",gpu,nrays,nangles,nslices,reconsize);
+        // printf("data fbp: %d %d %d %d %d\n",gpu,nrays,nangles,nslices,reconsize);
         // size_t b = 0;
         for(size_t b = 0; b < nslices; b += blocksize){
             
             blocksize = min(size_t(nslices) - b, blocksize);
-            printf("block: %ld %ld\n",blocksize,b);
+            // printf("block: %ld %ld\n",blocksize,b);
 			
             tomo.CopyFrom(tomogram + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
             

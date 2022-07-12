@@ -67,17 +67,17 @@ extern "C"{
 		int t;
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
 		
-		printf("Aqui\n");
+		// printf("Aqui\n");
 		std::vector<std::future<void>> threads;
 
-		printf("Aqui2\n");
+		// printf("Aqui2\n");
 
-		printf("valores cu: %d, %d,%d,%d %d %d\n",ngpus,nrays,nangles,nslices,numflats,blockgpu);
+		// printf("valores cu: %d, %d,%d,%d %d %d\n",ngpus,nrays,nangles,nslices,numflats,blockgpu);
 
 		for(t = 0; t < ngpus; t++){ 
 			
 			blockgpu = min(nslices - blockgpu * t, blockgpu);
-			printf("Aqui3 %d %d %ld %d %d\n",t,blockgpu,(size_t)t*blockgpu*nrays*nangles,nrays,nangles);
+			// printf("Aqui3 %d %d %ld %d %d\n",t,blockgpu,(size_t)t*blockgpu*nrays*nangles,nrays,nangles);
 
 			threads.push_back(std::async( std::launch::async, flatdarktransposegpu, gpus[t], frames + (size_t)t*blockgpu*nrays*nangles, 
 						flat + (size_t)t*blockgpu*nrays*numflats, dark + (size_t)t*blockgpu*nrays, nrays, blockgpu, nangles, numflats

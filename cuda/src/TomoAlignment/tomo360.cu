@@ -449,7 +449,7 @@ extern "C"{
 
 		for(size_t z=0; z<sizez; z++)
 		{
-			printf("for z: %ld %ld %ld %ld %ld\n",z,sizez,ips,sxy,sizey);
+			// printf("for z: %ld %ld %ld %ld %ld\n",z,sizez,ips,sxy,sizey);
 			float* temp1 = temp.gpuptr;
 			float* temp2 = temp1 + ips/2;
 
@@ -478,7 +478,7 @@ extern "C"{
 	void Tomo360To180gpu(int gpu, float* data, int nrays, int nangles, int nslices, int offset)
 	{
 		cudaSetDevice(gpu);
-		printf("tomo360 gpou block: %d %d %d\n",nslices,nrays,nangles);
+		// printf("tomo360 gpou block: %d %d %d\n",nslices,nrays,nangles);
 
 		rImage sinograms(nrays, (size_t)nangles*nslices);
 		
@@ -499,7 +499,7 @@ extern "C"{
 		 for(t = 0; t < ngpus; t++){ 
 			  
 			blockgpu = min(nslices - blockgpu * t, blockgpu);
-			printf("tomo360 block: %d %d %d %ld \n",blockgpu,t, nslices, (size_t)t * blockgpu * nrays * nangles);
+			// printf("tomo360 block: %d %d %d %ld \n",blockgpu,t, nslices, (size_t)t * blockgpu * nrays * nangles);
 
 			threads.push_back(std::async( std::launch::async, Tomo360To180gpu, gpus[t], data + (size_t)t * blockgpu * nrays * nangles, nrays, nangles, blockgpu, offset));
 		 }
