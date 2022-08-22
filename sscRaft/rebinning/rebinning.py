@@ -252,7 +252,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
         SetDictionary(dic,params,defaut)
 
         z1, z2 = dic['Distances']
-        tomo = rebinning_cpu(conetomo, z1, z2, dic['DetectorSize'], dic['ParDectSize'], dic['Poni'], dic['ShiftRotation'], dic['ShiftPhantom'])
+        tomo = rebinning_python(conetomo, z1, z2, dic['DetectorSize'], dic['ParDectSize'], dic['Poni'], dic['ShiftRotation'], dic['ShiftPhantom'])
 
         return tomo
 
