@@ -23,6 +23,8 @@ extern "C"{
     void cone_rebinning_cpu(float *tomo, float *conetomo, PAR param);
 
     __global__ void cone_rebinning_kernel(float *dtomo, float *dctomo, PAR param);
+
+    __global__ void cone_rebinning_kernel2(float *dtomo, float *dctomo, PAR param);
 }
 
 #endif 

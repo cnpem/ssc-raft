@@ -119,7 +119,8 @@ extern "C"{
         cudaSetDevice(gpu);
 
         rImage tomo(nrays, nangles, blocksize, MemoryType::EAllocGPU);
-        rImage blockRecon(reconsize, reconsize, blocksize, MemoryType::EAllocGPU);
+        // rImage blockRecon(reconsize, reconsize, blocksize, MemoryType::EAllocGPU);
+        Image2D<char> blockRecon(reconsize, reconsize, blocksize * datatype.Size());
 
         // printf("data fbp: %d %d %d %d %d\n",gpu,nrays,nangles,nslices,reconsize);
         // size_t b = 0;
@@ -132,7 +133,8 @@ extern "C"{
             
             GPUFBP((char*)blockRecon.gpuptr, tomo.gpuptr, nrays, nangles, blocksize, reconsize, centersino, reg, datatype, threshold, angles, bShiftCenter);
 
-            blockRecon.CopyTo(recon + (size_t)b*reconsize*reconsize, 0, (size_t)reconsize*reconsize*blocksize);
+            // blockRecon.CopyTo(recon + (size_t)b*reconsize*reconsize, 0, (size_t)reconsize*reconsize*blocksize);
+            HANDLE_ERROR(cudaMemcpy(recon + datatype.Size() * (size_t)b * reconsize * reconsize, blockRecon.gpuptr, (size_t)reconsize * reconsize * blocksize * datatype.Size(), cudaMemcpyDefault));                 
         }
         cudaDeviceSynchronize();
     }

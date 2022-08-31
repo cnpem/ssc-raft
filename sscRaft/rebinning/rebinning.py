@@ -21,13 +21,11 @@ def SetDictionary(dic,param,default):
 
 def rebinning_gpu(conetomo, dic, **kwargs):
     
-    z1, z2 = dic['Distances']
-    sx, sy = dic['ShiftPhantom']
-    rx, ry = dic['ShiftRotation']
-    cx, cy = dic['Poni']
-    Dx, Dy = dic['DetectorSize']
-    Lx, Ly = dic['ParDectSize']
-    px, py = dic['PixelSize']
+    z1x, z1y = dic['z1']
+    z2x, z2y = dic['z2']
+    d1x, d1y = dic['d1']
+    d2x, d2y = dic['d2']
+    px, py = dic['DetPixelSize']
 
     gpus = numpy.array(dic['gpus'])
     ngpus  = gpus.shape[0]
@@ -38,7 +36,7 @@ def rebinning_gpu(conetomo, dic, **kwargs):
     tomo   = numpy.ascontiguousarray(tomo.astype(numpy.float32))
     tomo_p = tomo.ctypes.data_as(ctypes.c_void_p)
 
-    param = numpy.array([z1,z2,cx,rx,sx,cy,ry,sy,Dx,Dy,Lx,Ly,px,py])
+    param = numpy.array([z1x,z1y,z2x,z2y,d1x,d1y,d2x,d2y,px,py])
     param   = numpy.ascontiguousarray(param.astype(numpy.float32))
     param_p = param.ctypes.data_as(ctypes.c_void_p)
 
@@ -71,19 +69,17 @@ def rebinning_gpu(conetomo, dic, **kwargs):
 
 def rebinning_cpu(conetomo, dic, **kwargs):
     
-    z1, z2 = dic['Distances']
-    sx, sy = dic['ShiftPhantom']
-    rx, ry = dic['ShiftRotation']
-    cx, cy = dic['Poni']
-    Dx, Dy = dic['DetectorSize']
-    Lx, Ly = dic['ParDectSize']
-    px, py = dic['PixelSize']
+    z1x, z1y = dic['z1']
+    z2x, z2y = dic['z2']
+    d1x, d1y = dic['d1']
+    d2x, d2y = dic['d2']
+    px, py = dic['DetPixelSize']
 
     tomo = numpy.zeros(conetomo.shape)
     tomo   = numpy.ascontiguousarray(tomo.astype(numpy.float32))
     tomo_p = tomo.ctypes.data_as(ctypes.c_void_p)
 
-    param = numpy.array([z1,z2,cx,rx,sx,cy,ry,sy,Dx,Dy,Lx,Ly,px,py])
+    param = numpy.array([z1x,z1y,z2x,z2y,d1x,d1y,d2x,d2y,px,py])
     param   = numpy.ascontiguousarray(param.astype(numpy.float32))
     param_p = param.ctypes.data_as(ctypes.c_void_p)
 
@@ -247,12 +243,11 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
         nslices = conetomo.shape[0]
         
         # Set default values for dictionary 'dic' if it is NOT defined
-        params = ('Distances','Poni','ShiftPhantom','ShiftRotation','DetectorSize','ParDectSize','PixelSize')
-        defaut = ((2,1),(0,0),(0,0),(0,0),(1,1),dic['DetectorSize'],(1/nimages,1/nslices))
+        params = ('z1','z2','d1','d2','DetPixelSize')
+        defaut = ((1,1),(0,0),(1,1),(0,0),(1/nimages,1/nslices))
         SetDictionary(dic,params,defaut)
 
-        z1, z2 = dic['Distances']
-        tomo = rebinning_cpu(conetomo, z1, z2, dic['DetectorSize'], dic['ParDectSize'], dic['Poni'], dic['ShiftRotation'], dic['ShiftPhantom'])
+        tomo = rebinning_projection(conetomo, dic['z1'][0], dic['z2'][0], (1,1), (1,1), (0,0), (0,0), (0,0))
 
         return tomo
 
@@ -261,11 +256,9 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
         nslices = conetomo.shape[1]
         
         # Set default values for dictionary 'dic' if it is NOT defined
-        params = ('gpus','Distances','Poni','ShiftPhantom','ShiftRotation','DetectorSize','ParDectSize','PixelSize','Type')
-        defaut = ([0],(2,1),(0,0),(0,0),(0,0),(1,1),dic['DetectorSize'],(1/nimages,1/nslices),'cpu')
+        params = ('gpus','z1','z2','d1','d2','DetPixelSize''Type')
+        defaut = ([0],(1,1),(0,0),(1,1),(0,0),(1/nimages,1/nslices),'cpu')
         SetDictionary(dic,params,defaut)
-
-        z1, z2 = dic['Distances']
 
         if dic['Type'] == 'cpu':
             tomo = rebinning_cpu(conetomo, dic, **kwargs)
@@ -274,7 +267,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
             tomo = rebinning_gpu(conetomo, dic, **kwargs)
             return tomo
         elif dic['Type'] == 'py':
-            tomo = rebinning_python(conetomo, z1, z2, dic['DetectorSize'], dic['ParDectSize'], dic['Poni'], dic['ShiftRotation'], dic['ShiftPhantom'])
+            tomo = rebinning_python(conetomo, dic['z1'][0], dic['z2'][0], (1,1), (1,1), (0,0), (0,0), (0,0))
             return tomo
         else:
             type = dic['Type']

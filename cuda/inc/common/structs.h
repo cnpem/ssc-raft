@@ -23,10 +23,12 @@ typedef struct Parameters
 	    dim3 BT, Grd;  
 
 	/* General parameters */
-	    float Fx, Fy, ratio, z1, z2, zt;
+        float pixelDetx, pixelDety, d1x, d1y, d2x, d2y;
+        float z1x, z1y, z2x, z2y;
+        float magnx, magny, mx, my;
+        float effa_pixel, effb_pixel;
 
     /* General Rebinning parameters */
-        float efft_pixel, effr_pixel;
         float ct, rt, st;
         float cr, rr, sr;
         float Lt, Lr;
