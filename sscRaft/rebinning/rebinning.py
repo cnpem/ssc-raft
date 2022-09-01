@@ -143,9 +143,9 @@ def rebinning_python(conesino, z1, z2, detector_size=(1, 1), pdetector_size=(1, 
     dbeta = bt[1] - bt[0]
     # print(dbeta, 2*np.pi/(nbeta), t[1] - t[0],r[1] - r[0])
 
-    aid = lambda a: np.around((a + (am))/2/(am)*(na )).astype(int)
-    bid = lambda b: np.around((b + (bm))/2/(bm)*(nb )).astype(int)
-    thetaid = lambda beta: np.around(beta/dbeta).astype(int)%nbeta
+    aid = lambda a: np.around((a + (am))/2/(am)*(na)).astype(int)
+    bid = lambda b: np.around((b + (bm))/2/(bm)*(nb)).astype(int)
+    thetaid = lambda beta: np.around((beta/(dbeta))).astype(int)%nbeta
     
     parsino = np.zeros((ntheta, nb, na))
 

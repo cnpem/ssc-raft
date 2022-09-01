@@ -118,10 +118,10 @@ extern "C"{
                     r_coord  = dr  * (float)j - 0.5 * param.Ny * dr;
                     bt_coord = dbt * (float)k; 
 
-                    a_coord  = ( param.d1x * t_coord) / sqrt( ( ( param.d1x + param.d2x ) * ( param.d1x + param.d2x ) ) + ( t_coord * t_coord ) );
-                    b_coord  = ( param.d1y * r_coord) / sqrt( ( ( param.d1y + param.d2y ) * ( param.d1y + param.d2y ) ) + ( r_coord * r_coord ) );
+                    a_coord  = ( ( param.d1x + param.d2x ) * t_coord ) / sqrt( ( ( param.d1x + param.d2x ) * ( param.d1x + param.d2x ) ) + ( t_coord * t_coord ) );
+                    b_coord  = ( ( param.d1y + param.d2y ) * r_coord ) / sqrt( ( ( param.d1y + param.d2y ) * ( param.d1y + param.d2y ) ) + ( r_coord * r_coord ) );
                     
-                    th_coord = bt_coord + atan( t_coord / ( param.d1x + param.d2x ) );
+                    th_coord = bt_coord - atan( t_coord / ( param.d1x + param.d2x ) );
                     
                     /* Parallel pixel Indexes */
                     a_ind  = (size_t)round( ( a_coord  + 0.5 * param.Nx * param.effa_pixel ) / param.effa_pixel );
