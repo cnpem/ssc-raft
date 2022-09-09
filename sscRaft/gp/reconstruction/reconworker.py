@@ -4,7 +4,7 @@ import gc
 from time import time
 import uuid
 import SharedArray as sa
-from .fbprt import *
+from .fbp import *
 from .em import *
 from .bst import *
 from .fst import *

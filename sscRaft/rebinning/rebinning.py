@@ -130,18 +130,16 @@ def rebinning_python(conesino, z1, z2, detector_size=(1, 1), pdetector_size=(1, 
     tsize, rsize = detector_size
     rm, tm = rsize, tsize
 
-    cx, cz = PONI
-
     asize, bsize = pdetector_size
     bm, am = bsize, asize
 
-    rx,rz = rot
-    sx,sz = pha
     t = np.linspace(-tm, tm, nt, endpoint=False)
     r = np.linspace(-rm, rm, nr, endpoint=False)
     bt = np.linspace(0, 360*np.pi/180, nbeta, endpoint=False)
     dbeta = bt[1] - bt[0]
-    # print(dbeta, 2*np.pi/(nbeta), t[1] - t[0],r[1] - r[0])
+    print(nbeta, dbeta, 2*np.pi/(nbeta), 2*np.pi/(nbeta-1))
+    print(nt, 2*tm / nt, 2*tm / (nt -1), t[1] - t[0]) 
+    print(nr, 2*rm / nr, 2*rm / (nr -1), r[1] - r[0])
 
     aid = lambda a: np.around((a + (am))/2/(am)*(na)).astype(int)
     bid = lambda b: np.around((b + (bm))/2/(bm)*(nb)).astype(int)
@@ -151,9 +149,9 @@ def rebinning_python(conesino, z1, z2, detector_size=(1, 1), pdetector_size=(1, 
 
     beta, rr, tt = np.meshgrid(bt, r, t, indexing='ij') 
 
-    ib                       = bid( ( ( (rr - cz - sz)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (rr - cz - rz - sz)**2) ) + rz + sz)
-    ia                       = aid( ( ( (tt - cx - sx)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (tt - cx - rx - sx)**2) ) + rx + sx)
-    itheta                   = thetaid( beta + np.arctan( (tt - cx - rx - sx) / (z1+z2) ) )
+    ib                       = bid( ( rr * (z1 + z2) ) / np.sqrt((z1+z2)**2 + rr**2) ) 
+    ia                       = aid( ( tt * (z1 + z2) ) / np.sqrt((z1+z2)**2 + tt**2) ) 
+    itheta                   = thetaid( beta + np.arctan( tt / (z1+z2) ) )
     ib[ib < 0]               = 0
     ib[ib > nb - 1]          = nb - 1
     ia[ia < 0]               = 0
@@ -184,13 +182,9 @@ def rebinning_projection(conesino, z1, z2, detector_size=(1, 1), pdetector_size=
     ssize, rsize = detector_size
     rm, tm = ssize, rsize
 
-    cx, cz = PONI
-
     bsize, asize = pdetector_size
     bm, am = bsize, asize
 
-    rx,rz = rot
-    sx,sz = pha
     t = np.linspace(-tm, tm, nt)
     r = np.linspace(-rm, rm, nr)
 
@@ -201,8 +195,8 @@ def rebinning_projection(conesino, z1, z2, detector_size=(1, 1), pdetector_size=
 
     rr, tt = np.meshgrid(r, t, indexing='ij') 
 
-    ib              = bid( ( ( (rr - cz - sz)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (rr - cz - rz - sz)**2) ) + rz + sz)
-    ia              = aid( ( ( (tt - cx - sx)*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (tt - cx - rx - sx)**2) ) + rx + sx)
+    ib              = bid( ( ( (rr )*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (rr )**2) ) )
+    ia              = aid( ( ( (tt )*(z1 + z2) ) / np.sqrt((z1+z2)**2 + (tt )**2) ) )
     ib[ib < 0]      = 0
     ib[ib > nb - 1] = nb - 1
     ia[ia < 0]      = 0
@@ -247,7 +241,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
         defaut = ((1,1),(0,0),(1,1),(0,0),(1/nimages,1/nslices))
         SetDictionary(dic,params,defaut)
 
-        tomo = rebinning_projection(conetomo, dic['z1'][0], dic['z2'][0], (1,1), (1,1), (0,0), (0,0), (0,0))
+        tomo = rebinning_projection(conetomo, dic['d1'][0], dic['d2'][0], (1,1), (1,1), (0,0), (0,0), (0,0))
 
         return tomo
 
@@ -260,6 +254,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
         defaut = ([0],(1,1),(0,0),(1,1),(0,0),(1/nimages,1/nslices),'cpu')
         SetDictionary(dic,params,defaut)
 
+        print('Zs:', dic['d1'][0], dic['d2'][0])
         if dic['Type'] == 'cpu':
             tomo = rebinning_cpu(conetomo, dic, **kwargs)
             return tomo
@@ -267,7 +262,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
             tomo = rebinning_gpu(conetomo, dic, **kwargs)
             return tomo
         elif dic['Type'] == 'py':
-            tomo = rebinning_python(conetomo, dic['z1'][0], dic['z2'][0], (1,1), (1,1), (0,0), (0,0), (0,0))
+            tomo = rebinning_python(conetomo, dic['d1'][0], dic['d2'][0], (1,1), (1,1), (0,0), (0,0), (0,0))
             return tomo
         else:
             type = dic['Type']

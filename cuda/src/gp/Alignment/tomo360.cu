@@ -1,8 +1,8 @@
-#include "../../inc/include.h"
-#include "../../inc/common/types.hpp"
-#include "../../inc/common/complex.hpp"
-#include "../../inc/common/operations.hpp"
-#include "../../inc/common/logerror.hpp"
+#include "../../../inc/include.h"
+#include "../../../inc/common/types.hpp"
+#include "../../../inc/common/complex.hpp"
+#include "../../../inc/common/operations.hpp"
+#include "../../../inc/common/logerror.hpp"
 
 extern "C"{
 	__global__ void KPhaseCorrelation(complex* ph1, complex* ph2, size_t sizex)

@@ -68,8 +68,8 @@ extern "C"{
 		param->mx          = ( param->d1x + param->d2x ) / param->d1x;
 		param->my          = ( param->d1y + param->d2y ) / param->d1y;
 		
-		param->effa_pixel  = ( param->pixelDetx / param->magnx ) / param->mx; 
-		param->effb_pixel  = ( param->pixelDety / param->magny ) / param->my;
+		param->effa_pixel  = ( param->pixelDetx / param->magnx ); 
+		param->effb_pixel  = ( param->pixelDety / param->magny );
 
 		/* GPUs */
 		param->gpus        = gpus;

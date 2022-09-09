@@ -21,9 +21,9 @@
 #include <omp.h>
 #include <math.h>
 #include "common/structs.h"
-#include "filter.h"
+#include "gp/filter.h"
 #include "rebinning.h"
-#include "tomoalignment.h"
-#include "fbp.h"
-#include "rings.h"
+#include "gp/alignment.h"
+#include "gp/fbp.h"
+#include "gp/rings.h"
 #include "flatdark.h"

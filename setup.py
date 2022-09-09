@@ -98,8 +98,9 @@ if CUDA:
 
     raft_codes = set(glob.glob('cuda/src/**/*.c*',recursive=True))
     raft_include1 = pwd + '/cuda/inc/'
-    raft_include2 = pwd + '/cuda/inc/common/'
-    raft_include3 = pwd + '/cuda/inc/common10/'
+    raft_include2 = pwd + '/cuda/inc/gp/'
+    raft_include3 = pwd + '/cuda/inc/common/'
+    raft_include4 = pwd + '/cuda/inc/common10/'
 
     ext_raft = Extension(name='sscRaft.lib.libraft',
 		          sources=list(raft_codes),
@@ -107,7 +108,7 @@ if CUDA:
                           runtime_library_dirs=[CUDA['lib']],
                           extra_compile_args={'nvcc': ['-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
                           extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas'],
-                          include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3])
+                          include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3, raft_include4])
     
 else:
     print('ssc-raft: Error! Compile with --cuda !')

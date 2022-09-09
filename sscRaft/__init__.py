@@ -6,8 +6,6 @@ except:
     pass
 
 from .rafttypes import *
-from .parallel  import *
+from .gp.reconstruction  import *
 from .rebinning import *
-from .aligment   import *
-from .rings   import *
 from .tomogram   import *

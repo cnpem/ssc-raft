@@ -29,21 +29,21 @@ extern "C"{
         r_coord  = dr  * (float)j - 0.5 * param.Ny * dr;
         bt_coord = dbt * (float)k; 
 
-        a_coord  = ( param.d1x * t_coord) / sqrt( ( ( param.d1x + param.d2x ) * ( param.d1x + param.d2x ) )  + ( t_coord * t_coord ) );
-        b_coord  = ( param.d1y * r_coord) / sqrt( ( ( param.d1y + param.d2y ) * ( param.d1y + param.d2y ) )  + ( r_coord * r_coord ) );
+        a_coord  = ( ( param.d1x + param.d2x ) * t_coord ) / sqrtf( ( ( param.d1x + param.d2x ) * ( param.d1x + param.d2x ) ) + ( t_coord * t_coord ) );
+        b_coord  = ( ( param.d1y + param.d2y ) * r_coord ) / sqrtf( ( ( param.d1y + param.d2y ) * ( param.d1y + param.d2y ) ) + ( r_coord * r_coord ) );
         
-        th_coord = bt_coord + atan( t_coord / ( param.d1x + param.d2x ) );
+        th_coord = bt_coord - atanf( t_coord / ( param.d1x + param.d2x ) );
         
         /* Parallel pixel Indexes */
-        a_ind  = (size_t)round( ( a_coord  + 0.5 * param.Nx * param.effa_pixel ) / param.effa_pixel );
-        b_ind  = (size_t)round( ( b_coord  + 0.5 * param.Ny * param.effb_pixel ) / param.effb_pixel );
-        th_ind = (size_t)round( ( th_coord                                     ) /              dbt ) % param.Nz;
+        a_ind  = (size_t)round( ( a_coord  + 0.5 * param.Nx * dt ) / dt  );
+        b_ind  = (size_t)round( ( b_coord  + 0.5 * param.Ny * dr ) / dr  );
+        th_ind = (size_t)round( ( th_coord                       ) / dbt ) % param.Nz;
         
         index = param.Nx * ( k      * param.Ny + i     ) + j    ; /* Cone index */
         voxel = param.Nx * ( th_ind * param.Ny + a_ind ) + b_ind; /* Parallel index */
 
-        if ( voxel < n )
-            dtomo[voxel] = dctomo[index];
+        // if ( voxel < n )
+        dtomo[voxel] = dctomo[index];
     }
 }
 
@@ -124,9 +124,9 @@ extern "C"{
                     th_coord = bt_coord - atan( t_coord / ( param.d1x + param.d2x ) );
                     
                     /* Parallel pixel Indexes */
-                    a_ind  = (size_t)round( ( a_coord  + 0.5 * param.Nx * param.effa_pixel ) / param.effa_pixel );
-                    b_ind  = (size_t)round( ( b_coord  + 0.5 * param.Ny * param.effb_pixel ) / param.effb_pixel );
-                    th_ind = (size_t)round( ( th_coord                                     ) /              dbt ) % param.Nz;
+                    a_ind  = (size_t)round( ( a_coord  + 0.5 * param.Nx * dt ) / dt  );
+                    b_ind  = (size_t)round( ( b_coord  + 0.5 * param.Ny * dr ) / dr  );
+                    th_ind = (size_t)round( ( th_coord                       ) / dbt ) % param.Nz;
                     
                     index = param.Nx * ( k      * param.Ny + i     ) + j    ; /* Cone index */
                     voxel = param.Nx * ( th_ind * param.Ny + a_ind ) + b_ind; /* Parallel index */

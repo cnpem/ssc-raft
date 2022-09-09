@@ -1,12 +1,12 @@
 // Authors: Giovanni Baraldi, Gilberto Martinez, Eduardo Miqueles
 // Sinogram centering
 
-#include "../../inc/include.h"
-#include "../../inc/common/kernel_operators.hpp"
-#include "../../inc/common/complex.hpp"
-#include "../../inc/common/types.hpp"
-#include "../../inc/common/operations.hpp"
-#include "../../inc/common/logerror.hpp"
+#include "../../../inc/include.h"
+#include "../../../inc/common/kernel_operators.hpp"
+#include "../../../inc/common/complex.hpp"
+#include "../../../inc/common/types.hpp"
+#include "../../../inc/common/operations.hpp"
+#include "../../../inc/common/logerror.hpp"
 
 extern "C"{
     __global__ void KCrossFrame16(complex* f, complex* g, const uint16_t* frame0, const uint16_t* frame1, const uint16_t* dark, const uint16_t* flat, size_t sizex)
