@@ -1,9 +1,9 @@
-#include "../../../inc/include.h"
-#include "../../../inc/common/types.hpp"
-#include "../../../inc/common/kernel_operators.hpp"
-#include "../../../inc/common/complex.hpp"
-#include "../../../inc/common/operations.hpp"
-#include "../../../inc/common/logerror.hpp"
+#include "../../../../inc/include.h"
+#include "../../../../inc/common/types.hpp"
+#include "../../../../inc/common/kernel_operators.hpp"
+#include "../../../../inc/common/complex.hpp"
+#include "../../../../inc/common/operations.hpp"
+#include "../../../../inc/common/logerror.hpp"
 
 extern "C"{
 	void SinoFilter(float* sino, size_t nrays, size_t nangles, size_t blocksize, int csino, bool bRampFilter, CFilter reg, bool bShiftCenter, float* sintable)

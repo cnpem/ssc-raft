@@ -1,11 +1,11 @@
 // Authors: Gilberto Martinez, Eduardo X Miqueles, Giovanni Baraldi
 
-#include "../../../inc/include.h"
-#include "../../../inc/common/kernel_operators.hpp"
-#include "../../../inc/common/complex.hpp"
-#include "../../../inc/common/types.hpp"
-#include "../../../inc/common/operations.hpp"
-#include "../../../inc/common/logerror.hpp"
+#include "../../../../inc/include.h"
+#include "../../../../inc/common/kernel_operators.hpp"
+#include "../../../../inc/common/complex.hpp"
+#include "../../../../inc/common/types.hpp"
+#include "../../../../inc/common/operations.hpp"
+#include "../../../../inc/common/logerror.hpp"
 
 
 extern "C"{
