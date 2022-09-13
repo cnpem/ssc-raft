@@ -4,7 +4,7 @@ import os
 import numpy 
 import sys
 import gc
-from ..rafttypes import *
+from ....rafttypes import *
 import uuid
 import SharedArray as sa
 from scipy.optimize import minimize

@@ -1,4 +1,4 @@
-from ..rafttypes import *
+from ....rafttypes import *
 import numpy as np
 import gc
 from time import time
@@ -10,7 +10,7 @@ from .bst import *
 from .fst import *
 from ..aligment.aligment import *
 from ..rings.rings import *
-from ..tomogram.flatdark import *
+from ....tomogram.flatdark import *
 import sys
 
 

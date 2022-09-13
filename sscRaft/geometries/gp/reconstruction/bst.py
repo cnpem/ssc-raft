@@ -1,6 +1,6 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
 
-from ..rafttypes import *
+from ....rafttypes import *
 import numpy as np
 import gc
 from time import time
