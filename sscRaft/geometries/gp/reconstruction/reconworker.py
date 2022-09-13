@@ -1,6 +1,5 @@
 from ....rafttypes import *
 import numpy as np
-import gc
 from time import time
 import uuid
 import SharedArray as sa

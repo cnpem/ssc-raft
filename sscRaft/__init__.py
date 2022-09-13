@@ -7,6 +7,5 @@ except:
 
 from .rafttypes import *
 from .geometries.gp.reconstruction  import *
-from .geometries.gc  import *
 from .rebinning import *
 from .tomogram   import *
