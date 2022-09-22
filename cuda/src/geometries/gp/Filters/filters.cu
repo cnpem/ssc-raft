@@ -18,6 +18,8 @@ extern "C"{
 		dim3 blk = fft.ShapeBlock();
 		dim3 thr = fft.ShapeThread();
 
+		printf("Enter sino filter \n ");
+
 		for(int k=0; k<blocksize; k++)
 		{
 			HANDLE_FFTERROR( cufftExecR2C(plan_r2c, sino+k*nrays*nangles, fft.gpuptr) );
@@ -76,6 +78,7 @@ extern "C"{
 
 		float rampfilter = float(tx) / (float)sizex;
 		rampfilter = mfilter.Apply(rampfilter);
+		// printf("band filter value: %lf \n ",rampfilter);
 
 		float fcenter = 1.0f - (bShiftCenter ? (sintable[ty]) : 0);
 		fcenter = -2*float(M_PI)/float(2*sizex-2) * fcenter * icenter;

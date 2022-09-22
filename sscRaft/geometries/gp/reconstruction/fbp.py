@@ -225,7 +225,7 @@ def fbp_threads(tomogram, dic, **kwargs):
 
 def fbp(tomogram, dic, **kwargs):
         
-        nrays = tomogram.shape[2]
+        nrays = tomogram.shape[-1]
 
         dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
                     'shift center','tomooffset','360pan')

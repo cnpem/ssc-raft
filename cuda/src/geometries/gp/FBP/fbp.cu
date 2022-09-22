@@ -26,13 +26,11 @@ extern "C"{
         {
             sintable.cpuptr[i] = sin(angs[i]);
             costable.cpuptr[i] = cos(angs[i]);
-            // printf("hare\n");
         }
         else for(int i=0; i<nangles; i++)
         {
             sintable.cpuptr[i] = sin(float(i)*float(M_PI)/float(nangles));
             costable.cpuptr[i] = cos(float(i)*float(M_PI)/float(nangles));
-            // printf("no angles hare\n");
         }
 
         sintable.LoadToGPU();
@@ -50,65 +48,12 @@ extern "C"{
     }
 }
 
-extern "C"{
-    void fbpsingleGPU(int gpu, float* blockRecon, float* sinoblock, int nrays, 
-            int nangles, int isizez, int sizeimage, int csino, float reg_val, int FilterType, float* angs, int bShiftCenter)
-    {
-        CFilter reg(FilterType,reg_val);
-
-        cudaSetDevice(gpu);
-        size_t sizez = size_t(isizez);
-        
-        cudaDeviceSynchronize();
-        auto time0 = std::chrono::system_clock::now();
-
-        dim3 threads(16,16,1); 
-        dim3 blocks((sizeimage+15)/16,(sizeimage+15)/16,1);
-
-        rImage sintable(1,nangles);
-        rImage costable(1,nangles);
-
-        if(angs != nullptr) for(int i=0; i<nangles; i++)
-        {
-            sintable.cpuptr[i] = sin(angs[i]);
-            costable.cpuptr[i] = cos(angs[i]);
-        }
-        else for(int i=0; i<nangles; i++)
-        {
-            sintable.cpuptr[i] = sin(float(i)*float(M_PI)/float(nangles));
-            costable.cpuptr[i] = cos(float(i)*float(M_PI)/float(nangles));
-        }
-
-        sintable.LoadToGPU();
-        costable.LoadToGPU();
-
-        rImage sino(nrays, nangles, min(sizez,32ul), MemoryType::EAllocGPU);
-        rImage recon(sizeimage,sizeimage, min(sizez,32ul), MemoryType::EAllocGPU);
-
-        for(size_t b=0; b < sizez; b += 32)
-        {
-            blocks.z = min(sizez-b,32ul);
-            size_t reconoffset = b*sizeimage*sizeimage;
-
-            sino.CopyFrom(sinoblock + b*nrays*nangles, 0, blocks.z*nrays*nangles);
-            SinoFilter(sino.gpuptr, nrays, nangles, blocks.z, csino, true, reg, bShiftCenter, sintable.gpuptr);
-            KBackProjection_RT<<<blocks, threads>>>((char*)recon.gpuptr, sino.gpuptr, sizeimage, nrays, nangles, EType::TypeEnum::FLOAT32, 0, sintable.gpuptr, costable.gpuptr);
-            recon.CopyTo(reconoffset + blockRecon, 0, blocks.z*sizeimage*sizeimage);
-        }
-
-        cudaDeviceSynchronize();
-        auto time3 = std::chrono::system_clock::now();
-
-        //std::cout << "Total: " << (time3-time0).count()/1000000 << " ms." << std::endl;
-    }
-    
-}
-
 extern "C"{   
 
     void fbpgpu(int gpu, float* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
         float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
     {
+        printf("Filter type: %d \n",FilterType);
         CFilter reg(FilterType,reg_val);
 
         EType datatype = EType((EType::TypeEnum)reconPrecision);
@@ -161,60 +106,6 @@ extern "C"{
             t.get();
     }
 
-    void _fbp(int gpu, char* recon, float* tomogram, float* angles, int nrays, int nangles, int nslices, int reconsize, int centersino, CFilter reg, 
-        EType datatype, float threshold, int bShiftCenter)
-    {
-        size_t memframe = 10*nrays*nangles;
-        size_t maxusage = 1ul<<33;
-        size_t maxblock = min(max(maxusage/memframe,size_t(1)),32ul);
-
-        cudaSetDevice(gpu);
-
-        rImage tomo(nrays, nangles, maxblock);
-        Image2D<char> blockRecon(nrays, nrays, maxblock * datatype.Size());
-
-        for(size_t b = 0; b < nslices; b += maxblock){
-            
-            size_t blocksize = min(nslices - b, maxblock);
-
-            HANDLE_ERROR(cudaMemcpy2D(tomo.gpuptr, 2 * nrays * maxblock, tomogram + b * nrays, 2 * nrays, nrays * blocksize*2, nangles, cudaMemcpyDefault));
-            
-            GPUFBP(blockRecon.gpuptr, tomo.gpuptr, nrays, nangles, blocksize, reconsize, centersino, reg, datatype, threshold, angles, bShiftCenter);
-
-            HANDLE_ERROR(cudaMemcpy(recon + datatype.Size() * b * reconsize * reconsize, blockRecon.gpuptr, reconsize * reconsize * blocksize * datatype.Size(), cudaMemcpyDefault));
-        }
-    }
-
-    void _fbpblock(int* gpus, int ngpus, char* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
-        float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
-    {
-        CFilter reg(FilterType,reg_val);
-
-        EType datatype = EType((EType::TypeEnum)reconPrecision);
-        
-        size_t memframe = 8*nrays*nangles;
-        size_t maxusage = 1ul<<33;
-        size_t maxblock = min(max(maxusage/memframe,size_t(1)),32ul);
-
-        size_t blockgpu = (nslices + ngpus - 1) / ngpus;
-        
-        std::vector<std::future<void>> threads;
-
-        for(size_t t = 0; t < ngpus; t++) 
-            if(blockgpu * t < nslices){
-                size_t lastblock = min(nslices - blockgpu * t, blockgpu);
-                char* offsetptr = recon + t * blockgpu * size_t(reconsize*reconsize);
-
-
-                threads.push_back(std::async( std::launch::async, _fbp, 
-                    gpus[t], offsetptr, tomogram, angles, nrays, nangles, lastblock, reconsize, 
-                    centersino, reg, datatype, threshold, bShiftCenter
-                ));
-            }
-    
-        for(auto& t : threads)
-        t.get();
-    }
 }
 
 extern "C"{

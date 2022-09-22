@@ -256,6 +256,8 @@ def fbp(tomogram, dic, **kwargs):
         
         dic.update({'recon size': reconsize,'recon type': recondtype, 'precision': precision})
 
+        print(dic)
+
         if len(gpus) == 1:
                 gpu = gpus[0]
                 output = fbpGPU( tomogram, dic, gpu )
