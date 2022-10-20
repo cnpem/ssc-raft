@@ -128,7 +128,7 @@ def visualization(lab, cones, proj, recon, n_gpus, save_path):
         _, axs = plt.subplots(1,3)
         axs[0].imshow(cones[:, k, :])
         axs[1].imshow(proj[:, k, :])
-        axs[3].imshow(recon[k%lab.nz, :, :])
+        axs[2].imshow(recon[k%lab.nz, :, :])
         
         plt.savefig('fdkTESTE' + str(k) + '.png')
         plt.close()
@@ -141,7 +141,7 @@ def visualization(lab, cones, proj, recon, n_gpus, save_path):
         _, axs = plt.subplots(1,3)
         axs[0].imshow(recon[:, :, k%lab.nz])
         axs[1].imshow(recon[:, k%lab.ny, :])
-        axs[3].imshow(recon[k%lab.nx, :, :])
+        axs[2].imshow(recon[k%lab.nx, :, :])
         
         plt.savefig('fdkTESTE' + str(k) + '.png')
         plt.close()
