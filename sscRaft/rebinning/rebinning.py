@@ -250,7 +250,7 @@ def conebeam_rebinning_to_parallel(conetomo, dic, **kwargs):
         nslices = conetomo.shape[1]
         
         # Set default values for dictionary 'dic' if it is NOT defined
-        params = ('gpus','z1','z2','d1','d2','DetPixelSize''Type')
+        params = ('gpus','z1','z2','d1','d2','DetPixelSize', 'Type')
         defaut = ([0],(1,1),(0,0),(1,1),(0,0),(1/nimages,1/nslices),'cpu')
         SetDictionary(dic,params,defaut)
 
