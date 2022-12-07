@@ -422,7 +422,7 @@ extern "C"{
         rImage smooth(msizex,msizey);
         rImage sinobar(msizex,msizey);
         lambda = VolumeAverage(sinobar.gpuptr, volume, vsizex, vsizey, vsizez, lambda, slicesize);
-
+        // printf("Lambda rings: %e \n",lambda);
         sinobar.LoadFromGPU();
         cudaDeviceSynchronize();
         float norm2vec[msizey];

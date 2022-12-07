@@ -18,7 +18,7 @@ extern "C"{
 		dim3 blk = fft.ShapeBlock();
 		dim3 thr = fft.ShapeThread();
 
-		printf("Enter sino filter \n ");
+		// printf("Enter sino filter \n ");
 
 		for(int k=0; k<blocksize; k++)
 		{

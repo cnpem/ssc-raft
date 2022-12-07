@@ -6,7 +6,6 @@ except:
     pass
 
 from .rafttypes import *
-from .geometries.gp.reconstruction  import *
-from .geometries.gc  import *
+from .geometries  import *
 from .rebinning import *
 from .tomogram   import *

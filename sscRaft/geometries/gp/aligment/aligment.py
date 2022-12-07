@@ -42,7 +42,7 @@ def Centersino(frame0, frame1, flat, dark):
 
         start = time()
 
-        offset = libraft.findcentersino16(frame0ptr, frame1ptr, darkptr, flatptr, int32(nrays), int32(nslices))
+        offset = libraft.findcentersino(frame0ptr, frame1ptr, darkptr, flatptr, int32(nrays), int32(nslices))
 
         elapsed = time() - start
         

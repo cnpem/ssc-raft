@@ -36,7 +36,8 @@ extern "C"{
         sintable.LoadToGPU();
         costable.LoadToGPU();
         
-        SinoFilter(sinoblock, nrays, nangles, sizez, csino, true, reg, bShiftCenter, sintable.gpuptr);
+        if ( reg.reg != 0.0 )
+            SinoFilter(sinoblock, nrays, nangles, sizez, csino, true, reg, bShiftCenter, sintable.gpuptr);
 
         dim3 threads(16,16,1); 
         dim3 blocks((sizeimage+15)/16,(sizeimage+15)/16,sizez);

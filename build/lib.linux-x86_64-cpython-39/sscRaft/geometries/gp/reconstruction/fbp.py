@@ -225,7 +225,7 @@ def fbp_threads(tomogram, dic, **kwargs):
 
 def fbp(tomogram, dic, **kwargs):
         
-        nrays = tomogram.shape[2]
+        nrays = tomogram.shape[-1]
 
         dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
                     'shift center','tomooffset','360pan')
@@ -255,8 +255,6 @@ def fbp(tomogram, dic, **kwargs):
                 logger.error(f'Invalid recon datatype:{precision}')
         
         dic.update({'recon size': reconsize,'recon type': recondtype, 'precision': precision})
-
-        print(dic)
 
         if len(gpus) == 1:
                 gpu = gpus[0]
