@@ -92,7 +92,7 @@ int memory(Lab lab, int ndev){
 
     //verificar se divisão está ok
     // n_process = 2*n_process;
-    if(lab.nx == 2048 && lab.nbeta == 2048) n_process = 8;
+    if(n_proj >= (long long int) (2048*2048*2048)) n_process = 8;
 
     printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
 

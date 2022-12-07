@@ -47,9 +47,11 @@ def reconstruction_fdk( data, experiment):
                 fourier = True)
     
 
-    reconstruction(lab, data, experiment['gpus'], save_path = experiment['save_path'], save = True, vis = experiment['vis'])
+    recon, filter = reconstruction(lab, data, experiment['gpus'], save_path = experiment['save_path'], save = True, vis = experiment['vis'])
 
     print('fdk')
+
+    return recon, filter
 
 
 
@@ -73,13 +75,15 @@ def reconstruction( lab, proj, gpus,
 
     if vis:
         print('Visualization...')
-        phantom = np.load(path_phantom)
-        visualization(lab, proj, filt, phantom, recon, len(gpus))
+        #phantom = np.load(path_phantom)
+        visualization(lab, proj, filt, recon, len(gpus))
     
     if comp:
         print('Visualization...')
         phantom = np.load(path_phantom)
         vis_phantom(lab, proj, filt, phantom, recon, len(gpus))
+    
+    return recon, filt
 
 
 def fdk_gpu(lab, proj, gpus):
@@ -124,7 +128,20 @@ def visualization(lab, cones, proj, recon, n_gpus, save_path):
         _, axs = plt.subplots(1,3)
         axs[0].imshow(cones[:, k, :])
         axs[1].imshow(proj[:, k, :])
-        axs[3].imshow(recon[k%lab.nz, :, :])
+        axs[2].imshow(recon[k%lab.nz, :, :])
+        
+        plt.savefig('fdkTESTE' + str(k) + '.png')
+        plt.close()
+        images.append(imageio.imread('fdkTESTE' + str(k) + '.png'))
+        os.remove('fdkTESTE' + str(k) + '.png')          
+    imageio.mimsave(save_path+'/result'+str(lab.nx)+"_"+ str(lab.nbeta)+"_"+str(int(n_gpus))+'.gif', images) 
+
+    images = []
+    for k in range(int(lab.nbeta/2),int(lab.nbeta/2)+100):
+        _, axs = plt.subplots(1,3)
+        axs[0].imshow(recon[:, :, k%lab.nz])
+        axs[1].imshow(recon[:, k%lab.ny, :])
+        axs[2].imshow(recon[k%lab.nx, :, :])
         
         plt.savefig('fdkTESTE' + str(k) + '.png')
         plt.close()

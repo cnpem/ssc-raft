@@ -336,7 +336,7 @@ def emfs( tomogram, dic ):
     """
     
     nslices   = tomogram.shape[0]
-    nrays     = tomogram.shape[2]
+    nrays     = tomogram.shape[-1]
     nangles   = dic['nangles']
     gpus      = dic['gpu']
     blocksize = dic['blocksize']
