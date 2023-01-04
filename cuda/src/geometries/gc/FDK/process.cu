@@ -73,10 +73,6 @@ int memory(Lab lab, int ndev){
     long double mem_gpu, mem_recon, mem_proj;
     int n_process;
     long long int n_proj, n_recon;
-    // int flag, count, i;
-    // float z_min, z_max, Z_min, Z_max;
-    // int Zi_min, Zi_max, nz_gpu, zi_min, zi_max;
-
     
     n_proj = (long long int)(lab.nv)*(long long int)(lab.nbeta)*(long long int)(lab.nh);
     n_recon = (long long int)(lab.nx)*(long long int)(lab.ny)*(long long int)(lab.nz);
@@ -90,11 +86,14 @@ int memory(Lab lab, int ndev){
     // divisão de processos 
     if(n_process < ndev) n_process = ndev;
 
-    //verificar se divisão está ok
     // n_process = 2*n_process;
-    if(n_proj >= (long long int) (2048*2048*2048)) n_process = 16;
+    if(lab.nx == 2048 && lab.nbeta == 2048) n_process = 8;
 
     printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
+
+    //if(lab.nbeta >= 1900) n_process = 16;
+    // if (lab.nbeta >= 3900) n_process = 32;
+    //if (lab.nh >= 8000) n_process = 32;
 
     return n_process;
 }}

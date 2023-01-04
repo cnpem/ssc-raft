@@ -55,6 +55,7 @@ def RingsMultiGPU(tomogram, dic):
         libraft.ringsblock(gpusptr, int32(ngpus), tomogramptr, int32(nrays), int32(nangles), int32(nslices), float32(lambdarings), int32(ringsblock))
         
         elapsed = time() - start
+        print('Rings Time', elapsed)
 
         return tomogram
 
@@ -99,6 +100,7 @@ def RingsGPU(tomogram, dic, gpu = 0):
         libraft.ringsgpu(int32(gpu), tomogramptr, int32(nrays), int32(nangles), int32(nslices), float32(lambdarings), int32(ringsblock))
         
         elapsed = time() - start
+        print('Rings Time', elapsed)
 
         return tomogram
 
