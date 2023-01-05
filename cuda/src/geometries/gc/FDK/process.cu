@@ -38,7 +38,9 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     
     printf("Process = %d:  n_recon  = %lld,  idx_recon = %lld, z_ph = %f \n",  i, n_recon, idx_recon, z_min);
     
-    L = sqrt(lab.x*lab.x + lab.y*lab.y);
+    // L = sqrt(lab.x*lab.x + lab.y*lab.y);
+    L = std::max(lab.x, lab.y);
+    
     //variáveis de9tector
    	Z_min = std::max(-lab.v, std::min(  lab.Dsd*z_min/(lab.D - L),  
                                         lab.Dsd*z_min/(lab.D + L) ));
@@ -87,7 +89,7 @@ int memory(Lab lab, int ndev){
     if(n_process < ndev) n_process = ndev;
 
     // n_process = 2*n_process;
-    if(lab.nx == 2048 && lab.nbeta == 2048) n_process = 8;
+    if(lab.nx > 1800 && lab.nbeta > 1800) n_process = 8;
 
     printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
 

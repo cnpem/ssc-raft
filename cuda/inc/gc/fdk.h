@@ -39,50 +39,42 @@ typedef struct {
 //FDK Functions
 
 extern "C"{
-    void gpu_fdk(Lab lab, float *recon, float *proj, int* gpus, int ndev,  double *time);
-
-    void filtering(Lab lab, float* proj, Process process); 
-
-    void backprojection(Lab lab, float* recon, float* proj, Process process);
+    void gpu_fdk(   Lab lab, float *recon, float *proj, int* gpus, int ndevs, double *time);
 
     void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
 
     int memory(Lab lab, int ndev);
 
-    void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon,  Process process);
+    void copy_to_gpu_back(Lab lab, float* proj, float* recon, float** c_proj, float** c_recon, float** c_beta, Process process);
 
-    void copy_to_gpu_back(Lab lab, float* proj, float* recon, float** c_proj, float** c_sample, Process process);  
+    void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta, Process process);
 
-    void calc_backproj(float* recon, float* proj, Lab lab, Process process);
+    void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process process);
 
-    __global__ void backproj(float* recon, float* proj, Lab lab, Process process);
+    __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process);
 
-    __global__ void backproj_interpol(float* recon, float* proj, Lab lab, Process process);
+    __global__ void set_beta(Lab lab, float* beta);
 
-    __host__ void calc_fft(Lab lab, float* proj, Process process);
+    __device__ void set_recon_idxs(long long int n, int* i, int*j, int* k, Lab lab);
 
-    __host__ void signal_fft(Lab lab, float* proj, cufftComplex* signal, int op, Process process);
+    __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
 
-    __global__ void filt_W(Lab lab, float* W);
+    void copy_gpu_filter(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process);
+
+    void copy_cpu_filter(float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process);
+
+    __global__ void signal_save(Lab lab, float* proj, cufftComplex* signal, Process process);
 
     __global__ void signal_filter(Lab lab, float* W, cufftComplex* signal, Process process);
+
+    __global__ void filt_W(Lab lab, float* W);
 
     __global__ void signal_inv(Lab lab, float* Q, cufftComplex* signal, Process process);
 
     __device__ void set_filter_idxs(long long int n, int* i, int*j, int* k, Lab lab, Process process);
 
-    __global__ void signal_save(Lab lab, float* proj, cufftComplex* signal, Process process);
-
-    void copy_gpu_filter(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process);
-
-    __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
-
-    void copy_cpu_filter(float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process);
-
-    __device__ void set_recon_idxs(long long int n, int* i, int*j, int* k, Lab lab);
-
     __device__ void set_projs_idxs(long long int n, int* i, int* k, int* m, Lab lab);
-    
+
 }
 
 
