@@ -176,7 +176,7 @@ except:
 ######## Conical Raft ##########
 
 class Lab(ctypes.Structure):
-    _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float), ("z", ctypes.c_float),
+        _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float), ("z", ctypes.c_float),
                 ("dx", ctypes.c_float), ("dy", ctypes.c_float),("dz", ctypes.c_float),
                 ("nx", ctypes.c_int), ("ny", ctypes.c_int), ("nz", ctypes.c_int),
                 ("h", ctypes.c_float), ("v", ctypes.c_float),
@@ -192,7 +192,7 @@ try:
 
 
 except:
-    print('-.RAFT-')
+    print('-.FDK-')
     pass
 
 
@@ -262,7 +262,6 @@ def SetDic(dic, paramname, deff):
 def SetDictionary(dic,param,default):
         for ind in range(len(param)):
                 SetDic(dic,param[ind], default[ind])
-
 
 
 if __name__ == "__main__":
