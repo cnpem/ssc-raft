@@ -51,21 +51,14 @@ extern "C"{
 
     void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon,  Process process);
 
-    void copy_to_gpu_back(Lab lab, float* proj, float* recon, float** c_proj, float** c_sample, Process process); }
+    void copy_to_gpu_back(Lab lab, float* proj, float* recon, float** c_proj, float** c_sample, Process process);  
 
-
-// Backprojection
-extern "C"{
     void calc_backproj(float* recon, float* proj, Lab lab, Process process);
 
     __global__ void backproj(float* recon, float* proj, Lab lab, Process process);
 
-    __global__ void backproj_interpol(float* recon, float* proj, Lab lab, Process process);}
+    __global__ void backproj_interpol(float* recon, float* proj, Lab lab, Process process);
 
-
-// Filter Functions: Fourier Transform
-
-extern "C"{
     __host__ void calc_fft(Lab lab, float* proj, Process process);
 
     __host__ void signal_fft(Lab lab, float* proj, cufftComplex* signal, int op, Process process);
@@ -84,14 +77,13 @@ extern "C"{
 
     __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
 
-    void copy_cpu_filter(float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process);}
+    void copy_cpu_filter(float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process);
 
-
-// Utilitary Functions
-extern "C"{
     __device__ void set_recon_idxs(long long int n, int* i, int*j, int* k, Lab lab);
 
-    __device__ void set_projs_idxs(long long int n, int* i, int* k, int* m, Lab lab);}
+    __device__ void set_projs_idxs(long long int n, int* i, int* k, int* m, Lab lab);
+    
+}
 
 
 #endif

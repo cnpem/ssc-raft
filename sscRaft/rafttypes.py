@@ -188,7 +188,7 @@ class Lab(ctypes.Structure):
                 ("nbeta", ctypes.c_int)]
 
 try:
-        libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p ]
+        libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
 
 
 except:
