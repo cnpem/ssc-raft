@@ -27,3 +27,4 @@
 #include "gp/fbp.h"
 #include "gp/rings.h"
 #include "flatdark.h"
+#include "gc/fdk.h"
