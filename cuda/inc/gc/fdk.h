@@ -28,6 +28,14 @@ typedef struct {
     bool fourier;
 } Lab;
 
+typedef struct {
+    int nrays;
+    int nangles;
+    int nslices;
+    float lambda_rings;
+    int ringblocks;
+} Rings_;
+
 typedef struct {  
     int i, i_gpu, zi;
     long long int n_proj, n_recon, n_filter;
@@ -39,11 +47,13 @@ typedef struct {
 //FDK Functions
 
 extern "C"{
-    void gpu_fdk(Lab lab, float *recon, float *proj, int* gpus, int ndev,  double *time);
+    void gpu_fdk(Lab lab, Rings_ ring,  float *recon, float *proj, int* gpus, int ndev,  double *time);
 
     void filtering(Lab lab, float* proj, Process process); 
 
     void backprojection(Lab lab, float* recon, float* proj, Process process);
+
+    void filtering(Rings_ ring, Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
 
     void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
 
@@ -82,6 +92,8 @@ extern "C"{
     __device__ void set_recon_idxs(long long int n, int* i, int*j, int* k, Lab lab);
 
     __device__ void set_projs_idxs(long long int n, int* i, int* k, int* m, Lab lab);
+
+    void ringsgpu_fdk(int gpu, float* data, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks);
     
 }
 
