@@ -10,6 +10,7 @@ cuda/src/Rebinning/rebinning_kernel.cu
 cuda/src/Rebinning/rebinning_parameters.cu
 cuda/src/geometries/gc/FDK/backproj.cu
 cuda/src/geometries/gc/FDK/fdk.cu
+cuda/src/geometries/gc/FDK/filtering.cu
 cuda/src/geometries/gc/FDK/fourier.cu
 cuda/src/geometries/gc/FDK/process.cu
 cuda/src/geometries/gp/Alignment/centersino.cu

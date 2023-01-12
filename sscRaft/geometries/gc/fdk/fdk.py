@@ -12,13 +12,15 @@ import ctypes.util
 
 def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz, 
                     h, v, dh, dv, nh, nv,
-                    D, Dsd, beta_max, dbeta, nbeta):
+                    D, Dsd, beta_max, dbeta, nbeta,
+                    lambda_rings, ringblocks ):
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
                 nx = nx, ny = ny, nz = nz, 
                 h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
                 D = D, Dsd = Dsd, 
-                beta_max = beta_max, dbeta = dbeta , nbeta = nbeta)
+                beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
+                lambda_rings = lambda_rings, ringblocks = ringblocks)
 
     return lab
 

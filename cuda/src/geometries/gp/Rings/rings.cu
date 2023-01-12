@@ -219,7 +219,9 @@ extern "C"{
         if(lambda < 0)
         {
             cImage minmax(blocks.x*blocks.y,1);
+
             KRedVolumeMM<<<blocks,threads>>>(mbar, minmax.gpuptr, volume, sizex, sizey, slicesize);
+
             minmax.LoadFromGPU();
 
             cudaDeviceSynchronize();
@@ -418,9 +420,10 @@ extern "C"{
 
         // for (int i = 0; i < vsizey; i++)
         //     printf("Vol = %e \n",volume[512*1024*1024 + i*1024]);
-        
+   
         rImage smooth(msizex,msizey);
         rImage sinobar(msizex,msizey);
+
         lambda = VolumeAverage(sinobar.gpuptr, volume, vsizex, vsizey, vsizez, lambda, slicesize);
 
         sinobar.LoadFromGPU();

@@ -28,7 +28,6 @@ void gpu_fdk(   Lab lab, float *recon, float *proj,
     Process* process = (Process*) malloc(sizeof(Process)*n_process);
     for(i = 0; i < n_process; i++) set_process(lab, i, &process[i], n_process, gpus, ndevs);
 
-
     printf("Filter:\n");
     clock_t f_begin = clock();
     k = 0;
@@ -42,11 +41,11 @@ void gpu_fdk(   Lab lab, float *recon, float *proj,
 
         if(k % ndevs == 0){
             for(i = 0; i < ndevs; i++) 
-                copy_gpu_filter(lab, proj, &c_filter[i], &c_signal[i], &c_W[i], process[k+i]);   
+                copy_gpu_filter( lab, proj, &c_filter[i], &c_signal[i], &c_W[i], process[k+i]);   
             cudaDeviceSynchronize();
         }
 
-        threads_filt.emplace_back(thread( fft, lab, c_filter[k%ndevs], c_signal[k%ndevs], c_W[k%ndevs], process[k])) ;
+        threads_filt.emplace_back(thread( filtering, lab, c_filter[k%ndevs], c_signal[k%ndevs], c_W[k%ndevs], process[k])) ;
         k = k+1;
 
         if(k % ndevs == 0){

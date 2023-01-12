@@ -10,7 +10,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
     long long int idx;
     int i, j, k, m;
 
-    float b, x, y, z;
+    float    x, y, z;
     float u, v, X, Z;
     float cosb, sinb, Q, L;
 
