@@ -25,7 +25,6 @@ def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz,
     return lab
 
 
-
 def reconstruction_fdk_(     lab, proj, gpus):
 
     print("Reconstruction...")
