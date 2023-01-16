@@ -53,7 +53,7 @@ def fdk(lab, proj, gpus):
 
 
 
-def reconstruction_fdk( data, flat, dark, experiment):
+def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
 
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
 
@@ -102,6 +102,8 @@ def reconstruction_fdk( data, flat, dark, experiment):
 
     if(experiment['normalize']):
         data = normalize_fdk(data, flat, dark, experiment['padding'])
+    else:
+        data = np.swapaxes(0,1,data)
     
     recon = fdk(lab, data, experiment['gpus'])
 
