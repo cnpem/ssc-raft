@@ -25,8 +25,7 @@ typedef struct {
     float beta_max;
     float dbeta;
     int nbeta;
-    float lambda_rings;
-    int ringblocks;
+    int rings;
 } Lab;
 
 
@@ -63,7 +62,7 @@ extern "C"{
 
     __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
 
-    void ringsgpu_fdk(int gpu, float* data, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks);
+    void ringsgpu_fdk( Lab lab, float* data, Process process);
 
     void copy_gpu_filter(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process);
 
