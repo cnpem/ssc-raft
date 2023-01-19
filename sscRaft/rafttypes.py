@@ -52,7 +52,7 @@ def load_library(lib,ext):
 #     print(_path)
 #     try:
     lib = ctypes.CDLL(_path)
-    print(lib)
+#     print(lib)
     return lib
 #     except:
 #         pass
