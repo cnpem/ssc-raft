@@ -1,10 +1,104 @@
 Examples
 ========
 
+FDK
+***
+
+* FDK (Feldkamp, Davis and Kress) Reconstruction Algorithm
+
+The FDK Reconstruction Algorithm is a popular method for three-dimensional reconstruction from cone-beam projections. 
+It was developed in 1984 by Feldkamp, Davis and Kress as a practical geometry adaptation of existing analytical Filtered Backprojection strategies for reconstruction.
+
+This reconstruction method consists of:
+- Filtering conical projections with Fourier Transforms
+- Backprojecting to sample reconstructions
+
+	.. code-block:: python
+			import numpy as np
+			import h5py
+			import sscRaft
+
+			in_path = 'path_to_input_HDF5_file'
+			in_name = 'name_input_HDF5_file'
+
+			# Load data, flat and dark
+			# Mogno HDF5 example:
+
+			data = h5py.File(in_path + in_name, "r")["scan"]["detector"]["data"][:].astype(np.float32)
+			flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)[0,:,:]
+			dark = h5py.File(in_path + in_name, "r")["scan"]["detector"]["darks"][:].astype(np.float32)[0,:,:]
+
+			# Dictionary
+			experiment = {}
+			experiment['z1'] = 2103*1e-3
+			experiment['z2'] = 2530.08*1e-3
+			experiment['pixel'] = 3.61*1e-6
+			experiment['n'] = 2048
+			experiment['gpus'] = np.array([0,1,2,3])
+			experiment['apply_rings'] = True
+			experiment['normalize'] = True
+			experiment['padding'] = 800
+
+			recon = sscRaft.reconstruction_fdk(experiment, data, flat, dark)
+
+
+Save HDF5 with metadata
+***********************
+
+How to save a numpy array in HDF5 format with metadata from a dictionary together with the ssc-reft version, for a reconstruct data from FDK.
+
+	.. code-block:: python
+			import sscRaft
+			import h5py
+
+			in_path = 'path_to_input_HDF5_file'
+			in_name = 'name_input_HDF5_file'
+
+			# Load data, flat and dark
+			# Mogno HDF5 example:
+
+			data = h5py.File(in_path + in_name, "r")["scan"]["detector"]["data"][:].astype(np.float32)
+			flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)[0,:,:]
+			dark = h5py.File(in_path + in_name, "r")["scan"]["detector"]["darks"][:].astype(np.float32)[0,:,:]
+
+			# Dictionary
+			experiment = {}
+			experiment['z1'] = 2103*1e-3
+			experiment['z2'] = 2530.08*1e-3
+			experiment['pixel'] = 3.61*1e-6
+			experiment['n'] = 2048
+			experiment['gpus'] = np.array([0,1,2,3])
+			experiment['apply_rings'] = True
+			experiment['normalize'] = True
+			experiment['padding'] = 800
+
+			recon = sscRaft.reconstruction_fdk(experiment, data, flat, dark)
+
+			out_path = 'path_to_output_HDF5_file'
+			out_name = 'name_output_HDF5_file'
+			ext = '.hdf5'
+
+			# Add more parameters on dictionary if necessary to save in output file
+			experiment['Input file'] = in_path + in_name
+			experiment['Energy [KeV]'] = '22 and 39'
+
+			# Create HDF5 file
+			outfile = h5py.File(out_path + out_name + ext,'a')
+
+			try:
+					# Call function to save the metadata from dictionary 'experiment' with the software 'sscRaft' and its version 'sscRaft.__version__'
+					sscRaft.Metadata_hdf5(outputFileHDF5 = outfile, dic = experiment, software = 'sscRaft', version = sscRaft.__version__)
+			except:
+					print("Error! Cannot save metadata in HDF5 output file.")
+					pass
+
+			# Save reconstruction to HDF5 output file
+			outfile.create_dataset('recon', data = recon)
+
 EM/TV
 *****
 
-* Expectation Maximization with total variation using a parallel tomogram as an input: 
+Expectation Maximization with total variation using a parallel tomogram as an input: 
 
 	.. code-block:: python
 
@@ -45,10 +139,10 @@ EM/TV
 CAT
 ***
 
-* EM/TV from real ptychographic data restored using package ``ssc-cdi`. After a full
-  ptychographic 3D reconstruction, we obtain a sequence of parallel sinograms, which
-  can be considered approximate Radon transforms. A 3D inversion follows using the
-  code below:
+EM/TV from real ptychographic data restored using package ``ssc-cdi`. After a full
+ptychographic 3D reconstruction, we obtain a sequence of parallel sinograms, which
+can be considered approximate Radon transforms. A 3D inversion follows using the
+code below:
 
 	.. code-block:: python
 
@@ -88,10 +182,11 @@ CAT
   Note that ``sino`` is a transposition from ``data`` in order to use ``ssc-raft`` usual axis order
   :math:`slice \times angles \times rays` 
 
+
 REBINNING
 *********
 
-* Conebeam tomogram rebinning to parallel tomogram: 
+Conebeam tomogram rebinning to parallel tomogram: 
 
 	.. code-block:: python
 

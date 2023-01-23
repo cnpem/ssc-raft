@@ -1,5 +1,21 @@
-Install
-========
+Installation
+============
+
+***
+PIP
+***
+
+One can install the latest version of ``sscRaft`` directly from our ``pip server`` by:
+
+.. code-block:: bash
+
+    pip config --user set global.extra-index-url http://gcc.lnls.br:3128/simple/
+    pip config --user set global.trusted-host gcc.lnls.br
+
+    pip install sscRaft
+
+Or manually download it from the `package <http://gcc.lnls.br:3128/packages/>`_ list.
+
 
 GITLAB
 ******

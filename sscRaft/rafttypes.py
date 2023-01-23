@@ -8,6 +8,7 @@ import sys
 import numpy
 import logging
 import json
+import h5py
 
 '''----------------------------------------------'''
 
@@ -49,14 +50,8 @@ else:
 
 def load_library(lib,ext):
     _path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + lib + ext
-#     print(_path)
-#     try:
     lib = ctypes.CDLL(_path)
-    print(lib)
     return lib
-#     except:
-#         pass
-#     return None
 
 libraft  = load_library(_lib, ext)
 
@@ -84,7 +79,7 @@ try:
     libraft.EMTV.restype  = None
 
 except:
-    print('-.EM-')
+    print('-.RAFT_PARALLEL_EM-')
     pass
 
 ######## Rebinning ##########
@@ -168,7 +163,7 @@ try:
     libraft.flatdarktransposeblock.restype  = None
     
 except:
-    print('-.RAFT-')
+    print('-.RAFT_PARALLEL-')
     pass
 
 
@@ -185,14 +180,14 @@ class Lab(ctypes.Structure):
                 ("D", ctypes.c_float), ("Dsd", ctypes.c_float),
                 ("beta_max", ctypes.c_float),
                 ("dbeta", ctypes.c_float),
-                ("nbeta", ctypes.c_int)]
+                ("nbeta", ctypes.c_int),
+                ("rings", ctypes.c_int)]
 
 try:
         libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
 
-
 except:
-    print('-.FDK-')
+    print('-.RAFT_CONICAL-')
     pass
 
 
@@ -262,6 +257,33 @@ def SetDic(dic, paramname, deff):
 def SetDictionary(dic,param,default):
         for ind in range(len(param)):
                 SetDic(dic,param[ind], default[ind])
+
+def Metadata_hdf5(outputFileHDF5, dic, software, version):
+        """ Function to save metadata from a dictionary, and the name of the softare used and its version
+        on a HDF5 file. The parameters names will be save the same as the names from the dictionary.
+
+        Args:
+            outputfile (h5py.File type): The h5py created file
+            dic (dictionary): A python dictionary containing all parameters (metadata) from the experiment
+            software (string): Name of the python module 'software'  used
+            version (string): Version of python module used (can be called by: 'software.__version__'; example: 'sscRaft.__version__')
+
+        """
+        try:
+                grp = outputFileHDF5['parameters']
+        except:
+                grp = outputFileHDF5.create_group('parameters')
+
+        n = len(dic)
+        i = 0
+        dset = grp.create_dataset('recon_parameters',(n+2,),dtype=h5py.string_dtype(encoding='ascii'))
+        for key in dic:
+                dset[i] = key + ": " + str(dic[key])
+                i = i + 1
+        dset[n] = 'Software: ' + software
+        dset[n+1] = 'Version: ' + version
+
+        grp.attrs.create(name="command",data=" ".join(sys.argv[1:]))
 
 
 if __name__ == "__main__":
