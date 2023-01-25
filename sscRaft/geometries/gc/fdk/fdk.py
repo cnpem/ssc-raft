@@ -200,8 +200,13 @@ nx_window : int, optional
         for i in range(2*nx_search):
             center_idx = (nx//2)-nx_search+i
 
-            sino_esq = tomo[:ntheta//2, k+(nz//2), center_idx-nx_window : center_idx]
-            sino_dir = np.flip(tomo[ntheta//2:, k+(nz//2), center_idx : center_idx+nx_window], axis=1)
+            if (ntheta%2 == 0):
+                sino_esq = tomo[:ntheta//2, k+(nz//2), center_idx-nx_window : center_idx]
+                sino_dir = np.flip(tomo[ntheta//2:, k+(nz//2), center_idx : center_idx+nx_window], axis=1)
+            else:
+                sino_esq = tomo[:ntheta//2, k+(nz//2), center_idx-nx_window : center_idx]
+                sino_dir = np.flip(tomo[ntheta//2:ntheta-1, k+(nz//2), center_idx : center_idx+nx_window], axis=1)
+            
 
             mean_sinos = np.linalg.norm(sino_esq + sino_dir)/2
             diff_symmetry[i] += np.linalg.norm(sino_esq - sino_dir) / mean_sinos
