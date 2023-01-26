@@ -101,7 +101,7 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
                 rings = int(experiment['apply_rings']) )
 
     if(experiment['normalize']):
-        data = normalize_fdk(data, flat, dark, experiment['padding'])
+        data = normalize_fdk(data, flat, dark, experiment['padding'], int(experiment['shift']))
     else:
         data = np.swapaxes(0,1,data)
     
@@ -112,7 +112,7 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
     return recon
 
 
-def normalize_fdk(tomo, flat, dark, padding):
+def normalize_fdk(tomo, flat, dark, padding, shift):
     print('Normalize ....')
 
     tomo[:,:11,:] = 1.0
@@ -122,14 +122,6 @@ def normalize_fdk(tomo, flat, dark, padding):
     flat = flat - dark
     for i in range(tomo.shape[0]):
         tomo[i,:,:] = tomo[i,:,:] - dark
-    
-    median_projection = np.median(tomo[tomo > 0])
-    median_flat_field = np.median(flat[flat > 0])
-
-    tomo[tomo ==0] = 1.0
-    tomo[tomo == np.max(tomo)] = median_projection
-    flat[flat == 0] = 1.0
-    flat[flat == np.max(flat)] = median_flat_field
 
     for i in range(tomo.shape[0]):
         tomo[i,:,:] = -np.log(tomo[i,:,:]/flat)
@@ -137,9 +129,10 @@ def normalize_fdk(tomo, flat, dark, padding):
     tomo[np.isinf(tomo)] = 0.0
     tomo[np.isnan(tomo)] = 0.0
 
-    shift = find_rotation_axis_fdk(tomo)
-    if padding < 2*np.abs(shift):
-        padding = 2*shift
+    if(shift):
+        shift = find_rotation_axis_fdk(tomo)
+        if padding < 2*np.abs(shift):
+            padding = 2*shift
     padd = padding -2*np.abs(shift)
 
     proj = np.zeros((tomo.shape[1], tomo.shape[0], tomo.shape[2]+padding))
