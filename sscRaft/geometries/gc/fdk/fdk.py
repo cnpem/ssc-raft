@@ -77,14 +77,18 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
     Returns:
         (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [x, y, z].
     """
+    if(experiment['normalize']):
+        data = normalize_fdk(data, flat, dark, experiment['padding'], int(experiment['shift']))
+    else:
+        data = np.swapaxes(data,0,1)
 
     D, Dsd = experiment['z1'], experiment['z2']
 
     dh, dv = experiment['pixel'], experiment['pixel']
-    nh, nv = int(data.shape[2] + experiment['padding']), int(data.shape[1])
+    nh, nv = int(data.shape[2]), int(data.shape[0])
     h, v = nh*dh/2, nv*dv/2
   
-    beta_max, nbeta = 2*np.pi, int(data.shape[0])
+    beta_max, nbeta = 2*np.pi, int(data.shape[1])
     dbeta = beta_max/nbeta
 
     magn = D/Dsd
@@ -99,11 +103,6 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
                 D = D, Dsd = Dsd, 
                 beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
                 rings = int(experiment['apply_rings']) )
-
-    if(experiment['normalize']):
-        data = normalize_fdk(data, flat, dark, experiment['padding'], int(experiment['shift']))
-    else:
-        data = np.swapaxes(0,1,data)
     
     recon = fdk(lab, data, experiment['gpus'])
 
@@ -146,7 +145,7 @@ def normalize_fdk(tomo, flat, dark, padding, shift):
     print('Projection shape =', proj.shape[0], proj.shape[1], proj.shape[2])
     return proj
 
-def find_rotation_axis_fdk(tomo, nx_search=1000, nx_window=5, nsinos=None):
+def find_rotation_axis_fdk(tomo, nx_search=500, nx_window=500, nsinos=None):
     """Searches for the rotation axis index in axis 2 (x variable).
     It minimizes the symmetry error.
     Works with parallel, fan and cone beam sinograms (proof: to do).
