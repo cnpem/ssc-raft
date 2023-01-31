@@ -26,6 +26,7 @@ typedef struct {
     float dbeta;
     int nbeta;
     int rings;
+    int rings_block;
 } Lab;
 
 

@@ -10,8 +10,10 @@ The FDK Reconstruction Algorithm is a popular method for three-dimensional recon
 It was developed in 1984 by Feldkamp, Davis and Kress as a practical geometry adaptation of existing analytical Filtered Backprojection strategies for reconstruction.
 
 This reconstruction method consists of:
+
 - Filtering conical projections with Fourier Transforms
 - Backprojecting to sample reconstructions
+
 
 	.. code-block:: python
 			import numpy as np
@@ -139,7 +141,7 @@ Expectation Maximization with total variation using a parallel tomogram as an in
 CAT
 ***
 
-EM/TV from real ptychographic data restored using package ``ssc-cdi`. After a full
+EM/TV from real ptychographic data restored using package ``ssc-cdi``. After a full
 ptychographic 3D reconstruction, we obtain a sequence of parallel sinograms, which
 can be considered approximate Radon transforms. A 3D inversion follows using the
 code below:

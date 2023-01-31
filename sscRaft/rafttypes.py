@@ -154,13 +154,21 @@ try:
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int, ctypes.c_void_p]
     libraft.fstblock.restype  = None   
    
-    libraft.flatdarktransposegpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+    libraft.flatdarktranspose_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
                                                 ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdarktransposegpu.restype  = None
+    libraft.flatdarktranspose_gpu.restype  = None
         
-    libraft.flatdarktransposeblock.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+    libraft.flatdarktranspose_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
                                                 ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdarktransposeblock.restype  = None
+    libraft.flatdarktranspose_block.restype  = None
+
+    libraft.flatdarktranspose_log_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
+    libraft.flatdarktranspose_log_gpu.restype  = None
+        
+    libraft.flatdarktranspose_log_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
+    libraft.flatdarktranspose_log_block.restype  = None
     
 except:
     print('-.RAFT_PARALLEL-')
@@ -181,7 +189,8 @@ class Lab(ctypes.Structure):
                 ("beta_max", ctypes.c_float),
                 ("dbeta", ctypes.c_float),
                 ("nbeta", ctypes.c_int),
-                ("rings", ctypes.c_int)]
+                ("rings", ctypes.c_int),
+                ("rings_block", ctypes.c_int)]
 
 try:
         libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]

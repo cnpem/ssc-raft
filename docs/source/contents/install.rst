@@ -20,7 +20,7 @@ Or manually download it from the `package <http://gcc.lnls.br:3128/packages/>`_ 
 GITLAB
 ******
 
-The package can be cloned from CNPEM's gitlab and hence install locally with your user:
+The package can be cloned from CNPEM's gitlab and installed locally with your user:
 
 .. code-block:: bash
 

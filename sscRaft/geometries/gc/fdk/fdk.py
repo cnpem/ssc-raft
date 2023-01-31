@@ -8,12 +8,13 @@ import imageio
 import ctypes
 import ctypes.util
 
+from ....tomogram.flatdark import *
 
 
 def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz, 
                     h, v, dh, dv, nh, nv,
                     D, Dsd, beta_max, dbeta, nbeta,
-                    rings ):
+                    rings, rings_block ):
 
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
@@ -21,7 +22,7 @@ def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz,
                 h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
                 D = D, Dsd = Dsd, 
                 beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
-                rings = rings)
+                rings = rings, rings_block = rings_block)
 
     return lab
 
@@ -59,32 +60,44 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
 
     Args:
         data (ndarray): Cone beam projection tomogram. The axes are [angle, slices, lenght].
-
-        flat (ndarray): Single cone beam ray projection. The axes are [slices, lenght].
-
+        flat (ndarray): Single cone beam ray projection. The axes are [number of flats, slices, lenght].
         dark (ndarray): Single dark projection. The axes are [slices, lenght].
-
         experiment (dictionary): Dictionary with the experiment info.
-            z1 (float): Source-sample distance in meters.
-            z2 (float): Source-detector distance in meters.
-            pixel (float): Detector pixel size in meters.
-            n (int): Reconstruction dimension.
-            gpus (ndarray): List of gpus for processing.
-            apply_rings (bool): Flag for application of rings removal algorithm.
-            normalize (bool): Flag for normalization of projection data.
-            padding (int): Number of elements for horizontal zero-padding.
 
     Returns:
         (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [x, y, z].
+
+
+    Dictionary parameters:
+        *``experiment['z1 [m]']`` (float): Source-sample distance in meters.
+        *``experiment['z1+z2 [m]']`` (float): Source-detector distance in meters.
+        *``experiment['detector pixel [m]']`` (float): Detector pixel size in meters.
+        *``experiment['recon size']`` (int): Reconstruction dimension.
+        *``experiment['gpus']`` (ndarray): List of gpus for processing.
+        *``experiment['rings']`` (bool,int): Tuple flag for application of rings removal algorithm. (apply, rings block = 2)
+        *``experiment['normalize']`` (bool,bool): Tuple flag for normalization of projection data. ( normalize , use log to normalize)
+        *``experiment['shift']`` (bool,int): Tuple (is_autoRot, value). Rotation shift automatic corrrection (is_autoRot) and value
+        *``experiment['padding']`` (int): Number of elements for horizontal zero-padding.
+        *``experiment['pco detector']`` (bool): If PCO detector, discar fist 11 rows of data.
     """
-    if(experiment['normalize']):
-        data = normalize_fdk(data, flat, dark, experiment['padding'], int(experiment['shift']))
+
+    # Set dictionary parameters by default if not already set.
+    dicparams = ('z1 [m]','z1+z2 [m]','detector pixel [m]','recon size','gpus','rings','normalize',
+                'shift','padding','pco detector')
+    defaut = (500e-3,1.0,1.44e-6,data.shape[2],[0],(True,2),(True,True),(True,0),800,True)
+    
+    SetDictionary(experiment,dicparams,defaut)
+
+    experiment['use log'] = experiment['normalize'][1]
+
+    if(experiment['normalize'][0]):
+        data = normalize_fdk(data, flat, dark, experiment)
     else:
         data = np.swapaxes(data,0,1)
 
-    D, Dsd = experiment['z1'], experiment['z2']
+    D, Dsd = experiment['z1 [m]'], experiment['z1+z2 [m]']
 
-    dh, dv = experiment['pixel'], experiment['pixel']
+    dh, dv = experiment['detector pixel [m]'], experiment['detector pixel [m]']
     nh, nv = int(data.shape[2]), int(data.shape[0])
     h, v = nh*dh/2, nv*dv/2
   
@@ -93,7 +106,7 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
 
     magn = D/Dsd
     dx, dy, dz = dh*magn, dh*magn, dv*magn
-    nx, ny, nz = int(experiment['n']), int(experiment['n']), int(experiment['n'])
+    nx, ny, nz = int(experiment['recon size']), int(experiment['recon size']), int(experiment['recon size'])
     x, y, z = dx*nx/2, dy*ny/2, dz*nz/2
 
     lab = Lab(  x = x, y = y, z = z, 
@@ -102,7 +115,7 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
                 h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
                 D = D, Dsd = Dsd, 
                 beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
-                rings = int(experiment['apply_rings']) )
+                rings = int(experiment['rings'][0]), rings_block = int(experiment['rings'][1]) )
     
     recon = fdk(lab, data, experiment['gpus'])
 
@@ -111,35 +124,45 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
     return recon
 
 
-def normalize_fdk(tomo, flat, dark, padding, shift):
+def normalize_fdk(tomo, flat, dark, experiment):
     print('Normalize ....')
 
-    tomo[:,:11,:] = 1.0
-    flat[:11,:] = 1.0
-    dark[:11,:] = 0.0
+    padding    = experiment['padding']
+    shift      = experiment['shift'][1]
+    is_autoRot = experiment['shift'][0]
 
-    flat = flat - dark
-    for i in range(tomo.shape[0]):
-        tomo[i,:,:] = tomo[i,:,:] - dark
+    if experiment['pco detector']:
+        tomo[:,:11,:] = 1.0
+        flat[:11,:]   = 1.0
+        dark[:11,:]   = 0.0
 
-    for i in range(tomo.shape[0]):
-        tomo[i,:,:] = -np.log(tomo[i,:,:]/flat)
+    # flat = flat - dark
+    # for i in range(tomo.shape[0]):
+    #     tomo[i,:,:] = tomo[i,:,:] - dark
 
-    tomo[np.isinf(tomo)] = 0.0
-    tomo[np.isnan(tomo)] = 0.0
+    # for i in range(tomo.shape[0]):
+    #     tomo[i,:,:] = -np.log(tomo[i,:,:]/flat)
 
-    if(shift):
+    # tomo[np.isinf(tomo)] = 0.0
+    # tomo[np.isnan(tomo)] = 0.0
+
+    tomo = correct_projections(tomo, flat, dark, experiment)
+
+    if is_autoRot:
         shift = find_rotation_axis_fdk(tomo)
-        if padding < 2*np.abs(shift):
-            padding = 2*shift
-    padd = padding -2*np.abs(shift)
 
-    proj = np.zeros((tomo.shape[1], tomo.shape[0], tomo.shape[2]+padding))
+    if padding < 2*np.abs(shift):
+        padding = 2*shift
+
+    padd = padding - 2 * np.abs(shift)
+
+    # proj = np.zeros((tomo.shape[1], tomo.shape[0], tomo.shape[2]+padding))
+    proj = np.zeros((tomo.shape[0], tomo.shape[1], tomo.shape[2]+padding))
 
     if(shift < 0):
-        proj[:,:,padd//2 + 2*np.abs(shift):tomo.shape[2]+padd//2 + 2*np.abs(shift)] = np.swapaxes(tomo,0,1)
+        proj[:,:,padd//2 + 2*np.abs(shift):tomo.shape[2]+padd//2 + 2*np.abs(shift)] = tomo #np.swapaxes(tomo,0,1)
     else:
-        proj[:,:,padd//2:tomo.shape[2]+padd//2] = np.swapaxes(tomo,0,1)
+        proj[:,:,padd//2:tomo.shape[2]+padd//2] = tomo #np.swapaxes(tomo,0,1)
 
     print('Projections ok!')
     print('Projection shape =', proj.shape[0], proj.shape[1], proj.shape[2])
@@ -161,7 +184,7 @@ def find_rotation_axis_fdk(tomo, nx_search=500, nx_window=500, nsinos=None):
         Width of the search. 
         If the center of rotation is not in the interval [nx_search-nx//2; nx_search+nx//2] this function will return a wrong result.
         Default is nx_search=400.
-nx_window : int, optional
+    nx_window : int, optional
         How much of the sinogram will be used in the axis 2.
         Default is nx_window=400.
     nsinos : int or None, optional

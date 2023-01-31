@@ -13,7 +13,6 @@ import SharedArray as sa
 
 def fbpMultiGPU(tomogram, dic):
         
-        
         gpus = dic['gpu']     
         ngpus = len(gpus)
 

@@ -44,14 +44,17 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         nslices = int32(nslices)
         nflats  = int32(nflats)
         
-        libraft.flatdarktransposeblock(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        if dic['use log']:
+                libraft.flatdarktranspose_log_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        else:
+                libraft.flatdarktranspose_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
 
         return frames #np.swapaxes(frames,0,1)
 
 
-def flatdarkGPU(frames, flat, dark, gpu = 0):
+def flatdarkGPU(frames, flat, dark, dic):
         
-        ngpus   = gpu
+        ngpus   = dic['gpu'][0]
 
         nrays   = frames.shape[-1]
         nangles = frames.shape[0]
@@ -76,103 +79,53 @@ def flatdarkGPU(frames, flat, dark, gpu = 0):
         nslices = int32(nslices)
         nflats  = int32(nflats)
 
-        libraft.flatdarktransposegpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        if dic['use log']:
+                libraft.flatdarktranspose_log_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        else:
+                libraft.flatdarktranspose_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
 
         return frames #np.swapaxes(frames,0,1)
 
-def _worker_flatdark_(params, start, end, gpu, process):
 
-        output = params[0]
-        data   = params[1]
-        dic    = params[6]
-        flat   = params[7]
-        dark   = params[8]
-
-        logger.info(f'flatdark: begin process {process} on gpu {gpu}')
-
-        output[start:end,:,:] = flatdarkGPU( data[:,start:end,:], flat[:,start:end,:], dark[start:end,:], dic, gpu )
-
-        logger.info(f'flatdark: end process {process} on gpu {gpu}')
-    
-
-def _build_flatdark_(params):
- 
-        nslices = params[2]
-        gpus    = params[5]
-        ngpus = len(gpus)
-
-        b = int( numpy.ceil( nslices/ngpus )  ) 
-
-        processes = []
-        for process in range( ngpus ):
-                begin_ = process*b
-                end_   = min( (process+1)*b, nslices )
-
-                p = multiprocessing.Process(target=_worker_flatdark_, args=(params, begin_, end_, gpus[process], process))
-                processes.append(p)
-    
-        for p in processes:
-                p.start()
-
-        for p in processes:
-                p.join()
-
-
-def flatdark_gpublock( frames, flat, dark, dic ):
-
-        nslices     = frames.shape[1]
-        nangles     = frames.shape[0]
-        nrays       = frames.shape[2]
-        gpus        = dic['gpu']
-
-        name = str( uuid.uuid4())
-
-        try:
-                sa.delete(name)
-        except:
-                pass
-
-        output  = sa.create(name,[nslices, nangles, nrays], dtype=np.float32)
-
-        _params_ = ( output, frames, nslices, nangles, nrays, gpus, dic, flat, dark)
-
-        _build_flatdark_( _params_ )
-
-        sa.delete(name)
-
-        return output
-
-
-def flatdarkLog_threads(frames, flat, dark, dic, **kwargs):
+def correct_projections(frames, flat, dark, dic, **kwargs):
+        """ Function to correct tomography projections (or frames) with flat and dark. 
         
-        dicparams = ('gpu','360pan')
-        defaut = ([0],False)
+        Can be computed in two ways.
+
+        .. math::
+        T = \log{- \frac{D - D_d}{D_f - D_d}}
+
+        for transmission tomography, and
+
+        .. math::
+        T = \frac{D - D_d}{D_f - D_d}
+
+        for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the projection volume, 
+        :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
+
+        Args:
+            frames (ndarray): Frames (or projections) of size [angles, slices, rays]
+            flat (ndarray): Flat of size [number of flats, slices, rays]
+            dark (ndarray): Dark of size [slices, rays]
+            dic (dictionary): Dictionary with the parameters info.
+
+        Returns:
+            ndarray: Corrected frames (or projections)of  size [slices, angles, rays]
+        
+         Dictionary parameters:
+                *``experiment['gpu']`` (int list): List of GPUs.
+                *``experiment['use log']`` (bool): Apply logarithm or not.
+        """        
+
+        dicparams = ('gpu','use log')
+        defaut = ([0],True)
         
         SetDictionary(dic,dicparams,defaut)
 
-        gpus  = dic['gpu']
+        gpus   = dic['gpu']
 
         if len(gpus) == 1:
-                gpu = gpus[0]
-                output = flatdarkGPU( frames, flat, dark, dic, gpu )
-        else:
-                output = flatdark_gpublock( frames, flat, dark, dic ) 
-
-        return np.swapaxes(output,1,0)
-
-
-def flatdarkLog(frames, flat, dark, dic, **kwargs):
-        
-        dicparams = ('gpu','360pan')
-        defaut = ([0],False)
-        
-        SetDictionary(dic,dicparams,defaut)
-
-        gpus  = dic['gpu']
-
-        if len(gpus) == 1:
-                gpu = gpus[0]
-                output = flatdarkGPU( frames, flat, dark, gpu )
+                output = flatdarkGPU( frames, flat, dark, dic )
         else:
                 output = flatdarkMultiGPU( frames, flat, dark, dic ) 
 
