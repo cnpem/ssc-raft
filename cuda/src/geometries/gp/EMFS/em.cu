@@ -42,7 +42,7 @@ extern "C" {
   
     if ( (tx<nrays) && (ty < nangles) && (tz<blockSize)  )
       {
-	int voxel = tz * nrays * nangles + ty * nrays + tx;
+	      int voxel = tz * nrays * nangles + ty * nrays + tx;
 	
        	tmp[voxel] = flat[voxel] * expf( - tmp[voxel]);	
       }
@@ -59,7 +59,7 @@ extern "C" {
   
     if ( (tx<sizeImage) && (ty < sizeImage) && (tz<blockSize)  )
       {
-	int voxel = tz * sizeImage * sizeImage + ty * sizeImage + tx;
+	      int voxel = tz * sizeImage * sizeImage + ty * sizeImage + tx;
 	
        	output[voxel] = output[voxel] * back[voxel] / backcounts[voxel];	
       }

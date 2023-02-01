@@ -7,7 +7,7 @@
 
 
 extern "C"{
-   static __global__ void KFlatDarkTransposelog(float* in, float* dark, float* flat, dim3 size, int numflats)
+   static __global__ void KFlatDarkTransposelog(float* in, float *out, float* dark, float* flat, dim3 size, int numflats)
 	{  
       // Supports 2 flats only
 		size_t idx = threadIdx.x + blockIdx.x*blockDim.x;
@@ -50,7 +50,7 @@ extern "C"{
 			// size_t coll = blockIdx.y * size.z + blockIdx.z;
 			
 			// out[coll * size.x + idx] = -log( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
-			in[line * size.x + idx] = -log( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
+			in[line * size.x + idx] = fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f);
 
 		}
 	}
@@ -67,6 +67,8 @@ extern "C"{
 		blocks.x = (nrays+127) / 128;
 
 		rImage data(nrays,blocksize,nangles);
+		rImage out(nrays,nangles,blocksize);
+
 		Image2D<float> cflat(nrays, blocksize, numflats);
 		Image2D<float> cdark(nrays, blocksize);
 
@@ -77,7 +79,7 @@ extern "C"{
 			cflat.CopyFrom(flat + (size_t)b*nrays*numflats, 0, (size_t)nrays*numflats*blocksize);
 			cdark.CopyFrom(dark + (size_t)b*nrays, 0, (size_t)nrays*blocksize);
 
-         KFlatDarkTransposelog<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,blocksize,nangles), cflat.sizez);
+         KFlatDarkTransposelog<<<blocks,128>>>(data.gpuptr, out.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,blocksize,nangles), cflat.sizez);
 
          data.CopyTo(frames + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
       
@@ -148,7 +150,6 @@ extern "C"{
 		int t;
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
 		
-		// printf("Aqui\n");
 		std::vector<std::future<void>> threads;
 
 		// printf("Aqui2\n");

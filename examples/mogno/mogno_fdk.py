@@ -10,12 +10,12 @@ experiment['z1 [m]'] = 2103*1e-3
 experiment['z1+z2 [m]'] = 2530.08*1e-3
 experiment['detector pixel [m]'] = 3.61*1e-6
 experiment['recon size'] = 2048
-experiment['gpus'] = np.array([0,1,2,3])
+experiment['gpus'] = [0,1,2,3]
 experiment['rings'] = (True,2)
 experiment['normalize'] = (True,True)
 experiment['padding'] = 800
 experiment['shift'] = (True,0)
-experiment['pco detector'] = True
+experiment['detector type'] = 'pco'
 
 
 start_total = time.time()
@@ -32,7 +32,7 @@ start_read = time.time()
 
 # Ler dado HDF5
 data = h5py.File(in_path + in_name, "r")["scan"]["detector"]["data"][:].astype(np.float32)
-flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)[0,:,:]
+flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)
 dark = h5py.File(in_path + in_name, "r")["scan"]["detector"]["darks"][:].astype(np.float32)[0,:,:]
 
 elapsed_read = time.time() - start_read

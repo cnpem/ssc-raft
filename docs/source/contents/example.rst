@@ -14,6 +14,39 @@ This reconstruction method consists of:
 - Filtering conical projections with Fourier Transforms
 - Backprojecting to sample reconstructions
 
+* sscRaft version 2.1.0 example:
+
+	.. code-block:: python
+			import numpy as np
+			import h5py
+			import sscRaft
+
+			in_path = 'path_to_input_HDF5_file'
+			in_name = 'name_input_HDF5_file'
+
+			# Load data, flat and dark
+			# Mogno HDF5 example:
+
+			data = h5py.File(in_path + in_name, "r")["scan"]["detector"]["data"][:].astype(np.float32)
+			flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)
+			dark = h5py.File(in_path + in_name, "r")["scan"]["detector"]["darks"][:].astype(np.float32)[0,:,:]
+
+			# Dictionary
+			experiment = {}
+			experiment['z1 [m]'] = 2103*1e-3
+			experiment['z1+z2 [m]'] = 2530.08*1e-3
+			experiment['detector pixel [m]'] = 3.61*1e-6
+			experiment['recon size'] = 2048
+			experiment['gpu'] = [0,1,2,3]
+			experiment['rings'] = (True,2)
+			experiment['normalize'] = (True,True)
+			experiment['padding'] = 800
+			experiment['shift'] = (True,0)
+			experiment['detector type'] = 'pco'
+
+			recon = sscRaft.reconstruction_fdk(experiment, data, flat, dark)
+
+* sscRaft version 2.0.1 example:
 
 	.. code-block:: python
 			import numpy as np
@@ -57,22 +90,10 @@ How to save a numpy array in HDF5 format with metadata from a dictionary togethe
 			in_name = 'name_input_HDF5_file'
 
 			# Load data, flat and dark
-			# Mogno HDF5 example:
-
-			data = h5py.File(in_path + in_name, "r")["scan"]["detector"]["data"][:].astype(np.float32)
-			flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)[0,:,:]
-			dark = h5py.File(in_path + in_name, "r")["scan"]["detector"]["darks"][:].astype(np.float32)[0,:,:]
-
-			# Dictionary
+			# set dictionary
 			experiment = {}
-			experiment['z1'] = 2103*1e-3
-			experiment['z2'] = 2530.08*1e-3
-			experiment['pixel'] = 3.61*1e-6
-			experiment['n'] = 2048
-			experiment['gpus'] = np.array([0,1,2,3])
-			experiment['apply_rings'] = True
-			experiment['normalize'] = True
-			experiment['padding'] = 800
+
+			# set sscRaft dictionary as previous examples
 
 			recon = sscRaft.reconstruction_fdk(experiment, data, flat, dark)
 

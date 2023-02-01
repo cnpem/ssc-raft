@@ -29,7 +29,11 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         else:
                 nslices = frames.shape[-2]
 
-        nflats = flat.shape[0]
+        if len(flat.shape) == 2:
+                nflats  = 1
+        else:
+                nflats = flat.shape[0]
+
         flat = np.ascontiguousarray(flat.astype(np.float32))
         flatptr = flat.ctypes.data_as(void_p)
 
@@ -49,12 +53,13 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         else:
                 libraft.flatdarktranspose_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
 
-        return frames #np.swapaxes(frames,0,1)
+        return frames 
 
 
 def flatdarkGPU(frames, flat, dark, dic):
         
-        ngpus   = dic['gpu'][0]
+        gpus = dic['gpu']     
+        ngpus = len(gpus)
 
         nrays   = frames.shape[-1]
         nangles = frames.shape[0]
@@ -64,7 +69,11 @@ def flatdarkGPU(frames, flat, dark, dic):
         else:
                 nslices = frames.shape[-2]
 
-        nflats = flat.shape[0]
+        if len(flat.shape) == 2:
+                nflats  = 1
+        else:
+                nflats = flat.shape[0]
+
         flat = np.ascontiguousarray(flat.astype(np.float32))
         flatptr = flat.ctypes.data_as(void_p)
 
@@ -84,7 +93,7 @@ def flatdarkGPU(frames, flat, dark, dic):
         else:
                 libraft.flatdarktranspose_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
 
-        return frames #np.swapaxes(frames,0,1)
+        return frames 
 
 
 def correct_projections(frames, flat, dark, dic, **kwargs):
@@ -122,11 +131,11 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
         
         SetDictionary(dic,dicparams,defaut)
 
-        gpus   = dic['gpu']
+        gpus = dic['gpu']
 
         if len(gpus) == 1:
                 output = flatdarkGPU( frames, flat, dark, dic )
         else:
                 output = flatdarkMultiGPU( frames, flat, dark, dic ) 
 
-        return np.swapaxes(output,1,0)
+        return np.swapaxes(output,0,1)

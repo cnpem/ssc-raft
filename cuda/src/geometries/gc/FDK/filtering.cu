@@ -40,7 +40,7 @@ void ringsgpu_fdk( Lab lab, float* data, Process process)
 
             tomptr += step;
         }
-        Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, offset);
+        Rings(data, lab.nh, lab.nbeta%lab.rings_block + lab.nbeta/lab.rings_block, process.z_filter, -1.0, offset);
 
     }// End Paola
 }

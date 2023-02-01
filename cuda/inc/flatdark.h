@@ -6,6 +6,7 @@
 
 
 extern "C"{
+        
         void flatdarkcpu(float* out, float* frames, float* cflat, float* cdark, 
 		size_t sizex, size_t sizey, size_t sizez, size_t block, int numflats, int tidx, int nthreads);
 

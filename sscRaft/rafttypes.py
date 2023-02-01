@@ -258,10 +258,18 @@ def Bin(img,n=2):
 def SetDic(dic, paramname, deff):
         try:
                 dic[paramname]
+                
+                if type(dic[paramname]) == list:
+                        for i in range(len(deff)):
+                                try:
+                                        dic[paramname][i] 
+                                except:
+                                        print('Using default -', paramname,':', deff[i])
+                                        dic[paramname][i] = deff[i]
+
         except:
                 print('Using default -', paramname,':', deff)
-                dic[paramname] = deff
-
+                
 
 def SetDictionary(dic,param,default):
         for ind in range(len(param)):
