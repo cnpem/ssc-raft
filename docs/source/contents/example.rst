@@ -17,6 +17,7 @@ This reconstruction method consists of:
 * sscRaft version 2.1.0 example:
 
 	.. code-block:: python
+		
 			import numpy as np
 			import h5py
 			import sscRaft
@@ -49,6 +50,7 @@ This reconstruction method consists of:
 * sscRaft version 2.0.1 example:
 
 	.. code-block:: python
+
 			import numpy as np
 			import h5py
 			import sscRaft
@@ -83,6 +85,7 @@ Save HDF5 with metadata
 How to save a numpy array in HDF5 format with metadata from a dictionary together with the ssc-reft version, for a reconstruct data from FDK.
 
 	.. code-block:: python
+
 			import sscRaft
 			import h5py
 
