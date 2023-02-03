@@ -28,14 +28,14 @@ def bstMultiGPU(tomogram, dic):
         else:
                 nslices = tomogram.shape[0]
         
-        reconsize = dic['reconSize']
+        reconsize = dic['recon size']
 
         Is360pan = dic['360pan']
         angles = dic['angles']
         precision = int(dic['precision'])
         filter = int32(FilterNumber(dic['filter']))
         regularization = float32(dic['regularization'])
-        recondtype = dic['reconType']
+        recondtype = dic['recon type']
         threshold = float32(dic['threshold'])
 
         tomogram = np.ascontiguousarray(tomogram.astype(np.float32))
@@ -53,7 +53,7 @@ def bstMultiGPU(tomogram, dic):
         if Is360pan:
                 tomooffset = 0
         else:
-                tomooffset = dic['tomoOffset']
+                tomooffset = dic['tomooffset']
         
         reconsize = int32(reconsize)
         tomooffset = int32(tomooffset)
@@ -77,14 +77,14 @@ def bstGPU(tomogram, dic, gpu = 0):
         else:
                 nslices = tomogram.shape[0]
         
-        reconsize = dic['reconSize']
+        reconsize = dic['recon size']
 
         Is360pan = dic['360pan']
         angles = dic['angles']
         precision = int(dic['precision'])
         filter = int32(FilterNumber(dic['filter']))
         regularization = float32(dic['regularization'])
-        recondtype = dic['reconYype']
+        recondtype = dic['recon type']
         threshold = float32(dic['threshold'])
 
         tomogram = np.ascontiguousarray(tomogram.astype(np.float32))
@@ -102,7 +102,7 @@ def bstGPU(tomogram, dic, gpu = 0):
         if Is360pan:
                 tomooffset = 0
         else:
-                tomooffset = dic['tomoOffset']
+                tomooffset = dic['tomooffset']
         
         reconsize = int32(reconsize)
         tomooffset = int32(tomooffset)
@@ -156,7 +156,7 @@ def bst_gpublock( tomogram, dic ):
         nangles     = tomogram.shape[1]
         nrays       = tomogram.shape[2]
         gpus        = dic['gpu']
-        outtype     = dic['reconType']
+        outtype     = dic['recon type']
 
         name = str( uuid.uuid4())
 
@@ -180,15 +180,15 @@ def bst_threads(tomogram, dic, **kwargs):
         
         nrays = tomogram.shape[2]
 
-        dicparams = ('gpu','angles','filter','reconSize','precision','regularization','threshold',
-                    'shiftCenter','tomoOffset','360pan')
+        dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
+                    'shift center','tomooffset','360pan')
         defaut = ([0],None,None,nrays,'float32',0,0,False,0,False)
         
         SetDictionary(dic,dicparams,defaut)
 
         gpus  = dic['gpu']
 
-        reconsize = dic['reconSize']
+        reconsize = dic['recon size']
 
         if reconsize % 32 != 0:
                 reconsize += 32-(reconsize%32)
@@ -207,7 +207,7 @@ def bst_threads(tomogram, dic, **kwargs):
         else:
                 logger.error(f'Invalid recon datatype:{precision}')
         
-        dic.update({'reconSize': reconsize,'reconType': recondtype, 'precision': precision})
+        dic.update({'recon size': reconsize,'recon type': recondtype, 'precision': precision})
 
         if len(gpus) == 1:
                 gpu = gpus[0]
@@ -222,15 +222,15 @@ def bst(tomogram, dic, **kwargs):
         
         nrays = tomogram.shape[-1]
 
-        dicparams = ('gpu','angles','filter','reconSize','precision','regularization','threshold',
-                    'shiftCenter','tomoOffset','360pan')
+        dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
+                    'shift center','tomooffset','360pan')
         defaut = ([0],None,None,nrays,'float32',0,0,False,0,False)
         
         SetDictionary(dic,dicparams,defaut)
 
         gpus  = dic['gpu']
 
-        reconsize = dic['reconSize']
+        reconsize = dic['recon size']
 
         if reconsize % 32 != 0:
                 reconsize += 32-(reconsize%32)
@@ -249,7 +249,7 @@ def bst(tomogram, dic, **kwargs):
         else:
                 logger.error(f'Invalid recon datatype:{precision}')
         
-        dic.update({'reconSize': reconsize,'reconType': recondtype, 'precision': precision})
+        dic.update({'recon size': reconsize,'recon type': recondtype, 'precision': precision})
 
         if len(gpus) == 1:
                 gpu = gpus[0]
