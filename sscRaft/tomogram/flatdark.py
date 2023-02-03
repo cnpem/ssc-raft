@@ -48,10 +48,10 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         nslices = int32(nslices)
         nflats  = int32(nflats)
         
-        if dic['use log']:
-                libraft.flatdarktranspose_log_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        if dic['uselog']:
+                libraft.flatdark_log_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
         else:
-                libraft.flatdarktranspose_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+                libraft.flatdark_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
 
         return frames 
 
@@ -88,10 +88,10 @@ def flatdarkGPU(frames, flat, dark, dic):
         nslices = int32(nslices)
         nflats  = int32(nflats)
 
-        if dic['use log']:
-                libraft.flatdarktranspose_log_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        if dic['uselog']:
+                libraft.flatdark_log_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
         else:
-                libraft.flatdarktranspose_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+                libraft.flatdark_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
 
         return frames 
 
@@ -123,10 +123,10 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
         
          Dictionary parameters:
                 *``experiment['gpu']`` (int list): List of GPUs.
-                *``experiment['use log']`` (bool): Apply logarithm or not.
+                *``experiment['uselog']`` (bool): Apply logarithm or not.
         """        
 
-        dicparams = ('gpu','use log')
+        dicparams = ('gpu','uselog')
         defaut = ([0],True)
         
         SetDictionary(dic,dicparams,defaut)

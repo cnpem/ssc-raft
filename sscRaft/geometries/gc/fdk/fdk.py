@@ -1,6 +1,7 @@
 from random import betavariate
 from ....rafttypes import *
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import math
 import os
@@ -53,7 +54,6 @@ def fdk(lab, proj, gpus):
     return recon
 
 
-
 def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
 
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
@@ -69,60 +69,62 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
 
 
     Dictionary parameters:
-        *``experiment['z1 [m]']`` (float): Source-sample distance in meters.
-        *``experiment['z1+z2 [m]']`` (float): Source-detector distance in meters.
-        *``experiment['detector pixel [m]']`` (float): Detector pixel size in meters.
-        *``experiment['recon size']`` (int): Reconstruction dimension.
-        *``experiment['gpu']`` (ndarray): List of gpus for processing.
-        *``experiment['rings']`` (bool,int): Tuple flag for application of rings removal algorithm. (apply, rings block = 2)
-        *``experiment['normalize']`` (bool,bool): Tuple flag for normalization of projection data. ( normalize , use log to normalize)
-        *``experiment['shift']`` (bool,int): Tuple (is_autoRot, value). Rotation shift automatic corrrection (is_autoRot) and value
-        *``experiment['padding']`` (int): Number of elements for horizontal zero-padding.
-        *``experiment['detector type']`` (string): If detector type 'pco', 'mobpix', 'pimegaSi' or 'pimegaCdTe'. If 'pco' discard fist 11 rows of data.
+        *``experiment['z1[m]']`` (float): Source-sample distance in meters. Defaults to 500e-3.
+        *``experiment['z1+z2[m]']`` (float): Source-detector distance in meters. Defaults to 1.0.
+        *``experiment['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
+        *``experiment['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[0].
+        *``experiment['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
+        *``experiment['rings']`` (bool,int): Tuple flag for application of rings removal algorithm. (apply = True, rings block = 2).
+        *``experiment['normalize']`` (bool,bool): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True).
+        *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation shift automatic corrrection (is_autoRot).
+        *``experiment['padding']`` (int): Number of elements for horizontal zero-padding. Defaults to 0.
+        *``experiment['detectorType']`` (string): If detector type. If 'pco' discard fist 11 rows of data. Defauts to 'pco'.
+        *``experiment['findRotationAxis']`` (int,int,int): For rotation axis function. (nx_search=500, nx_window=500, nsinos=None).
+
     """
 
     # Set dictionary parameters by default if not already set.
-    dicparams = ('z1 [m]','z1+z2 [m]','detector pixel [m]','recon size','gpu','rings','normalize',
-                'shift','padding','detector type')
-    defaut = (500e-3,1.0,1.44e-6,data.shape[2],[0],(True,2),(True,True),(True,0),800,'pco')
+    dicparams = ('z1[m]','z1+z2[m]','detectorPixel[m]','reconSize','gpu','rings','normalize',
+                'shift','padding','detectorType','findRotationAxis')
+    defaut = (500e-3,1.0,1.44e-6,data.shape[2],[0],(True,2),(True,True),(True,0),0,'pco',(500,500,None))
     
     SetDictionary(experiment,dicparams,defaut)
 
-    assert experiment['detector type'] in ('pco', 'mobpix', 'pimegaSi', 'pimegaCdTe')
+    assert experiment['detectorType'] in ('pco', 'mobpix', 'pimegaSi', 'pimegaCdTe')
 
-    experiment['use log'] = experiment['normalize'][1]
+    experiment['uselog'] = experiment['normalize'][1]
 
     if(experiment['normalize'][0]):
         data = normalize_fdk(data, flat, dark, experiment)
     else:
         data = np.swapaxes(data,0,1)
 
-    recon = data 
-    # D, Dsd = experiment['z1 [m]'], experiment['z1+z2 [m]']
+    # recon = data 
+    D, Dsd = experiment['z1[m]'], experiment['z1+z2[m]']
 
-    # dh, dv = experiment['detector pixel [m]'], experiment['detector pixel [m]']
-    # nh, nv = int(data.shape[2]), int(data.shape[0])
-    # h, v = nh*dh/2, nv*dv/2
+    dh, dv = experiment['detectorPixel[m]'], experiment['detectorPixel[m]']
+    nh, nv = int(data.shape[2]), int(data.shape[0])
+    h, v = nh*dh/2, nv*dv/2
   
-    # beta_max, nbeta = 2*np.pi, int(data.shape[1])
-    # dbeta = beta_max/nbeta
+    beta_max, nbeta = 2*np.pi, int(data.shape[1])
+    dbeta = beta_max/nbeta
 
-    # magn = D/Dsd
-    # dx, dy, dz = dh*magn, dh*magn, dv*magn
-    # nx, ny, nz = int(experiment['recon size']), int(experiment['recon size']), int(experiment['recon size'])
-    # x, y, z = dx*nx/2, dy*ny/2, dz*nz/2
+    magn = D/Dsd
+    dx, dy, dz = dh*magn, dh*magn, dv*magn
+    nx, ny, nz = int(experiment['reconSize']), int(experiment['reconSize']), int(experiment['reconSize'])
+    x, y, z = dx*nx/2, dy*ny/2, dz*nz/2
 
-    # lab = Lab(  x = x, y = y, z = z, 
-    #             dx = dx, dy = dy, dz = dz, 
-    #             nx = nx, ny = ny, nz = nz, 
-    #             h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
-    #             D = D, Dsd = Dsd, 
-    #             beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
-    #             rings = int(experiment['rings'][0]), rings_block = int(experiment['rings'][1]) )
+    lab = Lab(  x = x, y = y, z = z, 
+                dx = dx, dy = dy, dz = dz, 
+                nx = nx, ny = ny, nz = nz, 
+                h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
+                D = D, Dsd = Dsd, 
+                beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
+                rings = int(experiment['rings'][0]), rings_block = int(experiment['rings'][1]) )
     
-    # recon = fdk(lab, data, np.array(experiment['gpu']))
+    recon = fdk(lab, data, np.array(experiment['gpu']))
 
-    # print('fdk')
+    print('fdk')
 
     return recon
 
@@ -133,11 +135,14 @@ def normalize_fdk(tomo, flat, dark, experiment):
     padding    = experiment['padding']
     is_autoRot = experiment['shift'][0]
     shift      = experiment['shift'][1]
+    nx_search  = experiment['findRotationAxis'][0]
+    nx_window  = experiment['findRotationAxis'][1]
+    nsinos     = experiment['findRotationAxis'][2]
 
     if len(dark.shape) == 3:
             dark = dark[0]
 
-    if experiment['detector type'] == 'pco':
+    if experiment['detectorType'] == 'pco':
         dark[:11,:]    = 0.0
         tomo[:, :11,:] = 1.0 
             
@@ -182,10 +187,20 @@ def normalize_fdk(tomo, flat, dark, experiment):
     # ========= CUDA NORMALIZATION ================================================================
     tomo = correct_projections(tomo, flat, dark, experiment)
 
-    np.save("normalizado.npy",tomo[:,0:5,:])
+    # plt.figure(0)
+    # plt.imshow(tomo[:,0,:])
+    # plt.savefig('NormProjfirst.png', format='png')
+    # plt.clf()
+    # plt.close()
+
+    # plt.figure(0)
+    # plt.imshow(tomo[:,-1,:])
+    # plt.savefig('NormProjlast.png', format='png')
+    # plt.clf()
+    # plt.close()
 
     if is_autoRot:
-        shift = find_rotation_axis_fdk(np.swapaxes(tomo,0,1))
+        shift = find_rotation_axis_fdk(np.swapaxes(tomo,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
         print("Shift automatico:",shift)
 
     if padding < 2*np.abs(shift):
@@ -261,7 +276,6 @@ def find_rotation_axis_fdk(tomo, nx_search=500, nx_window=500, nsinos=None):
                 sino_esq = tomo[:ntheta//2, k+(nz//2), center_idx-nx_window : center_idx]
                 sino_dir = np.flip(tomo[ntheta//2:ntheta-1, k+(nz//2), center_idx : center_idx+nx_window], axis=1)
             
-
             mean_sinos = np.linalg.norm(sino_esq + sino_dir)/2
             diff_symmetry[i] += np.linalg.norm(sino_esq - sino_dir) / mean_sinos
     

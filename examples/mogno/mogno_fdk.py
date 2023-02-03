@@ -32,7 +32,7 @@ start_read = time.time()
 
 # Ler dado HDF5
 data = h5py.File(in_path + in_name, "r")["scan"]["detector"]["data"][:].astype(np.float32)
-flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)
+flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)[0,:,:]
 dark = h5py.File(in_path + in_name, "r")["scan"]["detector"]["darks"][:].astype(np.float32)[0,:,:]
 
 elapsed_read = time.time() - start_read

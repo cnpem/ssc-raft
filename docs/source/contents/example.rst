@@ -29,20 +29,20 @@ This reconstruction method consists of:
 
 			data = h5py.File(in_path + in_name, "r")["scan"]["detector"]["data"][:].astype(np.float32)
 			flat = h5py.File(in_path + in_name, "r")["scan"]["detector"]["flats"][:].astype(np.float32)
-			dark = h5py.File(in_path + in_name, "r")["scan"]["detector"]["darks"][:].astype(np.float32)[0,:,:]
+			dark = h5py.File(in_path + in_name, "r")["scan"]["detector"]["darks"][:].astype(np.float32)
 
 			# Dictionary
 			experiment = {}
-			experiment['z1 [m]'] = 2103*1e-3
-			experiment['z1+z2 [m]'] = 2530.08*1e-3
-			experiment['detector pixel [m]'] = 3.61*1e-6
-			experiment['recon size'] = 2048
-			experiment['gpu'] = [0,1,2,3]
-			experiment['rings'] = (True,2)
-			experiment['normalize'] = (True,True)
-			experiment['padding'] = 800
-			experiment['shift'] = (True,0)
-			experiment['detector type'] = 'pco'
+			experiment['z1[m]'] = 2103*1e-3 # Source-Sample distance (float). Defaults to 500*1e-3
+			experiment['z1+z2[m]'] = 2530.08*1e-3 # Source-Detector distance (float). Defauts to 1.0
+			experiment['detectorPixel[m]'] = 3.61*1e-6 # Detector pixel size (float). Defaults to 1.44*1e-6
+			experiment['reconSize'] = 2048 # Recons dimension (cube) (int). Defaults to tomogram shape[0]
+			experiment['gpu'] = [0,1,2,3] # List of GPUs (int list). Defaults to [0]
+			experiment['rings'] = (True,2) # Rings parameters: (bool,int) = (Apply ring or not, ring blocks: recommended 2 or 4). Defaults to (True,2)
+			experiment['normalize'] = (True,True) # Flat normalization: (bool,bool) = (Do normalization, use -log). Defaults to (True,True)
+			experiment['padding'] = 800 # Zero pad for fiter: (int). Defaults to 0.
+			experiment['shift'] = (True,0) # Rotation shift: (bool,int) = (Use automatic find_rotation function, shift value - can be negative). Defaults to (True,0)
+			experiment['detector type'] = 'pco' # Choose detector used: (string) = 'pco', 'mobpix', 'pimegaSi' or 'pimegaCdTe'. Defaults to 'pco'
 
 			recon = sscRaft.reconstruction_fdk(experiment, data, flat, dark)
 
@@ -105,8 +105,11 @@ How to save a numpy array in HDF5 format with metadata from a dictionary togethe
 			experiment['Input file'] = in_path + in_name
 			experiment['Energy [KeV]'] = '22 and 39'
 
-			# Create HDF5 file
+			# Append an existing HDF5 file
 			outfile = h5py.File(out_path + out_name + ext,'a')
+			# Or create a new HDF5 file
+			# outfile = h5py.File(out_path + out_name + ext,'w')
+
 
 			try:
 					# Call function to save the metadata from dictionary 'experiment' with the software 'sscRaft' and its version 'sscRaft.__version__'
@@ -130,7 +133,7 @@ Expectation Maximization with total variation using a parallel tomogram as an in
 			import time
 			
 			from sscPhantom import mario
-			from sscRaft import parallel
+			import sscRaft 
 
 			start = time.time()
 			
@@ -152,7 +155,7 @@ Expectation Maximization with total variation using a parallel tomogram as an in
 
 			start = time.time()
 
-			output, rad = parallel.emfs( sino, dic )
+			output, rad = sscRaft.emfs( sino, dic )
 
 			elapsed = time.time() - start
 
@@ -168,6 +171,11 @@ can be considered approximate Radon transforms. A 3D inversion follows using the
 code below:
 
 	.. code-block:: python
+
+		import sscRaft 
+		from sscRadon import radon
+		import numpy
+		import time
 
 		mdata = numpy.load(<my_data.npy>)
 
@@ -196,7 +204,7 @@ code below:
 
 		start = time.time()
 
-		output, rad = parallel.emfs( sino, dic )
+		output, rad = sscRaft.emfs( sino, dic )
 		
 		elapsed = time.time() - start
 		

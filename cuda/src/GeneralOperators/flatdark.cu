@@ -7,7 +7,7 @@
 
 
 extern "C"{
-   static __global__ void KFlatDarkTransposelog(float* in, float *out, float* dark, float* flat, dim3 size, int numflats)
+   static __global__ void KFlatDarklog(float* in, float* dark, float* flat, dim3 size, int numflats)
 	{  
       // Supports 2 flats only
 		size_t idx = threadIdx.x + blockIdx.x*blockDim.x;
@@ -17,21 +17,19 @@ extern "C"{
 			float dk = dark[blockIdx.y * size.x + idx];
 			float ft = flat[blockIdx.y * size.x + idx];
 			
-         if(numflats > 1){
+         	if(numflats > 1){
 				float interp = float(blockIdx.z+1)/float(size.z+1);
 				ft = ft*(1.0f-interp) + interp*(float)flat[size.x*size.y + blockIdx.y * size.x + idx];
 			}
 
 			size_t line = size.y*blockIdx.z + blockIdx.y;
-			// size_t coll = blockIdx.y * size.z + blockIdx.z;
 			
-			// out[coll * size.x + idx] = -log( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
-			in[line * size.x + idx] = -log( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
+			in[line * size.x + idx] = -logf( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
 
 		}
 	}
 
-	static __global__ void KFlatDarkTranspose(float* in, float* dark, float* flat, dim3 size, int numflats)
+	static __global__ void KFlatDark(float* in, float* dark, float* flat, dim3 size, int numflats)
 	{  
       // Supports 2 flats only
 		size_t idx = threadIdx.x + blockIdx.x*blockDim.x;
@@ -41,88 +39,54 @@ extern "C"{
 			float dk = dark[blockIdx.y * size.x + idx];
 			float ft = flat[blockIdx.y * size.x + idx];
 			
-         if(numflats > 1){
+         	if(numflats > 1){
 				float interp = float(blockIdx.z+1)/float(size.z+1);
 				ft = ft*(1.0f-interp) + interp*(float)flat[size.x*size.y + blockIdx.y * size.x + idx];
 			}
 
 			size_t line = size.y*blockIdx.z + blockIdx.y;
-			// size_t coll = blockIdx.y * size.z + blockIdx.z;
 			
-			// out[coll * size.x + idx] = -log( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
 			in[line * size.x + idx] = fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f);
 
 		}
 	}
 
-	void flatdarktranspose_log_gpu(int gpu, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
+	void flatdark_log_gpu(int gpu, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
 	{	
-      // Supports 2 flats max
-      cudaSetDevice(gpu);
+		// Supports 2 flats max
+		cudaSetDevice(gpu);
 
 		int b;
-      int blocksize = min(nslices,32);
+		int blocksize = min(nangles,32);
 
-      dim3 blocks = dim3(nrays,blocksize,nangles);
+		dim3 blocks = dim3(nrays,nslices,blocksize);
 		blocks.x = (nrays+127) / 128;
 
-		rImage data(nrays,blocksize,nangles);
-		rImage out(nrays,nangles,blocksize);
+		rImage data(nrays,nslices,blocksize);
 
-		Image2D<float> cflat(nrays, blocksize, numflats);
-		Image2D<float> cdark(nrays, blocksize);
+		Image2D<float> cflat(nrays, nslices, numflats);
+		Image2D<float> cdark(nrays, nslices);
 
-      for(b = 0; b < nslices; b += blocksize){
-			blocksize = min(blocksize,nslices-b);
+		for(b = 0; b < nangles; b += blocksize){
+			blocksize = min(blocksize,nangles-b);
 
-         data.CopyFrom(frames + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
-			cflat.CopyFrom(flat + (size_t)b*nrays*numflats, 0, (size_t)nrays*numflats*blocksize);
-			cdark.CopyFrom(dark + (size_t)b*nrays, 0, (size_t)nrays*blocksize);
+			data.CopyFrom(frames + (size_t)b*nrays*nslices, 0, (size_t)nrays*nslices*blocksize);
+			cflat.CopyFrom(flat, 0, (size_t)nrays*numflats*nslices);
+			cdark.CopyFrom(dark, 0, (size_t)nrays*nslices);
 
-         KFlatDarkTransposelog<<<blocks,128>>>(data.gpuptr, out.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,blocksize,nangles), cflat.sizez);
+			KFlatDarklog<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,nslices,blocksize), cflat.sizez);
 
-         data.CopyTo(frames + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
+			data.CopyTo(frames + (size_t)b*nrays*nslices, 0, (size_t)nrays*nslices*blocksize);
       
-      }
+      	}
 
 		cudaDeviceSynchronize();
 	}
 
-	void flatdarktranspose_gpu(int gpu, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
-	{	
-      // Supports 2 flats max
-      cudaSetDevice(gpu);
-
-		int b;
-      int blocksize = min(nslices,32);
-
-      dim3 blocks = dim3(nrays,blocksize,nangles);
-		blocks.x = (nrays+127) / 128;
-
-		rImage data(nrays,blocksize,nangles);
-		Image2D<float> cflat(nrays, blocksize, numflats);
-		Image2D<float> cdark(nrays, blocksize);
-
-      for(b = 0; b < nslices; b += blocksize){
-			blocksize = min(blocksize,nslices-b);
-
-         data.CopyFrom(frames + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
-			cflat.CopyFrom(flat + (size_t)b*nrays*numflats, 0, (size_t)nrays*numflats*blocksize);
-			cdark.CopyFrom(dark + (size_t)b*nrays, 0, (size_t)nrays*blocksize);
-
-         KFlatDarkTranspose<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,blocksize,nangles), cflat.sizez);
-
-         data.CopyTo(frames + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
-      
-      }
-
-		cudaDeviceSynchronize();
-	}
-
-	void flatdarktranspose_log_block(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
+	void flatdark_log_block(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
 	{
 		int t;
-		int blockgpu = (nslices + ngpus - 1) / ngpus;
+		int blockgpu = (nangles + ngpus - 1) / ngpus;
 		
 		// printf("Aqui\n");
 		std::vector<std::future<void>> threads;
@@ -133,11 +97,11 @@ extern "C"{
 
 		for(t = 0; t < ngpus; t++){ 
 			
-			blockgpu = min(nslices - blockgpu * t, blockgpu);
+			blockgpu = min(nangles - blockgpu * t, blockgpu);
 			// printf("Aqui3 %d %d %ld %d %d\n",t,blockgpu,(size_t)t*blockgpu*nrays*nangles,nrays,nangles);
 
-			threads.push_back(std::async( std::launch::async, flatdarktranspose_log_gpu, gpus[t], frames + (size_t)t*blockgpu*nrays*nangles, 
-						flat + (size_t)t*blockgpu*nrays*numflats, dark + (size_t)t*blockgpu*nrays, nrays, blockgpu, nangles, numflats
+			threads.push_back(std::async( std::launch::async, flatdark_log_gpu, gpus[t], frames + (size_t)t*blockgpu*nrays*nslices, 
+						flat, dark, nrays, nslices, blockgpu, numflats
 						));
 		}
 
@@ -145,11 +109,44 @@ extern "C"{
 			t.get();
 	}
 
-	void flatdarktranspose_block(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
+	void flatdark_gpu(int gpu, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
+	{	
+		// Supports 2 flats max
+		cudaSetDevice(gpu);
+
+		int b;
+		int blocksize = min(nangles,32);
+
+		dim3 blocks = dim3(nrays,nslices,blocksize);
+		blocks.x = (nrays+127) / 128;
+
+		rImage data(nrays,nslices,blocksize);
+
+		Image2D<float> cflat(nrays, nslices, numflats);
+		Image2D<float> cdark(nrays, nslices);
+
+		for(b = 0; b < nangles; b += blocksize){
+			blocksize = min(blocksize,nangles-b);
+
+			data.CopyFrom(frames + (size_t)b*nrays*nslices, 0, (size_t)nrays*nslices*blocksize);
+			cflat.CopyFrom(flat, 0, (size_t)nrays*numflats*nslices);
+			cdark.CopyFrom(dark, 0, (size_t)nrays*nslices);
+
+			KFlatDark<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,nslices,blocksize), cflat.sizez);
+
+			data.CopyTo(frames + (size_t)b*nrays*nslices, 0, (size_t)nrays*nslices*blocksize);
+      
+      	}
+
+		cudaDeviceSynchronize();
+	}
+
+	void flatdark_block(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
 	{
 		int t;
-		int blockgpu = (nslices + ngpus - 1) / ngpus;
+		int blockgpu = (nangles + ngpus - 1) / ngpus;
 		
+		// printf("Aqui\n");
 		std::vector<std::future<void>> threads;
 
 		// printf("Aqui2\n");
@@ -158,17 +155,18 @@ extern "C"{
 
 		for(t = 0; t < ngpus; t++){ 
 			
-			blockgpu = min(nslices - blockgpu * t, blockgpu);
+			blockgpu = min(nangles - blockgpu * t, blockgpu);
 			// printf("Aqui3 %d %d %ld %d %d\n",t,blockgpu,(size_t)t*blockgpu*nrays*nangles,nrays,nangles);
 
-			threads.push_back(std::async( std::launch::async, flatdarktranspose_gpu, gpus[t], frames + (size_t)t*blockgpu*nrays*nangles, 
-						flat + (size_t)t*blockgpu*nrays*numflats, dark + (size_t)t*blockgpu*nrays, nrays, blockgpu, nangles, numflats
+			threads.push_back(std::async( std::launch::async, flatdark_gpu, gpus[t], frames + (size_t)t*blockgpu*nrays*nslices, 
+						flat, dark, nrays, nslices, blockgpu, numflats
 						));
 		}
 
 		for(auto& t : threads)
 			t.get();
 	}
+
 
 	void _CPUReduceBLock16(float* out, uint16_t* frames, uint16_t* cflat, uint16_t* cdark, 
 		size_t sizex, size_t sizey, size_t sizez, size_t block, int numflats, int tidx, int nthreads)

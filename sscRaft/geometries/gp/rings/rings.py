@@ -9,16 +9,20 @@ import uuid
 import SharedArray as sa
 
 def RingsMultiGPU(tomogram, dic):
-        """Apply rings correction on tomogram by blocks of rings
+        """Apply rings correction on tomogram by blocks of rings in MULTIGPU
 
         Args:
-            tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
-            lambdareg (int, optional): Lambda regularization of rings. Defaults to -1 (automatic).
-            ringblocks (int, optional): Blocks of rings to be used. Defaults to 2.
-            gpus (list, optional): List of gpus. Defaults to [0].
+                tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
+                dic (dictionary): Dictionary with the parameters.
+                gpu (int): GPU to use. Defaults to 0.
 
         Returns:
-            ndarray: tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
+                ndarray: tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
+        
+        Dictionary parameters:
+                *``dic['lambdaRings']`` (float): Lambda regularization of rings. Value 0 is automatic.
+                *``dic['ringsBlock']`` (int): Blocks of rings to be used.    
+                *``dic['gpu']`` (int list): List of GPUs to use. 
         """   
 
         gpus = dic['gpu']     
@@ -36,8 +40,8 @@ def RingsMultiGPU(tomogram, dic):
         else:
                 nslices = tomogram.shape[0]
 
-        lambdarings = dic['lambda rings']
-        ringsblock  = dic['rings block']
+        lambdarings = dic['lambdaRings']
+        ringsblock  = dic['ringsBlock']
 
         if lambdarings == 0:
                 logger.warning(f'No Rings regularization: Lambda regularization is set to {lambdarings}.')
@@ -61,16 +65,19 @@ def RingsMultiGPU(tomogram, dic):
 
 
 def RingsGPU(tomogram, dic, gpu = 0):
-        """Apply rings correction on tomogram by blocks of rings
+        """Apply rings correction on tomogram by blocks of rings in GPU
 
         Args:
-            tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
-            lambdareg (int, optional): Lambda regularization of rings. Defaults to -1 (automatic).
-            ringblocks (int, optional): Blocks of rings to be used. Defaults to 2.
-            gpus (list, optional): List of gpus. Defaults to [0].
+                tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
+                dic (dictionary): Dictionary with the parameters.
+                gpu (int): GPU to use. Defaults to 0.
 
         Returns:
-            ndarray: tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
+                ndarray: tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
+        
+        Dictionary parameters:
+                *``dic['lambdaRings']`` (float): Lambda regularization of rings. Value 0 is automatic.
+                *``dic['ringsBlock']`` (int): Blocks of rings to be used. 
         """        
 
         nrays   = tomogram.shape[-1]
@@ -81,8 +88,8 @@ def RingsGPU(tomogram, dic, gpu = 0):
         else:
                 nslices = tomogram.shape[0]
 
-        lambdarings = dic['lambda rings']
-        ringsblock  = dic['rings block']
+        lambdarings = dic['lambdaRings']
+        ringsblock  = dic['ringsBlock']
 
         if lambdarings == 0:
                 logger.warning(f'No Rings regularization: Lambda regularization is set to {lambdarings}.')
@@ -169,7 +176,7 @@ def rings_gpublock( tomogram, dic ):
 
 def rings_thread(tomogram, dic, **kwargs):
 
-        dicparams = ('gpu','lambda rings','rings block')
+        dicparams = ('gpu','lambdaRings','ringsBlock')
         defaut = ([0],0,2)
 
         SetDictionary(dic,dicparams,defaut)
@@ -185,8 +192,22 @@ def rings_thread(tomogram, dic, **kwargs):
         return output
 
 def rings(tomogram, dic, **kwargs):
+        """Apply rings correction on tomogram by blocks of rings in MultiGPU
 
-        dicparams = ('gpu','lambda rings','rings block')
+        Args:
+                tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
+                dic (dictionary): Dictionary with the parameters.
+
+        Returns:
+                ndarray: tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
+        
+        Dictionary parameters:
+                *``dic['lambdaRings']`` (float): Lambda regularization of rings. Defaults to 0 (automatic).
+                *``dic['ringsBlock']`` (int): Blocks of rings to be used. Defaults to 2.    
+                *``dic['gpu']`` (int list): List of GPUs to use. Defaults to [0].
+        """
+
+        dicparams = ('gpu','lambdaRings','ringsBlock')
         defaut = ([0],0,2)
 
         SetDictionary(dic,dicparams,defaut)

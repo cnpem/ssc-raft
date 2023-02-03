@@ -25,19 +25,13 @@ logger.addHandler(console_handler)
 '''----------------------------------------------'''
 
 nthreads = multiprocessing.cpu_count()
-# try:
-#    multiprocessing.set_start_method('spawn', force=True)
-#    print("spawned")
-# except RuntimeError:
-#    pass
-
 
 # Load required libraies:
 
 libstdcpp = ctypes.CDLL( ctypes.util.find_library( "stdc++" ), mode=ctypes.RTLD_GLOBAL )
-libblas   = ctypes.CDLL( ctypes.util.find_library( "blas" ), mode=ctypes.RTLD_GLOBAL )
-libfftw3  = ctypes.CDLL( ctypes.util.find_library( "fftw3" ), mode=ctypes.RTLD_GLOBAL )
-libfftw3_threads  = ctypes.CDLL( ctypes.util.find_library( "fftw3_threads" ), mode=ctypes.RTLD_GLOBAL )
+# libblas   = ctypes.CDLL( ctypes.util.find_library( "blas" ), mode=ctypes.RTLD_GLOBAL )
+# libfftw3  = ctypes.CDLL( ctypes.util.find_library( "fftw3" ), mode=ctypes.RTLD_GLOBAL )
+# libfftw3_threads  = ctypes.CDLL( ctypes.util.find_library( "fftw3_threads" ), mode=ctypes.RTLD_GLOBAL )
 
 
 _lib = "lib/libraft"
@@ -154,21 +148,21 @@ try:
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int, ctypes.c_void_p]
     libraft.fstblock.restype  = None   
    
-    libraft.flatdarktranspose_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+    libraft.flatdark_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
                                                 ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdarktranspose_gpu.restype  = None
+    libraft.flatdark_gpu.restype  = None
         
-    libraft.flatdarktranspose_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+    libraft.flatdark_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
                                                 ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdarktranspose_block.restype  = None
+    libraft.flatdark_block.restype  = None
 
-    libraft.flatdarktranspose_log_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+    libraft.flatdark_log_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
                                                 ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdarktranspose_log_gpu.restype  = None
+    libraft.flatdark_log_gpu.restype  = None
         
-    libraft.flatdarktranspose_log_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+    libraft.flatdark_log_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
                                                 ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdarktranspose_log_block.restype  = None
+    libraft.flatdark_log_block.restype  = None
     
 except:
     print('-.RAFT_PARALLEL-')
@@ -269,6 +263,8 @@ def SetDic(dic, paramname, deff):
 
         except:
                 print('Using default -', paramname,':', deff)
+                dic[paramname] = deff
+
                 
 
 def SetDictionary(dic,param,default):
