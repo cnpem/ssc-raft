@@ -187,6 +187,9 @@ def normalize_fdk(tomo, flat, dark, experiment):
     # ========= CUDA NORMALIZATION ================================================================
     tomo = correct_projections(tomo, flat, dark, experiment)
 
+    tomo[tomo > 1000] = 0
+
+
     # plt.figure(0)
     # plt.imshow(tomo[:,0,:])
     # plt.savefig('NormProjfirst.png', format='png')
