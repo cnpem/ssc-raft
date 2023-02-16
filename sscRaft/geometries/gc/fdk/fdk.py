@@ -94,10 +94,8 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
 
     experiment['uselog'] = experiment['normalize'][1]
 
-    if(experiment['normalize'][0]):
-        data = normalize_fdk(data, flat, dark, experiment)
-    else:
-        data = np.swapaxes(data,0,1)
+    data = normalize_fdk(data, flat, dark, experiment)
+
 
     # recon = data 
     D, Dsd = experiment['z1[m]'], experiment['z1+z2[m]']
@@ -130,26 +128,27 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
 
 
 def normalize_fdk(tomo, flat, dark, experiment):
-    print('Normalize ....')
 
-    padding    = experiment['padding']
-    is_autoRot = experiment['shift'][0]
-    shift      = experiment['shift'][1]
-    nx_search  = experiment['findRotationAxis'][0]
-    nx_window  = experiment['findRotationAxis'][1]
-    nsinos     = experiment['findRotationAxis'][2]
+    padding      = experiment['padding']
+    is_normalize = experiment['normalize'][0]
+    is_autoRot   = experiment['shift'][0]
+    shift        = experiment['shift'][1]
+    nx_search    = experiment['findRotationAxis'][0]
+    nx_window    = experiment['findRotationAxis'][1]
+    nsinos       = experiment['findRotationAxis'][2]
 
-    if len(dark.shape) == 3:
-            dark = dark[0]
+    if is_normalize:
+        if len(dark.shape) == 3:
+                dark = dark[0]
 
-    if experiment['detectorType'] == 'pco':
-        dark[:11,:]    = 0.0
-        tomo[:, :11,:] = 1.0 
-            
-        if len(flat.shape) == 2:
-            flat[:11,:]   = 1.0
-        else: 
-            flat[:,:11,:] = 1.0
+        if experiment['detectorType'] == 'pco':
+            dark[:11,:]    = 0.0
+            tomo[:, :11,:] = 1.0 
+                
+            if len(flat.shape) == 2:
+                flat[:11,:]   = 1.0
+            else: 
+                flat[:,:11,:] = 1.0
 
     # ========= PYTHON NORMALIZATION ================================================================
 
@@ -185,8 +184,13 @@ def normalize_fdk(tomo, flat, dark, experiment):
 
 
     # ========= CUDA NORMALIZATION ================================================================
-    tomo = correct_projections(tomo, flat, dark, experiment)
-
+    if is_normalize:
+        print('Normalize ....')
+        tomo = correct_projections(tomo, flat, dark, experiment)
+    else:
+        tomo = np.swapaxes(tomo,0,1)
+    
+    # tomo[tomo > 1000] = 0
     # plt.figure(0)
     # plt.imshow(tomo[:,0,:])
     # plt.savefig('NormProjfirst.png', format='png')

@@ -11,7 +11,8 @@ extern "C"{
 	{  
       // Supports 2 flats only
 		size_t idx = threadIdx.x + blockIdx.x*blockDim.x;
-		
+		float tol = 1e-15;
+
 		if(idx < size.x && blockIdx.y < size.y)
 		{
 			float dk = dark[blockIdx.y * size.x + idx];
@@ -23,8 +24,18 @@ extern "C"{
 			}
 
 			size_t line = size.y*blockIdx.z + blockIdx.y;
+
+			float T = in[line * size.x + idx] - dk;
+			float Q = ft-dk;
+
+			if ( T < tol)
+				T = 1.0;
 			
+			if ( Q < tol)
+				Q = 1.0;
+
 			in[line * size.x + idx] = -logf( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
+			// in[line * size.x + idx] = -logf( T / Q );
 
 		}
 	}

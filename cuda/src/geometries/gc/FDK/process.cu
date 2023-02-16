@@ -24,7 +24,7 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     idx_filter = (long long int) zi_min*lab.nbeta*lab.nh;
     zi_filter = (int) (n_filter/(lab.nbeta*lab.nh));
 
-    printf("Process = %d: n_filter = %lld, idx_filter = %lld, z_filter = %d\n",   i, n_filter, idx_filter, zi_filter);
+    printf("Process = %d: n_filter = %lld, idx_filter = %lld, z_filter = %d\n", i, n_filter, idx_filter, zi_filter);
     
     nz_gpu = (int) (lab.nz/n_process);
     zi_min = i*nz_gpu;
