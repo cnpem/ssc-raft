@@ -24,25 +24,25 @@ void filtering(Lab lab, float* proj, cufftComplex* signal, float* W, Process pro
 void ringsgpu_fdk( Lab lab, float* data, Process process)
 { 
     // Função Original
-    Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
+     Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
 
-    // // Paola adicionou em 31/01/2023
-    // for (int m = 0; m < lab.rings_block / 2; m++){
+    // Paola adicionou em 31/01/2023
+    //for (int m = 0; m < lab.rings_block / 2; m++){
 
-    //     Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
+      //  Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
         
-    //     size_t offset = lab.nh*lab.nbeta;
-    //     size_t step = (lab.nbeta / lab.rings_block) * lab.nh;
-    //     float* tomptr = data; // pay attention to this
+        //size_t offset = lab.nh*lab.nbeta;
+     //   size_t step = (lab.nbeta / lab.rings_block) * lab.nh;
+      //  float* tomptr = data; // pay attention to this
 
-    //     for (int n = 0; n < lab.rings_block - 1; n++){
-    //         Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
+        //for (int n = 0; n < lab.rings_block - 1; n++){
+          //  Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
 
-    //         tomptr += step;
-    //     }
-    //     Rings(data, lab.nh, lab.nbeta%lab.rings_block + lab.nbeta/lab.rings_block, process.z_filter, -1.0, offset);
+            //tomptr += step;
+       // }
+        //Rings(data, lab.nh, lab.nbeta%lab.rings_block + lab.nbeta/lab.rings_block, process.z_filter, -1.0, offset);
 
-    // }// End Paola
+    //}// End Paola
 }
 
 
