@@ -14,84 +14,134 @@ import SharedArray as sa
 
 def flatdarkMultiGPU(frames, flat, dark, dic):
         
-        gpus = dic['gpu']     
-        ngpus = len(gpus)
+        gpus       = dic['gpu']     
+        ngpus      = len(gpus)
 
-        gpus = numpy.array(gpus)
-        gpus = np.ascontiguousarray(gpus.astype(np.int32))
-        gpusptr = gpus.ctypes.data_as(void_p)
+        gpus       = numpy.array(gpus)
+        gpus       = np.ascontiguousarray(gpus.astype(np.intc))
+        gpusptr    = gpus.ctypes.data_as(void_p)
 
-        nrays   = frames.shape[-1]
-        nangles = frames.shape[0]
+        is_log     = dic['uselog']
+        nrays      = frames.shape[-1]
+        nangles    = frames.shape[0]
+        Tframes    = dic['frames info'][0]
+        Initframes = dic['frames info'][1]
         
+        if is_log:
+                is_log = 1
+        else:
+                is_log = 0
+
+        if Tframes == nangles:
+                Initframes = 0
+
         if len(frames.shape) == 2:
                 nslices = 1
         else:
                 nslices = frames.shape[-2]
 
         if len(flat.shape) == 2:
+                flat = np.expand_dims(flat,0)
                 nflats  = 1
         else:
                 nflats = flat.shape[0]
 
-        flat = np.ascontiguousarray(flat.astype(np.float32))
-        flatptr = flat.ctypes.data_as(void_p)
+        if len(dark.shape) == 2:
+                dark = np.expand_dims(dark,0)
 
-        dark = np.ascontiguousarray(dark.astype(np.float32))
-        darkptr = dark.ctypes.data_as(void_p)
+        # Change Frames order from [angles,slices,rays] to [slices,angles,rays] for easier computation
+        frames    = np.swapaxes(frames,0,1)
         
-        frames = np.ascontiguousarray(frames.astype(np.float32))
+        # Change Flat order from [number of flats,slices,rays] to [slices,number of flats,rays] for easier computation
+        flat      = np.swapaxes(flat,0,1)
+
+        # Change Dark order from [1,slices,rays] to [slices,1,rays] for easier computation
+        dark      = np.swapaxes(dark,0,1)
+
+        flat      = np.ascontiguousarray(flat.astype(np.float32))
+        flatptr   = flat.ctypes.data_as(void_p)
+
+        dark      = np.ascontiguousarray(dark.astype(np.float32))
+        darkptr   = dark.ctypes.data_as(void_p)
+        
+        frames    = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
 
-        nrays   = int32(nrays)
-        nangles = int32(nangles)
-        nslices = int32(nslices)
-        nflats  = int32(nflats)
+        print('Init Frame of Correction:', Initframes)
+
+        nrays      = int32(nrays)
+        nangles    = int32(nangles)
+        nslices    = int32(nslices)
+        nflats     = int32(nflats)
+        Tframes    = int32(Tframes)
+        Initframes = int32(Initframes)
+        is_log     = int32(is_log)
         
-        if dic['uselog']:
-                libraft.flatdark_log_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
-        else:
-                libraft.flatdark_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        libraft.flatdark_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, Tframes, Initframes, is_log)
 
         return frames 
 
 
 def flatdarkGPU(frames, flat, dark, dic):
         
-        gpus = dic['gpu']     
-        ngpus = len(gpus)
-
-        nrays   = frames.shape[-1]
-        nangles = frames.shape[0]
+        gpu        = dic['gpu'][0]     
+        is_log     = dic['uselog']
+        nrays      = frames.shape[-1]
+        nangles    = frames.shape[0]
+        Tframes    = dic['frames info'][0]
+        Initframes = dic['frames info'][1]
         
+        if is_log:
+                is_log = 1
+        else:
+                is_log = 0
+        
+        if Tframes == nangles:
+                Initframes = 0
+
         if len(frames.shape) == 2:
                 nslices = 1
         else:
                 nslices = frames.shape[-2]
 
         if len(flat.shape) == 2:
+                flat = np.expand_dims(flat,0)
                 nflats  = 1
         else:
                 nflats = flat.shape[0]
-
-        flat = np.ascontiguousarray(flat.astype(np.float32))
-        flatptr = flat.ctypes.data_as(void_p)
-
-        dark = np.ascontiguousarray(dark.astype(np.float32))
-        darkptr = dark.ctypes.data_as(void_p)
         
-        frames = np.ascontiguousarray(frames.astype(np.float32))
+        if len(dark.shape) == 2:
+                dark = np.expand_dims(dark,0)
+        
+        # Change Frames order from [angles,slices,rays] to [slices,angles,rays] for easier computation
+        frames    = np.swapaxes(frames,0,1)
+        
+        # Change Flat order from [number of flats,slices,rays] to [slices,number of flats,rays] for easier computation
+        flat      = np.swapaxes(flat,0,1)
+
+        # Change Dark order from [1,slices,rays] to [slices,1,rays] for easier computation
+        dark      = np.swapaxes(dark,0,1)
+
+        flat      = np.ascontiguousarray(flat.astype(np.float32))
+        flatptr   = flat.ctypes.data_as(void_p)
+
+        dark      = np.ascontiguousarray(dark.astype(np.float32))
+        darkptr   = dark.ctypes.data_as(void_p)
+        
+        frames    = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
         
-        nrays   = int32(nrays)
-        nangles = int32(nangles)
-        nslices = int32(nslices)
-        nflats  = int32(nflats)
+        print('Init Frame of Correction:', Initframes)
 
-        if dic['uselog']:
-                libraft.flatdark_log_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
-        else:
-                libraft.flatdark_gpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        nrays      = int32(nrays)
+        nangles    = int32(nangles)
+        nslices    = int32(nslices)
+        nflats     = int32(nflats)
+        Tframes    = int32(Tframes)
+        Initframes = int32(Initframes)
+        is_log     = int32(is_log)
+        
+        libraft.flatdark_gpu(int32(gpu), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, Tframes, Initframes, is_log)
 
         return frames 
 
@@ -124,10 +174,11 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
          Dictionary parameters:
                 *``experiment['gpu']`` (int list): List of GPUs.
                 *``experiment['uselog']`` (bool): Apply logarithm or not.
+                *``experiment['frames info']`` (int,int): Total of frames acquired, index of initial frame to compute
         """        
 
-        dicparams = ('gpu','uselog')
-        defaut = ([0],True)
+        dicparams = ('gpu','uselog','frames info')
+        defaut    = ([0],True,(frames.shape[0],0))
         
         SetDictionary(dic,dicparams,defaut)
 
@@ -138,4 +189,4 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
         else:
                 output = flatdarkMultiGPU( frames, flat, dark, dic ) 
 
-        return np.swapaxes(output,0,1)
+        return output

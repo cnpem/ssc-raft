@@ -182,7 +182,7 @@ def Tomo360To180MultiGPU(tomogram, offset, gpu = [0]):
         ngpus = len(gpu)
 
         gpus = numpy.array(gpu)
-        gpus = np.ascontiguousarray(gpus.astype(np.int32))
+        gpus = np.ascontiguousarray(gpus.astype(np.intc))
         gpusptr = gpus.ctypes.data_as(void_p)  
 
         nrays = tomogram.shape[-1]

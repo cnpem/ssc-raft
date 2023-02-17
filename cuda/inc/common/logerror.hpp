@@ -3,6 +3,20 @@
 
 #include "../../inc/include.h"
 
+extern "C" {
+
+	inline void getDeviceProperties()
+	{	/* Get Device Properties */
+		int gpudevices; 
+		cudaDeviceProp prop; 
+		cudaGetDeviceCount(&gpudevices); /* Total Number of GPUs */ 
+		printf("GPUs number: %d\n",gpudevices); 
+		cudaGetDeviceProperties(&prop,0); /* Name of GPU */ 
+		printf("Device name: %s\n",prop.name);	
+	}
+
+}
+
 #define cudaCheckError(){ \
 	cudaError_t e = cudaGetLastError(); \
 	if (e != cudaSuccess){ \
