@@ -29,7 +29,7 @@ def rebinning_gpu(conetomo, dic, **kwargs):
 
     gpus = numpy.array(dic['gpus'])
     ngpus  = gpus.shape[0]
-    gpus   = numpy.ascontiguousarray(gpus.astype(numpy.int32))
+    gpus   = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_p = gpus.ctypes.data_as(ctypes.c_void_p)
 
     tomo = numpy.zeros(conetomo.shape)

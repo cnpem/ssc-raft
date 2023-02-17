@@ -149,20 +149,13 @@ try:
     libraft.fstblock.restype  = None   
    
     libraft.flatdark_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
+                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
     libraft.flatdark_gpu.restype  = None
         
     libraft.flatdark_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
+                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
     libraft.flatdark_block.restype  = None
 
-    libraft.flatdark_log_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdark_log_gpu.restype  = None
-        
-    libraft.flatdark_log_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdark_log_block.restype  = None
     
 except:
     print('-.RAFT_PARALLEL-')

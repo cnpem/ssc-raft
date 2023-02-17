@@ -17,7 +17,7 @@ def bstMultiGPU(tomogram, dic):
         ngpus = len(gpus)
 
         gpus = numpy.array(gpus)
-        gpus = np.ascontiguousarray(gpus.astype(np.int32))
+        gpus = np.ascontiguousarray(gpus.astype(np.intc))
         gpusptr = gpus.ctypes.data_as(void_p)
 
         nrays   = tomogram.shape[-1]
