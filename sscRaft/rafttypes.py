@@ -269,28 +269,34 @@ def Metadata_hdf5(outputFileHDF5, dic, software, version):
         on a HDF5 file. The parameters names will be save the same as the names from the dictionary.
 
         Args:
-            outputfile (h5py.File type): The h5py created file
+            outputFileHDF5 (h5py.File type or str): The h5py created file or the path to the HDF5 file
             dic (dictionary): A python dictionary containing all parameters (metadata) from the experiment
             software (string): Name of the python module 'software'  used
             version (string): Version of python module used (can be called by: 'software.__version__'; example: 'sscRaft.__version__')
 
         """
-        try:
-                grp = outputFileHDF5['parameters']
-        except:
-                grp = outputFileHDF5.create_group('parameters')
+        dic['Software'] = software
+        dic['Version']  = version
 
-        n = len(dic)
-        i = 0
-        dset = grp.create_dataset('recon_parameters',(n+2,),dtype=h5py.string_dtype(encoding='ascii'))
-        for key in dic:
-                dset[i] = key + ": " + str(dic[key])
-                i = i + 1
-        dset[n] = 'Software: ' + software
-        dset[n+1] = 'Version: ' + version
+        if isinstance(outputFileHDF5, str):
+               hdf5 = h5py.File(outputFileHDF5, 'a')
+        else:
+               hdf5 = outputFileHDF5
 
-        grp.attrs.create(name="command",data=" ".join(sys.argv[1:]))
 
+        for key, value in dic.items():
+
+                h5_path = 'Recon Parameters' #os.path.join('Recon Parameters', key)
+                hdf5.require_group(h5_path)
+                
+                if isinstance(value, list) or isinstance(value, tuple):
+                       data = str(value)
+                       hdf5[h5_path].create_dataset(key, data=data)
+                else:
+                       hdf5[h5_path].create_dataset(key, data=value, shape=())
+
+        if isinstance(outputFileHDF5, str):
+               hdf5.close()
 
 if __name__ == "__main__":
    pass

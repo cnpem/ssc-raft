@@ -237,32 +237,27 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process):
 
     return x
     
-def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize,process):
+def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize, process):
 
-    nblocks = ( idx_end + 1 - idx_start ) // blocksize + 1
-
-    output1 = params[0]
-    data    = params[1]
-    niter   = params[6]
-    reg     = params[7]
-    eps     = params[8]
-    method  = params[9]
-
-    if method=="tEM":
-        InversionMethod = _iterations_tem_mpfs_
-    elif method=="eEM":
-        InversionMethod = _iterations_eem_mpfs_
-    elif method=="EMTV":
-        InversionMethod = _iterations_emtv_mpfs_
+    I = ( idx_end - idx_start )
+    if (I%blocksize) == 0:
+        nblocks = I // blocksize 
     else:
-        print('ssc-raft: Error! Wrong method: "tEM"/"eEM"/"EMTV".')
-        return
+        nblocks = ( I + blocksize - (I%blocksize) ) // blocksize
     
+    # nblocks = ( idx_end + 1 - idx_start ) // blocksize + 1
+
+    output1          = params[0]
+    data             = params[1]
+    niter            = params[6]
+    reg              = params[7]
+    eps              = params[8]
+    InversionMethod  = params[9]
     
     for k in range(nblocks):
         _start_ = idx_start + k * blocksize
         _end_   = min( _start_ + blocksize, idx_end) 
-        # print('--> Process {}: GPU({}) / [{},{}]'.format(process, gpu, _start_, _end_) )
+        print('EM --> Process {}: GPU({}), slices [{},{}]'.format(process, gpu, _start_, _end_) )
         output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process)
         
         
@@ -271,19 +266,19 @@ def _build_em_mpfs_(params):
 
     #_params_ = ( output, data, nslices, nangles, gpus, blocksize)
  
-    nslices = params[2]
-    gpus    = params[4]
+    nslices   = params[2]
+    gpus      = params[4]
     blocksize = params[5]
-    ngpus = len(gpus)
+    ngpus     = len(gpus)
     
-    b = int( numpy.ceil( nslices/ngpus )  ) 
+    b         = int( numpy.ceil( nslices/ngpus )  ) 
     
     processes = []
     for k in range( ngpus ):
         begin_ = k*b
         end_   = min( (k+1)*b, nslices )
 
-        p = multiprocessing.Process(target=_worker_em_mpfs_, args=(params, begin_, end_, gpus[k], blocksize,k))
+        p = multiprocessing.Process(target=_worker_em_mpfs_, args=(params, begin_, end_, gpus[k], blocksize, k))
         processes.append(p)
     
     for p in processes:
@@ -345,25 +340,40 @@ def emfs( tomogram, dic ):
     eps       = dic['epsilon']
     method    = dic['method']
 
-    print("EM param:",blocksize,niter,reg,eps,method,nangles,gpus,nrays,nslices)
+    # print("EM param:",blocksize,niter,reg,eps,method,nangles,gpus,nrays,nslices)
+
+    if method=="tEM":
+        InversionMethod = _iterations_tem_mpfs_
+    elif method=="eEM":
+        InversionMethod = _iterations_eem_mpfs_
+    elif method=="EMTV":
+        InversionMethod = _iterations_emtv_mpfs_
+    else:
+        print('ssc-raft: Error! Wrong method: "tEM"/"eEM"/"EMTV".')
+        return
     
-    if blocksize > nslices // len(gpus):
+    if blocksize > ( nslices // len(gpus) ):
         print('ssc-raft: Error! Please check block size!')
     
-    name = str( uuid.uuid4())
-    
-    try:
-        sa.delete(name)
-    except:
-        pass
+    if len(gpus) > 1:
+        name = str( uuid.uuid4())
         
-    output  = sa.create(name,[nslices, nrays, nrays], dtype=numpy.float32)
+        try:
+            sa.delete(name)
+        except:
+            pass
+            
+        output   = sa.create(name,[nslices, nrays, nrays], dtype=numpy.float32)
 
-    _params_ = ( output, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, method)
-    
-    _build_em_mpfs_( _params_ )
+        _params_ = ( output, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, InversionMethod)
+        
+        _build_em_mpfs_( _params_ )
 
-    sa.delete(name)
+        sa.delete(name)
+
+    else:
+        output = InversionMethod( tomogram, niter = niter, device = gpus[0], reg = reg, eps = eps, process = 0)
     
     return output
+
 

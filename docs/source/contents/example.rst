@@ -1,6 +1,9 @@
 Examples
 ========
 
+We refer to the Scientific Computing Group (GCC) page `https://gcc.lnls.br/ <https://gcc.lnls.br/>`_ for a more complete sscRaft usage examples and tutorials. 
+Link - `https://gcc.lnls.br/wiki/docs/ssc-raft/ <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_.
+
 FDK
 ***
 

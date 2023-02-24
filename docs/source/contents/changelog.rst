@@ -4,14 +4,8 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
-[2.1.2] - 2023-02-09
---------------------
-Corretions
-~~~~~~~~~~
-- Fixed rings bug  in ``filtering.cu`` on ``geometries.gc.fdk``
 
-
-[2.1.4] - 2023-02-15
+[2.1.4] - 2023-02-24
 --------------------
 Added
 ~~~~~
@@ -19,9 +13,15 @@ Added
 - New dictionary entries for ``correct_projections()`` function in ``flatdark.py`` 
 - New examples of usage documentation page
 
+Changed
+~~~~~~~
+- Metadata datasets modifications in saving 
+
 Corretions
 ~~~~~~~~~~
-- Fixed a bug in linear interpolation correction in ``flatdark.cu`` - now parallelize over slices
+- Linear interpolation correction bug in ``flatdark.cu`` - now parallelize over slices
+- Reconstruction parallel method ``EM`` bug in blocksize = (1 or data.shape) and ngpus = 1
+
 
 [2.1.3] - 2023-02-15
 --------------------
