@@ -395,7 +395,7 @@ def emfs( tomogram, dic ):
         sa.delete(name)
 
     else:
-        output = InversionMethod( tomogram, niter = niter, device = gpus[0], reg = reg, eps = eps, process = 0)
+        output = InversionMethod( tomogram, niter = niter, device = gpus[0], reg = reg, eps = eps, process = 0, is_360)
     
     return output
 
