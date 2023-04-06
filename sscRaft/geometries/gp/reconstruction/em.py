@@ -29,7 +29,7 @@ def CNICE(darray,dtype=numpy.float32):
 # mpfs: (m)ulti(p)rocessing (f)rom (s)inograms 
 #
 
-def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process):
+def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process, is_360):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -116,18 +116,26 @@ def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process):
     s   = CNICE(sino) #sino pointer
     s_p = s.ctypes.data_as(void_p) 
     
-    libraft.EMTV( x_p, s_p,
-                  int32(recsize), int32(nrays),
-                  int32(nangles), int32(block),
-                  int32(device),  int32(niter[0]),
-                  int32(niter[1]),int32(niter[2]),
-                  float32(reg), float32(eps))
+    if is_360:
+        libraft.EMTV_2pi( x_p, s_p,
+            int32(recsize), int32(nrays),
+            int32(nangles), int32(block),
+            int32(device),  int32(niter[0]),
+            int32(niter[1]),int32(niter[2]),
+            float32(reg), float32(eps))
+    else:
+        libraft.EMTV( x_p, s_p,
+                    int32(recsize), int32(nrays),
+                    int32(nangles), int32(block),
+                    int32(device),  int32(niter[0]),
+                    int32(niter[1]),int32(niter[2]),
+                    float32(reg), float32(eps))
     
     elapsed = time.time() - start
 
     return x
 
-def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process):
+def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process,is_360):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -175,17 +183,24 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process):
     s   = CNICE(sino) #sino pointer
     s_p = s.ctypes.data_as(void_p) 
     
-    libraft.eEM( x_p, s_p,
-                 int32(recsize), int32(nrays),
-                 int32(nangles), int32(block),
-                 int32(device),  int32(niter[0]))
+    if is_360:
+        libraft.eEM_2pi( x_p, s_p,
+                    int32(recsize), int32(nrays),
+                    int32(nangles), int32(block),
+                    int32(device),  int32(niter[0]))
+    else:
+        libraft.eEM( x_p, s_p,
+                        int32(recsize), int32(nrays),
+                        int32(nangles), int32(block),
+                        int32(device),  int32(niter[0]))
+
 
     elapsed = time.time() - start
 
     return x
 
 
-def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process):
+def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process,is_360):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -228,10 +243,16 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process):
     f   = CNICE(cflat) #flat pointer
     f_p = f.ctypes.data_as(void_p) 
     
-    libraft.tEM( x_p, c_p, f_p,
-                 int32(recsize), int32(nrays),
-                 int32(nangles), int32(block),
-                 int32(device), int32(niter[0]))
+    if is_360:
+        libraft.tEM_2pi( x_p, c_p, f_p,
+                    int32(recsize), int32(nrays),
+                    int32(nangles), int32(block),
+                    int32(device), int32(niter[0]))
+    else:
+        libraft.tEM( x_p, c_p, f_p,
+                    int32(recsize), int32(nrays),
+                    int32(nangles), int32(block),
+                    int32(device), int32(niter[0]))
     
     elapsed = time.time() - start
 
@@ -247,18 +268,19 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize, process):
     
     # nblocks = ( idx_end + 1 - idx_start ) // blocksize + 1
 
-    output1          = params[0]
-    data             = params[1]
-    niter            = params[6]
-    reg              = params[7]
-    eps              = params[8]
-    InversionMethod  = params[9]
+    output1          = params[0 ]
+    data             = params[1 ]
+    niter            = params[6 ]
+    reg              = params[7 ]
+    eps              = params[8 ]
+    InversionMethod  = params[9 ]
+    is_360           = params[10]
     
     for k in range(nblocks):
         _start_ = idx_start + k * blocksize
         _end_   = min( _start_ + blocksize, idx_end) 
         print('EM --> Process {}: GPU({}), slices [{},{}]'.format(process, gpu, _start_, _end_) )
-        output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process)
+        output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process, is_360)
         
         
         
@@ -339,6 +361,7 @@ def emfs( tomogram, dic ):
     reg       = dic['regularization']
     eps       = dic['epsilon']
     method    = dic['method']
+    is_360    = dic['is360']
 
     # print("EM param:",blocksize,niter,reg,eps,method,nangles,gpus,nrays,nslices)
 
@@ -365,7 +388,7 @@ def emfs( tomogram, dic ):
             
         output   = sa.create(name,[nslices, nrays, nrays], dtype=numpy.float32)
 
-        _params_ = ( output, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, InversionMethod)
+        _params_ = ( output, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, InversionMethod, is_360)
         
         _build_em_mpfs_( _params_ )
 

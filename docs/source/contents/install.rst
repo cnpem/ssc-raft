@@ -36,7 +36,7 @@ The package can be cloned from CNPEM's gitlab and installed locally with your us
     make    
 
 
-The ``<version>` is the version of the ``sscRaft`` to be installed. Example, to install version 2.1.0
+The ``<version>`` is the version of the ``sscRaft`` to be installed. Example, to install version 2.1.0
 
 .. code-block:: bash
     git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v2.1.0 --single-branch
