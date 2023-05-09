@@ -4,54 +4,17 @@
 #include "../../../../inc/common/types.hpp"
 
 
-void filtering(Lab lab, float* proj, cufftComplex* signal, float* W, Process process)
-{
-    cudaSetDevice(process.i_gpu);
-    
-    // rings
-    if(lab.rings){
-        printf("Rings .... %d \n", process.i_gpu);
-        ringsgpu_fdk(lab, proj,process);
-        cudaDeviceSynchronize();
-    }
-    
-    fft(lab, proj, signal, W, process);
-
-    return;
-}
-
-
-void ringsgpu_fdk( Lab lab, float* data, Process process)
-{ 
-    // Função Original
-     Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
-
-    // Paola adicionou em 31/01/2023
-    //for (int m = 0; m < lab.rings_block / 2; m++){
-
-      //  Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
-        
-        //size_t offset = lab.nh*lab.nbeta;
-     //   size_t step = (lab.nbeta / lab.rings_block) * lab.nh;
-      //  float* tomptr = data; // pay attention to this
-
-        //for (int n = 0; n < lab.rings_block - 1; n++){
-          //  Rings(data, lab.nh, lab.nbeta, process.z_filter, -1.0, lab.nh*lab.nbeta);
-
-            //tomptr += step;
-       // }
-        //Rings(data, lab.nh, lab.nbeta%lab.rings_block + lab.nbeta/lab.rings_block, process.z_filter, -1.0, offset);
-
-    //}// End Paola
-}
-
 
 extern "C"{
-void copy_gpu_filter(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process) {
+void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process) {
     long long int N = process.n_filter;
 
     clock_t begin = clock();
     cudaSetDevice(process.i_gpu);
+
+    cudaDeviceSynchronize(); 
+    printf(cudaGetErrorString(cudaGetLastError()));
+    printf("\n");
 
     cudaMalloc(c_signal, sizeof(cufftComplex)*N);
 
@@ -60,6 +23,11 @@ void copy_gpu_filter(Lab lab, float* proj, float** c_proj, cufftComplex** c_sign
 
     cudaMalloc(W, lab.nh * sizeof(float));
     filt_W<<< 1, 1>>>(lab, *W);
+
+    cudaDeviceSynchronize(); 
+    printf(cudaGetErrorString(cudaGetLastError()));
+    printf("\n");
+
  
     printf("GPU memory allocated...\n");
 
@@ -68,7 +36,7 @@ void copy_gpu_filter(Lab lab, float* proj, float** c_proj, cufftComplex** c_sign
 }}
 
 extern "C"{
-void copy_cpu_filter(float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process) {
+void copy_cpu_filter_fft(float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process) {
     clock_t begin = clock();
     cudaSetDevice(process.i_gpu);
 
@@ -87,3 +55,48 @@ void copy_cpu_filter(float* proj, float* c_proj, cufftComplex* c_signal, float* 
     printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
 }}
 
+extern "C"{
+void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Process process) {
+    long long int N = process.n_filter;
+
+    clock_t begin = clock();
+    cudaSetDevice(process.i_gpu);
+
+    cudaDeviceSynchronize(); 
+    printf(cudaGetErrorString(cudaGetLastError()));
+    printf("\n");
+
+    cudaMalloc(c_Q, sizeof(float)*N);
+
+    cudaMalloc(c_proj, process.n_filter * sizeof(float));    
+    cudaMemcpy(*c_proj, &proj[process.idx_filter], process.n_filter * sizeof(float), cudaMemcpyHostToDevice);
+ 
+    printf("GPU memory allocated...\n");
+
+    cudaDeviceSynchronize(); 
+    printf(cudaGetErrorString(cudaGetLastError()));
+    printf("\n");
+
+
+    clock_t end = clock();
+    printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+}}
+
+extern "C"{
+void copy_cpu_filter_conv(float* proj, float* c_proj, float* c_Q, Process process) {
+    clock_t begin = clock();
+    cudaSetDevice(process.i_gpu);
+
+    cudaDeviceSynchronize(); 
+    printf(cudaGetErrorString(cudaGetLastError()));
+    printf("\n");
+
+    long long int N = process.n_filter;                                         //lab.nbeta * lab.nv * lab.nh;
+    cudaMemcpy(&proj[process.idx_filter], c_Q, N*sizeof(float), cudaMemcpyDeviceToHost);
+
+    cudaFree(c_proj);
+    cudaFree(c_Q);
+
+    clock_t end = clock();
+    printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+}}

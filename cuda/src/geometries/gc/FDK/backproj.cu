@@ -48,8 +48,9 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
 
         Q = proj[idx];   
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
+        // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
-    recon[n] = recon[n]*lab.dbeta/sqrtf(2*M_PI);
+    recon[n] = recon[n]*lab.dbeta;
     }
 }}
 
@@ -61,6 +62,11 @@ void copy_to_gpu_back(Lab lab, float* proj, float* recon, float** c_proj, float*
 
     N = process.n_recon;
     M = process.n_proj;                                        //lab.nx * lab.ny * lab.nz;
+
+
+    cudaDeviceSynchronize(); 
+    printf(cudaGetErrorString(cudaGetLastError()));
+    printf("\n");
 
     printf("Allocating gpu memory...");
     cudaMalloc(c_recon, N * sizeof(float));
@@ -84,8 +90,10 @@ void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta
     clock_t begin = clock();
     cudaSetDevice(process.i_gpu);
 
+    cudaDeviceSynchronize(); 
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
+
 
     long long int N = process.n_recon;                                         //lab.nbeta * lab.nv * lab.nh;
     cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost);
@@ -108,11 +116,22 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
     n_threads = NUM_THREADS;
     n_blocks  = M/n_threads + (M % n_threads == 0 ? 0:1);   
     
+
+    cudaDeviceSynchronize(); 
+    printf(cudaGetErrorString(cudaGetLastError()));
+    printf("\n");
+
     cudaSetDevice(process.i_gpu);
+
+    printf("\n Starting Backprojection: GPU %d \n", process.i_gpu);
 
     clock_t b_begin = clock();
 
     backproj<<<n_blocks, n_threads>>>(recon, proj, beta, lab, process);
+
+    cudaDeviceSynchronize(); 
+    printf(cudaGetErrorString(cudaGetLastError()));
+    printf("\n");
 
     clock_t b_end = clock();
     printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);

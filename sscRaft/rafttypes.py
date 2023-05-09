@@ -176,8 +176,7 @@ class Lab(ctypes.Structure):
                 ("beta_max", ctypes.c_float),
                 ("dbeta", ctypes.c_float),
                 ("nbeta", ctypes.c_int),
-                ("rings", ctypes.c_int),
-                ("rings_block", ctypes.c_int)]
+                ("fourier", ctypes.c_int)]
 
 try:
         libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]

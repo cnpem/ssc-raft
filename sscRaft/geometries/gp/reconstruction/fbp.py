@@ -227,7 +227,7 @@ def fbp(tomogram, dic, **kwargs):
         nrays = tomogram.shape[-1]
 
         dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
-                    'shiftcenter','tomooffset','360pan')
+                    'shift center','tomooffset','360pan')
         defaut = ([0],None,'lorentz',nrays,'float32',0,0,False,0,False)
         
         SetDictionary(dic,dicparams,defaut)
