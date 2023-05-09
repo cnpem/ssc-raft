@@ -13,7 +13,7 @@ Authors:
 	
 	Giovanni Baraldi	Scientific Computing Group/LNLS/CNPEM
 
-	Larissa M. Moreno	Mogno Beamline/LNLS/CNPEM
+	Larissa M. Moreno	Scientific Computing Group/LNLS/CNPEM
 
 	Otávio M. Paiano	Mogno Beamline/LNLS/CNPEM
 	 
