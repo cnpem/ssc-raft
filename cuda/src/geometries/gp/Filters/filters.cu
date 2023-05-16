@@ -9,16 +9,18 @@ extern "C"{
 	void SinoFilter(float* sino, size_t nrays, size_t nangles, size_t blocksize, int csino, bool bRampFilter, CFilter reg, bool bShiftCenter, float* sintable)
 	{	
 		cImage fft(nrays/2+1,nangles);
-		cImage fft2(nrays/2+1,nangles);
+		// cImage fft2(nrays/2+1,nangles);
+
+		printf("FILTER: %ld %ld %ld %ld \n",nrays,nangles,blocksize,nrays/2+1);
 
 		cufftHandle plan_r2c, plan_c2r;
 		cufftPlan1d(&plan_r2c, nrays, CUFFT_R2C, nangles);
 		cufftPlan1d(&plan_c2r, nrays, CUFFT_C2R, nangles);
-
+		
 		dim3 blk = fft.ShapeBlock();
 		dim3 thr = fft.ShapeThread();
 
-		// printf("Enter sino filter \n ");
+		printf("Enter sino filter \n ");
 
 		for(int k=0; k<blocksize; k++)
 		{

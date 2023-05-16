@@ -45,7 +45,7 @@ def fbpMultiGPU(tomogram, dic):
         outputptr = output.ctypes.data_as(void_p)
 
         try:
-                angles = np.ascontiguousarray(angles.astype(np.float32))
+                angles    = np.ascontiguousarray(angles.astype(np.float32))
                 anglesptr = angles.ctypes.data_as(void_p)
         except:
                 anglesptr = void_p(0)
@@ -94,12 +94,14 @@ def fbpGPU(tomogram, dic, gpu = 0):
         output = np.zeros((nslices,reconsize,reconsize),dtype=recondtype)
         outputptr = output.ctypes.data_as(void_p)
 
-        # print("dtypes:",recondtype,output.dtype)
+        print("dtypes:",recondtype,output.dtype)
 
         try:
+                print('values:',angles.shape)
                 angles = np.ascontiguousarray(angles.astype(np.float32))
                 anglesptr = angles.ctypes.data_as(void_p)
         except:
+                print('void')
                 anglesptr = void_p(0)
 
         if Is360pan:
@@ -114,6 +116,10 @@ def fbpGPU(tomogram, dic, gpu = 0):
         nslices = int32(nslices)
         bShiftCenter = int32(dic['shift center'])
 
+
+        print(dic)
+
+        # quit()
         libraft.fbpgpu(int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, anglesptr, threshold, precision, filter, bShiftCenter)
 
         return output

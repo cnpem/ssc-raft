@@ -514,8 +514,6 @@ extern "C"{
 		cudaSetDevice(gpu);
 		size_t blocksize = min((size_t)nslices,32ul);
 
-        // printf("GPU: %d, %ld %d, %d, %d, %f, %d\n", gpu,blocksize, nrays,nslices,nangles,lambda_rings,ringblocks);
-
 		rImage tomogram(nrays,nangles,blocksize);
         // float* tomogram;
         // HANDLE_ERROR( cudaMalloc(&tomogram, sizeof(float) * nrays * nangles * (int)blocksize) );
@@ -552,6 +550,8 @@ extern "C"{
             HANDLE_ERROR( cudaGetLastError() );
 
 	    }
+        printf("GPU rings: %d, %ld %d, %d, %d, %f, %d\n", gpu,blocksize, nrays,nslices,nangles,lambda_rings,ringblocks);
+
         // cudaFree(tomogram);
         cudaDeviceSynchronize();
     }
