@@ -10,6 +10,7 @@ import ctypes
 import ctypes.util
 
 from ....tomogram.flatdark import *
+from ....geometries.gp.rings import *
 
 
 def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz, 
@@ -160,18 +161,20 @@ def normalize_fdk(tomo, flat, dark, experiment):
 
         if(len(flat.shape) == 4):
             flats_ = np.zeros((flat.shape[0], flat.shape[2], flat.shape[3]))
-            for i in range(flat.shape[1]):
-                flats_[0,:,:] += flat[0,i,:,:]
-                flats_[1,:,:] += flat[1,i,:,:]
+            for j in range(flat.shape[0]):
+                for i in range(flat.shape[1]):
+                    flats_[j,:,:] += flat[j,i,:,:]
+                    # flats_[1,:,:] += flat[1,i,:,:]
             flats_ =flats_/flat.shape[1]
             flat = flats_
 
         if(len(dark.shape) == 4):
             darks_ = np.zeros((dark.shape[0], dark.shape[2], dark.shape[3]))
-            for i in range(dark.shape[1]):
-                darks_[0,:,:] += dark[0,i,:,:]
-                darks_[1,:,:] += dark[1,i,:,:]
-            darks_ =darks_/dark.shape[1]
+            for j in range(dark.shape[0]):
+                for i in range(dark.shape[1]):
+                    darks_[j,:,:] += dark[j,i,:,:]
+                    # darks_[1,:,:] += dark[1,i,:,:]
+            darks_ = darks_/dark.shape[1]
             dark = darks_
 
         tomo = correct_projections(tomo, flat, dark, experiment)
@@ -204,6 +207,17 @@ def normalize_fdk(tomo, flat, dark, experiment):
     # ===============================================================================
     print('Projections ok!')
     print('Projection shape =', proj.shape[0], proj.shape[1], proj.shape[2])
+
+    dic                 = {}
+    dic['gpu']          = experiment['gpu']
+    dic['lambda rings'] = -1 
+    dic['rings block']  = experiment['rings'][1]
+
+    if experiment['rings'][0]:
+        print('Applying Rings regularization...')
+        proj = rings(proj, dic)
+        print('Finished Rings regularization...')
+
     return proj
 
 def find_rotation_axis_fdk(tomo, nx_search=500, nx_window=500, nsinos=None):
