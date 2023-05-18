@@ -59,31 +59,18 @@ libraft  = load_library(_lib, ext)
 ######## EM ##########
 
 try:
-    libraft.tEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+    libraft.tEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                            c_int, c_int, c_int, c_int, c_int, c_int]
     libraft.tEM.restype  = None
 
-    libraft.eEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+    libraft.eEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                             c_int, c_int, c_int, c_int, c_int, c_int]
     libraft.eEM.restype  = None
 
-    libraft.EMTV.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
+    libraft.EMTV.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                              c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_int,
                              c_float, c_float]
     libraft.EMTV.restype  = None
-
-    libraft.tEM_2pi.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                           c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.tEM_2pi.restype  = None
-
-    libraft.eEM_2pi.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
-                            c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.eEM_2pi.restype  = None
-
-    libraft.EMTV_2pi.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
-                             c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_int,
-                             c_float, c_float]
-    libraft.EMTV_2pi.restype  = None
 
 except:
     print('-.RAFT_PARALLEL_EM-')

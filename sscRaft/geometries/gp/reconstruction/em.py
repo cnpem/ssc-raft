@@ -29,7 +29,7 @@ def CNICE(darray,dtype=numpy.float32):
 # mpfs: (m)ulti(p)rocessing (f)rom (s)inograms 
 #
 
-def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process, is_360):
+def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process, angles, is_360):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -110,32 +110,36 @@ def _iterations_emtv_mpfs_(sino, niter, device, reg, eps, process, is_360):
     
     start = time.time()
 
-    x   = numpy.zeros([block, recsize, recsize], dtype=numpy.float32)
-    x_p = x.ctypes.data_as(void_p)
+    x    = numpy.zeros([block, recsize, recsize], dtype=numpy.float32)
+    x_p  = x.ctypes.data_as(void_p)
 
-    s   = CNICE(sino) #sino pointer
-    s_p = s.ctypes.data_as(void_p) 
+    s    = CNICE(sino) #sino pointer
+    s_p  = s.ctypes.data_as(void_p) 
+
+    try:
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+    except:
+        if is_360:
+            angles = numpy.linspace(0,2.0*numpy.pi,nangles,endpoint=True)
+        else:
+            angles = numpy.linspace(0,numpy.pi,nangles,endpoint=True)
+
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
     
-    if is_360:
-        libraft.EMTV_2pi( x_p, s_p,
-            int32(recsize), int32(nrays),
-            int32(nangles), int32(block),
-            int32(device),  int32(niter[0]),
-            int32(niter[1]),int32(niter[2]),
-            float32(reg), float32(eps))
-    else:
-        libraft.EMTV( x_p, s_p,
-                    int32(recsize), int32(nrays),
-                    int32(nangles), int32(block),
-                    int32(device),  int32(niter[0]),
-                    int32(niter[1]),int32(niter[2]),
-                    float32(reg), float32(eps))
+    libraft.EMTV( x_p, s_p, ang_p, 
+                int32(recsize), int32(nrays),
+                int32(nangles), int32(block),
+                int32(device),  int32(niter[0]),
+                int32(niter[1]),int32(niter[2]),
+                float32(reg), float32(eps))
     
     elapsed = time.time() - start
 
     return x
 
-def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process,is_360):
+def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process, angles, is_360):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -183,16 +187,22 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process,is_360):
     s   = CNICE(sino) #sino pointer
     s_p = s.ctypes.data_as(void_p) 
     
-    if is_360:
-        libraft.eEM_2pi( x_p, s_p,
-                    int32(recsize), int32(nrays),
-                    int32(nangles), int32(block),
-                    int32(device),  int32(niter[0]))
-    else:
-        libraft.eEM( x_p, s_p,
-                        int32(recsize), int32(nrays),
-                        int32(nangles), int32(block),
-                        int32(device),  int32(niter[0]))
+    try:
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+    except:
+        if is_360:
+            angles = numpy.linspace(0,2.0*numpy.pi,nangles,endpoint=True)
+        else:
+            angles = numpy.linspace(0,numpy.pi,nangles,endpoint=True)
+
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+
+    libraft.eEM( x_p, s_p, ang_p,
+                int32(recsize), int32(nrays),
+                int32(nangles), int32(block),
+                int32(device),  int32(niter[0]))
 
 
     elapsed = time.time() - start
@@ -200,7 +210,7 @@ def _iterations_eem_mpfs_(sino, niter, device, reg, eps, process,is_360):
     return x
 
 
-def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process,is_360):
+def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process, angles, is_360):
 
     '''
     #Python version, for completeness: depends on ssc-radon/ssc-bst
@@ -243,16 +253,22 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process,is_360):
     f   = CNICE(cflat) #flat pointer
     f_p = f.ctypes.data_as(void_p) 
     
-    if is_360:
-        libraft.tEM_2pi( x_p, c_p, f_p,
-                    int32(recsize), int32(nrays),
-                    int32(nangles), int32(block),
-                    int32(device), int32(niter[0]))
-    else:
-        libraft.tEM( x_p, c_p, f_p,
-                    int32(recsize), int32(nrays),
-                    int32(nangles), int32(block),
-                    int32(device), int32(niter[0]))
+    try:
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+    except:
+        if is_360:
+            angles = numpy.linspace(0,2.0*numpy.pi,nangles,endpoint=True)
+        else:
+            angles = numpy.linspace(0,numpy.pi,nangles,endpoint=True)
+
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+
+    libraft.tEM( x_p, c_p, f_p, ang_p,
+                int32(recsize), int32(nrays),
+                int32(nangles), int32(block),
+                int32(device), int32(niter[0]))
     
     elapsed = time.time() - start
 
@@ -275,12 +291,13 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize, process):
     eps              = params[8 ]
     InversionMethod  = params[9 ]
     is_360           = params[10]
+    angles           = params[11]       
     
     for k in range(nblocks):
         _start_ = idx_start + k * blocksize
         _end_   = min( _start_ + blocksize, idx_end) 
         print('EM --> Process {}: GPU({}), slices [{},{}]'.format(process, gpu, _start_, _end_) )
-        output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process, is_360)
+        output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process, angles, is_360)
         
         
         
@@ -330,6 +347,7 @@ def emfs( tomogram, dic ):
     Parameters:
     
     * ``dic['nangles']``:  Number of angles
+    * ``dic['angles']``:  list of angles
     * ``dic['gpu']``:  List of GPU devices used for computation 
     * ``dic['blocksize']``:  Number of images to compute parallel radon transform 
     * ``dic['niterations']``:  Tuple for number of iterations. First position refers to the global number of
@@ -337,6 +355,7 @@ def emfs( tomogram, dic ):
       number of iterations for EM/TV number of iterations, as indicated by Yan & Luminita`s article.
     * ``dic['regularization']``:  Regularization parameter for EM/TV
     * ``dic['epsilon']``:  Smoothness for the TV operator
+    * ``dic['is360']`` (bool): It is used if no ``dic['angles']`` is set. True: 360 degrees acquisition; False: 180 degrees acquisition.
     * ``dic['method']``:  EM-method type ``eEM``, ``tEM`` or ``EM/TV``
     
        #. ``eEM`` refers to the  Emission Expectation Maximization Algorithm, where we solve
@@ -355,6 +374,7 @@ def emfs( tomogram, dic ):
     nslices   = tomogram.shape[0]
     nrays     = tomogram.shape[-1]
     nangles   = dic['nangles']
+    angles    = dic['angles']
     gpus      = dic['gpu']
     blocksize = dic['blocksize']
     niter     = dic['niterations']
@@ -388,14 +408,14 @@ def emfs( tomogram, dic ):
             
         output   = sa.create(name,[nslices, nrays, nrays], dtype=numpy.float32)
 
-        _params_ = ( output, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, InversionMethod, is_360)
+        _params_ = ( output, tomogram, nslices, nangles, gpus, blocksize, niter, reg, eps, InversionMethod, is_360, angles)
         
         _build_em_mpfs_( _params_ )
 
         sa.delete(name)
 
     else:
-        output = InversionMethod( tomogram, niter = niter, device = gpus[0], reg = reg, eps = eps, process = 0, is_360 = False)
+        output = InversionMethod( tomogram, niter = niter, device = gpus[0], reg = reg, eps = eps, process = 0, angles = None, is_360 = False)
     
     return output
 

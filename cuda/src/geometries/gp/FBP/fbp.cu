@@ -36,8 +36,7 @@ extern "C"{
         sintable.LoadToGPU();
         costable.LoadToGPU();
         
-        if ( reg.reg != 0.0 )
-            SinoFilter(sinoblock, nrays, nangles, sizez, csino, true, reg, bShiftCenter, sintable.gpuptr);
+        SinoFilter(sinoblock, nrays, nangles, sizez, csino, true, reg, bShiftCenter, sintable.gpuptr);
 
         dim3 threads(16,16,1); 
         dim3 blocks((sizeimage+15)/16,(sizeimage+15)/16,sizez);
@@ -80,7 +79,7 @@ extern "C"{
             GPUFBP((char*)blockRecon.gpuptr, tomo.gpuptr, nrays, nangles, blocksize, reconsize, centersino, reg, datatype, threshold, angles, bShiftCenter);
 
             // blockRecon.CopyTo(recon + (size_t)b*reconsize*reconsize, 0, (size_t)reconsize*reconsize*blocksize);
-            HANDLE_ERROR(cudaMemcpy(recon + datatype.Size() * (size_t)b * reconsize * reconsize, blockRecon.gpuptr, (size_t)reconsize * reconsize * blocksize * datatype.Size(), cudaMemcpyDefault));                 
+            HANDLE_ERROR(cudaMemcpy(recon + (size_t)b * reconsize * reconsize, blockRecon.gpuptr, (size_t)reconsize * reconsize * blocksize * datatype.Size(), cudaMemcpyDefault));                 
         }
         cudaDeviceSynchronize();
     }
