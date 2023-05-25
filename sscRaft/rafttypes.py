@@ -288,14 +288,20 @@ def Metadata_hdf5(outputFileHDF5, dic, software, version):
                 h5_path = 'Recon Parameters' #os.path.join('Recon Parameters', key)
                 hdf5.require_group(h5_path)
                 
-                if isinstance(value, list) or isinstance(value, tuple):
+                if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, numpy.ndarray):
                        data = str(value)
                        hdf5[h5_path].create_dataset(key, data=data)
                 else:
+                #        print('Key:',key,'Value',value,'Type',type(value))
+
+                       if key == 'recon type':
+                                value = str(value)
+                       print('Key:',key,'Value',value,'Type',type(value))
                        hdf5[h5_path].create_dataset(key, data=value, shape=())
 
         if isinstance(outputFileHDF5, str):
                hdf5.close()
+
 
 if __name__ == "__main__":
    pass
