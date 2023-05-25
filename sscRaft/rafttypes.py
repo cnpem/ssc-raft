@@ -72,19 +72,6 @@ try:
                              c_float, c_float]
     libraft.EMTV.restype  = None
 
-    libraft.tEM_2pi.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                           c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.tEM_2pi.restype  = None
-
-    libraft.eEM_2pi.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
-                            c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.eEM_2pi.restype  = None
-
-    libraft.EMTV_2pi.argtypes = [ctypes.c_void_p, ctypes.c_void_p,
-                             c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_int,
-                             c_float, c_float]
-    libraft.EMTV_2pi.restype  = None
-
 except:
     print('-.RAFT_PARALLEL_EM-')
     pass
@@ -189,8 +176,7 @@ class Lab(ctypes.Structure):
                 ("beta_max", ctypes.c_float),
                 ("dbeta", ctypes.c_float),
                 ("nbeta", ctypes.c_int),
-                ("rings", ctypes.c_int),
-                ("rings_block", ctypes.c_int)]
+                ("fourier", ctypes.c_int)]
 
 try:
         libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
@@ -306,15 +292,16 @@ def Metadata_hdf5(outputFileHDF5, dic, software, version):
                        data = str(value)
                        hdf5[h5_path].create_dataset(key, data=data)
                 else:
-                       print('Key:',key,'Value',value,'Type',type(value))
+                #        print('Key:',key,'Value',value,'Type',type(value))
 
                        if key == 'recon type':
                                 value = str(value)
-                       print('Key:',key,'Value',value,'Type',type(value))
+                #        print('Key:',key,'Value',value,'Type',type(value))
                        hdf5[h5_path].create_dataset(key, data=value, shape=())
 
         if isinstance(outputFileHDF5, str):
                hdf5.close()
+
 
 if __name__ == "__main__":
    pass

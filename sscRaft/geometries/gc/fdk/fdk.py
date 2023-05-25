@@ -10,12 +10,13 @@ import ctypes
 import ctypes.util
 
 from ....tomogram.flatdark import *
+from ....geometries.gp.rings import *
 
 
 def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz, 
                     h, v, dh, dv, nh, nv,
                     D, Dsd, beta_max, dbeta, nbeta,
-                    rings, rings_block ):
+                    fourier):
 
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
@@ -23,7 +24,7 @@ def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz,
                 h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
                 D = D, Dsd = Dsd, 
                 beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
-                rings = rings, rings_block = rings_block)
+                fourier = fourier)
 
     return lab
 
@@ -74,26 +75,23 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
         *``experiment['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
         *``experiment['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[0].
         *``experiment['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
+
+    Options:
+        *``experiment['fourier']`` (bool): Type of filter for reconstruction. True = Fourier, False = Convolution.
         *``experiment['rings']`` (bool,int): Tuple flag for application of rings removal algorithm. (apply = True, rings block = 2).
         *``experiment['normalize']`` (bool,bool,int,int): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, total number of frames acquired = data.shape[0], index of initial frame to process = 0).
         *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation shift automatic corrrection (is_autoRot).
         *``experiment['padding']`` (int): Number of elements for horizontal zero-padding. Defaults to 0.
         *``experiment['detectorType']`` (string): If detector type. If 'pco' discard fist 11 rows of data. Defauts to 'pco'.
         *``experiment['findRotationAxis']`` (int,int,int): For rotation axis function. (nx_search=500, nx_window=500, nsinos=None).
+         
 
     """
 
-    # Set dictionary parameters by default if not already set.
-    dicparams = ('z1[m]','z1+z2[m]','detectorPixel[m]','reconSize','gpu','rings','normalize',
-                'shift','padding','detectorType','findRotationAxis')
-    defaut    = (500e-3,1.0,1.44e-6,data.shape[2],[0],(True,2),(True,True,data.shape[0],0),(True,0),0,'pco',(500,500,None))
-    
-    SetDictionary(experiment,dicparams,defaut)
-
-    assert experiment['detectorType'] in ('pco', 'mobpix', 'pimegaSi', 'pimegaCdTe')
-
-    experiment['uselog']      = experiment['normalize'][1]
-    experiment['frames info'] = (experiment['normalize'][2],experiment['normalize'][3])
+    #Set dictionary parameters by default if not already set.
+    dicparams = ('fourier','rings','normalize', 'shift','padding','detectorType','findRotationAxis')
+    default    = (False, (False, 0), (False, False, 0, 0), (False, 0), 0, 'x', (0, 0, 0))
+    SetDictionary(experiment,dicparams,default)
 
     data = normalize_fdk(data, flat, dark, experiment)
 
@@ -112,13 +110,15 @@ def reconstruction_fdk( experiment, data, flat = {}, dark = {}):
     nx, ny, nz = int(experiment['reconSize']), int(experiment['reconSize']), int(experiment['reconSize'])
     x, y, z    = dx*nx/2, dy*ny/2, dz*nz/2
 
+    fourier = experiment['fourier']
+
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
                 nx = nx, ny = ny, nz = nz, 
                 h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
                 D = D, Dsd = Dsd, 
                 beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
-                rings = int(experiment['rings'][0]), rings_block = int(experiment['rings'][1]) )
+                fourier = fourier )
     
     recon = fdk(lab, data, np.array(experiment['gpu']))
 
@@ -133,77 +133,60 @@ def normalize_fdk(tomo, flat, dark, experiment):
     is_normalize = experiment['normalize'][0]
     is_autoRot   = experiment['shift'][0]
     shift        = experiment['shift'][1]
-    nx_search    = experiment['findRotationAxis'][0]
-    nx_window    = experiment['findRotationAxis'][1]
-    nsinos       = experiment['findRotationAxis'][2]
+    
         
     if experiment['detectorType'] == 'pco': 
         tomo[:, :11,:] = 1.0 
         
         if len(dark.shape) == 2:
             dark[:11,:]   = 0.0
-        else:
+        if len(dark.shape) == 3:
             dark[:,:11,:] = 0.0
+        if len(dark.shape) == 4:
+            dark[:,:,:11,:] = 0.0
 
         if len(flat.shape) == 2:
             flat[:11,:]   = 1.0
-        else: 
+        if len(flat.shape) == 3:
             flat[:,:11,:] = 1.0
-
-    # ========= PYTHON NORMALIZATION ================================================================
-
-    # flat = flat - dark
-    # for i in range(tomo.shape[0]):
-    #     tomo[i,:,:] = tomo[i,:,:] - dark
-
-    # for i in range(tomo.shape[0]):
-    #     tomo[i,:,:] = -np.log(tomo[i,:,:]/flat)
-
-    # tomo[np.isinf(tomo)] = 0.0
-    # tomo[np.isnan(tomo)] = 0.0
-
-    # np.save("normalizado2.npy",tomo[0:5,:,:])
-
-    # if is_autoRot:
-    #     shift = find_rotation_axis_fdk(tomo)
-    #     print("Shift automatico:",shift)
-
-    # if padding < 2*np.abs(shift):
-    #     padding = 2*shift
-
-    # padd = padding - 2 * np.abs(shift)
-
-    # print('Shift value and padding:',shift,padd)
-
-    # proj = np.zeros((tomo.shape[1], tomo.shape[0], tomo.shape[2]+padding))
-
-    # if(shift < 0):
-    #     proj[:,:,padd//2 + 2*np.abs(shift):tomo.shape[2]+padd//2 + 2*np.abs(shift)] = np.swapaxes(tomo,0,1)
-    # else:
-    #     proj[:,:,padd//2:tomo.shape[2]+padd//2] = np.swapaxes(tomo,0,1)
-
+        if len(flat.shape) == 4:
+            flat[:,:11,:] = 1.0
 
     # ========= CUDA NORMALIZATION ================================================================
     if is_normalize:
         print('Normalize ....')
+
+        experiment['uselog'] = experiment['normalize'][1]
+        experiment['frames info'] = (experiment['normalize'][2],experiment['normalize'][3])
+
+        if(len(flat.shape) == 4):
+            flats_ = np.zeros((flat.shape[0], flat.shape[2], flat.shape[3]))
+            for j in range(flat.shape[0]):
+                for i in range(flat.shape[1]):
+                    flats_[j,:,:] += flat[j,i,:,:]
+                    # flats_[1,:,:] += flat[1,i,:,:]
+            flats_ =flats_/flat.shape[1]
+            flat = flats_
+
+        if(len(dark.shape) == 4):
+            darks_ = np.zeros((dark.shape[0], dark.shape[2], dark.shape[3]))
+            for j in range(dark.shape[0]):
+                for i in range(dark.shape[1]):
+                    darks_[j,:,:] += dark[j,i,:,:]
+                    # darks_[1,:,:] += dark[1,i,:,:]
+            darks_ = darks_/dark.shape[1]
+            dark = darks_
+
         tomo = correct_projections(tomo, flat, dark, experiment)
     else:
         tomo = np.swapaxes(tomo,0,1)
     
-    # tomo[tomo > 1000] = 0
-    # plt.figure(0)
-    # plt.imshow(tomo[:,0,:])
-    # plt.savefig('NormProjfirst.png', format='png')
-    # plt.clf()
-    # plt.close()
-
-    # plt.figure(0)
-    # plt.imshow(tomo[:,-1,:])
-    # plt.savefig('NormProjlast.png', format='png')
-    # plt.clf()
-    # plt.close()
 
     if is_autoRot:
+        nx_search    = experiment['findRotationAxis'][0]
+        nx_window    = experiment['findRotationAxis'][1]
+        nsinos       = experiment['findRotationAxis'][2]
+        
         shift = find_rotation_axis_fdk(np.swapaxes(tomo,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
         print("Shift automatico:",shift)
 
@@ -224,6 +207,17 @@ def normalize_fdk(tomo, flat, dark, experiment):
     # ===============================================================================
     print('Projections ok!')
     print('Projection shape =', proj.shape[0], proj.shape[1], proj.shape[2])
+
+    dic                 = {}
+    dic['gpu']          = experiment['gpu']
+    dic['lambda rings'] = -1 
+    dic['rings block']  = experiment['rings'][1]
+
+    if experiment['rings'][0]:
+        print('Applying Rings regularization...')
+        proj = rings(proj, dic)
+        print('Finished Rings regularization...')
+
     return proj
 
 def find_rotation_axis_fdk(tomo, nx_search=500, nx_window=500, nsinos=None):
@@ -288,3 +282,37 @@ def find_rotation_axis_fdk(tomo, nx_search=500, nx_window=500, nsinos=None):
     print('Shift :', deviation)
 
     return deviation
+
+
+
+    # ========= PYTHON NORMALIZATION ================================================================
+
+    # flat = flat - dark
+    # for i in range(tomo.shape[0]):
+    #     tomo[i,:,:] = tomo[i,:,:] - dark
+
+    # for i in range(tomo.shape[0]):
+    #     tomo[i,:,:] = -np.log(tomo[i,:,:]/flat)
+
+    # tomo[np.isinf(tomo)] = 0.0
+    # tomo[np.isnan(tomo)] = 0.0
+
+    # np.save("normalizado2.npy",tomo[0:5,:,:])
+
+    # if is_autoRot:
+    #     shift = find_rotation_axis_fdk(tomo)
+    #     print("Shift automatico:",shift)
+
+    # if padding < 2*np.abs(shift):
+    #     padding = 2*shift
+
+    # padd = padding - 2 * np.abs(shift)
+
+    # print('Shift value and padding:',shift,padd)
+
+    # proj = np.zeros((tomo.shape[1], tomo.shape[0], tomo.shape[2]+padding))
+
+    # if(shift < 0):
+    #     proj[:,:,padd//2 + 2*np.abs(shift):tomo.shape[2]+padd//2 + 2*np.abs(shift)] = np.swapaxes(tomo,0,1)
+    # else:
+    #     proj[:,:,padd//2:tomo.shape[2]+padd//2] = np.swapaxes(tomo,0,1)

@@ -3,6 +3,12 @@
 #include <cufft.h>
 #include <stdlib.h>
 
+
+
+
+
+
+
 extern "C"{
 __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process){
     int n = lab.nh;
@@ -71,8 +77,23 @@ extern "C"{
 __global__ void filt_W(Lab lab, float* W){
     int i;
     float wmax = 1.0/(2.0*lab.dh);
-    for (i = 0; i < lab.nh/2; i++) W[i] = (wmax)/(lab.nh-1) + (2*i*wmax)/(lab.nh-1);     
-    for (i = 0; i < lab.nh/2; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh-1);
+    
+    for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+
+    for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+
+    // for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*sinf(M_PI*i/lab.nh)/(M_PI*i/lab.nh);
+
+    // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*sinf(M_PI*(lab.nh/2-i)/lab.nh)/(M_PI*(lab.nh/2-i)/lab.nh);
+
+    for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nh));
+
+    for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nh/2 -i)/lab.nh));
+
+    // for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(expf(1)/(1-4*(i/lab.nh)*(i/lab.nh)))*expf(-1/(1-4*(i/lab.nh)*(i/lab.nh)));
+
+    // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(expf(1)/(1-4*((lab.nh/2-i)/lab.nh)*((lab.nh/2-i)/lab.nh)))*expf(-1/(1-4*((lab.nh/2-i)/lab.nh)*((lab.nh/2-i)/lab.nh)));
+
 }}
 
 extern "C"{
@@ -97,12 +118,3 @@ __device__ void set_filter_idxs(long long int n, int* i, int*j, int* k, Lab lab,
     *i = rem_ij % lab.nh;
 }}
 
-extern "C"{
-__device__ void set_projs_idxs(long long int n, int* i, int* k, int* m, Lab lab) {
-    long int nik, rem_ik;
-    nik = lab.nx*lab.nz;
-    *m = (n) / nik;
-    rem_ik = (n) % nik;
-    *k = rem_ik / lab.nz;
-    *i = rem_ik % lab.nz;
-}}
