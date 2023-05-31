@@ -207,6 +207,8 @@ extern "C" {
     cudaMalloc(&d_angles, sizeof(float) * nangles);
     cudaMemcpy(d_angles, angles, sizeof(float) * nangles, cudaMemcpyHostToDevice);	
 
+    printf("Printando essa porra + %d \n",device);
+
     //GRID and BLOCKS SIZE
     dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
     dim3 gridBlockD((int)ceil((nrays)/threadsPerBlock.x)+1,

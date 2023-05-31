@@ -274,7 +274,7 @@ def _iterations_tem_mpfs_(sino, niter, device, reg, eps, process, angles, is_360
 
     return x
     
-def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize, process):
+def _worker_em_mpfs_(params, idx_start, idx_end, gpu, blocksize, process):
 
     I = ( idx_end - idx_start )
     if (I%blocksize) == 0:
@@ -284,20 +284,21 @@ def _worker_em_mpfs_(params, idx_start,idx_end, gpu, blocksize, process):
     
     # nblocks = ( idx_end + 1 - idx_start ) // blocksize + 1
 
-    output1          = params[0 ]
-    data             = params[1 ]
-    niter            = params[6 ]
-    reg              = params[7 ]
-    eps              = params[8 ]
-    InversionMethod  = params[9 ]
-    is_360           = params[10]
-    angles           = params[11]       
+    output          = params[0 ]
+    data            = params[1 ]
+    niter           = params[6 ]
+    reg             = params[7 ]
+    eps             = params[8 ]
+    InversionMethod = params[9 ]
+    is_360          = params[10]
+    angles          = params[11]       
     
     for k in range(nblocks):
         _start_ = idx_start + k * blocksize
         _end_   = min( _start_ + blocksize, idx_end) 
         print('EM --> Process {}: GPU({}), slices [{},{}]'.format(process, gpu, _start_, _end_) )
-        output1[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process, angles, is_360)
+        print("Inversion Method",InversionMethod)
+        output[_start_:_end_,:,:] = InversionMethod( data[_start_:_end_, :, :], niter, gpu, reg, eps, process, angles, is_360)
         
         
         
