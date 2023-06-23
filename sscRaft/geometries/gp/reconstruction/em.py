@@ -420,4 +420,190 @@ def emfs( tomogram, dic ):
     
     return output
 
+#==============================================================================================
+# Code for threads in C
+#==============================================================================================
 
+def _iterations_eem_block_(sino, niter, gpus, reg, eps, process, angles, is_360):
+
+    block   = sino.shape[0]
+    nangles = sino.shape[1]
+    nrays   = sino.shape[2]
+    recsize = sino.shape[2]
+    
+    start   = time.time()
+
+    ngpus   = len(gpus)
+    gpus    = numpy.array(gpus)
+    gpus    = numpy.ascontiguousarray(gpus.astype(numpy.intc))
+    gpus_p  = gpus.ctypes.data_as(void_p)
+    
+    x       = numpy.zeros([block, recsize, recsize], dtype=numpy.float32)
+    x_p     = x.ctypes.data_as(void_p)
+
+    s       = CNICE(sino) #sino pointer
+    s_p     = s.ctypes.data_as(void_p) 
+    
+    try:
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+    except:
+        if is_360:
+            angles = numpy.linspace(0,2.0*numpy.pi,nangles,endpoint=True)
+        else:
+            angles = numpy.linspace(0,numpy.pi,nangles,endpoint=True)
+
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+
+    libraft.eEMblock( x_p, s_p, ang_p,
+                    int32(recsize), int32(nrays),
+                    int32(nangles), int32(block),
+                    int32(ngpus),  int32(niter[0]), gpus_p)
+
+
+    elapsed = time.time() - start
+
+    return x
+
+
+def _iterations_tem_block_(sino, niter, gpus, reg, eps, process, angles, is_360):
+
+    ngpus   = len(gpus)
+    gpus    = numpy.array(gpus)
+    gpus    = numpy.ascontiguousarray(gpus.astype(numpy.intc))
+    gpus_p  = gpus.ctypes.data_as(void_p)
+
+    counts = numpy.exp(-sino)
+    cflat  = numpy.ones(sino.shape)
+    block   = sino.shape[0]
+    nangles = sino.shape[1]
+    nrays   = sino.shape[2]
+    recsize = sino.shape[2]
+    
+    start = time.time()
+
+    x   = numpy.zeros([block, recsize, recsize], dtype=numpy.float32)
+    x_p = x.ctypes.data_as(void_p)
+
+    c   = CNICE(counts) #count pointer
+    c_p = c.ctypes.data_as(void_p) 
+
+    f   = CNICE(cflat) #flat pointer
+    f_p = f.ctypes.data_as(void_p) 
+    
+    try:
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+    except:
+        if is_360:
+            angles = numpy.linspace(0,2.0*numpy.pi,nangles,endpoint=True)
+        else:
+            angles = numpy.linspace(0,numpy.pi,nangles,endpoint=True)
+
+        ang   = CNICE(angles) #angles pointer
+        ang_p = ang.ctypes.data_as(void_p) 
+
+    libraft.tEMblock( x_p, c_p, f_p, ang_p,
+                int32(recsize), int32(nrays),
+                int32(nangles), int32(block),
+                int32(ngpus), int32(niter[0]), gpus_p)
+    
+    elapsed = time.time() - start
+
+    return x
+
+def em(tomogram, dic, **kwargs):
+    """ Expectation maximization for 3D tomographic parallel sinograms
+
+    Args:
+        tomogram: three-dimensional stack of sinograms (slices,angles,rays) 
+        dic: input dictionary 
+        
+    Returns:
+        (ndarray): stacking 3D reconstructed volume, reconstructed sinograms (z,y,x)
+
+    * CPU function
+    * This function uses a shared array through package 'SharedArray'.
+    * The total number of images will be divided by the number of processes given as input
+    * SharedArray names are provided by uuid.uuid4() 
+    
+    Parameters:
+    
+    * ``dic['nangles']``:  Number of angles
+    * ``dic['angles']``:  list of angles
+    * ``dic['gpu']``:  List of GPU devices used for computation 
+    * ``dic['blocksize']``:  Number of images to compute parallel radon transform 
+    * ``dic['niterations']``:  Tuple for number of iterations. First position refers to the global number of
+      iterations for the {Transmission,Emission}/EM algorithms. Second and Third positions refer to the local 
+      number of iterations for EM/TV number of iterations, as indicated by Yan & Luminita`s article.
+    * ``dic['regularization']``:  Regularization parameter for EM/TV
+    * ``dic['epsilon']``:  Smoothness for the TV operator
+    * ``dic['is360']`` (bool): It is used if no ``dic['angles']`` is set. True: 360 degrees acquisition; False: 180 degrees acquisition.
+    * ``dic['method']``:  EM-method type ``eEM``, ``tEM`` or ``EM/TV``
+    
+       #. ``eEM`` refers to the  Emission Expectation Maximization Algorithm, where we solve
+          :math:`Ax = b`, being :math:`A` the discretized version for the Radon transform and 
+          :math:`b` the input sinograms in the parallel geometry.
+
+       #. ``tEM`` refers to the Transmission Expectation Maximization Algorithm, where we solve
+          :math:`Ax = b` using :math:`exp(-b)` as the photon count and 1's as the flat-field 
+          measurement. 
+
+       #. ``EMTV`` refers to the combination of ``eEM`` and a Total variation step, as indicated
+          in the manuscript of Yan & Luminita ``DOI:10.1117/12.878238``.
+
+    """
+    # Set default dictionary parameters:
+
+    dicparams = ('gpu','angles','nangles'        ,'niterations','regularization','epsilon','method','is360')
+    defaut    = ([0]  ,None    ,tomogram.shape[1],[8,3,8]      ,1e-3            ,1e-15    ,'eEM'   ,False  )
+
+    SetDictionary(dic,dicparams,defaut)
+
+    # Set parameters
+
+    gpus      = dic['gpu']
+
+    nslices   = tomogram.shape[0]
+    nrays     = tomogram.shape[-1]
+    nangles   = dic['nangles']
+    angles    = dic['angles']
+    blocksize = dic['blocksize']
+    niter     = dic['niterations']
+    reg       = dic['regularization']
+    eps       = dic['epsilon']
+    method    = dic['method']
+    is_360    = dic['is360']
+
+    if method == 'eEM':
+
+        if len(gpus) == 1:
+
+            gpu    = gpus[0]
+            output = _iterations_eem_mpfs_(tomogram, niter, gpu, reg, eps, 0, angles, is_360)
+
+        else:
+
+            output = _iterations_eem_block_(tomogram, niter, gpus, reg, eps, 0, angles, is_360) 
+    
+    elif method == 'tEM':
+
+        if len(gpus) == 1:
+
+            gpu    = gpus[0]
+            output = _iterations_tem_mpfs_(tomogram, niter, gpu, reg, eps, 0, angles, is_360)
+
+        else:
+            
+            output = _iterations_tem_block_(tomogram, niter, gpus, reg, eps, 0, angles, is_360) 
+
+    elif method == 'EMTV':
+
+        output = emfs( tomogram, dic )
+
+    else:
+
+        logger.error(f'Invalid recon method:{method}')
+
+    return output

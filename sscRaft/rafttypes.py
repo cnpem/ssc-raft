@@ -72,6 +72,16 @@ try:
                              c_float, c_float]
     libraft.EMTV.restype  = None
 
+    # EM threads in C
+    libraft.tEMblock.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                           c_int, c_int, c_int, c_int, c_int, c_int, ctypes.c_void_p]
+    libraft.tEMblock.restype  = None
+
+    libraft.eEMblock.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                            c_int, c_int, c_int, c_int, c_int, c_int, ctypes.c_void_p]
+    libraft.eEMblock.restype  = None
+
+
 except:
     print('-.RAFT_PARALLEL_EM-')
     pass

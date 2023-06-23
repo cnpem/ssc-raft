@@ -200,9 +200,9 @@ def fbp_threads(tomogram, dic, **kwargs):
 
         reconsize = dic['recon size']
 
-        if reconsize % 32 != 0:
-                reconsize += 32-(reconsize%32)
-                logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
+        # if reconsize % 32 != 0:
+        #         reconsize += 32-(reconsize%32)
+        #         logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
 
         precision = dic['precision'].lower()
         if precision == 'float32':
@@ -242,9 +242,9 @@ def fbp(tomogram, dic, **kwargs):
 
         reconsize = dic['recon size']
 
-        if reconsize % 32 != 0:
-                reconsize += 32-(reconsize%32)
-                logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
+        # if reconsize % 32 != 0:
+        #         reconsize += 32-(reconsize%32)
+        #         logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
 
         precision = dic['precision'].lower()
         if precision == 'float32':

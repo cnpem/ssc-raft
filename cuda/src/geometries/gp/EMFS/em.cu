@@ -1,9 +1,11 @@
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <cublas_v2.h>
+// #include <cuda.h>
+// #include <cuda_runtime_api.h>
+// #include <stdio.h>
+// #include <stdlib.h>
+// #include <math.h>
+// #include <cublas_v2.h>
+
+#include "../../../../inc/include.h"
 
 #define PI 3.141592653589793238462643383279502884
 
@@ -709,4 +711,93 @@ extern "C" {
   }
 }
 
+//----------------------
+// emission-EM Threads Block algorithm
+//----------------------
 
+extern "C"{   
+
+  void eEMgpu(float *output, float *sino, float *angles, 
+        int sizeImage, int nrays, int nangles, int nslices, int gpu, int niter)
+  {
+
+      size_t blocksize = min((size_t)nslices,32ul);
+
+      for(size_t b = 0; b < nslices; b += blocksize){
+          
+          blocksize = min(size_t(nslices) - b, blocksize);
+          eEM(output + (size_t)b*nrays*nangles, sino + (size_t)b*nrays*nangles, angles, sizeImage, nrays, nangles, blocksize, gpu, niter);          
+      }
+
+      cudaDeviceSynchronize();
+
+  }
+
+  void eEMblock(float *output, float *sino, float *angles, 
+    int sizeImage, int nrays, int nangles, int nslices, int ngpus, int niter, int* gpus)
+  {
+      int t;
+      int blockgpu = (nslices + ngpus - 1) / ngpus;
+      
+      std::vector<std::future<void>> threads;
+
+      for(t = 0; t < ngpus; t++){ 
+          
+          blockgpu = min(nslices - blockgpu * t, blockgpu);
+
+          threads.push_back(std::async( std::launch::async, eEMgpu, output + (size_t)t * blockgpu * sizeImage*sizeImage, 
+          sino + (size_t)t * blockgpu * nrays * nangles, angles, sizeImage, nrays, nangles, blockgpu,  gpus[t], niter
+          ));
+      }
+  
+      for(auto& t : threads)
+          t.get();
+  }
+
+}
+
+//----------------------
+// transmission-EM Threads Block algorithm
+//----------------------
+
+extern "C"{   
+
+  void tEMgpu(float *output, float *count, float *flat, float *angles, 
+        int sizeImage, int nrays, int nangles, int nslices, int gpu, int niter)
+  {
+
+      size_t blocksize = min((size_t)nslices,32ul);
+
+      for(size_t b = 0; b < nslices; b += blocksize){
+          
+          blocksize = min(size_t(nslices) - b, blocksize);
+          tEM(output + (size_t)b*nrays*nangles, count + (size_t)b*nrays*nangles, flat + (size_t)b*nrays*nangles, angles, sizeImage, nrays, nangles, blocksize, gpu, niter);          
+      }
+
+      cudaDeviceSynchronize();
+
+  }
+
+  void tEMblock(float *output, float *count, float *flat, float *angles, 
+    int sizeImage, int nrays, int nangles, int nslices, int ngpus, int niter, int* gpus)
+  {
+      int t;
+      int blockgpu = (nslices + ngpus - 1) / ngpus;
+      
+      std::vector<std::future<void>> threads;
+
+      for(t = 0; t < ngpus; t++){ 
+          
+          blockgpu = min(nslices - blockgpu * t, blockgpu);
+
+          threads.push_back(std::async( std::launch::async, tEMgpu, output + (size_t)t * blockgpu * sizeImage*sizeImage, 
+          count + (size_t)t * blockgpu * nrays * nangles, flat + (size_t)t * blockgpu * nrays * nangles, angles, 
+          sizeImage, nrays, nangles, blockgpu,  gpus[t], niter
+          ));
+      }
+  
+      for(auto& t : threads)
+          t.get();
+  }
+
+}

@@ -20,6 +20,7 @@
 #include <thread>
 #include <omp.h>
 #include <math.h>
+#include <cublas_v2.h>
 #include "common/structs.h"
 #include "gp/filter.h"
 #include "rebinning.h"
