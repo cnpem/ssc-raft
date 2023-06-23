@@ -174,7 +174,7 @@ except:
 
 
 ######## Conical Raft ##########
-
+## FDK:
 class Lab(ctypes.Structure):
         _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float), ("z", ctypes.c_float),
                 ("dx", ctypes.c_float), ("dy", ctypes.c_float),("dz", ctypes.c_float),
@@ -194,6 +194,37 @@ try:
 except:
     print('-.RAFT_CONICAL-')
     pass
+
+## Transmission Expectation-Maximization (TEM):
+class Lab_EM(ctypes.Structure):
+    _fields_ = [
+        ("Lx", ctypes.c_float), ("Ly", ctypes.c_float), ("Lz", ctypes.c_float),
+        ("x0", ctypes.c_float), ("y0", ctypes.c_float), ("z0", ctypes.c_float),
+        ("nx", ctypes.c_int), ("ny", ctypes.c_int), ("nz", ctypes.c_int),
+        ("sx", ctypes.c_float), ("sy", ctypes.c_float), ("sz", ctypes.c_float),
+        ("nbeta", ctypes.c_int),
+        ("ndetc", ctypes.c_int),
+        ("n_ray_points", ctypes.c_int)]
+
+lib_cone_tEM  = load_library(_lib, ext)
+try:
+    conebeam_tEM_gpu = lib_cone_tEM.conebeam_tEM_gpu
+    conebeam_tEM_gpu.argtypes = [
+        Lab_EM, # struct Lab lab.
+        ctypes.c_void_p, # float *flat.
+        ctypes.c_void_p, # float *px.
+        ctypes.c_void_p, # float *py.
+        ctypes.c_void_p, # float *pz.
+        ctypes.c_void_p, # float *angles.
+        ctypes.c_void_p, # float *recon.
+        ctypes.c_void_p, # float *tomo.
+        ctypes.c_int, # int ngpus.
+        ctypes.c_int, # int niter.
+        ctypes.c_float, # float tv.
+        ctypes.c_float] # float max_val.
+    conebeam_tEM_gpu.restype = ctypes.c_int
+except:
+    raise NotImplementedError()
 
 
 
