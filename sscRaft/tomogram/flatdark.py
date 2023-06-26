@@ -8,8 +8,6 @@ from ctypes import c_float as float32
 from ctypes import c_int as int32
 from ctypes import c_void_p  as void_p
 from ctypes import c_size_t as size_t
-import uuid
-import SharedArray as sa
 
 
 def flatdarkMultiGPU(frames, flat, dark, dic):
@@ -67,7 +65,7 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         frames    = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
 
-        print('Init Frame of Correction:', Initframes)
+        logger.info(f'Init Frame of Correction: {Initframes}')
 
         nrays      = int32(nrays)
         nangles    = int32(nangles)
@@ -131,7 +129,7 @@ def flatdarkGPU(frames, flat, dark, dic):
         frames    = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
         
-        print('Init Frame of Correction:', Initframes)
+        logger.info(f'Init Frame of Correction: {Initframes}')
 
         nrays      = int32(nrays)
         nangles    = int32(nangles)

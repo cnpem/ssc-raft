@@ -9,3 +9,5 @@ from .rafttypes import *
 from .geometries  import *
 from .rebinning import *
 from .tomogram   import *
+from .rings   import *
+from .pipelines   import *

@@ -14,7 +14,7 @@ extern "C"{
     {
         size_t sizez = size_t(isizez);
 
-        printf("GPUFBP: %ld %d %d %d\n",sizez,nrays,nangles,sizeimage);
+        // printf("GPUFBP: %ld %d %d %d\n",sizez,nrays,nangles,sizeimage);
 
         cudaDeviceSynchronize();
         auto time0 = std::chrono::system_clock::now();
@@ -26,8 +26,8 @@ extern "C"{
         { 
             sintable.cpuptr[i] = sin(angs[i]);
             costable.cpuptr[i] = cos(angs[i]);
-            if ( i == 100 )
-                printf("Angles %d here: %lf %lf\n", nangles, angs[100], cos(angs[100]));
+            // if ( i == 100 )
+            //     printf("Angles %d here: %lf %lf\n", nangles, angs[100], cos(angs[100]));
         }
         else for(int i=0; i<nangles; i++)
         {
@@ -35,10 +35,10 @@ extern "C"{
             costable.cpuptr[i] = cos(float(i)*float(M_PI)/float(nangles));
         }
 
-        printf("Before load trig table to GPU \n");
+        // printf("Before load trig table to GPU \n");
         sintable.LoadToGPU();
         costable.LoadToGPU();
-        printf("Before load trig table to GPU \n");
+        // printf("Before load trig table to GPU \n");
         
         SinoFilter(sinoblock, nrays, nangles, sizez, csino, true, reg, bShiftCenter, sintable.gpuptr);
 
@@ -57,7 +57,7 @@ extern "C"{
     void fbpgpu(int gpu, float* recon, float* tomogram, int nrays, int nangles, int nslices, int reconsize, int centersino,
         float reg_val, float* angles, float threshold, int reconPrecision, int FilterType, int bShiftCenter)
     {
-        printf("Filter type: %d \n",FilterType);
+        // printf("Filter type: %d \n",FilterType);
         CFilter reg(FilterType,reg_val);
 
         EType datatype = EType((EType::TypeEnum)reconPrecision);
@@ -71,23 +71,23 @@ extern "C"{
         // rImage blockRecon(reconsize, reconsize, blocksize, MemoryType::EAllocGPU);
         Image2D<char> blockRecon(reconsize, reconsize, blocksize * datatype.Size());
 
-        printf("data fbp: %d %d %d %d %d\n",gpu,nrays,nangles,nslices,reconsize);
+        // printf("data fbp: %d %d %d %d %d\n",gpu,nrays,nangles,nslices,reconsize);
         // size_t b = 0;
         for(size_t b = 0; b < nslices; b += blocksize){
             
             blocksize = min(size_t(nslices) - b, blocksize);
-            printf("block: %ld %ld %d\n",blocksize,b,nslices);
+            // printf("block: %ld %ld %d\n",blocksize,b,nslices);
 			
             tomo.CopyFrom(tomogram + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
             
             GPUFBP((char*)blockRecon.gpuptr, tomo.gpuptr, nrays, nangles, blocksize, reconsize, centersino, reg, datatype, threshold, angles, bShiftCenter);
 
-            printf("Before copy to CPU %ld \n",b);
+            // printf("Before copy to CPU %ld \n",b);
 
             // blockRecon.CopyTo(recon + (size_t)b*reconsize*reconsize, 0, (size_t)reconsize*reconsize*blocksize);
             HANDLE_ERROR(cudaMemcpy(recon + (size_t)b * reconsize * reconsize, blockRecon.gpuptr, (size_t)reconsize * reconsize * blocksize * datatype.Size(), cudaMemcpyDeviceToHost));                 
             
-            printf("After copy to CPU %ld \n",b);
+            // printf("After copy to CPU %ld \n",b);
 
         }
         cudaDeviceSynchronize();
@@ -104,7 +104,7 @@ extern "C"{
         for(t = 0; t < ngpus; t++){ 
             
             blockgpu = min(nslices - blockgpu * t, blockgpu);
-            printf("gpu: %d %d %d %d\n",t,blockgpu,blockgpu * t, nslices);
+            // printf("gpu: %d %d %d %d\n",t,blockgpu,blockgpu * t, nslices);
 
             threads.push_back(std::async( std::launch::async, fbpgpu, gpus[t], recon + (size_t)t * blockgpu * reconsize*reconsize, 
                 tomogram + (size_t)t * blockgpu * nrays * nangles, nrays, nangles, blockgpu, reconsize, centersino,

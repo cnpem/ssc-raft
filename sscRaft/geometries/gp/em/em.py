@@ -10,8 +10,6 @@ import uuid
 import SharedArray as sa
 import time
 
-import warnings
-
 #from sscRadon import radon
 #from sscBst import backprojection
 

@@ -11,7 +11,8 @@ from ctypes import c_size_t as size_t
 import uuid
 import SharedArray as sa
 
-def bstMultiGPU(tomogram, dic):
+
+def fstMultiGPU(tomogram, dic):
         
         gpus = dic['gpu']     
         ngpus = len(gpus)
@@ -28,7 +29,7 @@ def bstMultiGPU(tomogram, dic):
         else:
                 nslices = tomogram.shape[0]
         
-        reconsize = dic['recon size']
+        reconsize = dic['reconSize']
 
         Is360pan = dic['360pan']
         angles = dic['angles']
@@ -61,11 +62,12 @@ def bstMultiGPU(tomogram, dic):
         nangles = int32(nangles)
         nslices = int32(nslices)
 
-        libraft.bstblock(gpusptr, int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, filter, anglesptr)
+        libraft.fstblock(gpusptr, int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, filter, anglesptr)
 
         return output
 
-def bstGPU(tomogram, dic, gpu = 0):
+
+def fstGPU(tomogram, dic, gpu = 0):
         
         ngpus   = gpu
 
@@ -77,7 +79,7 @@ def bstGPU(tomogram, dic, gpu = 0):
         else:
                 nslices = tomogram.shape[0]
         
-        reconsize = dic['recon size']
+        reconsize = dic['reconSize']
 
         Is360pan = dic['360pan']
         angles = dic['angles']
@@ -110,24 +112,24 @@ def bstGPU(tomogram, dic, gpu = 0):
         nangles = int32(nangles)
         nslices = int32(nslices)
 
-        libraft.bstgpu(int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, filter, anglesptr)
+        libraft.fstgpu(int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, filter, anglesptr)
 
         return output
 
-def _worker_bst_(params, start, end, gpu, process):
+def _worker_fst_(params, start, end, gpu, process):
 
         output = params[0]
         data   = params[1]
         dic    = params[6]
 
-        logger.info(f'BST: begin process {process} on gpu {gpu}')
+        logger.info(f'FST: begin process {process} on gpu {gpu}')
 
-        output[start:end,:,:] = bstGPU( data[start:end, :, :], dic, gpu )
+        output[start:end,:,:] = fstGPU( data[start:end, :, :], dic, gpu )
 
-        logger.info(f'BST: end process {process} on gpu {gpu}')
+        logger.info(f'FST: end process {process} on gpu {gpu}')
     
 
-def _build_bst_(params):
+def _build_fst_(params):
  
         nslices = params[2]
         gpus    = params[5]
@@ -140,7 +142,7 @@ def _build_bst_(params):
                 begin_ = process*b
                 end_   = min( (process+1)*b, nslices )
 
-                p = multiprocessing.Process(target=_worker_bst_, args=(params, begin_, end_, gpus[process], process))
+                p = multiprocessing.Process(target=_worker_fst_, args=(params, begin_, end_, gpus[process], process))
                 processes.append(p)
     
         for p in processes:
@@ -150,7 +152,7 @@ def _build_bst_(params):
                 p.join()
 
 
-def bst_gpublock( tomogram, dic ):
+def fst_gpublock( tomogram, dic ):
 
         nslices     = tomogram.shape[0]
         nangles     = tomogram.shape[1]
@@ -169,18 +171,18 @@ def bst_gpublock( tomogram, dic ):
 
         _params_ = ( output, tomogram, nslices, nangles, nrays, gpus, dic)
 
-        _build_bst_( _params_ )
+        _build_fst_( _params_ )
 
         sa.delete(name)
 
         return output
 
 
-def bst_threads(tomogram, dic, **kwargs):
+def fst_threads(tomogram, dic, **kwargs):
         
         nrays = tomogram.shape[2]
 
-        dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
+        dicparams = ('gpu','angles','filter','reconSize','precision','regularization','threshold',
                     'shift center','tomooffset','360pan')
         defaut = ([0],None,None,nrays,'float32',0,0,False,0,False)
         
@@ -188,7 +190,7 @@ def bst_threads(tomogram, dic, **kwargs):
 
         gpus  = dic['gpu']
 
-        reconsize = dic['recon size']
+        reconsize = dic['reconSize']
 
         if reconsize % 32 != 0:
                 reconsize += 32-(reconsize%32)
@@ -207,30 +209,30 @@ def bst_threads(tomogram, dic, **kwargs):
         else:
                 logger.error(f'Invalid recon datatype:{precision}')
         
-        dic.update({'recon size': reconsize,'recon type': recondtype, 'precision': precision})
+        dic.update({'reconSize': reconsize,'recon type': recondtype, 'precision': precision})
 
         if len(gpus) == 1:
                 gpu = gpus[0]
-                output = bstGPU( tomogram, dic, gpu )
+                output = fstGPU( tomogram, dic, gpu )
         else:
-                output = bst_gpublock( tomogram, dic ) 
+                output = fst_gpublock( tomogram, dic ) 
 
         return output
 
 
-def bst(tomogram, dic, **kwargs):
+def fst(tomogram, dic, **kwargs):
         
         nrays = tomogram.shape[-1]
 
-        dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
+        dicparams = ('gpu','angles','filter','reconSize','precision','regularization','threshold',
                     'shift center','tomooffset','360pan')
-        defaut = ([0],None,None,nrays,'float32',0,0,False,0,False)
+        defaut = ([0],None,None,nrays,'float32',1,0,False,0,False)
         
         SetDictionary(dic,dicparams,defaut)
 
         gpus  = dic['gpu']
 
-        reconsize = dic['recon size']
+        reconsize = dic['reconSize']
 
         if reconsize % 32 != 0:
                 reconsize += 32-(reconsize%32)
@@ -249,12 +251,12 @@ def bst(tomogram, dic, **kwargs):
         else:
                 logger.error(f'Invalid recon datatype:{precision}')
         
-        dic.update({'recon size': reconsize,'recon type': recondtype, 'precision': precision})
+        dic.update({'reconSize': reconsize,'recon type': recondtype, 'precision': precision})
 
         if len(gpus) == 1:
                 gpu = gpus[0]
-                output = bstGPU( tomogram, dic, gpu )
+                output = fstGPU( tomogram, dic, gpu )
         else:
-                output = bstMultiGPU( tomogram, dic ) 
+                output = fstMultiGPU( tomogram, dic ) 
 
         return output

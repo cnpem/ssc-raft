@@ -550,7 +550,7 @@ extern "C"{
             HANDLE_ERROR( cudaGetLastError() );
 
 	    }
-        printf("GPU rings: %d, %ld %d, %d, %d, %f, %d\n", gpu,blocksize, nrays,nslices,nangles,lambda_rings,ringblocks);
+        // printf("GPU rings: %d, %ld %d, %d, %d, %f, %d\n", gpu,blocksize, nrays,nslices,nangles,lambda_rings,ringblocks);
 
         // cudaFree(tomogram);
         cudaDeviceSynchronize();

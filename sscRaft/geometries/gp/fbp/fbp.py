@@ -11,8 +11,7 @@ from ctypes import c_size_t as size_t
 import uuid
 import SharedArray as sa
 
-
-def fstMultiGPU(tomogram, dic):
+def fbpMultiGPU(tomogram, dic):
         
         gpus = dic['gpu']     
         ngpus = len(gpus)
@@ -29,7 +28,7 @@ def fstMultiGPU(tomogram, dic):
         else:
                 nslices = tomogram.shape[0]
         
-        reconsize = dic['recon size']
+        reconsize = dic['reconSize']
 
         Is360pan = dic['360pan']
         angles = dic['angles']
@@ -46,7 +45,7 @@ def fstMultiGPU(tomogram, dic):
         outputptr = output.ctypes.data_as(void_p)
 
         try:
-                angles = np.ascontiguousarray(angles.astype(np.float32))
+                angles    = np.ascontiguousarray(angles.astype(np.float32))
                 anglesptr = angles.ctypes.data_as(void_p)
         except:
                 anglesptr = void_p(0)
@@ -61,13 +60,13 @@ def fstMultiGPU(tomogram, dic):
         nrays = int32(nrays)
         nangles = int32(nangles)
         nslices = int32(nslices)
+        bShiftCenter = int32(dic['shift center'])
 
-        libraft.fstblock(gpusptr, int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, filter, anglesptr)
+        libraft.fbpblock(gpusptr, int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, anglesptr, threshold, precision, filter, bShiftCenter)
 
         return output
 
-
-def fstGPU(tomogram, dic, gpu = 0):
+def fbpGPU(tomogram, dic, gpu = 0):
         
         ngpus   = gpu
 
@@ -79,7 +78,7 @@ def fstGPU(tomogram, dic, gpu = 0):
         else:
                 nslices = tomogram.shape[0]
         
-        reconsize = dic['recon size']
+        reconsize = dic['reconSize']
 
         Is360pan = dic['360pan']
         angles = dic['angles']
@@ -95,10 +94,14 @@ def fstGPU(tomogram, dic, gpu = 0):
         output = np.zeros((nslices,reconsize,reconsize),dtype=recondtype)
         outputptr = output.ctypes.data_as(void_p)
 
+        print("dtypes:",recondtype,output.dtype)
+
         try:
+                print('values:',angles.shape)
                 angles = np.ascontiguousarray(angles.astype(np.float32))
                 anglesptr = angles.ctypes.data_as(void_p)
         except:
+                print('void')
                 anglesptr = void_p(0)
 
         if Is360pan:
@@ -111,25 +114,30 @@ def fstGPU(tomogram, dic, gpu = 0):
         nrays = int32(nrays)
         nangles = int32(nangles)
         nslices = int32(nslices)
+        bShiftCenter = int32(dic['shift center'])
 
-        libraft.fstgpu(int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, filter, anglesptr)
+
+        print(dic)
+
+        # quit()
+        libraft.fbpgpu(int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, anglesptr, threshold, precision, filter, bShiftCenter)
 
         return output
 
-def _worker_fst_(params, start, end, gpu, process):
+def _worker_fbp_(params, start, end, gpu, process):
 
         output = params[0]
         data   = params[1]
         dic    = params[6]
 
-        logger.info(f'FST: begin process {process} on gpu {gpu}')
+        logger.info(f'FBP: begin process {process} on gpu {gpu}')
 
-        output[start:end,:,:] = fstGPU( data[start:end, :, :], dic, gpu )
+        output[start:end,:,:] = fbpGPU( data[start:end, :, :], dic, gpu )
 
-        logger.info(f'FST: end process {process} on gpu {gpu}')
+        logger.info(f'FBP: end process {process} on gpu {gpu}')
     
 
-def _build_fst_(params):
+def _build_fbp_(params):
  
         nslices = params[2]
         gpus    = params[5]
@@ -142,7 +150,7 @@ def _build_fst_(params):
                 begin_ = process*b
                 end_   = min( (process+1)*b, nslices )
 
-                p = multiprocessing.Process(target=_worker_fst_, args=(params, begin_, end_, gpus[process], process))
+                p = multiprocessing.Process(target=_worker_fbp_, args=(params, begin_, end_, gpus[process], process))
                 processes.append(p)
     
         for p in processes:
@@ -152,7 +160,7 @@ def _build_fst_(params):
                 p.join()
 
 
-def fst_gpublock( tomogram, dic ):
+def fbp_gpublock( tomogram, dic ):
 
         nslices     = tomogram.shape[0]
         nangles     = tomogram.shape[1]
@@ -171,18 +179,18 @@ def fst_gpublock( tomogram, dic ):
 
         _params_ = ( output, tomogram, nslices, nangles, nrays, gpus, dic)
 
-        _build_fst_( _params_ )
+        _build_fbp_( _params_ )
 
         sa.delete(name)
 
         return output
 
 
-def fst_threads(tomogram, dic, **kwargs):
+def fbp_threads(tomogram, dic, **kwargs):
         
         nrays = tomogram.shape[2]
 
-        dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
+        dicparams = ('gpu','angles','filter','reconSize','precision','regularization','threshold',
                     'shift center','tomooffset','360pan')
         defaut = ([0],None,None,nrays,'float32',0,0,False,0,False)
         
@@ -190,11 +198,11 @@ def fst_threads(tomogram, dic, **kwargs):
 
         gpus  = dic['gpu']
 
-        reconsize = dic['recon size']
+        reconsize = dic['reconSize']
 
-        if reconsize % 32 != 0:
-                reconsize += 32-(reconsize%32)
-                logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
+        # if reconsize % 32 != 0:
+        #         reconsize += 32-(reconsize%32)
+        #         logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
 
         precision = dic['precision'].lower()
         if precision == 'float32':
@@ -209,34 +217,34 @@ def fst_threads(tomogram, dic, **kwargs):
         else:
                 logger.error(f'Invalid recon datatype:{precision}')
         
-        dic.update({'recon size': reconsize,'recon type': recondtype, 'precision': precision})
+        dic.update({'reconSize': reconsize,'recon type': recondtype, 'precision': precision})
 
         if len(gpus) == 1:
                 gpu = gpus[0]
-                output = fstGPU( tomogram, dic, gpu )
+                output = fbpGPU( tomogram, dic, gpu )
         else:
-                output = fst_gpublock( tomogram, dic ) 
+                output = fbp_gpublock( tomogram, dic ) 
 
         return output
 
 
-def fst(tomogram, dic, **kwargs):
+def fbp(tomogram, dic, **kwargs):
         
         nrays = tomogram.shape[-1]
 
-        dicparams = ('gpu','angles','filter','recon size','precision','regularization','threshold',
+        dicparams = ('gpu','angles','filter','reconSize','precision','regularization','threshold',
                     'shift center','tomooffset','360pan')
-        defaut = ([0],None,None,nrays,'float32',0,0,False,0,False)
+        defaut = ([0],None,'lorentz',nrays,'float32',1,0,False,0,False)
         
         SetDictionary(dic,dicparams,defaut)
 
         gpus  = dic['gpu']
 
-        reconsize = dic['recon size']
+        reconsize = dic['reconSize']
 
-        if reconsize % 32 != 0:
-                reconsize += 32-(reconsize%32)
-                logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
+        # if reconsize % 32 != 0:
+        #         reconsize += 32-(reconsize%32)
+        #         logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
 
         precision = dic['precision'].lower()
         if precision == 'float32':
@@ -251,12 +259,12 @@ def fst(tomogram, dic, **kwargs):
         else:
                 logger.error(f'Invalid recon datatype:{precision}')
         
-        dic.update({'recon size': reconsize,'recon type': recondtype, 'precision': precision})
+        dic.update({'reconSize': reconsize,'recon type': recondtype, 'precision': precision})
 
         if len(gpus) == 1:
                 gpu = gpus[0]
-                output = fstGPU( tomogram, dic, gpu )
+                output = fbpGPU( tomogram, dic, gpu )
         else:
-                output = fstMultiGPU( tomogram, dic ) 
+                output = fbpMultiGPU( tomogram, dic ) 
 
         return output
