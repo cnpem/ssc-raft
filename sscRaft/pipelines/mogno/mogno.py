@@ -80,8 +80,8 @@ def preprocessing_mogno(data, flat, dark, experiment):
 
       if dic['normalize'][4]:
          for i in range(tomo.shape[1]):
-            if tomo[i,:,:] < 0:
-               tomo[i,:,:] = tomo[i,:,:] + np.abs(tomo[i,:,:].min())
+            if tomo[:,i,:].min() < 0:
+               tomo[:,i,:] = tomo[:,i,:] + np.abs(tomo[:,i,:].min())
    else:
       logger.info('Not applying Flat and Dark correction')
       tomo = np.swapaxes(tomo,0,1)
