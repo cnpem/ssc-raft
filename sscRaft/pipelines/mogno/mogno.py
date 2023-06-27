@@ -78,7 +78,7 @@ def preprocessing_mogno(data, flat, dark, experiment):
 
       tomo = correct_projections(tomo, flat, dark, experiment)
 
-      if dic['normalize'][4]:
+      if experiment['normalize'][4]:
          for i in range(tomo.shape[1]):
             if tomo[:,i,:].min() < 0:
                tomo[:,i,:] = tomo[:,i,:] + np.abs(tomo[:,i,:].min())

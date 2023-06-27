@@ -101,9 +101,9 @@ extern "C"{
         int i;
         float wmax = 1.0/(2.0*lab.dh);
         
-        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (wmax)/(lab.nh) + (2*i*wmax)/(lab.nh); 
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (wmax)/(lab.nh-1) + (2*i*wmax)/(lab.nh-1); 
     
-        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh-1);
     }
 
     __global__ void filt_W(Lab lab, float* W){
