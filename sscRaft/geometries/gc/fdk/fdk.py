@@ -7,7 +7,7 @@ import ctypes.util
 def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz, 
                     h, v, dh, dv, nh, nv,
                     D, Dsd, beta_max, dbeta, nbeta,
-                    fourier):
+                    fourier, filter, regularization):
 
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
@@ -15,7 +15,7 @@ def set_experiment( x, y, z, dx, dy, dz, nx, ny, nz,
                 h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
                 D = D, Dsd = Dsd, 
                 beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
-                fourier = fourier)
+                fourier = fourier, filter_type = filter, reg = regularization)
 
     return lab
 
@@ -25,7 +25,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     GPU function.
 
     Args:
-        data (ndarray): Cone beam projection tomogram. The axes are [angle, slices, lenght].
+        data (ndarray): Cone beam projection tomogram. The axes are [angles, slices, lenght].
         dic (dictionary): Dictionary with the experiment info.
 
     Returns:
@@ -37,10 +37,18 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
         *``dic['z1+z2[m]']`` (float): Source-detector distance in meters. Defaults to 1.0.
         *``dic['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
         *``dic['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[0].
-        *``dic['fourier']`` (bool): Type of filter for reconstruction. True = Fourier, False = Convolution.
+        *``dic['fourier']`` (bool): Type of filter computation for reconstruction. True = Fourier, False = Convolution (only for ramp filter).
+        *``dic['filter']`` (str,optional): Type of filter for reconstruction. 
+        Options = ('none','gaussian','lorentz','cosine','rectangle','hann','hamming','ramp'). Default is 'hamming'.
+        *``dic['regularization']`` (float,optional): Type of filter for reconstruction, small values. Default is 1.
     """
 
     # recon = data 
+    regularization = dic['regularization']
+
+    if regularization == 0:
+        dic['filter'] = 'none'
+    
     D, Dsd = dic['z1[m]'], dic['z1+z2[m]']
 
     dh, dv = dic['detectorPixel[m]'], dic['detectorPixel[m]']
@@ -56,6 +64,9 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     x, y, z    = dx*nx/2, dy*ny/2, dz*nz/2
 
     fourier = dic['fourier']
+    filter = FilterNumber(dic['filter'])
+
+    print('Filter name:',dic['filter'], 'and number:',filter)
 
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
@@ -63,7 +74,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
                 h = h, v = v, dh = dh, dv = dv, nh = nh, nv = nv, 
                 D = D, Dsd = Dsd, 
                 beta_max = beta_max, dbeta = dbeta , nbeta = nbeta,
-                fourier = fourier )
+                fourier = fourier, filter_type = filter, reg = regularization)
 
     time = np.zeros(2)
     time = np.ascontiguousarray(time.astype(np.float64))

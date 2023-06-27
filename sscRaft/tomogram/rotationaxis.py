@@ -8,11 +8,11 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
    Works with parallel, fan and cone beam sinograms for 360 degrees projections.
    
    Args:
-      data (ndarray): Projection tomogram. The axes are [angles, slices, lenght].
+      data (ndarray): Projection tomogram. The axes are [slices, angles, lenght].
       experiment (dictionary): Dictionary with the experiment info.
 
    Returns:
-      (ndarray): Rotation axis corrected tomogram (3D). The axes are [angles, slices, lenght].
+      (ndarray): Rotation axis corrected tomogram (3D). The axes are [slices, angles, lenght].
    
    Raises:
       ValueError: If the number of angles/projections is not an even number.
@@ -48,7 +48,7 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
       nx_window  = experiment['findRotationAxis'][1]
       nsinos     = experiment['findRotationAxis'][2]
       
-      shift      = find_rotation_axis_360(data, nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
+      shift      = find_rotation_axis_360(np.swapaxes(data,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
 
       logger.info(f'Automatic rotation axis correction value {shift}')
    else:
@@ -68,7 +68,7 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
 
       logger.info(f'Corrected projection for rotation axis: new shape {proj.shape}')
 
-   return proj
+   return proj, shift
 
 def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
     """Searches for the rotation axis index in axis 2 (x variable).

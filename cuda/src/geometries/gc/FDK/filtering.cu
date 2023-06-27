@@ -22,7 +22,46 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
     cudaMemcpy(*c_proj, &proj[process.idx_filter], process.n_filter * sizeof(float), cudaMemcpyHostToDevice);
 
     cudaMalloc(W, lab.nh * sizeof(float));
-    filt_W<<< 1, 1>>>(lab, *W);
+
+    printf("Filter number: %d \n",lab.filter_type);
+    switch (lab.filter_type){
+        case 0:
+            // No filter Applied
+            filt_W<<< 1, 1>>>(lab, *W);
+            break;
+        case 1:
+            // Gaussian
+            filt_Gaussian<<< 1, 1>>>(lab, *W);
+            break;
+        case 2:
+            // Lorentz
+            filt_Lorentz<<< 1, 1>>>(lab, *W);
+            break;
+        case 3:
+            // Cosine
+            filt_Cosine<<< 1, 1>>>(lab, *W);
+            break;
+        case 4:
+            // Rectangle
+            filt_Rectangle<<< 1, 1>>>(lab, *W);
+            break;
+        case 5:
+            // Hann
+            filt_Hann<<< 1, 1>>>(lab, *W);
+            break;
+        case 6:
+            // Hamming
+            filt_Hamming<<< 1, 1>>>(lab, *W);
+            break;
+        case 7:
+            // Ramp
+            filt_Ramp<<< 1, 1>>>(lab, *W);
+            break;
+        default:
+            // Hamming
+            filt_W<<< 1, 1>>>(lab, *W);
+
+    }
 
     cudaDeviceSynchronize(); 
     printf(cudaGetErrorString(cudaGetLastError()));

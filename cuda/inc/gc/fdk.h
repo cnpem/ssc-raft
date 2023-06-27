@@ -26,6 +26,23 @@ typedef struct {
     float dbeta;
     int nbeta;
     int fourier;
+    int filter_type; // Filter Types
+    float reg; // Filter regularization
+
+    /* Filter Types definitions
+    enum EType
+	{
+        none      = 0,
+        gaussian  = 1,
+        lorentz   = 2,
+        cosine    = 3,
+        rectangle = 4,
+        hann      = 5,
+        hamming   = 6,
+        ramp      = 7
+	};
+    */
+
 } Lab;
 
 
@@ -72,6 +89,13 @@ extern "C"{
     __global__ void signal_save(Lab lab, float* proj, cufftComplex* signal, Process process);
     __global__ void signal_filter(Lab lab, float* W, cufftComplex* signal, Process process);
     __global__ void filt_W(Lab lab, float* W);
+    __global__ void filt_Ramp(Lab lab, float* W);
+    __global__ void filt_Gaussian(Lab lab, float* W);
+    __global__ void filt_Lorentz(Lab lab, float* W);
+    __global__ void filt_Cosine(Lab lab, float* W);
+    __global__ void filt_Rectangle(Lab lab, float* W);
+    __global__ void filt_Hann(Lab lab, float* W);
+    __global__ void filt_Hamming(Lab lab, float* W);
     __global__ void signal_inv(Lab lab, float* Q, cufftComplex* signal, Process process);
     __device__ void set_filter_idxs(long long int n, int* i, int*j, int* k, Lab lab, Process process);
 

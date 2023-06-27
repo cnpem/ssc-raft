@@ -119,11 +119,11 @@ extern "C" {
       {
         // __sincosf(k * dth, &sink, &cosk);
         __sincosf(angles[k], &sink, &cosk);
-        
-        dth = angles[k+1] - angles[k];
 
         if ( k == (nangles - 1) )
           dth = angles[nangles - 1] - angles[nangles - 2];
+        else
+          dth = angles[k+1] - angles[k];
       
         t = x * cosk + y * sink;
       
@@ -350,10 +350,10 @@ extern "C" {
         // __sincosf(k * dth, &sink, &cosk);
         __sincosf(angles[k], &sink, &cosk);
         
-        dth = angles[k+1] - angles[k];
-
         if ( k == (nangles - 1) )
           dth = angles[nangles - 1] - angles[nangles - 2];
+        else
+          dth = angles[k+1] - angles[k];
       
         t = x * cosk + y * sink;
       
@@ -402,10 +402,10 @@ extern "C" {
         // __sincosf(k * dth, &sink, &cosk);
         __sincosf(angles[k], &sink, &cosk);
         
-        dth = angles[k+1] - angles[k];
-
         if ( k == (nangles - 1) )
           dth = angles[nangles - 1] - angles[nangles - 2];
+        else
+          dth = angles[k+1] - angles[k];
       
         t = x * cosk + y * sink;
       

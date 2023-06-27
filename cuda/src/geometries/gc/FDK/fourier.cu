@@ -74,29 +74,6 @@ __global__ void signal_filter(Lab lab, float* W, cufftComplex* signal, Process p
 }}
 
 extern "C"{
-__global__ void filt_W(Lab lab, float* W){
-    int i;
-    float wmax = 1.0/(2.0*lab.dh);
-    
-    for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
-
-    for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
-
-    // for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*sinf(M_PI*i/lab.nh)/(M_PI*i/lab.nh);
-
-    // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*sinf(M_PI*(lab.nh/2-i)/lab.nh)/(M_PI*(lab.nh/2-i)/lab.nh);
-
-    for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nh));
-
-    for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nh/2 -i)/lab.nh));
-
-    // for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(expf(1)/(1-4*(i/lab.nh)*(i/lab.nh)))*expf(-1/(1-4*(i/lab.nh)*(i/lab.nh)));
-
-    // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(expf(1)/(1-4*((lab.nh/2-i)/lab.nh)*((lab.nh/2-i)/lab.nh)))*expf(-1/(1-4*((lab.nh/2-i)/lab.nh)*((lab.nh/2-i)/lab.nh)));
-
-}}
-
-extern "C"{
 __global__ void signal_inv(Lab lab, float* Q, cufftComplex* signal, Process process){
     long long int n = blockDim.x * blockIdx.x + threadIdx.x ;
     int i,j,k;
@@ -118,3 +95,129 @@ __device__ void set_filter_idxs(long long int n, int* i, int*j, int* k, Lab lab,
     *i = rem_ij % lab.nh;
 }}
 
+extern "C"{
+
+    __global__ void filt_Ramp(Lab lab, float* W){
+        int i;
+        float wmax = 1.0/(2.0*lab.dh);
+        
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (wmax)/(lab.nh) + (2*i*wmax)/(lab.nh); 
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+    }
+
+    __global__ void filt_W(Lab lab, float* W){
+        int i;
+        float wmax = 1.0/(2.0*lab.dh);
+        
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+    
+        // for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*sinf(M_PI*i/lab.nh)/(M_PI*i/lab.nh);
+    
+        // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*sinf(M_PI*(lab.nh/2-i)/lab.nh)/(M_PI*(lab.nh/2-i)/lab.nh);
+    
+        for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nh));
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nh/2 - i)/lab.nh));
+    
+        // for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(expf(1)/(1-4*(i/lab.nh)*(i/lab.nh)))*expf(-1/(1-4*(i/lab.nh)*(i/lab.nh)));
+    
+        // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(expf(1)/(1-4*((lab.nh/2-i)/lab.nh)*((lab.nh/2-i)/lab.nh)))*expf(-1/(1-4*((lab.nh/2-i)/lab.nh)*((lab.nh/2-i)/lab.nh)));
+    
+    }
+
+    __global__ void filt_Gaussian(Lab lab, float* W){
+        int i;
+        float wmax = 1.0/(2.0*lab.dh);
+        float w, c = 0.693f;
+
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = W[i]*expf(-c*lab.reg*(i/lab.nh)*(i/lab.nh));
+
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*expf(-c*lab.reg*((lab.nh/2 - i)/lab.nh)*((lab.nh/2 - i)/lab.nh));
+
+    }
+
+    __global__ void filt_Lorentz(Lab lab, float* W){
+        int i;
+        float wmax = 1.0/(2.0*lab.dh);
+        float w;
+        
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = W[i]/(1.0 + lab.reg*(i/lab.nh)*(i/lab.nh));
+
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]/(1.0 + lab.reg*((lab.nh/2 - i)/lab.nh)*((lab.nh/2 - i)/lab.nh));
+
+    }
+
+    __global__ void filt_Cosine(Lab lab, float* W){
+        int i;
+        float wmax = 1.0/(2.0*lab.dh);
+        
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = W[i]*cosf( float(M_PI)*0.5f*(i/lab.nh));
+
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*cosf( float(M_PI)*0.5f*((lab.nh/2 - i)/lab.nh));
+    }
+
+    __global__ void filt_Rectangle(Lab lab, float* W){
+        int i;
+        float wmax = 1.0/(2.0*lab.dh);
+        float param;
+        
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+
+        for (i = 0; i <= lab.nh/2 ; i++) {
+            param = fmaxf((i/lab.nh) * lab.reg * float(M_PI) * 0.5f, 1E-4f);
+            W[i] = W[i]*sinf(param) / param;
+        }
+
+        for (i = 1; i < lab.nh/2 ; i++) {
+            param = fmaxf(((lab.nh/2 - i)/lab.nh) * lab.reg * float(M_PI) * 0.5f, 1E-4f);
+            W[lab.nh/2 + i] = W[lab.nh/2 + i]*sinf(param) / param;
+
+        }
+
+    }
+
+    __global__ void filt_Hann(Lab lab, float* W){
+        int i;
+        float wmax = 1.0/(2.0*lab.dh);
+        
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+
+        for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(0.5 + 0.5*cosf(2*M_PI*i/lab.nh));
+
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(0.5 + 0.5*cosf(2*M_PI*(lab.nh/2 - i)/lab.nh));
+
+    }
+
+    __global__ void filt_Hamming(Lab lab, float* W){
+        int i;
+        float wmax = 1.0/(2.0*lab.dh);
+        
+        for (i = 0; i <= lab.nh/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+    
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nh);
+
+        for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nh));
+
+        for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nh/2 - i)/lab.nh));
+    }
+
+}

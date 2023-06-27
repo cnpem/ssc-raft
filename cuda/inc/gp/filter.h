@@ -20,8 +20,7 @@ struct CFilter
 		gaussian=1,
 		lorentz=2,
 		cosine=3,
-		rectangle=4,
-		FSC
+		rectangle=4
 	};
 
 	float reg = 0;

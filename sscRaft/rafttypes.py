@@ -186,7 +186,9 @@ class Lab(ctypes.Structure):
                 ("beta_max", ctypes.c_float),
                 ("dbeta", ctypes.c_float),
                 ("nbeta", ctypes.c_int),
-                ("fourier", ctypes.c_int)]
+                ("fourier", ctypes.c_int),
+                ("filter_type", ctypes.c_int),
+                ("reg", ctypes.c_float)]
 
 try:
         libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
@@ -250,20 +252,24 @@ def nice(f): # scientific notation + 2 decimals
     return "{:.2e}".format(f)
 
 def FilterNumber(mfilter):
-        if mfilter.lower() == 'gaussian' or mfilter.lower() == 'gauss':
+        if mfilter.lower() == 'none':
+                return 0
+        elif mfilter.lower() == 'gaussian':
                 return 1
         elif mfilter.lower() == 'lorentz':
                 return 2
-        elif mfilter.lower() == 'cosine' or mfilter.lower() == 'cos':
+        elif mfilter.lower() == 'cosine':
                 return 3
-        elif mfilter.lower() == 'rectangle' or mfilter.lower() == 'rect':
+        elif mfilter.lower() == 'rectangle':
                 return 4
         elif mfilter.lower() == 'hann':
                 return 5
-        elif mfilter.lower() == 'FSC':
-                return 0
-        
-        return 0
+        elif mfilter.lower() == 'hamming':
+                return 6
+        elif mfilter.lower() == 'ramp':
+                return 7
+        else:
+               return 6
 
 def Bin(img,n=2):
         if n <= 1:
