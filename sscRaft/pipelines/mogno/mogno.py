@@ -22,7 +22,7 @@ def preprocessing_mogno(data, flat, dark, experiment):
    Dictionary parameters:
       *``experiment['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
       *``experiment['rings']`` (bool,int): Tuple flag for application of rings removal algorithm. (apply = True, rings block = 2).
-      *``experiment['normalize']`` (bool,bool,int,int): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, total number of frames acquired = data.shape[0], index of initial frame to process = 0).
+      *``experiment['normalize']`` (bool,bool,int,int,bool): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, total number of frames acquired = data.shape[0], index of initial frame to process = 0, remove negative values = False).
       *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation shift automatic corrrection (is_autoRot).
       *``experiment['padding']`` (int): Number of elements for horizontal zero-padding. Defaults to 0.
       *``experiment['detectorType']`` (string): If detector type. If 'pco' discard fist 11 rows of data. Defauts to 'pco'.
@@ -77,6 +77,11 @@ def preprocessing_mogno(data, flat, dark, experiment):
          dark = darks_
 
       tomo = correct_projections(tomo, flat, dark, experiment)
+
+      if dic['normalize'][4]:
+         for i in range(tomo.shape[1]):
+            if tomo[i,:,:] < 0:
+               tomo[i,:,:] = tomo[i,:,:] + np.abs(tomo[i,:,:].min())
    else:
       logger.info('Not applying Flat and Dark correction')
       tomo = np.swapaxes(tomo,0,1)
@@ -147,7 +152,7 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
 
    #Set dictionary parameters by default if not already set.
    dicparams = ('fourier','rings','normalize', 'shift','padding','detectorType','findRotationAxis','method','filter','regularization')
-   default    = (False, (False, 0), (False, False, 0, 0), (False, 0), 0, 'x', (0, 0, 0),'fdk','hamming',1)
+   default    = (False, (False, 0), (False, False, 0, 0, False), (False, 0), 0, 'x', (0, 0, 0),'fdk','hamming',1)
    SetDictionary(experiment,dicparams,default)
 
    experiment['method']         = 'fdk'
