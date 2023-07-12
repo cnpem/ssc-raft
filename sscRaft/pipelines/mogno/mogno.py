@@ -5,7 +5,7 @@ from ...tomogram.flatdark import *
 from ...tomogram.rotationaxis import *
 from ...rings import *
 from ...geometries.gc.fdk import *
-from ...geometries.gc.em import *
+from ...geometries.gc.emc import *
 
 def preprocessing_mogno(data, flat, dark, experiment):
    """Preprocessing data from Mogno beamline (conebeam): correction of projection, correction of rotation axis and correction of rings.
@@ -13,15 +13,16 @@ def preprocessing_mogno(data, flat, dark, experiment):
    Args:
       data (ndarray): Cone beam projection tomogram. The axes are [angles, slices, lenght].
       flat (ndarray): Single cone beam ray projection. The axes are [number of flats, slices, lenght].
-      dark (ndarray): Single dark projection. The axes are [slices, lenght].
+      dark (ndarray): Single dark projection. The axes are [number of darks, slices, lenght].
       experiment (dictionary): Dictionary with the experiment info.
 
    Returns:
-      (ndarray): Corrected tomogram (3D). The axes are [slices, angles, lenght].
+      (ndarray, int): Corrected tomogram (3D) with axes [slices, angles, lenght]
+      and Number of pixels representing the deviation of the center of rotation. 
 
    Dictionary parameters:
       *``experiment['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
-      *``experiment['rings']`` (bool,int): Tuple flag for application of rings removal algorithm. (apply = True, rings block = 2).
+      *``experiment['rings']`` (bool,float,int): Tuple flag for application of rings removal algorithm. (apply = True, rings regularization = -1 (automatic), rings block = 1).
       *``experiment['normalize']`` (bool,bool,int,int,bool): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, total number of frames acquired = data.shape[0], index of initial frame to process = 0, remove negative values = False).
       *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation shift automatic corrrection (is_autoRot).
       *``experiment['padding']`` (int): Number of elements for horizontal zero-padding. Defaults to 0.
@@ -63,7 +64,6 @@ def preprocessing_mogno(data, flat, dark, experiment):
          for j in range(flat.shape[0]):
                for i in range(flat.shape[1]):
                   flats_[j,:,:] += flat[j,i,:,:]
-                  # flats_[1,:,:] += flat[1,i,:,:]
          flats_ = flats_/flat.shape[1]
          flat   = flats_
 
@@ -72,7 +72,6 @@ def preprocessing_mogno(data, flat, dark, experiment):
          for j in range(dark.shape[0]):
                for i in range(dark.shape[1]):
                   darks_[j,:,:] += dark[j,i,:,:]
-                  # darks_[1,:,:] += dark[1,i,:,:]
          darks_ = darks_/dark.shape[1]
          dark = darks_
 
@@ -102,8 +101,8 @@ def preprocessing_mogno(data, flat, dark, experiment):
 
       dic                 = {}
       dic['gpu']          = experiment['gpu']
-      dic['lambda rings'] = -1 
-      dic['rings block']  = experiment['rings'][1]
+      dic['lambda rings'] = experiment['rings'][1] 
+      dic['rings block']  = experiment['rings'][2]
 
       if experiment['rings'][0]:
          logger.info('Applying Rings regularization...')
@@ -111,6 +110,12 @@ def preprocessing_mogno(data, flat, dark, experiment):
          logger.info('Finished Rings regularization...')
    else:
       logger.error(f'Invalid reconstruction method:{method}. Chosse from options `fdk` or `em`.')
+
+   # Garbage Collector
+   # lists are cleared whenever a full collection or
+   # collection of the highest generation (2) is run
+   # collected = gc.collect() # or gc.collect(2)
+   # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
 
    return tomo, shift
 
@@ -121,7 +126,7 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
    Args:
       data (ndarray): Cone beam projection tomogram. The axes are [angle, slices, lenght].
       flat (ndarray): Single cone beam ray projection. The axes are [number of flats, slices, lenght].
-      dark (ndarray): Single dark projection. The axes are [slices, lenght].
+      dark (ndarray): Single dark projection. The axes are [number of darks, slices, lenght].
       experiment (dictionary): Dictionary with the experiment info.
 
    Returns:
@@ -133,12 +138,12 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
       *``experiment['z1+z2[m]']`` (float): Source-detector distance in meters. Defaults to 1.0.
       *``experiment['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
       *``experiment['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[0].
-      *``experiment['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
+      *``experiment['gpu']`` (list): List of gpus for processing. Defaults to [0].
       *``experiment['method']`` (str): Method for reconstruction: 'em' or 'fdk'. Defaults to 'fdk'.
 
    Options:
       *``experiment['fourier']`` (bool): Type of filter for reconstruction. True = Fourier, False = Convolution.
-      *``experiment['rings']`` (bool,int): Tuple flag for application of rings removal algorithm. (apply = True, rings block = 2).
+      *``experiment['rings']`` (bool,float,int): Tuple flag for application of rings removal algorithm. (apply = True, rings regularization = -1 (automatic), rings block = 1).
       *``experiment['normalize']`` (bool,bool,int,int): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, total number of frames acquired = data.shape[0], index of initial frame to process = 0).
       *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation shift automatic corrrection (is_autoRot).
       *``experiment['padding']`` (int): Number of elements for horizontal zero-padding. Defaults to 0.
@@ -146,14 +151,14 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
       *``experiment['findRotationAxis']`` (int,int,int): For rotation axis function. (nx_search=500, nx_window=500, nsinos=None).
       *``experiment['filter']`` (str,optional): Type of filter for reconstruction. 
       Options = ('none','gaussian','lorentz','cosine','rectangle','hann','hamming','ramp'). Default is 'hamming'.
-      *``experiment['regularization']`` (float,optional): Type of filter for reconstruction, small values. Default is 1.
-         
+      *``experiment['regularization']`` (float,optional): Value of regularization for reconstruction (FDK or EM/TV), small values. Default is 1.
+      *``experiment['iterations']`` (int,int):  Tuple for EM ONLY. Number of iterations and number of integration points for EM/TV.   
     """
 
    #Set dictionary parameters by default if not already set.
-   dicparams = ('fourier','rings','normalize', 'shift','padding','detectorType','findRotationAxis','method','filter','regularization')
-   default    = (False, (False, 0), (False, False, 0, 0, False), (False, 0), 0, 'x', (0, 0, 0),'fdk','hamming',1)
-   SetDictionary(experiment,dicparams,default)
+   # dicparams = ('fourier','rings','normalize', 'shift','padding','detectorType','findRotationAxis','method','filter','regularization')
+   # default    = (False, (False, -1, 1), (False, False, 0, 0, False), (False, 0), 0, 'x', (0, 0, 0),'fdk','hamming',1)
+   # SetDictionary(experiment,dicparams,default)
 
    experiment['method']         = 'fdk'
 
@@ -161,21 +166,31 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
 
    logger.info(f'FDK: Begin preprocessing')
 
-   data, shift = preprocessing_mogno(data, flat, dark, experiment)
+   tomo, shift = preprocessing_mogno(data, flat, dark, experiment)
+
+   if method == 'em':
+      experiment['shift'][1] = shift
+      experiment['niterations'] = (experiment['iterations'][0],1,1,experiment['iterations'][1])
 
    logger.info(f'FDK: Finished preprocessing')
 
    logger.info(f'FDK: Begin reconstruction')
 
    if method == 'fdk':
-      recon = fdk(data, experiment)
+      recon = fdk(tomo, experiment)
    elif method == 'em':
-      # recon = tEM_cone(data, experiment)
+      # recon = em_cone(tomo, flat, dark, experiment)
       pass
    else:
-      logger.error(f'Invalid reconstruction method:{method}. Chosse from options `fdk` or `em`.')
+      logger.error(f'Invalid reconstruction method:{method}. Choose from options `fdk` or `em`.')
 
+
+   # Garbage Collector
+   # lists are cleared whenever a full collection or
+   # collection of the highest generation (2) is run
+   # collected = gc.collect() # or gc.collect(2)
+   # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
 
    logger.info(f'FDK: Finished reconstruction')
 
-   return recon, data
+   return recon

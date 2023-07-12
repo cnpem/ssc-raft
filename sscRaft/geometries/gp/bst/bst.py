@@ -114,109 +114,6 @@ def bstGPU(tomogram, dic, gpu = 0):
 
         return output
 
-def _worker_bst_(params, start, end, gpu, process):
-
-        output = params[0]
-        data   = params[1]
-        dic    = params[6]
-
-        logger.info(f'BST: begin process {process} on gpu {gpu}')
-
-        output[start:end,:,:] = bstGPU( data[start:end, :, :], dic, gpu )
-
-        logger.info(f'BST: end process {process} on gpu {gpu}')
-    
-
-def _build_bst_(params):
- 
-        nslices = params[2]
-        gpus    = params[5]
-        ngpus = len(gpus)
-
-        b = int( numpy.ceil( nslices/ngpus )  ) 
-
-        processes = []
-        for process in range( ngpus ):
-                begin_ = process*b
-                end_   = min( (process+1)*b, nslices )
-
-                p = multiprocessing.Process(target=_worker_bst_, args=(params, begin_, end_, gpus[process], process))
-                processes.append(p)
-    
-        for p in processes:
-                p.start()
-
-        for p in processes:
-                p.join()
-
-
-def bst_gpublock( tomogram, dic ):
-
-        nslices     = tomogram.shape[0]
-        nangles     = tomogram.shape[1]
-        nrays       = tomogram.shape[2]
-        gpus        = dic['gpu']
-        outtype     = dic['recon type']
-
-        name = str( uuid.uuid4())
-
-        try:
-                sa.delete(name)
-        except:
-                pass
-
-        output  = sa.create(name,[nslices, nangles, nrays], dtype=outtype)
-
-        _params_ = ( output, tomogram, nslices, nangles, nrays, gpus, dic)
-
-        _build_bst_( _params_ )
-
-        sa.delete(name)
-
-        return output
-
-
-def bst_threads(tomogram, dic, **kwargs):
-        
-        nrays = tomogram.shape[2]
-
-        dicparams = ('gpu','angles','filter','reconSize','precision','regularization','threshold',
-                    'shift center','tomooffset','360pan')
-        defaut = ([0],None,None,nrays,'float32',0,0,False,0,False)
-        
-        SetDictionary(dic,dicparams,defaut)
-
-        gpus  = dic['gpu']
-
-        reconsize = dic['reconSize']
-
-        if reconsize % 32 != 0:
-                reconsize += 32-(reconsize%32)
-                logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
-
-        precision = dic['precision'].lower()
-        if precision == 'float32':
-                precision = 5
-                recondtype = np.float32
-        elif precision == 'uint16':
-                precision = 2
-                recondtype = np.uint16
-        elif precision == 'uint8':
-                precision = 1
-                recondtype = np.uint8
-        else:
-                logger.error(f'Invalid recon datatype:{precision}')
-        
-        dic.update({'reconSize': reconsize,'recon type': recondtype, 'precision': precision})
-
-        if len(gpus) == 1:
-                gpu = gpus[0]
-                output = bstGPU( tomogram, dic, gpu )
-        else:
-                output = bst_gpublock( tomogram, dic ) 
-
-        return output
-
 
 def bst(tomogram, dic, **kwargs):
         
@@ -232,9 +129,9 @@ def bst(tomogram, dic, **kwargs):
 
         reconsize = dic['reconSize']
 
-        if reconsize % 32 != 0:
-                reconsize += 32-(reconsize%32)
-                logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
+        # if reconsize % 32 != 0:
+        #         reconsize += 32-(reconsize%32)
+        #         logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
 
         precision = dic['precision'].lower()
         if precision == 'float32':
@@ -256,5 +153,11 @@ def bst(tomogram, dic, **kwargs):
                 output = bstGPU( tomogram, dic, gpu )
         else:
                 output = bstMultiGPU( tomogram, dic ) 
+
+        # Garbage Collector
+        # lists are cleared whenever a full collection or
+        # collection of the highest generation (2) is run
+        # collected = gc.collect() # or gc.collect(2)
+        # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
 
         return output

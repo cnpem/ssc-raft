@@ -237,77 +237,6 @@ def Tomo360To180GPU(tomogram, offset, gpu = 0):
         return tomogram.reshape((nslices, nangles // 2, nrays * 2))
 
 
-def _worker_360to180_(params, start, end, gpu, process):
-
-        output = params[0]
-        data   = params[1]
-        offset = params[6]
-
-        logger.info(f'Applying Rings: begin process {process} on gpu {gpu}')
-
-        output[start:end,:,:] = Tomo360To180GPU( data[start:end, :, :], offset, gpu )
-
-        logger.info(f'Applying Rings: end process {process} on gpu {gpu}')
-    
-
-def _build_360to180_(params):
- 
-        nslices = params[2]
-        gpus    = params[5]
-        ngpus = len(gpus)
-
-        b = int( numpy.ceil( nslices/ngpus )  ) 
-
-        processes = []
-        for process in range( ngpus ):
-                begin_ = process*b
-                end_   = min( (process+1)*b, nslices )
-
-                p = multiprocessing.Process(target=_worker_360to180_, args=(params, begin_, end_, gpus[process], process))
-                processes.append(p)
-    
-        for p in processes:
-                p.start()
-
-        for p in processes:
-                p.join()
-
-
-def tomo360to180_gpublock( tomogram, offset, gpus ):
-
-        nslices     = tomogram.shape[0]
-        nangles     = tomogram.shape[1]
-        nrays       = tomogram.shape[2]
-
-        name = str( uuid.uuid4())
-
-        try:
-                sa.delete(name)
-        except:
-                pass
-
-        output  = sa.create(name,[nslices, nangles // 2, 2 * nrays], dtype=np.float32)
-
-        _params_ = ( output, tomogram, nslices, nangles, nrays, gpus, offset)
-
-        _build_360to180_( _params_ )
-
-        sa.delete(name)
-
-        return output
-
-
-def Tomo360To180_threads(tomogram, offset, gpus = [0], **kwargs):
-
-        if len(gpus) == 1:
-                gpu = gpus[0]
-                output = Tomo360To180GPU( tomogram, offset, gpu )
-        else:
-                output = tomo360to180_gpublock( tomogram, offset, gpus ) 
-
-        return output
-
-
 def Tomo360To180(tomogram, offset, gpus = [0], **kwargs):
 
         if len(gpus) == 1:
@@ -315,5 +244,11 @@ def Tomo360To180(tomogram, offset, gpus = [0], **kwargs):
                 output = Tomo360To180GPU( tomogram, offset, gpu )
         else:
                 output = Tomo360To180MultiGPU( tomogram, offset, gpus ) 
+                
+        # Garbage Collector
+        # lists are cleared whenever a full collection or
+        # collection of the highest generation (2) is run
+        # collected = gc.collect() # or gc.collect(2)
+        # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
 
         return output

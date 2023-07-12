@@ -11,7 +11,7 @@ extern "C"{
 		cImage fft(nrays/2+1,nangles);
 		// cImage fft2(nrays/2+1,nangles);
 
-		printf("FILTER: %ld %ld %ld %ld \n",nrays,nangles,blocksize,nrays/2+1);
+		// printf("FILTER: %ld %ld %ld %ld \n",nrays,nangles,blocksize,nrays/2+1);
 
 		cufftHandle plan_r2c, plan_c2r;
 		cufftPlan1d(&plan_r2c, nrays, CUFFT_R2C, nangles);
@@ -20,7 +20,7 @@ extern "C"{
 		dim3 blk = fft.ShapeBlock();
 		dim3 thr = fft.ShapeThread();
 
-		printf("Enter sino filter \n ");
+		// printf("Enter sino filter \n ");
 
 		for(int k=0; k<blocksize; k++)
 		{

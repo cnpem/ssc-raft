@@ -6,22 +6,27 @@ import multiprocessing
 import os
 import sys
 import numpy
-import logging
+import gc
 import json
 import h5py
 
 '''----------------------------------------------'''
+import logging
+
+console_log_level = 10
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
+console_handler = logging.StreamHandler(sys.stdout)
 
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
+logger.setLevel(logging.DEBUG)
+console_handler.setLevel(console_log_level)
+
+DEBUG = 10
 '''----------------------------------------------'''
 
 nthreads = multiprocessing.cpu_count()
@@ -80,6 +85,14 @@ try:
     libraft.eEMblock.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
                             c_int, c_int, c_int, c_int, c_int, c_int, ctypes.c_void_p]
     libraft.eEMblock.restype  = None
+
+    libraft.tEMgpu.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                           c_int, c_int, c_int, c_int, c_int, c_int]
+    libraft.tEMgpu.restype  = None
+
+    libraft.eEMgpu.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                            c_int, c_int, c_int, c_int, c_int, c_int]
+    libraft.eEMgpu.restype  = None
 
 
 except:
@@ -324,8 +337,13 @@ def Metadata_hdf5(outputFileHDF5, dic, software, version):
         dic['Software'] = software
         dic['Version']  = version
 
+        
         if isinstance(outputFileHDF5, str):
-               hdf5 = h5py.File(outputFileHDF5, 'a')
+
+                if os.path.exists(outputFileHDF5):
+                        hdf5 = h5py.File(outputFileHDF5, 'a')
+                else:
+                        hdf5 = h5py.File(outputFileHDF5, 'w')
         else:
                hdf5 = outputFileHDF5
 
@@ -336,14 +354,12 @@ def Metadata_hdf5(outputFileHDF5, dic, software, version):
                 hdf5.require_group(h5_path)
                 
                 if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, numpy.ndarray):
-                       data = str(value)
-                       hdf5[h5_path].create_dataset(key, data=data)
+                       value = numpy.asarray(value)
+                       hdf5[h5_path].create_dataset(key, data=value, shape=value.shape)
                 else:
-                #        print('Key:',key,'Value',value,'Type',type(value))
-
                        if key == 'recon type':
                                 value = str(value)
-                #        print('Key:',key,'Value',value,'Type',type(value))
+                       
                        hdf5[h5_path].create_dataset(key, data=value, shape=())
 
         if isinstance(outputFileHDF5, str):

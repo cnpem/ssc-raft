@@ -26,8 +26,6 @@ extern "C"{
         { 
             sintable.cpuptr[i] = sin(angs[i]);
             costable.cpuptr[i] = cos(angs[i]);
-            // if ( i == 100 )
-            //     printf("Angles %d here: %lf %lf\n", nangles, angs[100], cos(angs[100]));
         }
         else for(int i=0; i<nangles; i++)
         {
@@ -35,10 +33,8 @@ extern "C"{
             costable.cpuptr[i] = cos(float(i)*float(M_PI)/float(nangles));
         }
 
-        // printf("Before load trig table to GPU \n");
         sintable.LoadToGPU();
         costable.LoadToGPU();
-        // printf("Before load trig table to GPU \n");
         
         SinoFilter(sinoblock, nrays, nangles, sizez, csino, true, reg, bShiftCenter, sintable.gpuptr);
 
