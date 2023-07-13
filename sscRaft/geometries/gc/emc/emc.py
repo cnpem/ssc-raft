@@ -463,6 +463,7 @@ def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
     *``dic['max tolerance']`` (float):  Maximum -physically acceptable- value admitted in the reconstruction.
         Default is np.inf (positive infinite).
     *``dic['shift']`` (int): Tuple (value = 0). Rotation axis deviation value.
+    *``dic['Energy[keV]'] (float or list of floats): photon energy in keV.
     *``dic['save path']`` (str,optional): Path to save reconstruction
 
     """
@@ -482,17 +483,23 @@ def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
 
     cone_data               = {}
 
+    cone_data['unit of measurement (length)'] = 'm'
+    cone_data['Energy[keV]'] = dic['Energy[keV]']
     cone_data['z1']         = dic['z1[m]']
-    cone_data['z1']         = dic['z1+z2[m]'] - dic['z1[m]']
+    cone_data['z2']         = dic['z1+z2[m]'] - dic['z1[m]']
     cone_data['pixel_size'] = dic['detectorPixel[m]']
-    cone_data['size']       = dic['reconSize']
     cone_data['angs']       = numpy.asarray(dic['angles'])
+
+    try:
+        cone_data['size'] = dic['reconSize']
+    except:
+        pass
 
     try:
         cone_data['meio_sup_comp'] = dic['meio_sup_comp']
     except:
         pass
-    
+
     try:
         cone_data['rotation axis position'] = dic['shift']
     except:
