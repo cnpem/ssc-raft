@@ -31,7 +31,9 @@ def preprocessing_mogno(data, flat, dark, experiment):
       *``experiment['method']`` (string): Method for reconstruction: 'em' or 'fdk'. Defaults to 'fdk'.
 
    """
-   tomo = np.copy(data)
+   tomo = data.copy()
+   flat = flat.copy()
+   dark = dark.copy()
 
    is_normalize = experiment['normalize'][0]
    method       = experiment['method']
@@ -88,12 +90,12 @@ def preprocessing_mogno(data, flat, dark, experiment):
    if method == 'em':
       shift      = experiment['shift'][1]
       is_autoRot = experiment['shift'][0]
-      nx_search  = experiment['findRotationAxis'][0]
-      nx_window  = experiment['findRotationAxis'][1]
-      nsinos     = experiment['findRotationAxis'][2]
-
+      tomo = np.swapaxes(tomo,0,1)
       if is_autoRot:
-         shift    = find_rotation_axis_360(np.swapaxes(tomo,0,1), nx_search, nx_window, nsinos)
+         nx_search  = experiment['findRotationAxis'][0]
+         nx_window  = experiment['findRotationAxis'][1]
+         nsinos     = experiment['findRotationAxis'][2]
+         shift = find_rotation_axis_360(tomo, nx_search, nx_window, nsinos)
 
    elif method == 'fdk':
       tomo_, shift = correct_rotation_axis360(tomo, experiment)
@@ -160,27 +162,25 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
    # default    = (False, (False, -1, 1), (False, False, 0, 0, False), (False, 0), 0, 'x', (0, 0, 0),'fdk','hamming',1)
    # SetDictionary(experiment,dicparams,default)
 
-   experiment['method']         = 'fdk'
-
    method = experiment['method']
 
-   logger.info(f'FDK: Begin preprocessing')
+   logger.info(f'RECON-MOGNO: Begin preprocessing')
 
    tomo, shift = preprocessing_mogno(data, flat, dark, experiment)
 
-   if method == 'em':
-      experiment['shift'][1] = shift
+   if method == 'em' and experiment['shift']:
+      experiment['shift'] = shift
       experiment['niterations'] = (experiment['iterations'][0],1,1,experiment['iterations'][1])
+      logger.info('RECON-MOGNO: Rotation axis deviation: {}'.format(shift))
 
-   logger.info(f'FDK: Finished preprocessing')
+   logger.info(f'RECON-MOGNO: Finished preprocessing')
 
-   logger.info(f'FDK: Begin reconstruction')
+   logger.info(f'RECON-MOGNO: Begin reconstruction')
 
    if method == 'fdk':
       recon = fdk(tomo, experiment)
    elif method == 'em':
-      # recon = em_cone(tomo, flat, dark, experiment)
-      pass
+      recon = em_cone(data, flat, dark, experiment)
    else:
       logger.error(f'Invalid reconstruction method:{method}. Choose from options `fdk` or `em`.')
 
@@ -191,6 +191,6 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
    # collected = gc.collect() # or gc.collect(2)
    # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
 
-   logger.info(f'FDK: Finished reconstruction')
+   logger.info(f'RECON-MOGNO: Finished reconstruction')
 
    return recon
