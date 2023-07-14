@@ -107,7 +107,7 @@ def _make_detector_pointer(cone_data, tomo_shape):
 
 def _get_rot_axis_deviation(cone_data, tomo_shape):
     rot_axis_pos = cone_data["rotation axis position"]
-    deviation = -(rot_axis_pos-tomo_shape[2]/2)*cone_data["pixel_size"]
+    deviation = -(rot_axis_pos-tomo_shape[2]/2)*cone_data["eps"]
     return deviation
 
 def _align_exp_wrt_rot_axis_position(cone_data, tomo_shape):
@@ -501,9 +501,9 @@ def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
         pass
 
     try:
-        cone_data['rotation axis position'] = dic['shift']
+        cone_data['rotation axis position'] = dic['shift'] + tomogram.shape[-1]/2
     except:
-        cone_data['rotation axis position'] = 0
+        cone_data['rotation axis position'] = tomogram.shape[-1]/2
 
     try:
         cone_data['number of integration points'] = dic['niterations'][3]
