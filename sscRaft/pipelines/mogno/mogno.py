@@ -145,7 +145,7 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
       *``experiment['fourier']`` (bool): Type of filter for reconstruction. True = Fourier, False = Convolution.
       *``experiment['rings']`` (bool,float,int): Tuple flag for application of rings removal algorithm. (apply = True, rings regularization = -1 (automatic), rings block = 1).
       *``experiment['normalize']`` (bool,bool,int,int): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, total number of frames acquired = data.shape[0], index of initial frame to process = 0).
-      *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation shift automatic corrrection (is_autoRot).
+      *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation axis automatic corrrection (is_autoRot).
       *``experiment['padding']`` (int): Number of elements for horizontal zero-padding. Defaults to 0.
       *``experiment['detectorType']`` (str): If detector type. If 'pco' discard fist 11 rows of data. Defauts to 'pco'.
       *``experiment['findRotationAxis']`` (int,int,int): For rotation axis function. (nx_search=500, nx_window=500, nsinos=None).

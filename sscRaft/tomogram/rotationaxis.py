@@ -19,7 +19,7 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
         ValueError: If the number of angles/projections is not an even number.
 
     Dictionary parameters:
-        *``experiment['shift']`` (Tuple, optional): (bool,int) Rotation shift automatic corrrection (is_autoRot) (`is_autoRot = True`, `value = 0`).
+        *``experiment['shift']`` (Tuple, optional): (bool,int) Rotation axis automatic corrrection (is_autoRot) (`is_autoRot = True`, `value = 0`).
         *``experiment['findRotationAxis']`` (Tuple, optional): (int,int,int) For rotation axis function. Tuple (`nx_search=500`, `nx_window=500`, `nsinos=None`).
         *``experiment['padding']`` (int, optional): Number of elements for horizontal zero-padding. Defaults to 0.
 
@@ -29,7 +29,7 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
         Default is `nx_search=500`.
         * `nx_window` (int, optional): How much of the sinogram will be used in the axis 2.
         Default is `nx_window=500`.
-        * `nsinos` (int or None, optional): Number of sinograms to avarege over.
+        * `nsinos` (int or None, optional): Number of sinograms to average over.
         Default is None, which results in `nsinos = nslices//2`, where `nslices = tomo.shape[1]`.
         * `is_autoRot` (bool,optional): Apply the automatic rotation axis correction.
         Default is `True`.
