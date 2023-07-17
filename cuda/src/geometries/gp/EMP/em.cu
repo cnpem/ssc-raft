@@ -216,7 +216,7 @@ extern "C" {
     cudaMalloc(&d_angles, sizeof(float) * nangles);
     cudaMemcpy(d_angles, angles, sizeof(float) * nangles, cudaMemcpyHostToDevice);	
 
-    printf("Printando essa porra + %d, %d, %e\n",device, nangles, count[1024]);
+    // printf("Printando essa porra + %d, %d, %e\n",device, nangles, count[1024]);
     // for(int i=0; i < nangles; i++) printf("Angle[%d] = %e \n",i,angles[i]);
 
     //GRID and BLOCKS SIZE
@@ -236,7 +236,7 @@ extern "C" {
  
     for( k=0; k < niter; k++ )
       {
-      printf("Aqui iter = %d \n",k);
+      // printf("Aqui iter = %d \n",k);
       kernel_radon<<<gridBlockD, threadsPerBlock>>>(d_temp, d_output, d_angles, sizeImage, nrays, nangles, blockSize, 1.0);
       
       kernel_flatTimesExp<<<gridBlockD, threadsPerBlock>>>(d_temp, d_flat, sizeImage, nrays, nangles, blockSize);
@@ -251,7 +251,7 @@ extern "C" {
     //Copy the output image from device memory to host memory
     cudaMemcpy (output , d_output , blockSize*sizeImage*sizeImage*sizeof(float) , cudaMemcpyDeviceToHost);
     
-    printf("Printando out + %d, %d, %e\n",device, nangles, output[1024]);
+    // printf("Printando out + %d, %d, %e\n",device, nangles, output[1024]);
 
     cudaFree(d_output);
     cudaFree(d_temp);
@@ -459,7 +459,7 @@ extern "C" {
     cudaMalloc(&d_angles, sizeof(float) * nangles);
     cudaMemcpy(d_angles, angles, sizeof(float) * nangles, cudaMemcpyHostToDevice);	
     
-    printf("Printando essa porra + %d, %d, %e\n",device, nangles, sino[1024]);
+    // printf("Printando essa porra + %d, %d, %e\n",device, nangles, sino[1024]);
 
     //GRID and BLOCKS SIZE
     dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
@@ -742,7 +742,7 @@ extern "C"{
       for(size_t b = 0; b < nslices; b += blocksize){
           
           blocksize = min(size_t(nslices) - b, blocksize);
-          printf("Nslices: %d, blocksize: %ld, Iter: %ld \n", nslices,blocksize,b);
+          // printf("Nslices: %d, blocksize: %ld, Iter: %ld \n", nslices,blocksize,b);
 
 
           eEM(output + (size_t)b*sizeImage*sizeImage, sino + (size_t)b*nrays*nangles, angles, sizeImage, nrays, nangles, blocksize, gpu, niter);          
@@ -789,7 +789,7 @@ extern "C"{
 
       for(size_t b = 0; b < nslices; b += blocksize){
           blocksize = min(size_t(nslices) - b, blocksize);
-          printf("Nslices: %d, blocksize: %ld, Iter: %ld \n", nslices,blocksize,b);
+          // printf("Nslices: %d, blocksize: %ld, Iter: %ld \n", nslices,blocksize,b);
 
           tEM(output + (size_t)b*sizeImage*sizeImage, count + (size_t)b*nrays*nangles, flat + (size_t)b*nrays*nangles, angles, sizeImage, nrays, nangles, blocksize, gpu, niter);          
       }
