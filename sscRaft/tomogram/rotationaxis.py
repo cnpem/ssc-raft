@@ -77,7 +77,7 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
     return proj, shift
 
 def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
-    """CPU (python) function: Searches for the rotation axis index in axis 2 (rays (x) variable) of a sample measured on more then 180 degrees.
+    """CPU (python) function: Searches for the rotation axis index in axis 2 (rays (x) variable) of a sample measured on more than 180 degrees.
     It minimizes the symmetry error.
     Works with parallel, fan and cone beam sinograms (proof: to do).
     It is assumed the center of rotation is between two pixels. 

@@ -59,7 +59,7 @@ Or manually download it from the [package](https://gcc.lnls.br:3128/packages/) l
 7. `Centersino`: parallel beam center alignment
 8. `Filters`: filters
 9. `FDK`: Conebeam filter backprojection
-
+10. `EM`: bug for parallel beam 360 panoramic
 
 ## To Do:
 
@@ -67,4 +67,4 @@ Or manually download it from the [package](https://gcc.lnls.br:3128/packages/) l
 2. `Tomo360`: Correction of bug for odd angle dimension
 3. `Aceleration`:
 4. `EM FST`:
-5. `EM`: bug for parallel beam 360 panoramic
+

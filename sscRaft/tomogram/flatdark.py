@@ -22,16 +22,11 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         is_log     = dic['uselog']
         nrays      = frames.shape[-1]
         nangles    = frames.shape[0]
-        Tframes    = dic['frames info'][0]
-        Initframes = dic['frames info'][1]
         
         if is_log:
                 is_log = 1
         else:
                 is_log = 0
-
-        if Tframes == nangles:
-                Initframes = 0
 
         if len(frames.shape) == 2:
                 nslices = 1
@@ -65,13 +60,11 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         frames    = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
 
-        logger.info(f'Init Frame of Correction: {Initframes}')
-
         nrays      = int32(nrays)
         nangles    = int32(nangles)
         nslices    = int32(nslices)
-        nflats     = int32(nflats)
-        Tframes    = int32(Tframes)
+        nflats     = int32(nangles)
+        Tframes    = int32(0)
         Initframes = int32(Initframes)
         is_log     = int32(is_log)
         
@@ -86,16 +79,11 @@ def flatdarkGPU(frames, flat, dark, dic):
         is_log     = dic['uselog']
         nrays      = frames.shape[-1]
         nangles    = frames.shape[0]
-        Tframes    = dic['frames info'][0]
-        Initframes = dic['frames info'][1]
         
         if is_log:
                 is_log = 1
         else:
                 is_log = 0
-        
-        if Tframes == nangles:
-                Initframes = 0
 
         if len(frames.shape) == 2:
                 nslices = 1
@@ -128,15 +116,13 @@ def flatdarkGPU(frames, flat, dark, dic):
         
         frames    = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
-        
-        logger.info(f'Init Frame of Correction: {Initframes}')
 
         nrays      = int32(nrays)
         nangles    = int32(nangles)
         nslices    = int32(nslices)
         nflats     = int32(nflats)
-        Tframes    = int32(Tframes)
-        Initframes = int32(Initframes)
+        Tframes    = int32(nangles)
+        Initframes = int32(0)
         is_log     = int32(is_log)
         
         libraft.flatdark_gpu(int32(gpu), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, Tframes, Initframes, is_log)
@@ -172,11 +158,10 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
          Dictionary parameters:
                 *``experiment['gpu']`` (int list): List of GPUs.
                 *``experiment['uselog']`` (bool): Apply logarithm or not.
-                *``experiment['frames info']`` (int,int): Total of frames acquired, index of initial frame to compute
         """        
 
-        dicparams = ('gpu','uselog','frames info')
-        defaut    = ([0],True,(frames.shape[0],0))
+        dicparams = ('gpu','uselog')
+        defaut    = ([0],True)
         
         SetDictionary(dic,dicparams,defaut)
 

@@ -29,7 +29,6 @@ def fbpMultiGPU(tomogram, dic):
         
         reconsize = dic['reconSize']
 
-        Is360pan = dic['360pan']
         angles = dic['angles']
         precision = int(dic['precision'])
         filter = int32(FilterNumber(dic['filter']))
@@ -49,10 +48,7 @@ def fbpMultiGPU(tomogram, dic):
         except:
                 anglesptr = void_p(0)
 
-        if Is360pan:
-                tomooffset = 0
-        else:
-                tomooffset = dic['tomooffset']
+        tomooffset = dic['tomooffset']
         
         reconsize = int32(reconsize)
         tomooffset = int32(tomooffset)
@@ -79,7 +75,6 @@ def fbpGPU(tomogram, dic, gpu = 0):
         
         reconsize = dic['reconSize']
 
-        Is360pan = dic['360pan']
         angles = dic['angles']
         precision = int(dic['precision'])
         filter = int32(FilterNumber(dic['filter']))
@@ -103,10 +98,7 @@ def fbpGPU(tomogram, dic, gpu = 0):
                 print('void')
                 anglesptr = void_p(0)
 
-        if Is360pan:
-                tomooffset = 0
-        else:
-                tomooffset = dic['tomooffset']
+        tomooffset = dic['tomooffset']
         
         reconsize = int32(reconsize)
         tomooffset = int32(tomooffset)
@@ -115,10 +107,6 @@ def fbpGPU(tomogram, dic, gpu = 0):
         nslices = int32(nslices)
         bShiftCenter = int32(dic['shift center'])
 
-
-        print(dic)
-
-        # quit()
         libraft.fbpgpu(int32(ngpus), outputptr, tomogramptr, nrays, nangles, nslices, reconsize, tomooffset, regularization, anglesptr, threshold, precision, filter, bShiftCenter)
 
         return output
@@ -130,8 +118,8 @@ def fbp(tomogram, dic, **kwargs):
         nrays = tomogram.shape[-1]
 
         dicparams = ('gpu','angles','filter','reconSize','precision','regularization','threshold',
-                    'shift center','tomooffset','360pan')
-        defaut = ([0],None,'lorentz',nrays,'float32',1,0,False,0,False)
+                    'shift center','tomooffset')
+        defaut = ([0],None,'lorentz',nrays,'float32',1,0,False,0)
         
         SetDictionary(dic,dicparams,defaut)
 

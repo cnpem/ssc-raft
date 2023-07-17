@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+[2.2.0] - 2023-07-17
+--------------------
+Added
+~~~~~
+- Function for Mogno beamline reconstruction in cone-beam geometry
+- New dictionary entries 
+- Added ``EM`` for cone-beam geometry
+- Parallel ``EM`` now accepts a list of nonregular angles as input
+- Documentation page updated! New examples of usage in documentation page
+
+Changed
+~~~~~~~
+- Metadata datasets modifications in saving 
+- Dictionary entries for ``correct_projections()`` function in ``flatdark.py``: removed ``frames info``
+- Internal structure changed
+
+Corretions
+~~~~~~~~~~
+- Reconstruction parallel method ``EM`` bug with use of multiprocessing (python) together with other GPU functions.
+
+Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- The ``FDK`` resconstruction is returning a multiplication factor of ``2`` related to filtering computed by Fourier Transform. This factor changes a little when the filtering is computed by direct convolution
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
 
 [2.1.4] - 2023-02-24
 --------------------

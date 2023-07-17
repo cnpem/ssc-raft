@@ -11,7 +11,7 @@ This page documents the ssc-raft module from Sirius Scientific Computing Group.
 Code structure
 ***************
 
-This module is implemented in ``CUDA`` with an interface in ``Python 3``
+This module is implemented in ``CUDA`` with an interface in ``Python3``
  
 ****************
 Modules
@@ -20,7 +20,7 @@ Modules
 Module call
 ***************
 
-The ssc-raft algorithm is called as ``sscRaft`` module in ``Python 3`` 
+The ssc-raft algorithm is called as ``sscRaft`` module in ``Python3`` 
 
 .. code-block:: python
     
@@ -41,17 +41,32 @@ Functions
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: sscRaft.geometries.gp.reconstruction
+.. automodule:: sscRaft.geometries.gc.emc
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: sscRaft.geometries.gp.alignment
+.. automodule:: sscRaft.geometries.gp.bst
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: sscRaft.geometries.gp.rings
+.. automodule:: sscRaft.geometries.gp.emp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: sscRaft.geometries.gp.fbp
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: sscRaft.geometries.gp.fst
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: sscRaft.pipelines.mogno
     :members:
     :undoc-members:
     :show-inheritance:

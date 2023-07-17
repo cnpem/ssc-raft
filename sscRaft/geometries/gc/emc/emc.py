@@ -463,14 +463,14 @@ def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
     *``dic['max tolerance']`` (float):  Maximum -physically acceptable- value admitted in the reconstruction.
         Default is np.inf (positive infinite).
     *``dic['shift']`` (int): Tuple (value = 0). Rotation axis deviation value.
-    *``dic['Energy[keV]'] (float or list of floats): photon energy in keV.
+    *``dic['Energy[keV]']`` (float or list of floats): photon energy in keV.
     *``dic['save path']`` (str,optional): Path to save reconstruction
 
     """
     # Set default dictionary parameters:
 
-    # dicparams = ('gpu','angles','nangles','niterations','regularization','epsilon','method','is360','blocksize')
-    # defaut    = ([0],None,tomogram.shape[1],[8,3,8],1e-3,1e-1,'eEM',False, 1)
+    # dicparams = ('gpu','angles','nangles','niterations','regularization')
+    # defaut    = ([0],None,tomogram.shape[1],[8,3,8,200],1)
 
     # SetDictionary(dic,dicparams,defaut)
 
@@ -509,6 +509,11 @@ def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
         cone_data['number of integration points'] = dic['niterations'][3]
     except:
         pass
+
+    try:
+        cone_data['save path'] = dic['save path']
+    except:
+        dic['save path'] = False
 
     recon = tEM_cone(tomogram, flat, dark, cone_data, niter, gpus, reg, recon_max, save_path = dic['save path'])
 

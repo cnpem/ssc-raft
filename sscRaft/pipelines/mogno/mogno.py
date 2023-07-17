@@ -23,7 +23,7 @@ def preprocessing_mogno(data, flat, dark, experiment):
    Dictionary parameters:
       *``experiment['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
       *``experiment['rings']`` (bool,float,int): Tuple flag for application of rings removal algorithm. (apply = True, rings regularization = -1 (automatic), rings block = 1).
-      *``experiment['normalize']`` (bool,bool,int,int,bool): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, total number of frames acquired = data.shape[0], index of initial frame to process = 0, remove negative values = False).
+      *``experiment['normalize']`` (bool,bool,bool): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, remove negative values = False).
       *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation shift automatic corrrection (is_autoRot).
       *``experiment['padding']`` (int): Number of elements for horizontal zero-padding. Defaults to 0.
       *``experiment['detectorType']`` (string): If detector type. If 'pco' discard fist 11 rows of data. Defauts to 'pco'.
@@ -59,7 +59,6 @@ def preprocessing_mogno(data, flat, dark, experiment):
       logger.info('Begin Flat and Dark correction')
 
       experiment['uselog'] = experiment['normalize'][1]
-      experiment['frames info'] = (experiment['normalize'][2],experiment['normalize'][3])
 
       if(len(flat.shape) == 4):
          flats_ = np.zeros((flat.shape[0], flat.shape[2], flat.shape[3]))
@@ -144,9 +143,9 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
       *``experiment['method']`` (str): Method for reconstruction: 'em' or 'fdk'. Defaults to 'fdk'.
 
    Options:
-      *``experiment['fourier']`` (bool): Type of filter for reconstruction. True = Fourier, False = Convolution.
+      *``experiment['fourier']`` (bool): Define type of filter computation for `FDK` reconstruction. True = FFT, False = Integration (only available for'ramp' filter). Recommend FFT.
       *``experiment['rings']`` (bool,float,int): Tuple flag for application of rings removal algorithm. (apply = True, rings regularization = -1 (automatic), rings block = 1).
-      *``experiment['normalize']`` (bool,bool,int,int,bool): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, total number of frames acquired = data.shape[0], index of initial frame to process = 0, remove negative values = False).
+      *``experiment['normalize']`` (bool,bool,bool): Tuple flag for normalization of projection data. ( normalize = True , use log to normalize = True, remove negative values = False).
       *``experiment['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation axis automatic corrrection (is_autoRot).
       *``experiment['padding']`` (int): Number of elements for horizontal zero-padding. Defaults to 0.
       *``experiment['detectorType']`` (str): If detector type. If 'pco' discard fist 11 rows of data. Defauts to 'pco'.

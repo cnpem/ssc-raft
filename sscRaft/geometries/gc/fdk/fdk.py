@@ -25,11 +25,11 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     GPU function.
 
     Args:
-        data (ndarray): Cone beam projection tomogram. The axes are [angles, slices, lenght].
+        data (ndarray): Cone beam projection tomogram. The axes are [slices, angles, lenght].
         dic (dictionary): Dictionary with the experiment info.
 
     Returns:
-        (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [x, y, z].
+        (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [z, y, x].
 
     Dictionary parameters:
         *``dic['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
@@ -37,7 +37,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
         *``dic['z1+z2[m]']`` (float): Source-detector distance in meters. Defaults to 1.0.
         *``dic['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
         *``dic['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[0].
-        *``dic['fourier']`` (bool): Type of filter computation for reconstruction. True = Fourier, False = Convolution (only for ramp filter).
+        *``dic['fourier']`` (bool): Define type of filter computation for reconstruction. True = FFT, False = Integration (only available for'ramp' filter). Recommend FFT.
         *``dic['filter']`` (str,optional): Type of filter for reconstruction. 
         Options = ('none','gaussian','lorentz','cosine','rectangle','hann','hamming','ramp'). Default is 'hamming'.
         *``dic['regularization']`` (float,optional): Type of filter for reconstruction, small values. Default is 1.
@@ -45,16 +45,13 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
 
     # recon = data 
     regularization = dic['regularization']
-
-    if regularization == 0:
-        dic['filter'] = 'none'
     
     D, Dsd = dic['z1[m]'], dic['z1+z2[m]']
 
     dh, dv = dic['detectorPixel[m]'], dic['detectorPixel[m]']
     nh, nv = int(tomogram.shape[2]), int(tomogram.shape[0])
     h, v   = nh*dh/2, nv*dv/2
-  
+
     beta_max, nbeta = 2*np.pi, int(tomogram.shape[1])
     dbeta           = beta_max/nbeta
 

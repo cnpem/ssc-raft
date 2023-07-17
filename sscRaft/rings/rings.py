@@ -123,13 +123,13 @@ def rings(tomogram, dic, **kwargs):
                 ndarray: tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
         
         Dictionary parameters:
-                *``dic['lambda rings']`` (float): Lambda regularization of rings. Defaults to 0 (automatic).
-                *``dic['rings block']`` (int): Blocks of rings to be used. Defaults to 2.    
+                *``dic['lambda rings']`` (float): Lambda regularization of rings. Defaults to -1 (automatic).
+                *``dic['rings block']`` (int): Blocks of rings to be used. Defaults to 1.    
                 *``dic['gpu']`` (int list): List of GPUs to use. Defaults to [0].
         """
 
         dicparams = ('gpu','lambda rings','rings block')
-        defaut = ([0],0,2)
+        defaut = ([0],-1,1)
 
         SetDictionary(dic,dicparams,defaut)
 
