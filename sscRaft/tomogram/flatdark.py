@@ -63,9 +63,9 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         nrays      = int32(nrays)
         nangles    = int32(nangles)
         nslices    = int32(nslices)
-        nflats     = int32(nangles)
-        Tframes    = int32(0)
-        Initframes = int32(Initframes)
+        nflats     = int32(nflats)
+        Tframes    = int32(nangles)
+        Initframes = int32(0)
         is_log     = int32(is_log)
         
         libraft.flatdark_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, Tframes, Initframes, is_log)
