@@ -22,7 +22,8 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         is_log     = dic['uselog']
         nrays      = frames.shape[-1]
         nangles    = frames.shape[0]
-        
+        Tframes    = nangles
+
         if is_log:
                 is_log = 1
         else:
@@ -64,7 +65,7 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         nangles    = int32(nangles)
         nslices    = int32(nslices)
         nflats     = int32(nflats)
-        Tframes    = int32(nangles)
+        Tframes    = int32(Tframes)
         Initframes = int32(0)
         is_log     = int32(is_log)
         
@@ -79,6 +80,7 @@ def flatdarkGPU(frames, flat, dark, dic):
         is_log     = dic['uselog']
         nrays      = frames.shape[-1]
         nangles    = frames.shape[0]
+        Tframes    = nangles
         
         if is_log:
                 is_log = 1
@@ -121,7 +123,7 @@ def flatdarkGPU(frames, flat, dark, dic):
         nangles    = int32(nangles)
         nslices    = int32(nslices)
         nflats     = int32(nflats)
-        Tframes    = int32(nangles)
+        Tframes    = int32(Tframes)
         Initframes = int32(0)
         is_log     = int32(is_log)
         
