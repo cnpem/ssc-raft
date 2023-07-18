@@ -691,7 +691,11 @@ def em(tomogram, dic, **kwargs):
     reg       = dic['regularization']
     eps       = dic['epsilon']
     method    = dic['method']
-    is_360    = dic['is360']
+
+    try:
+        is_360  = dic['is360']
+    except:
+        is_360 = False
 
     if method == 'eEM':
 
