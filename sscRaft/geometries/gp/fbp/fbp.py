@@ -7,8 +7,6 @@ from ctypes import c_float as float32
 from ctypes import c_int as int32
 from ctypes import c_void_p  as void_p
 from ctypes import c_size_t as size_t
-import uuid
-import SharedArray as sa
 
 def fbpMultiGPU(tomogram, dic):
         
@@ -26,14 +24,25 @@ def fbpMultiGPU(tomogram, dic):
                 nslices = 1
         else:
                 nslices = tomogram.shape[0]
+
+        precision = dic['precision'].lower()
+        if precision == 'float32':
+                precision = 5
+                recondtype = np.float32
+        elif precision == 'uint16':
+                precision = 2
+                recondtype = np.uint16
+        elif precision == 'uint8':
+                precision = 1
+                recondtype = np.uint8
+        else:
+                logger.error(f'Invalid recon datatype:{precision}')
         
         reconsize = dic['reconSize']
 
         angles = dic['angles']
-        precision = int(dic['precision'])
         filter = int32(FilterNumber(dic['filter']))
         regularization = float32(dic['regularization'])
-        recondtype = dic['recon type']
         threshold = float32(dic['threshold'])
 
         tomogram = np.ascontiguousarray(tomogram.astype(np.float32))
@@ -73,13 +82,25 @@ def fbpGPU(tomogram, dic, gpu = 0):
         else:
                 nslices = tomogram.shape[0]
         
+        precision = dic['precision'].lower()
+
+        if precision == 'float32':
+                precision = 5
+                recondtype = np.float32
+        elif precision == 'uint16':
+                precision = 2
+                recondtype = np.uint16
+        elif precision == 'uint8':
+                precision = 1
+                recondtype = np.uint8
+        else:
+                logger.error(f'Invalid recon datatype:{precision}')
+        
         reconsize = dic['reconSize']
 
         angles = dic['angles']
-        precision = int(dic['precision'])
         filter = int32(FilterNumber(dic['filter']))
         regularization = float32(dic['regularization'])
-        recondtype = dic['recon type']
         threshold = float32(dic['threshold'])
 
         tomogram = np.ascontiguousarray(tomogram.astype(np.float32))
@@ -88,14 +109,10 @@ def fbpGPU(tomogram, dic, gpu = 0):
         output = np.zeros((nslices,reconsize,reconsize),dtype=recondtype)
         outputptr = output.ctypes.data_as(void_p)
 
-        print("dtypes:",recondtype,output.dtype)
-
         try:
-                print('values:',angles.shape)
                 angles = np.ascontiguousarray(angles.astype(np.float32))
                 anglesptr = angles.ctypes.data_as(void_p)
         except:
-                print('void')
                 anglesptr = void_p(0)
 
         tomooffset = dic['tomooffset']
@@ -125,26 +142,13 @@ def fbp(tomogram, dic, **kwargs):
 
         gpus  = dic['gpu']
 
-        reconsize = dic['reconSize']
+        # reconsize = dic['reconSize']
 
         # if reconsize % 32 != 0:
         #         reconsize += 32-(reconsize%32)
         #         logger.info(f'Reconsize not multiple of 32. Setting to: {reconsize}')
 
-        precision = dic['precision'].lower()
-        if precision == 'float32':
-                precision = 5
-                recondtype = np.float32
-        elif precision == 'uint16':
-                precision = 2
-                recondtype = np.uint16
-        elif precision == 'uint8':
-                precision = 1
-                recondtype = np.uint8
-        else:
-                logger.error(f'Invalid recon datatype:{precision}')
-        
-        dic.update({'reconSize': reconsize,'recon type': recondtype, 'precision': precision})
+        # dic.update({'reconSize': reconsize})
 
         if len(gpus) == 1:
                 gpu = gpus[0]
