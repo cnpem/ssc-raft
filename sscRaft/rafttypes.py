@@ -94,6 +94,13 @@ try:
                             c_int, c_int, c_int, c_int, c_int, c_int]
     libraft.eEMgpu.restype  = None
 
+    libraft.emfreq.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                            c_int, c_int, c_int, c_int, c_int, c_float, c_int, c_int]
+    libraft.emfreq.restype  = None
+
+    libraft.emfreqblock.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                            c_int, c_int, c_int, c_int, c_int, c_float, c_int, c_int, ctypes.c_void_p]
+    libraft.emfreqblock.restype  = None
 
 except:
     print('-.RAFT_PARALLEL_EM-')
@@ -154,22 +161,6 @@ try:
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_void_p, ctypes.c_float, 
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int]
     libraft.fbpblock.restype  = None
-
-    libraft.bstgpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int, ctypes.c_void_p]
-    libraft.bstgpu.restype  = None
-
-    libraft.bstblock.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int, ctypes.c_void_p]
-    libraft.bstblock.restype  = None
-
-    libraft.fstgpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int, ctypes.c_void_p]
-    libraft.fstgpu.restype  = None
-    
-    libraft.fstblock.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_int, ctypes.c_void_p]
-    libraft.fstblock.restype  = None   
    
     libraft.flatdark_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
                                                 ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
