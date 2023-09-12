@@ -4,10 +4,10 @@
 // #include "../../../../inc/common/types.hpp"
 // #include "../../../../inc/common/operations.hpp"
 // #include "../../../../inc/common/logerror.hpp"
-#include "./src/fst.h"
-#include "./src/bst.h"
-#include "./src/kernel.h"
-#include "./src/utils/cufft_utils.h"
+#include "../../../../inc/geometries/gp/fst.h"
+#include "../../../../inc/geometries/gp/fst_kernel.h"
+#include "../../../../inc/geometries/gp/bst.h"
+#include "../../../../inc/common/cufft_utils.h"
 
 
 extern "C" {
@@ -78,7 +78,9 @@ extern "C" {
 		angles_cu, angles, sizeof(float) * nangles,
         cudaMemcpyHostToDevice, stream));
 
+        // BST:
         BST(backcounts_cu, sino_cu, nrays, nangles, blocksize, nrays, zpad+1);
+
         calc_reciprocal_element_wise<<<recon_size/NUM_THREADS, NUM_THREADS>>>(
             backcounts_cu,
             recon_size);
@@ -97,6 +99,7 @@ extern "C" {
                 nrays, nangles, blocksize,
                 zpad, interpolation, scale,
                 stream);
+
             // BST:
             BST(back_cu, sino_cu, nrays, nangles, blocksize, nrays, zpad+1);
 

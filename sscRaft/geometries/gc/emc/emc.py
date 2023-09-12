@@ -479,7 +479,11 @@ def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
     gpus                    = dic['gpu']
     niter                   = dic['niterations'][0]
     reg                     = dic['regularization']
-    recon_max               = dic['max tolerance']
+
+    try:
+        recon_max           = dic['max tolerance']
+    except:
+        recon_max           = np.inf
 
     cone_data               = {}
 

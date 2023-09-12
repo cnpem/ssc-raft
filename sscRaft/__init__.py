@@ -11,3 +11,5 @@ from .rebinning import *
 from .tomogram   import *
 from .rings   import *
 from .pipelines   import *
+from .filters   import *
+

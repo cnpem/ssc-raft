@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <cufft.h>
-#include "../../../../inc/gc/fdk.h"
+#include "../../../../inc/geometries/gc/fdk.h"
 
 // fazer funções para malloc e copia para não poluir os códigos.
 // MUDA O NOME DA CALC_CONV PARA FILTER_BY_CONV

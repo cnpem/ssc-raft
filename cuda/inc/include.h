@@ -22,9 +22,11 @@
 #include <math.h>
 #include <cublas_v2.h>
 #include "common/structs.h"
-#include "gp/filter.h"
-#include "rebinning.h"
-#include "gp/alignment.h"
-#include "gp/fbp.h"
-#include "gp/rings.h"
-#include "flatdark.h"
+#include "GeneralOperators/filter.h"
+#include "rebinning/rebinning.h"
+#include "GeneralOperators/alignment.h"
+#include "geometries/gp/fbp.h"
+#include "GeneralOperators/rings.h"
+#include "GeneralOperators/flatdark.h"
+#include "GeneralOperators/phasefilters.h"
+#include "GeneralOperators/operators.h"

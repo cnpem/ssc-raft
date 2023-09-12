@@ -10,19 +10,25 @@
 
 typedef struct Parameters
 {	/* General Parameters: Dimensions and Cuda*/
-        size_t nangles, nrays; /* Reconstruction Problem Dimensions */
+		size_t nangles, nrays; /* Reconstruction Problem Dimensions */
 	    size_t Ninx, Niny, Ninz; /* Input dimensions */
         size_t Noutx, Nouty, Noutz; /* Output dimensions */
         size_t Nx, Ny, Nz, Nt, nx, ny, nz, nt; /* Thread dimensions */
 	    size_t sizeofblock, blocksize, slice, subvolume; /* Thread dimensions */
 
-	    int ngpus, *gpus;
-	    cufftHandle mplan, mplan2;
+		int ngpus, *gpus;
+	    cufftHandle mplan, implan;
 	    cudaStream_t *streams;
         int num_streams;  
 	    dim3 BT, Grd;  
 
 	/* General parameters */
+        float alpha;
+	    float energy, lambda, wave;
+        size_t padx, pady, Npadx, Npady;
+
+        int filter;
+		
         float pixelDetx, pixelDety, d1x, d1y, d2x, d2y;
         float z1x, z1y, z2x, z2y;
         float magnx, magny, mx, my;
@@ -33,34 +39,8 @@ typedef struct Parameters
         float cr, rr, sr;
         float Lt, Lr;
         float Dt, Dr;
-    
+
 }PAR;
-
-typedef struct FANData
-{
-    /* General FAN parameters */
-        float SD, effx_pixel, effy_pixel;
-        float gammaM;
-    /* CPU */
-        float *data, *recon, *flat, *dark;
-    
-    /* GPU */
-        cufftComplex *aux_data, *kernel;
-        float *ddata, *sintable, *costable, *weight, *drecon, *dflat, *ddark; 
-}FDAT;
-
-typedef struct CONEData
-{
-    /* General CONE parameters */
-        float SD, effx_pixel, effy_pixel;
-        float gammaM;
-    /* CPU */
-        float *data, *recon, *flat, *dark;
-    
-    /* GPU */
-        cufftComplex *aux_data, *kernel;
-        float *ddata, *sintable, *costable, *weight, *drecon, *dflat, *ddark; 
-}CDAT;
 
 typedef struct REBData
 {

@@ -3,8 +3,8 @@
 //     https://docs.nvidia.com/cuda/pdf/CUDA_Math_API.pdf
 #include <stddef.h>
 #include <stdio.h>
-#include "../../../../inc/gc/kernel.cuh"
-#include "../../../../inc/gc/cone_data_types.cuh"
+#include "../../../../inc/geometries/gc/emc_kernel.cuh"
+#include "../../../../inc/geometries/gc/emc_cone_data_types.cuh"
 
 
 #define MAX_NUM_OF_VOXELS_IN_RAY_PATH 8192

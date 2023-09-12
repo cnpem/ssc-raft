@@ -53,7 +53,7 @@ def preprocessing_mogno(data, flat, dark, experiment):
       if len(flat.shape) == 3:
          flat[:,:11,:] = 1.0
       if len(flat.shape) == 4:
-         flat[:,:11,:] = 1.0
+         flat[:,:,:11,:] = 1.0
 
    if is_normalize:
       logger.info('Begin Flat and Dark correction')

@@ -6,8 +6,8 @@
 #include <vector>
 #include <algorithm> // std::min_element.
 #include <stdlib.h>  // size_t and malloc for backcounts.
-#include "../../../../inc/gc/manager.cuh"
-#include "../../../../inc/gc/kernel.cuh"
+#include "../../../../inc/geometries/gc/emc_manager.cuh"
+#include "../../../../inc/geometries/gc/emc_kernel.cuh"
 
 
 #define MAX_GPUS 64

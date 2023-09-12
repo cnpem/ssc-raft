@@ -1,4 +1,4 @@
-#include "../../../../inc/gc/fdk.h"
+#include "../../../../inc/geometries/gc/fdk.h"
 #include <stdio.h>
 #include <cufft.h>
 #include <stdlib.h>
@@ -24,7 +24,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
     recon[n] = 0.0;
 
     L = sqrtf(x*x + y*y);
-    if( L <= lab.x && L <= lab.y){
+    // if( L <= lab.x && L <= lab.y){
     for(m = 0; m < lab.nbeta; m++){
 
         cosb = beta[m];
@@ -50,19 +50,22 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
         // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
-    recon[n] = recon[n]*lab.dbeta;
-    }
+    recon[n] = recon[n]*lab.dbeta / 2.0;
+    // }
 }}
 
 extern "C"{
-void copy_to_gpu_back(Lab lab, float* proj, float* recon, float** c_proj, float** c_recon, float** c_beta, Process process) {
+void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float** c_proj, float** c_recon, float** c_beta, Process process) {
     long long int N,M;	
     clock_t begin = clock();
     cudaSetDevice(process.i_gpu);
 
     N = process.n_recon;
-    M = process.n_proj;                                        //lab.nx * lab.ny * lab.nz;
+    M = process.n_proj;     //lab.nx * lab.ny * lab.nz;
 
+    float *dangles;
+    cudaMalloc((void **)&dangles, lab.nbeta * sizeof(float));
+    cudaMemcpy(dangles, angles, lab.nbeta * sizeof(float), cudaMemcpyHostToDevice);
 
     cudaDeviceSynchronize(); 
     printf(cudaGetErrorString(cudaGetLastError()));
@@ -79,7 +82,9 @@ void copy_to_gpu_back(Lab lab, float* proj, float* recon, float** c_proj, float*
     printf("\n");
 
     cudaMalloc(c_beta, 2* lab.nbeta * sizeof(float));
-    set_beta<<< 1, 1 >>>(lab,*c_beta);
+    set_beta<<< 1, 1 >>>(lab,dangles,*c_beta);
+
+    cudaFree(dangles);
 
     clock_t end = clock();
     printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
@@ -95,7 +100,7 @@ void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta
     printf("\n");
 
 
-    long long int N = process.n_recon;                                         //lab.nbeta * lab.nv * lab.nh;
+    long long int N = process.n_recon;    //lab.nbeta * lab.nv * lab.nh;
     cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaFree(c_proj);
@@ -111,7 +116,7 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
     long int n_blocks;
     int n_threads;
 
-    M = process.n_recon;                                        //lab.nx * lab.ny * lab.nz;
+    M = process.n_recon;   //lab.nx * lab.ny * lab.nz;
     
     n_threads = NUM_THREADS;
     n_blocks  = M/n_threads + (M % n_threads == 0 ? 0:1);   
@@ -139,11 +144,14 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
 
 
 extern "C"{
-__global__ void set_beta(Lab lab, float* beta){
+__global__ void set_beta(Lab lab, float *dangles, float* beta){
 
     for(int m = 0; m < lab.nbeta; m++){
-        beta[m] = cosf(lab.dbeta*m);
-        beta[m + lab.nbeta] = sinf(lab.dbeta*m);
+        // beta[m] = cosf(lab.dbeta*m);
+        // beta[m + lab.nbeta] = sinf(lab.dbeta*m);
+        // printf("beta[%d] = %e \n",m,lab.dbeta*m);
+        beta[m] = cosf(dangles[m]);
+        beta[m + lab.nbeta] = sinf(dangles[m]);
     }
 }}
 

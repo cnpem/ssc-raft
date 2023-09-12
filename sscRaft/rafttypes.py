@@ -175,6 +175,17 @@ except:
     print('-.RAFT_PARALLEL-')
     pass
 
+######## Paganin ##########
+
+try:
+    libraft.phase_filters.argtypes = [  ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+                                        ctypes.c_void_p, ctypes.c_int]
+    libraft.phase_filters.restype  = None
+    
+except:
+    print('-.PHASE_FILTERS-')
+    pass
 
 
 ######## Conical Raft ##########
@@ -192,10 +203,14 @@ class Lab(ctypes.Structure):
                 ("nbeta", ctypes.c_int),
                 ("fourier", ctypes.c_int),
                 ("filter_type", ctypes.c_int),
-                ("reg", ctypes.c_float)]
+                ("reg", ctypes.c_float),
+                ("slice0", ctypes.c_int),
+                ("slice1", ctypes.c_int),
+                ("nslices", ctypes.c_int)
+                ]
 
 try:
-        libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
+        libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
 
 except:
     print('-.RAFT_CONICAL-')
@@ -213,6 +228,7 @@ class Lab_EM(ctypes.Structure):
         ("n_ray_points", ctypes.c_int)]
 
 lib_cone_tEM  = load_library(_lib, ext)
+
 try:
     conebeam_tEM_gpu = lib_cone_tEM.conebeam_tEM_gpu
     conebeam_tEM_gpu.argtypes = [
@@ -273,7 +289,21 @@ def FilterNumber(mfilter):
         elif mfilter.lower() == 'ramp':
                 return 7
         else:
-               return 6
+                return 6
+
+def PhaseFilterNumber(mfilter):
+        if mfilter.lower() == 'none':
+                return 0
+        elif mfilter.lower() == 'paganin':
+                return 1
+        elif mfilter.lower() == 'bronnikov':
+                return 2
+        elif mfilter.lower() == 'born':
+                return 3
+        elif mfilter.lower() == 'rytov':
+                return 4
+        else:
+                return 0
 
 def Bin(img,n=2):
         if n <= 1:
@@ -356,6 +386,15 @@ def Metadata_hdf5(outputFileHDF5, dic, software, version):
         if isinstance(outputFileHDF5, str):
                hdf5.close()
 
+def power_of_2_padding(size,pad):
+
+    n = numpy.log2(size + 2 * pad)
+    r = n % 1
+    if r != 0:
+        power = n + 1 - r
+        pad  = int(pow(2,power) - size ) // 2
+
+    return pad
 
 if __name__ == "__main__":
    pass

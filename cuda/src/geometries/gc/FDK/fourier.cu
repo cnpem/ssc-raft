@@ -1,16 +1,42 @@
-#include "../../../../inc/gc/fdk.h"
+#include "../../../../inc/geometries/gc/fdk.h"
 #include <stdio.h>
 #include <cufft.h>
 #include <stdlib.h>
 
-
-
-
-
-
-
 extern "C"{
 __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process){
+    int n = lab.nh;
+    long long int batch = process.z_filter*lab.nbeta;
+    long long int N = process.n_filter;
+
+    int n_threads = NUM_THREADS;
+    long long int n_blocks  = N/n_threads + (N % n_threads == 0 ? 0:1);
+
+    cudaSetDevice(process.i_gpu);
+
+    int v[] = {n};
+    cufftHandle plan;
+    cufftPlanMany(&plan, 1, v, v, 1, n, v, 1, n, CUFFT_C2C, batch);
+
+    //Calculate Signal
+    signal_save<<<n_blocks, n_threads>>>(lab, proj, signal, process);
+
+    //Forward FFT
+    printf("Forward FFT...\n");
+    cufftExecC2C(plan,(cufftComplex*) signal,(cufftComplex*) signal, CUFFT_FORWARD);
+
+    signal_filter<<<n_blocks, n_threads>>>(lab, W, signal, process);
+
+    printf("Inverse FFT...\n");
+    cufftExecC2C(plan,(cufftComplex*) signal,(cufftComplex*) signal, CUFFT_INVERSE);
+
+    signal_inv<<<n_blocks, n_threads>>>(lab, proj, signal, process);
+
+    cufftDestroy(plan); 
+}}
+
+extern "C"{
+__host__ void fft_nopad(Lab lab, float* proj, cufftComplex* signal, float* W, Process process){
     int n = lab.nh;
     long long int batch = process.z_filter*lab.nbeta;
     long long int N = process.n_filter;
@@ -218,6 +244,11 @@ extern "C"{
         for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nh));
 
         for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nh/2 - i)/lab.nh));
+
+        // Paola Modification 16 agosto 2023:
+        // for (i = 0; i < lab.nh ; i++) W[i] = (2*i*wmax)/(lab.nh)*(0.54 + 0.46*cosf(2*M_PI*i/lab.nh));
+        // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nh/2 - i)/lab.nh));
+
     }
 
 }

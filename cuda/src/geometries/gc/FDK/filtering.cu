@@ -1,6 +1,6 @@
 #include "../../../../inc/include.h"
-#include "../../../../inc/gp/rings.h"
-#include "../../../../inc/gc/fdk.h"
+// #include "../../../../inc/GeneralOperators/gp/rings.h"
+#include "../../../../inc//geometries/gc/fdk.h"
 #include "../../../../inc/common/types.hpp"
 
 
