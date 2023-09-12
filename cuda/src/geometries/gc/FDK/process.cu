@@ -21,10 +21,10 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
 
     nz_gpu = (int) (lab.nv/n_process); // lab.blockv
     zi_min = lab.slice0 + i*nz_gpu;
-    // zi_max = (int) std::min(lab.slice0 + (i+1)*nz_gpu, lab.nv); // lab.blockv
-    zi_max = (int) std::min(lab.slice0 + (i+1)*nz_gpu, lab.slice1); // lab.blockv
+    zi_max = (int) std::min(lab.slice0 + (i+1)*nz_gpu, lab.nv); // lab.blockv
+    // zi_max = (int) std::min(lab.slice0 + (i+1)*nz_gpu, lab.slice1); // lab.blockv
 
-    n_filter = (long long int) (zi_max + 1 - zi_min)*lab.nbeta*lab.nh;
+    n_filter = (long long int) (zi_max - zi_min)*lab.nbeta*lab.nh;
     idx_filter = (long long int) zi_min*lab.nbeta*lab.nh;
     // idx_filter = (long long int) ( zi_min - lab.slice0 )*lab.nbeta*lab.nh;
     zi_filter = (int) (n_filter/(lab.nbeta*lab.nh));
@@ -34,13 +34,13 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     
     nz_gpu = (int) (lab.nz/n_process); 
     zi_min = lab.slice0 + i*nz_gpu;
-    // zi_max = (int) std::min(lab.slice0 + (i+1)*nz_gpu, lab.nz); 
-    zi_max = (int) std::min(lab.slice0 + (i+1)*nz_gpu, lab.slice1); 
+    zi_max = (int) std::min(lab.slice0 + (i+1)*nz_gpu, lab.nz); 
+    // zi_max = (int) std::min(lab.slice0 + (i+1)*nz_gpu, lab.slice1); 
 
     
     printf("S0 = %d, S1 = %d, zi_max = %d , zi_min = %d \n",lab.slice0,lab.slice1,zi_max,zi_min);
 
-    n_recon = (long long int) (zi_max+1 - zi_min)*lab.nx*lab.ny;
+    n_recon = (long long int) (zi_max - zi_min)*lab.nx*lab.ny;
     idx_recon = (long long int) ( zi_min - lab.slice0 ) * lab.nx * lab.ny;
 
     z_min = - lab.z + zi_min*lab.dz;
@@ -74,8 +74,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
                                         lab.Dsd*z_max/(lab.D - L))); 
 
     Zi_min = std::max(0, (int) floor((Z_min + lab.v)/lab.dv));
-    // Zi_max = std::min(lab.nv, (int) ceil((Z_max + lab.v)/lab.dv));
-    Zi_max = std::min(lab.nslices, (int) ceil((Z_max + lab.v)/lab.dv));
+    Zi_max = std::min(lab.nv, (int) ceil((Z_max + lab.v)/lab.dv));
+    // Zi_max = std::min(lab.nslices, (int) ceil((Z_max + lab.v)/lab.dv));
 
     printf("Zimax = %d, %d, %e, Zimin = %d, %d, %e \n",Zi_max,zi_max,z_max,Zi_min,zi_min,z_min);
 
