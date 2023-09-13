@@ -30,6 +30,7 @@ typedef struct {
     float reg; // Filter regularization
     int slice0, slice1; // Slices: start slice = slice0, end slice = slice1
     int nslices; // nslices: total numer of acquired slices
+    int is_slice; // (bool) Reconstruct a block of slices or not
 
     /* Filter Types definitions
     enum EType
@@ -61,6 +62,7 @@ typedef struct {
 extern "C"{
     void gpu_fdk(Lab lab,  float *recon, float *proj, float *angles, int* gpus, int ndev, double *time);
     void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
+    void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
     int memory(Lab lab, int ndev);
 
 

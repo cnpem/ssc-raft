@@ -20,7 +20,7 @@ def set_experiment( x, y, z,
                     fourier, 
                     filter, 
                     regularization,
-                    start_slice, end_slice, nslices):
+                    start_slice, end_slice, nslices, is_slice):
 
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
@@ -35,7 +35,7 @@ def set_experiment( x, y, z,
                 fourier = fourier, 
                 filter_type = filter, 
                 reg = regularization,
-                slice0 = start_slice, slice1 = end_slice, nslices = nslices)
+                slice0 = start_slice, slice1 = end_slice, nslices = nslices, is_slice = is_slice)
 
     return lab
 
@@ -67,17 +67,6 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     # recon = data 
     regularization = dic['regularization']
 
-    # try:
-    #     padding = int(dic['padding'])
-    # except:
-    #     logger.warning(f'Set default padding size of {padding}.')
-
-    # padding = 0
-
-    # proj = np.zeros((tomogram.shape[0], tomogram.shape[1], tomogram.shape[2] + 2 * padding))
-
-    # proj[:,:,padding:tomogram.shape[2] + padding] = tomogram
-
     if len(tomogram.shape) == 2:
             nslices = 1
     elif len(tomogram.shape) == 3:
@@ -98,16 +87,23 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     try:
         start_slice = dic['slices'][0]
         end_slice   = dic['slices'][1]
+        is_slice    = 1
         logger.info(f'Reconstruct slices {start_slice} to {end_slice}.')
     except:
         start_slice = 0
-        end_slice   = nslices   
+        end_slice   = nslices 
+        is_slice    = 0
+        logger.info(f'Reconstruct slices {start_slice} to {end_slice}.')  
 
-    blockslices = end_slice - start_slice
+    blockslices = nslices
+
+    # blockslices = end_slice - start_slice
 
     if blockslices > nslices:
         logger.error(f'Trying to reconstruct more slices than provided by the tomogram data.')
-        sys.exit(1)       
+        sys.exit(1)     
+
+    logger.info(f'Reconstructing {blockslices} slices of {nslices}.')
 
     Dd, Dsd = dic['z1[m]'], dic['z1+z2[m]']
 
@@ -121,7 +117,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     if nbeta != nangles: 
         logger.error(f'Number of projection do not match: size of angles list ({nbeta}) is different from the number of projections ({nangles}).')
         logger.error(f'Finishing run...')
-        sys.exit()
+        sys.exit(1)
 
     beta_max = angles[nbeta - 1]
     dbeta    = angles[1] - angles[0]
@@ -141,15 +137,23 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
             nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(blockslices)
         elif len(dic['reconSize']) > 2:
             nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(reconsize[2])
+            if nz != blockslices:
+                logger.error(f'Number of slices of reconstruction ({nz}) do not match with number of slices chosen to be reconstructed ({blockslices}).')
+                logger.error(f'Finishing run...')
+                sys.exit(1)
     except:
         nx, ny, nz = int(nrays), int(nrays), int(blockslices)
-        logger.info(f'Set default reconstruction size ({nz},{ny},{nx}) = (slices,angles,rays).')
-    
+        logger.info(f'Set default reconstruction size ({nz},{ny},{nx}) = (z,y,x).')
 
     # x, y, z    = dx*nx/2, dy*ny/2, dz*nz/2
     x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
 
-    fourier    = dic['fourier']
+    try:
+        fourier = dic['fourier']
+    except:
+        fourier = True
+        logger.info(f'Set default FDK filtering method as FFT.')
+
     filtername = dic['filter']
     filter     = FilterNumber(dic['filter'])
 
@@ -166,12 +170,12 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
                 nh = nh, nv = nv, 
                 D = Dd, Dsd = Dsd, 
                 beta_max = beta_max, 
-                dbeta = dbeta , 
+                dbeta = dbeta, 
                 nbeta = nbeta,
                 fourier = fourier, 
                 filter_type = filter, 
                 reg = regularization,
-                slice0 = start_slice, slice1 = end_slice, nslices = nslices)
+                slice0 = start_slice, slice1 = end_slice, nslices = nslices, is_slice = is_slice)
 
     time = np.zeros(2)
     time = np.ascontiguousarray(time.astype(np.float64))

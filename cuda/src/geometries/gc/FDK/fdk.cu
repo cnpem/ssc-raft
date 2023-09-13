@@ -21,19 +21,25 @@ extern "C"
     void gpu_fdk(Lab lab, float *recon, float *proj, float *angles,
                  int *gpus, int ndevs, double *time)
     {
-
-        printf("nangles = %d, Fourier = %d \n", lab.nbeta, lab.fourier);
-        // for (int i = 0; i < lab.nbeta; i++)
-        //     printf("angles[%d] = %e\n",i,angles[i]);
-
         int i, n_process;
 
         n_process = memory(lab, ndevs);
         printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);
+        printf("nh = %d, nv = %d, nx = %d, ny = %d, nz = %d \n",  lab.nh,  lab.nv, lab.nx, lab.ny, lab.nz);
+        printf("dh = %e, dv = %e, dx = %e, dy = %e, dz = %e \n",  lab.dh,  lab.dv, lab.dx, lab.dy, lab.dz);
+        printf("dbeta = %e, nbeta = %d, \n",  lab.dbeta,  lab.nbeta);
 
         Process *process = (Process *)malloc(sizeof(Process) * n_process);
+        
+        // if(lab.is_slice == 1){
+        //     for (i = 0; i < n_process; i++)
+        //         set_process_slices(lab, i, &process[i], n_process, gpus, ndevs);
+        // }else{
+        printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
+
         for (i = 0; i < n_process; i++)
             set_process(lab, i, &process[i], n_process, gpus, ndevs);
+        // }
 
         printf("Filter:\n");
         clock_t f_begin = clock();

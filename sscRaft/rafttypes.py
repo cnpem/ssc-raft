@@ -206,7 +206,8 @@ class Lab(ctypes.Structure):
                 ("reg", ctypes.c_float),
                 ("slice0", ctypes.c_int),
                 ("slice1", ctypes.c_int),
-                ("nslices", ctypes.c_int)
+                ("nslices", ctypes.c_int),
+                ("is_slice", ctypes.c_int)
                 ]
 
 try:
