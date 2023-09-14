@@ -102,13 +102,13 @@ def flatdarkGPU(frames, flat, dark, dic):
                 dark = np.expand_dims(dark,0)
         
         # Change Frames order from [angles,slices,rays] to [slices,angles,rays] for easier computation
-        # frames    = np.swapaxes(frames,0,1)
+        frames    = np.swapaxes(frames,0,1)
         
         # Change Flat order from [number of flats,slices,rays] to [slices,number of flats,rays] for easier computation
-        # flat      = np.swapaxes(flat,0,1)
+        flat      = np.swapaxes(flat,0,1)
 
         # Change Dark order from [1,slices,rays] to [slices,1,rays] for easier computation
-        # dark      = np.swapaxes(dark,0,1)
+        dark      = np.swapaxes(dark,0,1)
 
         flat      = np.ascontiguousarray(flat.astype(np.float32))
         flatptr   = flat.ctypes.data_as(void_p)
