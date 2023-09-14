@@ -375,14 +375,14 @@ def Metadata_hdf5(outputFileHDF5, dic, software, version):
                 h5_path = 'Recon Parameters' #os.path.join('Recon Parameters', key)
                 hdf5.require_group(h5_path)
                 
+                if key == 'findRotationAxis':
+                        value = str(value)
                 if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, numpy.ndarray):
-                       value = numpy.asarray(value)
-                       hdf5[h5_path].create_dataset(key, data=value, shape=value.shape)
+                        value = numpy.asarray(value)
+                        hdf5[h5_path].create_dataset(key, data=value, shape=value.shape)
                 else:
-                       if key == 'recon type':
-                                value = str(value)
-                       
-                       hdf5[h5_path].create_dataset(key, data=value, shape=())
+                        # print(value)
+                        hdf5[h5_path].create_dataset(key, data=value, shape=())
 
         if isinstance(outputFileHDF5, str):
                hdf5.close()

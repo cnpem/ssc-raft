@@ -75,8 +75,8 @@ def phase_filters(tomogram,dic):
         logger.error(f'Blocksize is bigger than the number of angles ({nangles}) divided by the number of GPUs selected ({ngpus})!')
         sys.exit(1)
 
-    filtername = dic['filter']
-    filter     = PhaseFilterNumber(dic['filter'])
+    filtername = dic['phase filter']
+    filter     = PhaseFilterNumber(dic['phase filter'])
     
     if filter == 0:
         logger.warning(f'No phase filter selected! ')

@@ -124,7 +124,7 @@ void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta
 
 
     long long int N = process.n_recon;    //lab.nbeta * lab.nv * lab.nh;
-    printf("idx recon %lld gpu = %d. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
+    printf("idx recon %d gpu = %lld. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
     HANDLE_ERROR(cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost));
 
     HANDLE_ERROR(cudaFree(c_proj));

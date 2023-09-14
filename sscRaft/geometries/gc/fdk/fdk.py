@@ -57,7 +57,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
         *``dic['z1+z2[m]']`` (float): Source-detector distance in meters. Defaults to 1.0.
         *``dic['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
         *``dic['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[-1].
-        *``dic['filter']`` (str,optional): Type of filter for reconstruction. 
+        *``dic['Fourier']`` (bool): Type of filter for reconstruction: if uses FFT (True) or not.
         *``dic['angles']`` (list): list of angles.
         *``dic['filter']`` (str,optional): Type of filter for reconstruction. 
         Options = ('none','gaussian','lorentz','cosine','rectangle','hann','hamming','ramp'). Default is 'hamming'.
@@ -193,6 +193,8 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     proj_p = proj.ctypes.data_as(ctypes.c_void_p)
 
     recon = np.zeros((lab.nz, lab.ny, lab.nx))
+    logger.info(f'Recon shape: {recon.shape} = (nz,ny,nx).')
+
     recon = np.ascontiguousarray(recon.astype(np.float32))
     recon_p = recon.ctypes.data_as(ctypes.c_void_p)
 

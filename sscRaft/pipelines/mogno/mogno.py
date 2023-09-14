@@ -38,9 +38,12 @@ def preprocessing_mogno(data, flat, dark, experiment):
    is_normalize = experiment['normalize'][0]
    method       = experiment['method']
 
-   if experiment['detectorType'] == 'pco': 
-      tomo[:, :11,:] = 1.0 
-      
+   if experiment['detectorType'] == 'pco':
+      if len(tomo.shape) == 2: 
+         tomo[:11,:] = 1.0 
+      if len(tomo.shape) == 3:
+         tomo[:,:11,:] = 1.0
+
       if len(dark.shape) == 2:
          dark[:11,:]   = 0.0
       if len(dark.shape) == 3:
@@ -179,7 +182,7 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
    if method == 'fdk':
       recon = fdk(tomo, experiment)
    elif method == 'em':
-      recon = em_cone(data, flat, dark, experiment)
+      recon = em_cone(tomo, flat, dark, experiment)
    else:
       logger.error(f'Invalid reconstruction method:{method}. Choose from options `fdk` or `em`.')
 

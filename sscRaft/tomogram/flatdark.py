@@ -52,6 +52,10 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         # Change Dark order from [1,slices,rays] to [slices,1,rays] for easier computation
         dark      = np.swapaxes(dark,0,1)
 
+        logger.info(f'Number of flats is {nflats}.')
+        if nflats > 1:
+                logger.info(f'Interpolating flats before and after.')
+
         flat      = np.ascontiguousarray(flat.astype(np.float32))
         flatptr   = flat.ctypes.data_as(void_p)
 
@@ -110,6 +114,13 @@ def flatdarkGPU(frames, flat, dark, dic):
         # Change Dark order from [1,slices,rays] to [slices,1,rays] for easier computation
         dark      = np.swapaxes(dark,0,1)
 
+        logger.info(f'Number of flats is {nflats}.')
+        if nflats > 1:
+                logger.info(f'Interpolating flats before and after.')
+
+        logger.info(f'Flat dimension is ({flat.shape}) = (slices,number of flats,rays).')
+        logger.info(f'Dark dimension is ({dark.shape}) = (slices,number of darks,rays).')
+
         flat      = np.ascontiguousarray(flat.astype(np.float32))
         flatptr   = flat.ctypes.data_as(void_p)
 
@@ -161,6 +172,7 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
                 *``experiment['gpu']`` (int list): List of GPUs.
                 *``experiment['uselog']`` (bool): Apply logarithm or not.
         """        
+        logger.info(f'Begin Flat and Dark correction.')
 
         dicparams = ('gpu','uselog')
         defaut    = ([0],True)
@@ -173,6 +185,13 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
                 output = flatdarkGPU( frames, flat, dark, dic )
         else:
                 output = flatdarkMultiGPU( frames, flat, dark, dic ) 
+
+        # if dic['uselog']:
+        #         output[np.isinf(output)] = 0.0
+        #         output[np.isnan(output)] = 0.0
+        # else:
+        #         output[np.isinf(output)] = 1.0
+        #         output[np.isnan(output)] = 1.0
 
         # Garbage Collector
         # lists are cleared whenever a full collection or

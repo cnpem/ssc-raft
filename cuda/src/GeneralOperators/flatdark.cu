@@ -42,7 +42,7 @@ extern "C"{
 			if ( S < tol )
 				S = 1.0;
 
-			// in[line ] = -logf( fmaxf(in[line] - dk, 0.5f) / fmaxf(ft - dk,0.5f) ); // Old version (Giovanni)
+			// in[line] = fmaxf(T, 0.5f) / fmaxf(Q,0.5f) ; // Old version (Giovanni)
 			in[line] = S;
 
 		}
@@ -53,7 +53,7 @@ extern "C"{
       // Supports 2 flats only
 		size_t idx = threadIdx.x + blockIdx.x*blockDim.x;
 		size_t line;
-		float ft, flat_before, flat_after, dk, T, Q, S, interp, tol = 1e-14;
+		float ft, flat_before, flat_after, dk, T, Q, S, interp, tol = 1e-10;
 
 		if(idx < size.x && blockIdx.y < size.y && blockIdx.z < size.z){
 			
@@ -83,7 +83,7 @@ extern "C"{
 			if ( S < tol )
 				S = 1.0;
 
-			// in[line ] = -logf( fmaxf(in[line] - dk, 0.5f) / fmaxf(ft - dk,0.5f) ); // Old version (Giovanni)
+			// in[line] = - logf( fmaxf(T, 0.5f) / fmaxf(Q,0.5f) ); // Old version (Giovanni)
 			in[line] = - logf( S );
 
 		}
@@ -105,6 +105,7 @@ extern "C"{
 
 		Image2D<float> cflat(nrays, numflats, blocksize); // Flat in GPU
 		Image2D<float> cdark(nrays, 1, blocksize); // Dark in GPU
+
 
 		for(b = 0; b < nslices; b += blocksize){
 			
@@ -131,6 +132,8 @@ extern "C"{
 	{
 		int t;
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
+
+		printf("Rings filter: Number of flats is %d \n", numflats);
 		
 		std::vector<std::future<void>> threads;
 		
