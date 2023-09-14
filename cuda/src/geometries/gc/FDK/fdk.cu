@@ -31,15 +31,16 @@ extern "C"
 
         Process *process = (Process *)malloc(sizeof(Process) * n_process);
         
-        // if(lab.is_slice == 1){
-        //     for (i = 0; i < n_process; i++)
-        //         set_process_slices(lab, i, &process[i], n_process, gpus, ndevs);
-        // }else{
-        printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
+        if(lab.is_slice == 1){
+            printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
+            for (i = 0; i < n_process; i++)
+                set_process_slices(lab, i, &process[i], n_process, gpus, ndevs);
+        }else{
+            printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
 
-        for (i = 0; i < n_process; i++)
-            set_process(lab, i, &process[i], n_process, gpus, ndevs);
-        // }
+            for (i = 0; i < n_process; i++)
+                set_process(lab, i, &process[i], n_process, gpus, ndevs);
+        }
 
         printf("Filter:\n");
         clock_t f_begin = clock();

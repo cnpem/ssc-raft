@@ -86,7 +86,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     
     try:
         start_slice = dic['slices'][0]
-        end_slice   = dic['slices'][1]
+        end_slice   = dic['slices'][1] 
         is_slice    = 1
         logger.info(f'Reconstruct slices {start_slice} to {end_slice}.')
     except:
@@ -95,9 +95,8 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
         is_slice    = 0
         logger.info(f'Reconstruct slices {start_slice} to {end_slice}.')  
 
-    blockslices = nslices
-
-    # blockslices = end_slice - start_slice
+    # blockslices = nslices
+    blockslices = end_slice - start_slice
 
     if blockslices > nslices:
         logger.error(f'Trying to reconstruct more slices than provided by the tomogram data.')
@@ -108,9 +107,8 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     Dd, Dsd = dic['z1[m]'], dic['z1+z2[m]']
 
     dh, dv = dic['detectorPixel[m]'], dic['detectorPixel[m]']
-    nh, nv = int(nrays), int(blockslices)
-    h, v   = nh*dh/2, nslices*dv/2
-    # h, v   = nh*dh/2, nv*dv/2
+    nh, nv = int(nrays), int(nslices)
+    h, v   = nh*dh/2, nv*dv/2
 
     nbeta  = len(angles)
 

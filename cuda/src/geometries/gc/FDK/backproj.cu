@@ -3,6 +3,23 @@
 #include <cufft.h>
 #include <stdlib.h>
 
+#include <iostream>
+#include <string.h>
+#include <assert.h>
+#include <iostream>
+#include <fstream>
+#include <cassert>
+#include <sstream>
+#include <string>
+
+inline void SaveLog(){};
+
+#define Log(message){ std::cout << message << std::endl; }
+
+#define ErrorAssert(statement, message){ if(!(statement)){ std::cerr << __LINE__ << " in " << __FILE__ << ": " << message << "\n" << std::endl; Log(message); SaveLog(); exit(-1); } }
+
+#define HANDLE_ERROR(errexp){ cudaError_t cudaerror = errexp; ErrorAssert( cudaerror == cudaSuccess, "Cuda error: " << std::string(cudaGetErrorString( cudaerror )) ) }
+
 extern "C"{
 __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process){
 
@@ -15,6 +32,8 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
     float cosb, sinb, Q, L;
 
     int xi, zk;
+
+    if ( n >= process.n_recon ) return;
 
     set_recon_idxs(n, &i, &j, &k, lab);
     x = -lab.x + i*lab.dx;
@@ -50,6 +69,8 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
         // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
+    // printf("n = %lld \n",n);
+
     recon[n] = recon[n]*lab.dbeta / 2.0;
     // }
 }}
@@ -64,28 +85,28 @@ void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float**
     M = process.n_proj;     //lab.nx * lab.ny * lab.nz;
 
     float *dangles;
-    cudaMalloc((void **)&dangles, lab.nbeta * sizeof(float));
-    cudaMemcpy(dangles, angles, lab.nbeta * sizeof(float), cudaMemcpyHostToDevice);
+    HANDLE_ERROR(cudaMalloc((void **)&dangles, lab.nbeta * sizeof(float)));
+    HANDLE_ERROR(cudaMemcpy(dangles, angles, lab.nbeta * sizeof(float), cudaMemcpyHostToDevice));
 
     cudaDeviceSynchronize(); 
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
 
     printf("Allocating gpu memory... c_recon N = %lld \n",N);
-    cudaMalloc(c_recon, N * sizeof(float));
+    HANDLE_ERROR(cudaMalloc(c_recon, N * sizeof(float)));
 
     printf("Allocating gpu memory... c_proj M = %lld \n",M);
-    cudaMalloc(c_proj, M * sizeof(float));     
-    cudaMemcpy(*c_proj, &proj[process.idx_proj], M * sizeof(float), cudaMemcpyHostToDevice);
+    HANDLE_ERROR(cudaMalloc(c_proj, M * sizeof(float)));     
+    HANDLE_ERROR(cudaMemcpy(*c_proj, &proj[process.idx_proj], M * sizeof(float), cudaMemcpyHostToDevice));
  
     printf("GPU memory allocated...\n");
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
 
-    cudaMalloc(c_beta, 2* lab.nbeta * sizeof(float));
+    HANDLE_ERROR(cudaMalloc(c_beta, 2* lab.nbeta * sizeof(float)));
     set_beta<<< 1, 1 >>>(lab,dangles,*c_beta);
 
-    cudaFree(dangles);
+    HANDLE_ERROR(cudaFree(dangles));
 
     clock_t end = clock();
     printf("Time copy_to_gpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
@@ -94,7 +115,8 @@ void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float**
 extern "C"{
 void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta, Process process) {
     clock_t begin = clock();
-    cudaSetDevice(process.i_gpu);
+
+    HANDLE_ERROR(cudaSetDevice(process.i_gpu));
 
     cudaDeviceSynchronize(); 
     printf(cudaGetErrorString(cudaGetLastError()));
@@ -102,11 +124,12 @@ void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta
 
 
     long long int N = process.n_recon;    //lab.nbeta * lab.nv * lab.nh;
-    cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost);
+    printf("idx recon %lld gpu = %d. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
+    HANDLE_ERROR(cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost));
 
-    cudaFree(c_proj);
-    cudaFree(c_recon);
-    cudaFree(c_beta);
+    HANDLE_ERROR(cudaFree(c_proj));
+    HANDLE_ERROR(cudaFree(c_recon));
+    HANDLE_ERROR(cudaFree(c_beta));
     
     clock_t end = clock();
     printf("Time copy_to_cpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
