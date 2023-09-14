@@ -23,7 +23,7 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         nrays      = frames.shape[-1]
         nangles    = frames.shape[0]
         Tframes    = nangles
-
+        
         if is_log:
                 is_log = 1
         else:
@@ -55,6 +55,9 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         logger.info(f'Number of flats is {nflats}.')
         if nflats > 1:
                 logger.info(f'Interpolating flats before and after.')
+
+        logger.info(f'Flat dimension is ({flat.shape}) = (slices,number of flats,rays).')
+        logger.info(f'Dark dimension is ({dark.shape}) = (slices,number of darks,rays).')
 
         flat      = np.ascontiguousarray(flat.astype(np.float32))
         flatptr   = flat.ctypes.data_as(void_p)

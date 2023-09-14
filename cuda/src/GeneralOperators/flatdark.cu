@@ -132,8 +132,6 @@ extern "C"{
 	{
 		int t;
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
-
-		printf("Rings filter: Number of flats is %d \n", numflats);
 		
 		std::vector<std::future<void>> threads;
 		
