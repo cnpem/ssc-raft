@@ -62,13 +62,61 @@ extern "C" {
 	{	
 		/* Initialize GPU device */
 		HANDLE_ERROR(cudaSetDevice(ngpu))
+
+		size_t npad = param.Npadx * param.Npady;
+		float *d_kernel;
+		float *kernel, maximum;
+
+		// Compute phase filter kernel
+		HANDLE_ERROR(cudaMalloc((void **)&d_kernel, sizeof(float) * npad ));
+
+		switch ((int)param.filter){
+				case 0:
+					/* code */
+					printf("No filter was selected!");
+					break;
+				case 1:
+					/* code */
+					paganinKernel<<<param.Grd,param.BT>>>(d_kernel, param, param.Npadx, param.Npady, nangles);
+					break;
+				case 2:
+					/* code */
+					bronnikovKernel<<<param.Grd,param.BT>>>(d_kernel, param, param.Npadx, param.Npady, nangles);
+					break;
+				case 3:
+					/* code */
+					bornKernel<<<param.Grd,param.BT>>>(d_kernel, param, param.Npadx, param.Npady, nangles);
+					break;
+				case 4:
+					/* code */
+					rytovKernel<<<param.Grd,param.BT>>>(d_kernel, param, param.Npadx, param.Npady, nangles);
+					break;
+
+				default:
+					paganinKernel<<<param.Grd,param.BT>>>(d_kernel, param, param.Npadx, param.Npady, nangles);
+					break;
+			}
+
+        // Normalize kernel by maximum value
+        kernel = (float*)malloc(npad * sizeof(float));
+        HANDLE_ERROR(cudaMemcpy(kernel, d_kernel, npad * sizeof(float), cudaMemcpyDeviceToHost));
+        maximum = find_matrix_max(kernel, param.Npadx, param.Npady);
+        Normalize<<<param.Grd,param.BT>>>(d_kernel, maximum, param.Npadx, param.Npady, nangles);
+
+        if(ngpu == 0){
+            // print_matrix(kernel, param.Npadx, param.Npady);
+            printf("Maximum paganin: %e \n",maximum);
+        }
+
+        free(kernel);
 		
 		size_t bz; 
 		param.blocksize = min(nangles,param.blocksize);
 
+		printf("Dims: %ld, %ld, %ld \n",param.Npadx,param.Npady,param.blocksize);
 		/* Plan for Fourier transform - cufft */
 		int n[] = {(int)param.Npadx,(int)param.Npady};
-		HANDLE_FFTERROR(cufftPlanMany(&param.mplan , 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, param.blocksize));
+		HANDLE_FFTERROR(cufftPlanMany(&param.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, param.blocksize));
 
 		size_t zblock = param.blocksize;
 
@@ -82,9 +130,9 @@ extern "C" {
 
 				HANDLE_FFTERROR(cufftDestroy(param.mplan));
 
-				HANDLE_FFTERROR(cufftPlanMany(&param.mplan , 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, zblock));
+				HANDLE_FFTERROR(cufftPlanMany(&param.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, zblock));
 			}
-
+				
 			switch ((int)param.filter){
 				case 0:
 					/* code */
@@ -92,24 +140,24 @@ extern "C" {
 					break;
 				case 1:
 					/* code */
-					_paganin_gpu(param, projections + nrays * nslices * bz, nrays, zblock, nslices);
+					_paganin_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 				case 2:
 					/* code */
-					_bronnikov_gpu(param, projections + nrays * nslices * bz, nrays, zblock, nslices);
+					_bronnikov_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 				case 3:
 					/* code */
-					_born_gpu(param, projections + nrays * nslices * bz, nrays, zblock, nslices);
+					_born_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 				case 4:
 					/* code */
-					_rytov_gpu(param, projections + nrays * nslices * bz, nrays, zblock, nslices);
+					_rytov_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 
 				default:
 					printf("Using paganin as default phase filter!");
-					_paganin_gpu(param, projections + nrays * nslices * bz, nrays, zblock, nslices);
+					_paganin_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 			}	
 			
@@ -117,6 +165,7 @@ extern "C" {
 
 		/* Destroy plan */
 		HANDLE_FFTERROR(cufftDestroy(param.mplan));
+		cudaFree(d_kernel);
 
 		cudaDeviceSynchronize();
 	}

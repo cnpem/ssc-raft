@@ -7,38 +7,6 @@ from ctypes import c_int as int32
 from ctypes import c_void_p  as void_p
 from ctypes import c_size_t as size_t
 
-def set_experiment( x, y, z, 
-                    dx, dy, dz, 
-                    nx, ny, nz, 
-                    h, v, 
-                    dh, dv, 
-                    nh, nv,
-                    D, Dsd, 
-                    beta_max, 
-                    dbeta, 
-                    nbeta,
-                    fourier, 
-                    filter, 
-                    regularization,
-                    start_slice, end_slice, nslices, is_slice):
-
-    lab = Lab(  x = x, y = y, z = z, 
-                dx = dx, dy = dy, dz = dz, 
-                nx = nx, ny = ny, nz = nz, 
-                h = h, v = v, 
-                dh = dh, dv = dv, 
-                nh = nh, nv = nv, 
-                D = D, Dsd = Dsd, 
-                beta_max = beta_max, 
-                dbeta = dbeta, 
-                nbeta = nbeta,
-                fourier = fourier, 
-                filter_type = filter, 
-                reg = regularization,
-                slice0 = start_slice, slice1 = end_slice, nslices = nslices, is_slice = is_slice)
-
-    return lab
-
 
 def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
@@ -85,24 +53,50 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
         logger.exception(e)
     
     try:
-        start_slice = dic['slices'][0]
-        end_slice   = dic['slices'][1] 
-        is_slice    = 1
-        logger.info(f'Reconstruct slices {start_slice} to {end_slice}.')
+        start_recon_slice = dic['slices'][0]
+        end_recon_slice   = dic['slices'][1]
+        start_tomo_slice  = 0 #dic['slice tomo'][0]
+        end_tomo_slice    = nslices #dic['slice tomo'][1]
+        is_slice          = 1
+        # logger.info(f'Reconstruct slices {start_recon_slice} to {end_recon_slice} using tomogram slices {start_tomo_slice} to {end_tomo_slice}.')
     except:
-        start_slice = 0
-        end_slice   = nslices 
+        start_recon_slice = 0
+        end_recon_slice   = nslices
+        start_tomo_slice  = 0
+        end_tomo_slice    = nslices
         is_slice    = 0
-        logger.info(f'Reconstruct slices {start_slice} to {end_slice}.')  
+        # logger.info(f'Reconstruct slices {start_recon_slice} to {end_recon_slice} using tomogram slices {start_tomo_slice} to {end_tomo_slice}.')  
 
-    # blockslices = nslices
-    blockslices = end_slice - start_slice
+    blockslices_recon = end_recon_slice - start_recon_slice
 
-    if blockslices > nslices:
-        logger.error(f'Trying to reconstruct more slices than provided by the tomogram data.')
-        sys.exit(1)     
+    try:
+        reconsize = dic['reconSize']
 
-    logger.info(f'Reconstructing {blockslices} slices of {nslices}.')
+        if isinstance(reconsize,list) or isinstance(reconsize,tuple):
+        
+            if len(dic['reconSize']) == 1:
+                nx, ny, nz = int(reconsize[0]), int(reconsize[0]), int(blockslices_recon)
+            else:
+                nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(blockslices_recon)
+        
+        elif isinstance(reconsize,list):
+            
+            nx, ny, nz = int(reconsize), int(reconsize), int(blockslices_recon)
+        
+        else:
+            
+            logger.error(f'Dictionary entry `reconsize` wrong ({reconsize}). The entry `reconsize` is optional, but if it exists it needs to be a list = [nx,ny].')
+            logger.error(f'Finishing run...')
+            sys.exit(1)
+
+    except:
+        nx, ny, nz = int(nrays), int(nrays), int(blockslices_recon)
+        logger.info(f'Set default reconstruction size ({nx},{ny},{nz}) = (x,y,z).')
+
+    if blockslices_recon > nslices:
+        logger.warning(f'Trying to reconstruct more slices than provided by the tomogram data.')    
+
+    logger.info(f'Reconstructing {blockslices_recon} slices of {nslices}.')
 
     Dd, Dsd = dic['z1[m]'], dic['z1+z2[m]']
 
@@ -120,30 +114,9 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     beta_max = angles[nbeta - 1]
     dbeta    = angles[1] - angles[0]
 
-    # beta_max, nbeta = 2*np.pi, int(tomogram.shape[1])
-    # dbeta           = beta_max/nbeta
-
     magn       = Dd/Dsd
     dx, dy, dz = dh*magn, dh*magn, dv*magn
 
-    try:
-        reconsize = dic['reconSize']
-        
-        if len(dic['reconSize']) == 1:
-            nx, ny, nz = int(reconsize[0]), int(reconsize[0]), int(blockslices)
-        elif len(dic['reconSize']) == 2:
-            nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(blockslices)
-        elif len(dic['reconSize']) > 2:
-            nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(reconsize[2])
-            if nz != blockslices:
-                logger.error(f'Number of slices of reconstruction ({nz}) do not match with number of slices chosen to be reconstructed ({blockslices}).')
-                logger.error(f'Finishing run...')
-                sys.exit(1)
-    except:
-        nx, ny, nz = int(nrays), int(nrays), int(blockslices)
-        logger.info(f'Set default reconstruction size ({nz},{ny},{nx}) = (z,y,x).')
-
-    # x, y, z    = dx*nx/2, dy*ny/2, dz*nz/2
     x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
 
     try:
@@ -173,7 +146,9 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
                 fourier = fourier, 
                 filter_type = filter, 
                 reg = regularization,
-                slice0 = start_slice, slice1 = end_slice, nslices = nslices, is_slice = is_slice)
+                is_slice = is_slice,
+                slice_recon_start = start_recon_slice, slice_recon_end = end_recon_slice,  
+                slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice)
 
     time = np.zeros(2)
     time = np.ascontiguousarray(time.astype(np.float64))

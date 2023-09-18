@@ -19,6 +19,38 @@ extern "C" {
         recuperate_zeropadding<<<param.Grd,param.BT>>>(dataPadded, ans, sizex, sizey, sizez, param.padx, param.pady);
 	}
 
+    float find_matrix_max(float *matrix, size_t sizex, size_t sizey)
+    {
+        size_t i,j,ind;
+        float maximum = 0;
+
+        for (i = 0; i < sizex; i++){
+            for (j = 0; j < sizey; j++){
+                
+                ind = i + j * sizex;
+
+                maximum = MAX(matrix[ind],maximum);
+            }
+        }
+        return maximum;
+    }
+
+    void print_matrix(float *matrix, size_t sizex, size_t sizey)
+    {
+        size_t i,j,ind;
+
+        for (j = 0; j < sizey; j++){
+            for (i = 0; i < sizex; i++){
+
+                ind = i + j * sizex;
+
+                printf("%e ",matrix[ind]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+
     __global__ void CConvolve(cufftComplex *a, float *b, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)
     {
         size_t i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -43,6 +75,18 @@ extern "C" {
         if ( (i >= sizex) || (j >= sizey) || (k >= sizez) ) return;
         
         c[index].x /= N; c[index].y /= N; 
+    }
+
+    __global__ void Normalize(float *a, float b, size_t sizex, size_t sizey, size_t sizez)
+    {
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
+        size_t index = sizex * (k*sizey + j)  + i;
+        
+        if ( (i >= sizex) || (j >= sizey) || (k >= sizez) ) return;
+        
+        a[index] /= b; 
     }
 
     __global__ void fftshiftKernel(float *c, size_t sizex, size_t sizey, size_t sizez)

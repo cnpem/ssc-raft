@@ -28,9 +28,9 @@ typedef struct {
     int fourier;
     int filter_type; // Filter Types
     float reg; // Filter regularization
-    int slice0, slice1; // Slices: start slice = slice0, end slice = slice1
-    int nslices; // nslices: total numer of acquired slices
     int is_slice; // (bool) Reconstruct a block of slices or not
+    int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
+    int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
 
     /* Filter Types definitions
     enum EType
@@ -63,6 +63,7 @@ extern "C"{
     void gpu_fdk(Lab lab,  float *recon, float *proj, float *angles, int* gpus, int ndev, double *time);
     void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
     void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
+    void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
     int memory(Lab lab, int ndev);
 
 
@@ -71,7 +72,6 @@ extern "C"{
     void set_backprojection(Lab lab, float* recon, float* proj, float *angles, int n_process,  int ndevs, Process* process);
 
     
-    
     void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float** c_proj, float** c_recon, float** c_beta, Process process);
     void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta, Process process);
     void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process);
@@ -79,8 +79,6 @@ extern "C"{
     void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Process process) ;
     void copy_cpu_filter_conv(float* proj, float* c_proj, float* c_Q, Process process);
     
-
-
     void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process process);
     __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process);
     __global__ void set_beta(Lab lab, float *dangles, float* beta);

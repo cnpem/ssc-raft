@@ -23,8 +23,8 @@ def phase_filters(tomogram,dic):
     
     z1x       = dic['z1[m]']
     z2x       = dic['z2[m]']
-    z1y       = z1x
-    z2y       = z2x
+    z1y       = z1x+0
+    z2y       = z2x+0
     energy    = dic['energy[KeV]']
     alpha     = dic['regularization']
     pad       = dic['padding']

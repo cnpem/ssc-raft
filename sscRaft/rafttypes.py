@@ -204,10 +204,11 @@ class Lab(ctypes.Structure):
                 ("fourier", ctypes.c_int),
                 ("filter_type", ctypes.c_int),
                 ("reg", ctypes.c_float),
-                ("slice0", ctypes.c_int),
-                ("slice1", ctypes.c_int),
-                ("nslices", ctypes.c_int),
-                ("is_slice", ctypes.c_int)
+                ("is_slice", ctypes.c_int),
+                ("slice_recon_start", ctypes.c_int),
+                ("slice_recon_end", ctypes.c_int),
+                ("slice_tomo_start", ctypes.c_int),
+                ("slice_tomo_end", ctypes.c_int)
                 ]
 
 try:
@@ -396,6 +397,7 @@ def power_of_2_padding(size,pad):
         pad  = int(pow(2,power) - size ) // 2
 
     return pad
+       
 
 if __name__ == "__main__":
    pass

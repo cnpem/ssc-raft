@@ -8,6 +8,9 @@
 #define GIGA 1073741824UL
 #define SQUARE(x) ((x)*(x))
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 typedef struct Parameters
 {	/* General Parameters: Dimensions and Cuda*/
 		size_t nangles, nrays; /* Reconstruction Problem Dimensions */

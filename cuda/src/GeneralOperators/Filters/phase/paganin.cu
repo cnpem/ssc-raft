@@ -10,28 +10,24 @@
 
 extern "C" {
 
-	void _paganin_gpu(PAR param, float *projections, size_t nrays, size_t nangles, size_t nslices)
+	void _paganin_gpu(PAR param, float *projections, float *d_kernel, size_t nrays, size_t nangles, size_t nslices)
     {
 		size_t n    = nrays * nslices * nangles;
 		size_t npad = param.Npadx * param.Npady * nangles;
-		float *d_sino, *kernel;
+		float *d_sino;
 		cufftComplex *d_sinoPadded;
 
-		HANDLE_ERROR(cudaMalloc((void **)&kernel      , sizeof(float) * npad ));
 		HANDLE_ERROR(cudaMalloc((void **)&d_sino      , sizeof(float) * n )); 
 		HANDLE_ERROR(cudaMalloc((void **)&d_sinoPadded, sizeof(cufftComplex) * npad ));
 
 		HANDLE_ERROR(cudaMemcpy(d_sino, projections, n * sizeof(float), cudaMemcpyHostToDevice));
 
-        paganinKernel<<<param.Grd,param.BT>>>(kernel, param, param.Npadx, param.Npady, nangles);
-
-        apply_filter(param, d_sino, kernel, d_sino, d_sinoPadded, nrays, nslices, nangles);
+        apply_filter(param, d_sino, d_kernel, d_sino, d_sinoPadded, nrays, nslices, nangles);
 
         paganinReturn<<<param.Grd,param.BT>>>(d_sino, param, nrays, nslices, nangles);
 
 		HANDLE_ERROR(cudaMemcpy(projections, d_sino, n * sizeof(float), cudaMemcpyDeviceToHost));
 
-		cudaFree(kernel);
 		cudaFree(d_sinoPadded);
 		cudaFree(d_sino);
     }

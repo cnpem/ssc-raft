@@ -36,7 +36,7 @@ extern "C"
         if(lab.is_slice == 1){
             printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
             for (i = 0; i < n_process; i++)
-                set_process_slices(lab, i, &process[i], n_process, gpus, ndevs);
+                set_process_slices_2(lab, i, &process[i], n_process, gpus, ndevs);
         }else{
             printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
 
