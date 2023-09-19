@@ -23,13 +23,14 @@ def phase_filters(tomogram,dic):
     
     z1x       = dic['z1[m]']
     z2x       = dic['z2[m]']
-    z1y       = z1x+0
-    z2y       = z2x+0
+    z1y       = z1x
+    z2y       = z2x
     energy    = dic['energy[KeV]']
     alpha     = dic['regularization']
     pad       = dic['padding']
-    padx      = pad
-    pady      = pad
+    # padx      = pad
+    # pady      = pad
+    pixel     = dic['detectorPixel[m]']
 
     # Select beam geometry
     case = dic['beamgeometry']
@@ -50,18 +51,20 @@ def phase_filters(tomogram,dic):
 
             if pad > 0:
                 if nrays % 2 != 0: 
-                    tomogram = np.pad(tomogram,((0,0),(0,1)), mode = 'edge')
+                    tomogram = np.pad(tomogram,((0,0),(0,1)), mode = 'constant')
                 if nslices % 2 != 0: 
-                    tomogram = np.pad(tomogram,((0,1),(0,0)), mode = 'edge')
+                    tomogram = np.pad(tomogram,((0,1),(0,0)), mode = 'constant')
 
     elif len(tomogram.shape) == 3:
             nangles = tomogram.shape[0]
 
             if pad > 0:
                 if nrays % 2 != 0: 
-                    tomogram = numpy.pad(tomogram,((0,0),(0,0),(0,1)), mode = 'edge')
+                    tomogram = numpy.pad(tomogram,((0,0),(0,0),(0,1)), mode = 'constant')
                 if nslices % 2 != 0: 
-                    tomogram = numpy.pad(tomogram,((0,0),(0,1),(0,0)), mode = 'edge')
+                    tomogram = numpy.pad(tomogram,((0,0),(0,1),(0,0)), mode = 'constant')
+                if nangles % 2 != 0: 
+                    tomogram = numpy.pad(tomogram,((0,1),(0,0),(0,0)), mode = 'constant')
     else:
         logger.error(f'Data has wrong shape = {tomogram.shape}. It needs to be 2D or 3D.')
         sys.exit(1)
@@ -90,6 +93,18 @@ def phase_filters(tomogram,dic):
     #     power_of_2_padding(nrays,padx) 
     # if pady > 0:
     #     power_of_2_padding(nslices,pady) 
+
+    c = 299792458    # Velocity of Light [m/s]
+    plank = 4.135667662E-15  # Plank constant [ev*s]
+    const = (plank * c)
+    wave =  const / energy   # [m]  waveleght 
+
+    paxx  = np.ceil(np.pi * wave * z2x / pixel ** 2)
+    padx = int((pow(2, np.ceil(np.log2(nrays + paxx))) - nrays) * 0.5)
+    payy  = np.ceil(np.pi * wave * z2y / pixel ** 2)
+    pady = int((pow(2, np.ceil(np.log2(nslices + payy))) - nslices) * 0.5)
+
+    logger.info(f'Padding values: ({padx},{pady}) = (x,y)')
 
     float_param     = numpy.array([z1x, z1y, z2x, z2y, energy, alpha])
     float_param     = numpy.ascontiguousarray(float_param.astype(numpy.float32))

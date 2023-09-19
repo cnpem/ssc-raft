@@ -76,10 +76,11 @@ void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gp
 
     long long int  n_filter, idx_filter, n_recon, idx_recon, n_proj, idx_proj;
     float z_min, z_max, Z_min, Z_max, L;  
-    int nz_gpu,  zi_min, zi_max, Zi_max, Zi_min, zi_filter; 
+    int nz_gpu,  zi_min, zi_max, Zi_max, Zi_min, zi_filter, zi_filter_pad; 
     int zi_min0, zi_max0, Zi_max0, Zi_min0; 
     float z_min0, z_max0, Z_max0, Z_min0; 
     int zzi_min, zzi_max;
+    long long int  n_filter_pad, idx_filter_pad;
 
     // Reconstructed object 
     nz_gpu = (int) ( ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
@@ -119,9 +120,12 @@ void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gp
     zzi_min = i*nz_gpu;
     zzi_max = (int) std::min((i+1)*nz_gpu, lab.nv); 
 
-    n_filter = (long long int) (zzi_max - zzi_min)*lab.nbeta*lab.nh;
-    idx_filter = (long long int) zzi_min*lab.nbeta*lab.nh;
-    zi_filter = (int) (n_filter/(lab.nbeta*lab.nh));
+    n_filter       = (long long int) (zzi_max - zzi_min)*lab.nbeta*lab.nh;
+    n_filter_pad   = (long long int) (zzi_max - zzi_min)*lab.nbeta*lab.nph;
+    idx_filter     = (long long int) zzi_min*lab.nbeta*lab.nh;
+    idx_filter_pad = (long long int) zzi_min*lab.nbeta*lab.nph;
+    zi_filter      = (int) (n_filter/(lab.nbeta*lab.nh ));
+    zi_filter_pad  = (int) (n_filter_pad/(lab.nbeta*lab.nph));
 
     printf("n_process = %d, nv = %d, %d \n",n_process,lab.nv,nz_gpu);
     printf("Process = %d: n_filter = %lld, idx_filter = %lld, z_filter = %d, nbeta = %d, hbeta = %f \n", i, n_filter, idx_filter, zi_filter, lab.nbeta, lab.dbeta);
@@ -131,9 +135,14 @@ void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gp
     (*process).zi = Zi_min;
     (*process).idx_proj = idx_proj;
     (*process).n_proj = n_proj;
+
     (*process).n_filter = n_filter;
     (*process).idx_filter = idx_filter;
     (*process).z_filter = zi_filter; 
+    (*process).n_filter_pad = n_filter_pad;
+    (*process).idx_filter_pad = idx_filter_pad;
+    (*process).z_filter_pad = zi_filter_pad; 
+
     (*process).n_recon = n_recon;
     (*process).idx_recon = idx_recon;
     (*process).z_ph = z_min;
@@ -152,6 +161,8 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     int zi_min0, zi_max0, Zi_max0, Zi_min0; 
     float z_min0, z_max0, Z_max0, Z_min0; 
     int zzi_min, zzi_max;
+    long long int  n_filter_pad, idx_filter_pad;
+    int zi_filter_pad;
 
     // Reconstructed object 
     nz_gpu = (int) ( ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
@@ -207,9 +218,12 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     zzi_min = Zi_min0 + i*nz_gpu;
     zzi_max = (int) std::min(Zi_min0 + (i+1)*nz_gpu, Zi_max0); // lab.blockv
 
-    n_filter = (long long int) (zzi_max - zzi_min)*lab.nbeta*lab.nh;
-    idx_filter = (long long int) zzi_min*lab.nbeta*lab.nh;
-    zi_filter = (int) (n_filter/(lab.nbeta*lab.nh));
+    n_filter       = (long long int) (zzi_max - zzi_min)*lab.nbeta*lab.nh;
+    n_filter_pad   = (long long int) (zzi_max - zzi_min)*lab.nbeta*lab.nph;
+    idx_filter     = (long long int) zzi_min*lab.nbeta*lab.nh;
+    idx_filter_pad = (long long int) zzi_min*lab.nbeta*lab.nph;
+    zi_filter      = (int) (n_filter/(lab.nbeta*lab.nh ));
+    zi_filter_pad  = (int) (n_filter_pad/(lab.nbeta*lab.nph));
 
     printf("n_process = %d, nv = %d, %d \n",n_process,lab.nv,nz_gpu);
     printf("Process = %d: n_filter = %lld, idx_filter = %lld, z_filter = %d, nbeta = %d, hbeta = %f \n", i, n_filter, idx_filter, zi_filter, lab.nbeta, lab.dbeta);
@@ -219,9 +233,14 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     (*process).zi = Zi_min;
     (*process).idx_proj = idx_proj;
     (*process).n_proj = n_proj;
+
     (*process).n_filter = n_filter;
     (*process).idx_filter = idx_filter;
     (*process).z_filter = zi_filter; 
+    (*process).n_filter_pad = n_filter_pad;
+    (*process).idx_filter_pad = idx_filter_pad;
+    (*process).z_filter_pad = zi_filter_pad; 
+
     (*process).n_recon = n_recon;
     (*process).idx_recon = idx_recon;
     (*process).z_ph = z_min;
@@ -237,7 +256,7 @@ int memory(Lab lab, int ndev){
     int n_process;
     long long int n_proj, n_recon;
     
-    n_proj = (long long int)(lab.nv)*(long long int)(lab.nbeta)*(long long int)(lab.nh);
+    n_proj = (long long int)(lab.nv)*(long long int)(lab.nbeta)*(long long int)(lab.nph);
 
     n_recon = (long long int)(lab.nx)*(long long int)(lab.ny)*(long long int)(lab.nz);
 

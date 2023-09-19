@@ -31,6 +31,7 @@ typedef struct {
     int is_slice; // (bool) Reconstruct a block of slices or not
     int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
     int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
+    int nph, padh;
 
     /* Filter Types definitions
     enum EType
@@ -50,9 +51,9 @@ typedef struct {
 
 
 typedef struct {  
-    int i, i_gpu, zi, z_filter;
-    long long int n_proj, n_recon, n_filter;
-    long long int idx_proj, idx_recon, idx_filter;
+    int i, i_gpu, zi, z_filter, z_filter_pad;
+    long long int n_proj, n_recon, n_filter, n_filter_pad;
+    long long int idx_proj, idx_recon, idx_filter, idx_filter_pad;
     float z_ph, z_det;
 } Process;
 
@@ -83,13 +84,17 @@ extern "C"{
     __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process);
     __global__ void set_beta(Lab lab, float *dangles, float* beta);
     __device__ void set_recon_idxs(long long int n, int* i, int*j, int* k, Lab lab);
-
+    __device__ void set_filter_idxs_pad(long long int n, int* i, int*j, int* k, Lab lab, Process process);
 
 
     __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
-    void ringsgpu_fdk( Lab lab, float* data, Process process);
+    __host__ void fft_nopad(Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
+
+    
     __global__ void signal_save(Lab lab, float* proj, cufftComplex* signal, Process process);
+    __global__ void signal_save_pad(Lab lab, float* proj, cufftComplex* signal, Process process);
     __global__ void signal_filter(Lab lab, float* W, cufftComplex* signal, Process process);
+    __global__ void signal_filter_pad(Lab lab, float* W, cufftComplex* signal, Process process);
     __global__ void filt_W(Lab lab, float* W);
     __global__ void filt_Ramp(Lab lab, float* W);
     __global__ void filt_Gaussian(Lab lab, float* W);
@@ -99,7 +104,10 @@ extern "C"{
     __global__ void filt_Hann(Lab lab, float* W);
     __global__ void filt_Hamming(Lab lab, float* W);
     __global__ void signal_inv(Lab lab, float* Q, cufftComplex* signal, Process process);
+    __global__ void signal_inv_pad(Lab lab, float* Q, cufftComplex* signal, Process process);
+
     __device__ void set_filter_idxs(long long int n, int* i, int*j, int* k, Lab lab, Process process);
+    __device__ void set_filter_idxs_pad(long long int n, int* i, int*j, int* k, Lab lab, Process process);
 
     void filtering_conv(Lab lab, float* proj, float* Q, Process process);
     __global__ void calc_Q(float* Q, float* proj, Lab lab, Process process);

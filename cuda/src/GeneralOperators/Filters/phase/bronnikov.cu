@@ -36,9 +36,10 @@ extern "C" {
     {
         size_t i     = blockIdx.x*blockDim.x + threadIdx.x;
         size_t j     = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k     = blockIdx.z*blockDim.z + threadIdx.z;
         size_t ind   = sizex * j + i;
 
-        if ( (i >= sizex ) || (j >= sizey) ) return;
+        if ( (i >= sizex ) || (j >= sizey) || (k >= 1) ) return;
 
         // Reciprocal grid
         float nyq       = 0.5;

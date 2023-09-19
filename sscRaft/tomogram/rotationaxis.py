@@ -54,17 +54,17 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
     else:
         logger.info(f'Applying given rotation axis correction deviation value: {shift}')
 
-    if padding < 2*np.abs(shift):
-        padding = 2*shift
+    if padding < np.abs(shift):
+        padding = shift
 
-    padd = padding - 2 * np.abs(shift)
+    padd = padding - np.abs(shift)
 
-    proj = np.zeros((data.shape[0], data.shape[1], data.shape[2]+padding))
+    proj = np.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * padding))
 
     if(shift < 0):
-        proj[:,:,padd//2 + 2*np.abs(shift):data.shape[2]+padd//2 + 2*np.abs(shift)] = data
+        proj[:,:,padd + np.abs(shift):data.shape[2]+padd + np.abs(shift)] = data
     else:
-        proj[:,:,padd//2:data.shape[2]+padd//2] = data
+        proj[:,:,padd:data.shape[2]+padd] = data
 
         logger.info(f'Corrected projection for rotation axis: new shape {proj.shape}')
 

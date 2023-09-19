@@ -36,9 +36,10 @@ extern "C" {
     {
         size_t i     = blockIdx.x*blockDim.x + threadIdx.x;
         size_t j     = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k     = blockIdx.z*blockDim.z + threadIdx.z;
         size_t ind   = sizex * j + i;
 
-        if ( (i >= sizex ) || (j >= sizey) ) return;
+        if ( (i >= sizex ) || (j >= sizey) || (k >= 1) ) return;
 
         // Reciprocal grid
         float nyq       = 0.5;
@@ -55,8 +56,8 @@ extern "C" {
 
         float wxx = wx*wx; float wyy = wy*wy;
 
-		float kernelX = param.z2x * param.lambda * wxx  / ( 4.0 * float(M_PI) * magnx );
-		float kernelY = param.z2y * param.lambda * wyy  / ( 4.0 * float(M_PI) * magny );
+		float kernelX = 2.0 * float(M_PI) * param.z2x * param.lambda * wxx  / ( 4.0 * float(M_PI) * magnx );
+		float kernelY = 2.0 * float(M_PI) * param.z2y * param.lambda * wyy  / ( 4.0 * float(M_PI) * magny );
 
         kernel[ind] = 1.0 / ( param.alpha + kernelX + kernelY );
 
@@ -69,9 +70,15 @@ extern "C" {
         size_t k     = blockIdx.z*blockDim.z + threadIdx.z;
         size_t ind   = sizex * k * sizey + sizex * j + i;
 
+        float tol = 1e-10;
+
         if ( (i >= sizex ) || (j >= sizey) || (k >= sizez)) return;
 
+        // if ( data[ind] < tol )
+		// 		data[ind] = 1.0;
+
         data[ind] = - logf( data[ind] );
+        // data[ind] = - logf( fmaxf(data[ind], 0.5f) );
 
     }
 

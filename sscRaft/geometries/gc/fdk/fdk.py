@@ -133,6 +133,14 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     if filter == 1 or filter == 2 or filter == 4:
         logger.info(f'FDK filter regularization: {regularization}')     
 
+    # try:
+    #     padh = dic['padding']
+    # except:
+    #     padh = nh // 2
+
+    padh = 0 #nh // 2
+    nph  = nh + 2 * padh
+    
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
                 nx = nx, ny = ny, nz = nz, 
@@ -148,7 +156,8 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
                 reg = regularization,
                 is_slice = is_slice,
                 slice_recon_start = start_recon_slice, slice_recon_end = end_recon_slice,  
-                slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice)
+                slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice,
+                nph = nph, padh = padh)
 
     time = np.zeros(2)
     time = np.ascontiguousarray(time.astype(np.float64))

@@ -65,7 +65,9 @@ extern "C" {
 
 		size_t npad = param.Npadx * param.Npady;
 		float *d_kernel;
-		float *kernel, maximum;
+		cublasHandle_t handle = NULL;
+        cublasCreate(&handle);
+        cublasStatus_t stat;
 
 		// Compute phase filter kernel
 		HANDLE_ERROR(cudaMalloc((void **)&d_kernel, sizeof(float) * npad ));
@@ -98,25 +100,26 @@ extern "C" {
 			}
 
         // Normalize kernel by maximum value
-        kernel = (float*)malloc(npad * sizeof(float));
-        HANDLE_ERROR(cudaMemcpy(kernel, d_kernel, npad * sizeof(float), cudaMemcpyDeviceToHost));
-        maximum = find_matrix_max(kernel, param.Npadx, param.Npady);
-        Normalize<<<param.Grd,param.BT>>>(d_kernel, maximum, param.Npadx, param.Npady, nangles);
+ 		int max;
+        stat = cublasIsamax(handle, (int)npad, d_kernel, 1, &max);
 
-        if(ngpu == 0){
-            // print_matrix(kernel, param.Npadx, param.Npady);
-            printf("Maximum paganin: %e \n",maximum);
-        }
+        if (stat != CUBLAS_STATUS_SUCCESS)
+            printf("Cublas Max failed\n");
 
-        free(kernel);
-		
+		float maximum;
+		HANDLE_ERROR(cudaMemcpy(&maximum, d_kernel + max, sizeof(float), cudaMemcpyDeviceToHost));
+        Normalize<<<param.Grd,param.BT>>>(d_kernel, maximum, param.Npadx, param.Npady);
+
 		size_t bz; 
 		param.blocksize = min(nangles,param.blocksize);
 
+		printf("Filter: %d \n",(int)param.filter);
 		printf("Dims: %ld, %ld, %ld \n",param.Npadx,param.Npady,param.blocksize);
+		printf("Dims: %e, %e, %e, %e, %e, %e \n",param.z1x,param.z1y,param.z2x,param.z2y,param.energy,param.lambda);
+		
 		/* Plan for Fourier transform - cufft */
 		int n[] = {(int)param.Npadx,(int)param.Npady};
-		HANDLE_FFTERROR(cufftPlanMany(&param.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, param.blocksize));
+		HANDLE_FFTERROR(cufftPlanMany(&param.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, (int)param.blocksize));
 
 		size_t zblock = param.blocksize;
 
@@ -130,7 +133,7 @@ extern "C" {
 
 				HANDLE_FFTERROR(cufftDestroy(param.mplan));
 
-				HANDLE_FFTERROR(cufftPlanMany(&param.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, zblock));
+				HANDLE_FFTERROR(cufftPlanMany(&param.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, (int)zblock));
 			}
 				
 			switch ((int)param.filter){
@@ -140,24 +143,24 @@ extern "C" {
 					break;
 				case 1:
 					/* code */
-					_paganin_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_paganin_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 				case 2:
 					/* code */
-					_bronnikov_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_bronnikov_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 				case 3:
 					/* code */
-					_born_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_born_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 				case 4:
 					/* code */
-					_rytov_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_rytov_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 
 				default:
 					printf("Using paganin as default phase filter!");
-					_paganin_gpu(param, projections + nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_paganin_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
 					break;
 			}	
 			
@@ -166,6 +169,7 @@ extern "C" {
 		/* Destroy plan */
 		HANDLE_FFTERROR(cufftDestroy(param.mplan));
 		cudaFree(d_kernel);
+		cublasDestroy(handle);
 
 		cudaDeviceSynchronize();
 	}
@@ -187,11 +191,12 @@ extern "C" {
 
 		param->filter    = (int)parami[3]; // filter type;
 
+		param->lambda    = ( plank * vc ) / param->energy;
+		param->wave      = ( 2.0 * float(M_PI) ) / param->lambda;
+
 		param->Npadx     = sizex + 2.0 * param->padx; 
 		param->Npady     = sizey + 2.0 * param->pady; 
 
-		param->lambda    = ( plank * vc ) / param->energy;
-		param->wave      = ( 2.0 * float(M_PI) ) / param->lambda;
 
 		/* GPUs */
 		/* Initialize Device sizes variables */

@@ -8,6 +8,7 @@
 extern "C"{
 void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process) {
     long long int N = process.n_filter;
+    long long int Npad = process.n_filter_pad;
 
     clock_t begin = clock();
     cudaSetDevice(process.i_gpu);
@@ -16,12 +17,13 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
 
-    cudaMalloc(c_signal, sizeof(cufftComplex)*N);
+    cudaMalloc(c_signal, sizeof(cufftComplex)*Npad);
 
     cudaMalloc(c_proj, process.n_filter * sizeof(float));    
     cudaMemcpy(*c_proj, &proj[process.idx_filter], process.n_filter * sizeof(float), cudaMemcpyHostToDevice);
 
-    cudaMalloc(W, lab.nh * sizeof(float));
+    // cudaMalloc(W, lab.nh * sizeof(float));
+    cudaMalloc(W, (lab.nph) * sizeof(float));
 
     printf("Filter number: %d \n",lab.filter_type);
     switch (lab.filter_type){
@@ -83,7 +85,7 @@ void copy_cpu_filter_fft(float* proj, float* c_proj, cufftComplex* c_signal, flo
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
 
-    long long int N = process.n_filter;                                         //lab.nbeta * lab.nv * lab.nh;
+    long long int N = process.n_filter;   
     cudaMemcpy(&proj[process.idx_filter], c_proj, N*sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaFree(c_proj);

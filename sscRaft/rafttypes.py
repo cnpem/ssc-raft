@@ -208,7 +208,9 @@ class Lab(ctypes.Structure):
                 ("slice_recon_start", ctypes.c_int),
                 ("slice_recon_end", ctypes.c_int),
                 ("slice_tomo_start", ctypes.c_int),
-                ("slice_tomo_end", ctypes.c_int)
+                ("slice_tomo_end", ctypes.c_int),
+                ("nph", ctypes.c_int),
+                ("padh", ctypes.c_int)
                 ]
 
 try:

@@ -11,45 +11,15 @@ extern "C" {
 
 	void apply_filter(PAR param, float *data, float *kernel, float *ans, cufftComplex *dataPadded, size_t sizex, size_t sizey, size_t sizez)
 	{
-        zeropadding<<<param.Grd,param.BT>>>(data, dataPadded, sizex, sizey, sizez, param.padx, param.pady);
+        padding<<<param.Grd,param.BT>>>(data, dataPadded, 1.0, sizex, sizey, sizez, param.padx, param.pady);
+        // padding_phase_filters<<<param.Grd,param.BT>>>(data, dataPadded, sizex, sizey, sizez, param.padx, param.pady);
+
         HANDLE_FFTERROR(cufftExecC2C(param.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
         CConvolve<<<param.Grd,param.BT>>>(dataPadded, kernel, dataPadded, param.Npadx, param.Npady, sizez);	
         HANDLE_FFTERROR(cufftExecC2C(param.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
         fftNormalize<<<param.Grd,param.BT>>>(dataPadded, param.Npadx, param.Npady, sizez);
-        recuperate_zeropadding<<<param.Grd,param.BT>>>(dataPadded, ans, sizex, sizey, sizez, param.padx, param.pady);
+        recuperate_padding<<<param.Grd,param.BT>>>(dataPadded, ans, sizex, sizey, sizez, param.padx, param.pady);
 	}
-
-    float find_matrix_max(float *matrix, size_t sizex, size_t sizey)
-    {
-        size_t i,j,ind;
-        float maximum = 0;
-
-        for (i = 0; i < sizex; i++){
-            for (j = 0; j < sizey; j++){
-                
-                ind = i + j * sizex;
-
-                maximum = MAX(matrix[ind],maximum);
-            }
-        }
-        return maximum;
-    }
-
-    void print_matrix(float *matrix, size_t sizex, size_t sizey)
-    {
-        size_t i,j,ind;
-
-        for (j = 0; j < sizey; j++){
-            for (i = 0; i < sizex; i++){
-
-                ind = i + j * sizex;
-
-                printf("%e ",matrix[ind]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
 
     __global__ void CConvolve(cufftComplex *a, float *b, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)
     {
@@ -70,23 +40,11 @@ extern "C" {
         size_t i = blockIdx.x*blockDim.x + threadIdx.x;
         size_t j = blockIdx.y*blockDim.y + threadIdx.y;
         size_t k = blockIdx.z*blockDim.z + threadIdx.z;
-        size_t index = sizex * (k*sizey + j)  + i;
+        size_t index = sizex * (k*sizey + j) + i;
         
         if ( (i >= sizex) || (j >= sizey) || (k >= sizez) ) return;
         
-        c[index].x /= N; c[index].y /= N; 
-    }
-
-    __global__ void Normalize(float *a, float b, size_t sizex, size_t sizey, size_t sizez)
-    {
-        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
-        size_t index = sizex * (k*sizey + j)  + i;
-        
-        if ( (i >= sizex) || (j >= sizey) || (k >= sizez) ) return;
-        
-        a[index] /= b; 
+        c[index].x /= N; 
     }
 
     __global__ void fftshiftKernel(float *c, size_t sizex, size_t sizey, size_t sizez)
@@ -118,6 +76,51 @@ extern "C" {
                 c[shift] = temp;
             }
         }
+    }
+
+    __global__ void Normalize(float *a, float b, size_t sizex, size_t sizey)
+    {
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
+        
+        size_t index = sizex * j + i;
+        
+        if ( (i >= sizex) || (j >= sizey) || (k >= 1) ) return;
+        
+        a[index] = a[index] / b; 
+    }
+
+    float find_matrix_max(float *matrix, size_t sizex, size_t sizey)
+    {
+        size_t i,j,ind;
+        float maximum = 0;
+
+        for (i = 0; i < sizex; i++){
+            for (j = 0; j < sizey; j++){
+                
+                ind = i + j * sizex;
+
+                maximum = MAX(matrix[ind],maximum);
+            }
+        }
+        return maximum;
+    }
+
+    void print_matrix(float *matrix, size_t sizex, size_t sizey)
+    {
+        size_t i,j,ind;
+
+        for (j = 0; j < sizey; j++){
+            for (i = 0; i < sizex; i++){
+
+                ind = i + j * sizex;
+
+                printf("%e ",matrix[ind]);
+            }
+            printf("\n");
+        }
+        printf("\n");
     }
 
 }
