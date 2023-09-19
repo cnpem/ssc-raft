@@ -218,7 +218,7 @@ extern "C"{
 						dark   + (size_t)t*blockgpu*nrays, 
 						nrays, blockgpu, nangles, 
 						numflats, Totalframes, Initframe,
-						is_log
+						is_log, nslices
 						));
 			// threads.push_back(std::async( std::launch::async, 
 			// 			flatdark_gpu, 

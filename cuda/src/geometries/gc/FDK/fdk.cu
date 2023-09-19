@@ -139,7 +139,7 @@ extern "C"
                 cudaDeviceSynchronize();
             }
 
-            threads_filt.emplace_back(thread(fft_nopad, lab, c_filter[k % ndevs], c_signal[k % ndevs], c_W[k % ndevs], process[k]));
+            threads_filt.emplace_back(thread(fft, lab, c_filter[k % ndevs], c_signal[k % ndevs], c_W[k % ndevs], process[k]));
             k = k + 1;
 
             if (k % ndevs == 0)

@@ -133,10 +133,10 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     if filter == 1 or filter == 2 or filter == 4:
         logger.info(f'FDK filter regularization: {regularization}')     
 
-    # try:
-    #     padh = dic['padding']
-    # except:
-    #     padh = nh // 2
+    try:
+        padh = dic['padding']
+    except:
+        padh = nh // 2
 
     padh = 0 #nh // 2
     nph  = nh + 2 * padh

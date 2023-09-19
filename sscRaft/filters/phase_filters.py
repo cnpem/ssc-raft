@@ -23,13 +23,13 @@ def phase_filters(tomogram,dic):
     
     z1x       = dic['z1[m]']
     z2x       = dic['z2[m]']
-    z1y       = z1x
-    z2y       = z2x
+    z1y       = z1x+0
+    z2y       = z2x+0
     energy    = dic['energy[KeV]']
     alpha     = dic['regularization']
     pad       = dic['padding']
-    # padx      = pad
-    # pady      = pad
+    padx      = pad+0
+    pady      = pad+0
     pixel     = dic['detectorPixel[m]']
 
     # Select beam geometry
@@ -99,10 +99,10 @@ def phase_filters(tomogram,dic):
     const = (plank * c)
     wave =  const / energy   # [m]  waveleght 
 
-    paxx  = np.ceil(np.pi * wave * z2x / pixel ** 2)
-    padx = int((pow(2, np.ceil(np.log2(nrays + paxx))) - nrays) * 0.5)
-    payy  = np.ceil(np.pi * wave * z2y / pixel ** 2)
-    pady = int((pow(2, np.ceil(np.log2(nslices + payy))) - nslices) * 0.5)
+    # paxx  = np.ceil(np.pi * wave * z2x / pixel ** 2)
+    # padx = int((pow(2, np.ceil(np.log2(nrays + paxx))) - nrays) * 0.5)
+    # payy  = np.ceil(np.pi * wave * z2y / pixel ** 2)
+    # pady = int((pow(2, np.ceil(np.log2(nslices + payy))) - nslices) * 0.5)
 
     logger.info(f'Padding values: ({padx},{pady}) = (x,y)')
 
