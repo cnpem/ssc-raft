@@ -53,12 +53,12 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     padh = int(nrays // 2)
     try:
         pad  = dic['recon pad']
+        logger.info(f'Set FDK pad value as {pad} x horizontal dimension ({padh}).')
         padh = int(pad * padh)
         # padh = power_of_2_padding(nrays,padh)
-        logger.info(f'Set FDK pad value as {pad} x horizontal dimension ({padh}).')
     except:
-        logger.info(f'Set default FDK pad value as {pad} x horizontal dimension ({padh}).')
         pad  = 1
+        logger.info(f'Set default FDK pad value as {pad} x horizontal dimension ({padh}).')
         padh = int(pad * padh)
         # padh = power_of_2_padding(nrays,padh)
 
