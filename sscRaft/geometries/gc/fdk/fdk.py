@@ -36,7 +36,6 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     regularization = dic['regularization']
 
     Dd, Dsd = dic['z1[m]'], dic['z1+z2[m]']
-
     dh, dv = dic['detectorPixel[m]'], dic['detectorPixel[m]']
 
     nrays   = tomogram.shape[-1]
@@ -108,18 +107,8 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     if blockslices_recon > nslices:
         logger.warning(f'Trying to reconstruct more slices than provided by the tomogram data.')    
 
-    try:
-        start_tomo_slice  = dic['slice tomo'][0]
-        end_tomo_slice    = dic['slice tomo'][1]
-    except:
-        if is_slice == 1:
-            start_tomo_slice  = 0
-            end_tomo_slice    = nslices
-            # start_tomo_slice, end_tomo_slice = set_conical_slices(start_recon_slice,end_recon_slice,nslices,nx,ny,Dd,Dsd,dh)
-            # tomogram = tomogram[start_tomo_slice:(end_tomo_slice + 1),:,:]
-        else:
-            start_tomo_slice  = 0
-            end_tomo_slice    = nslices
+    start_tomo_slice  = 0
+    end_tomo_slice    = nslices
 
     logger.info(f'Reconstructing {blockslices_recon} slices of {nslices}.')
 

@@ -63,7 +63,7 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     Zi_max = std::min(lab.nv, (int) ceil((Z_max + lab.v)/lab.dv));
 
     idx_proj = (long long int) (Zi_min)*(lab.nbeta*lab.nh);
-    n_proj = (long long int) (Zi_max+1-Zi_min)*(lab.nbeta*lab.nh);
+    n_proj = (long long int) (Zi_max-Zi_min)*(lab.nbeta*lab.nh);
 
     printf("Zimax = %d, %d, %e, Zimin = %d, %d, %e \n",Zi_max,zi_max,z_max,Zi_min,zi_min,z_min);
 

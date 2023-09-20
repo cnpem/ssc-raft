@@ -64,6 +64,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         if( zk + process.zi >= lab.nv) continue; 
 
         idx = (long long int) zk*lab.nbeta*lab.nh + m*lab.nh + xi; 
+        
 
         Q = proj[idx];   
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);

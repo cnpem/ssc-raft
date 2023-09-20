@@ -56,8 +56,10 @@ extern "C" {
 
         float wxx = wx*wx; float wyy = wy*wy;
 
-		float kernelX = 4.0 * float(M_PI) * float(M_PI) * param.z2x * param.alpha * wxx  / ( magnx );
-		float kernelY = 4.0 * float(M_PI) * float(M_PI) * param.z2y * param.alpha * wyy  / ( magny );
+        float gamma = 1.0 / param.alpha;
+
+		float kernelX = 4.0 * float(M_PI) * float(M_PI) * param.z2x * gamma * wxx  / ( magnx );
+		float kernelY = 4.0 * float(M_PI) * float(M_PI) * param.z2y * gamma * wyy  / ( magny );
 
         kernel[ind] = 1.0 / ( 1.0 + kernelX + kernelY );
 
@@ -74,8 +76,8 @@ extern "C" {
 
         if ( (i >= sizex ) || (j >= sizey) || (k >= sizez)) return;
 
-        if ( data[ind] < tol )
-				data[ind] = 1.0;
+        // if ( data[ind] < tol )
+		// 		data[ind] = 1.0;
 
         data[ind] = - logf( data[ind] );
         // data[ind] = - logf( fmaxf(data[ind], 0.5f) );

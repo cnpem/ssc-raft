@@ -110,12 +110,14 @@ extern "C" {
 		HANDLE_ERROR(cudaMemcpy(&maximum, d_kernel + max, sizeof(float), cudaMemcpyDeviceToHost));
         Normalize<<<param.Grd,param.BT>>>(d_kernel, maximum, param.Npadx, param.Npady);
 
+		cudaDeviceSynchronize();
+
 		size_t bz; 
 		param.blocksize = min(nangles,param.blocksize);
 
-		printf("Filter: %d \n",(int)param.filter);
-		printf("Dims: %ld, %ld, %ld \n",param.Npadx,param.Npady,param.blocksize);
-		printf("Dims: %e, %e, %e, %e, %e, %e \n",param.z1x,param.z1y,param.z2x,param.z2y,param.energy,param.lambda);
+		// printf("Filter: %d \n",(int)param.filter);
+		// printf("Dims: %ld, %ld, %ld \n",param.Npadx,param.Npady,param.blocksize);
+		// printf("Dims: %e, %e, %e, %e, %e, %e \n",param.z1x,param.z1y,param.z2x,param.z2y,param.energy,param.lambda);
 		
 		/* Plan for Fourier transform - cufft */
 		int n[] = {(int)param.Npadx,(int)param.Npady};
@@ -131,9 +133,11 @@ extern "C" {
 
 			if( zblock != param.blocksize){
 
+				cudaDeviceSynchronize();
 				HANDLE_FFTERROR(cufftDestroy(param.mplan));
 
 				HANDLE_FFTERROR(cufftPlanMany(&param.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, (int)zblock));
+				cudaDeviceSynchronize();
 			}
 				
 			switch ((int)param.filter){
@@ -165,6 +169,7 @@ extern "C" {
 			}	
 			
 		}
+		cudaDeviceSynchronize();
 
 		/* Destroy plan */
 		HANDLE_FFTERROR(cufftDestroy(param.mplan));
