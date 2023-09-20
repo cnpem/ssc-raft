@@ -104,8 +104,8 @@ extern "C"{
 
 			S = T / Q;
 
-			// if ( S < tol )
-			// 	S = 1.0;
+			if ( S < tol )
+				S = 1.0;
 
 			// in[line] = fmaxf(T, 0.5f) / fmaxf(Q,0.5f) ; // Old version (Giovanni)
 			in[line] = S;
@@ -145,8 +145,8 @@ extern "C"{
 
 			S = T / Q;
 
-			// if ( S < tol )
-			// 	S = 1.0;
+			if ( S < tol )
+				S = 1.0;
 
 			// in[line] = - logf( fmaxf(T, 0.5f) / fmaxf(Q,0.5f) ); // Old version (Giovanni)
 			in[line] = - logf( S );
@@ -164,7 +164,7 @@ extern "C"{
 
 		int b;
 		int blocksize = min(nslices,32); // Herança do Giovanni -> Mudar
-		size_t offset = 0; //(size_t)gpu * nslices * nrays;
+		size_t offset = (size_t)gpu * nslices * nrays;
 
 		dim3 blocks = dim3(nrays,nangles,blocksize);
 		blocks.x = ( nrays + 127 ) / 128;

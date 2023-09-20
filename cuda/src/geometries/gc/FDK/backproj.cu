@@ -60,7 +60,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
 	
         if( xi < 0) continue;             
         if( xi >= lab.nh) continue; 
-        if( zk < 0) continue;             
+        if( zk < 0) continue;      
         if( zk + process.zi >= lab.nv) continue; 
 
         idx = (long long int) zk*lab.nbeta*lab.nh + m*lab.nh + xi; 
@@ -69,7 +69,6 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
         // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
-    // printf("n = %lld \n",n);
 
     recon[n] = recon[n]*lab.dbeta / 2.0;
     // }
@@ -124,7 +123,7 @@ void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta
 
 
     long long int N = process.n_recon;    //lab.nbeta * lab.nv * lab.nh;
-    printf("idx recon %d gpu = %lld. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
+    printf("gpu = %d, idx recon = %lld. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
     HANDLE_ERROR(cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost));
 
     HANDLE_ERROR(cudaFree(c_proj));
@@ -146,7 +145,6 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
     n_threads = NUM_THREADS;
     n_blocks  = M/n_threads + (M % n_threads == 0 ? 0:1);   
     
-
     cudaDeviceSynchronize(); 
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
@@ -179,7 +177,6 @@ __global__ void set_beta(Lab lab, float *dangles, float* beta){
         beta[m + lab.nbeta] = sinf(dangles[m]);
     }
 }}
-
 
 
 extern "C"{

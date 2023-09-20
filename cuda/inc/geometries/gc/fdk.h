@@ -53,7 +53,7 @@ typedef struct {
 typedef struct {  
     int i, i_gpu, zi, z_filter, z_filter_pad;
     long long int n_proj, n_recon, n_filter, n_filter_pad;
-    long long int idx_proj, idx_recon, idx_filter, idx_filter_pad;
+    long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
     float z_ph, z_det;
 } Process;
 

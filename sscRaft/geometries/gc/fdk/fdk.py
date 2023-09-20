@@ -35,16 +35,33 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     # recon = data 
     regularization = dic['regularization']
 
+    Dd, Dsd = dic['z1[m]'], dic['z1+z2[m]']
+
+    dh, dv = dic['detectorPixel[m]'], dic['detectorPixel[m]']
+
+    nrays   = tomogram.shape[-1]
+    nangles = tomogram.shape[-2]
+
     if len(tomogram.shape) == 2:
             nslices = 1
+
     elif len(tomogram.shape) == 3:
             nslices = tomogram.shape[0]
     else:
         logger.error(f'Data has wrong shape = {tomogram.shape}. It needs to be 2D or 3D.')
         sys.exit(1)
 
-    nrays   = tomogram.shape[-1]
-    nangles = tomogram.shape[-2]
+    padh = int(nrays // 2)
+    try:
+        pad  = dic['recon pad']
+        padh = int(pad * padh)
+        # padh = power_of_2_padding(nrays,padh)
+        logger.info(f'Set FDK pad value as {pad} x horizontal dimension ({padh}).')
+    except:
+        logger.info(f'Set default FDK pad value as {pad} x horizontal dimension ({padh}).')
+        pad  = 1
+        padh = int(pad * padh)
+        # padh = power_of_2_padding(nrays,padh)
 
     try:
         angles     = dic['angles']
@@ -55,17 +72,13 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     try:
         start_recon_slice = dic['slices'][0]
         end_recon_slice   = dic['slices'][1]
-        start_tomo_slice  = 0 #dic['slice tomo'][0]
-        end_tomo_slice    = nslices #dic['slice tomo'][1]
         is_slice          = 1
-        # logger.info(f'Reconstruct slices {start_recon_slice} to {end_recon_slice} using tomogram slices {start_tomo_slice} to {end_tomo_slice}.')
+        logger.info(f'Reconstruct slices {start_recon_slice} to {end_recon_slice}.')
     except:
         start_recon_slice = 0
         end_recon_slice   = nslices
-        start_tomo_slice  = 0
-        end_tomo_slice    = nslices
-        is_slice    = 0
-        # logger.info(f'Reconstruct slices {start_recon_slice} to {end_recon_slice} using tomogram slices {start_tomo_slice} to {end_tomo_slice}.')  
+        is_slice          = 0
+        logger.info(f'Reconstruct all slices: {start_recon_slice} to {end_recon_slice}.')  
 
     blockslices_recon = end_recon_slice - start_recon_slice
 
@@ -79,12 +92,11 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
             else:
                 nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(blockslices_recon)
         
-        elif isinstance(reconsize,list):
+        elif isinstance(reconsize,int):
             
             nx, ny, nz = int(reconsize), int(reconsize), int(blockslices_recon)
         
         else:
-            
             logger.error(f'Dictionary entry `reconsize` wrong ({reconsize}). The entry `reconsize` is optional, but if it exists it needs to be a list = [nx,ny].')
             logger.error(f'Finishing run...')
             sys.exit(1)
@@ -96,13 +108,26 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     if blockslices_recon > nslices:
         logger.warning(f'Trying to reconstruct more slices than provided by the tomogram data.')    
 
+    try:
+        start_tomo_slice  = dic['slice tomo'][0]
+        end_tomo_slice    = dic['slice tomo'][1]
+    except:
+        if is_slice == 1:
+            start_tomo_slice  = 0
+            end_tomo_slice    = nslices
+            # start_tomo_slice, end_tomo_slice = set_conical_slices(start_recon_slice,end_recon_slice,nslices,nx,ny,Dd,Dsd,dh)
+            # tomogram = tomogram[start_tomo_slice:(end_tomo_slice + 1),:,:]
+        else:
+            start_tomo_slice  = 0
+            end_tomo_slice    = nslices
+
     logger.info(f'Reconstructing {blockslices_recon} slices of {nslices}.')
 
-    Dd, Dsd = dic['z1[m]'], dic['z1+z2[m]']
 
-    dh, dv = dic['detectorPixel[m]'], dic['detectorPixel[m]']
     nh, nv = int(nrays), int(nslices)
     h, v   = nh*dh/2, nv*dv/2
+    nph    = int(nh + 2 * padh)
+    print("NPH = ",nph)
 
     nbeta  = len(angles)
 
@@ -116,7 +141,6 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
 
     magn       = Dd/Dsd
     dx, dy, dz = dh*magn, dh*magn, dv*magn
-
     x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
 
     try:
@@ -132,14 +156,6 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
 
     if filter == 1 or filter == 2 or filter == 4:
         logger.info(f'FDK filter regularization: {regularization}')     
-
-    try:
-        padh = dic['padding']
-    except:
-        padh = nh // 2
-
-    padh = 0 #nh // 2
-    nph  = nh + 2 * padh
     
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
@@ -177,7 +193,8 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     proj_p = proj.ctypes.data_as(ctypes.c_void_p)
 
     recon = np.zeros((lab.nz, lab.ny, lab.nx))
-    logger.info(f'Recon shape: {recon.shape} = (nz,ny,nx).')
+
+    logger.info(f'Recon shape: ({lab.nx}, {lab.ny}, {lab.nz}) = (nx,ny,nz).')
 
     recon = np.ascontiguousarray(recon.astype(np.float32))
     recon_p = recon.ctypes.data_as(ctypes.c_void_p)

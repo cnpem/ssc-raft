@@ -17,6 +17,7 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
 
+    //cudaMalloc(c_signal, sizeof(cufftComplex)*N);
     cudaMalloc(c_signal, sizeof(cufftComplex)*Npad);
 
     cudaMalloc(c_proj, process.n_filter * sizeof(float));    

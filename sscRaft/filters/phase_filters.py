@@ -7,8 +7,9 @@ from ctypes import c_int as int32
 from ctypes import c_void_p  as void_p
 from ctypes import c_size_t as size_t
 
-def phase_filters(tomogram,dic):
+def phase_filters(tomo,dic):
 
+    tomogram = numpy.copy(tomo)
     tomogram = np.swapaxes(tomogram,0,1)
 
     gpus = dic['gpu']     
@@ -27,10 +28,22 @@ def phase_filters(tomogram,dic):
     z2y       = z2x+0
     energy    = dic['energy[KeV]']
     alpha     = dic['regularization']
-    pad       = dic['padding']
-    padx      = pad+0
-    pady      = pad+0
     pixel     = dic['detectorPixel[m]']
+
+    padx = int(nrays // 2)
+    pady = int(nrays // 2)
+    try:
+        pad  = dic['phase pad']
+        padx = int(pad * padx)
+        pady = int(pad * pady)
+        # padx = power_of_2_padding(nrays,padx)
+        logger.info(f'Set FDK pad value as ({padx},{pady}) = (padx,pady).')
+    except:
+        pad  = 1
+        padx = int(pad * padx)
+        pady = int(pad * pady)
+        # padx = power_of_2_padding(nrays,padx)
+        logger.info(f'Set default FDK pad value as ({padx},{pady}) = (padx,pady).')
 
     # Select beam geometry
     case = dic['beamgeometry']
@@ -47,24 +60,11 @@ def phase_filters(tomogram,dic):
         sys.exit(1)
 
     if len(tomogram.shape) == 2:
-            nangles = 1
-
-            if pad > 0:
-                if nrays % 2 != 0: 
-                    tomogram = np.pad(tomogram,((0,0),(0,1)), mode = 'constant')
-                if nslices % 2 != 0: 
-                    tomogram = np.pad(tomogram,((0,1),(0,0)), mode = 'constant')
+        nangles = 1
 
     elif len(tomogram.shape) == 3:
-            nangles = tomogram.shape[0]
-
-            if pad > 0:
-                if nrays % 2 != 0: 
-                    tomogram = numpy.pad(tomogram,((0,0),(0,0),(0,1)), mode = 'constant')
-                if nslices % 2 != 0: 
-                    tomogram = numpy.pad(tomogram,((0,0),(0,1),(0,0)), mode = 'constant')
-                if nangles % 2 != 0: 
-                    tomogram = numpy.pad(tomogram,((0,1),(0,0),(0,0)), mode = 'constant')
+        nangles = tomogram.shape[0]
+    
     else:
         logger.error(f'Data has wrong shape = {tomogram.shape}. It needs to be 2D or 3D.')
         sys.exit(1)
@@ -88,24 +88,6 @@ def phase_filters(tomogram,dic):
     else:
         logger.info(f'Phase filter: {filtername}({filter})')
 
-    # Correct padding for dimension to be power of 2: good for faster FFT
-    # if padx > 0:
-    #     power_of_2_padding(nrays,padx) 
-    # if pady > 0:
-    #     power_of_2_padding(nslices,pady) 
-
-    c = 299792458    # Velocity of Light [m/s]
-    plank = 4.135667662E-15  # Plank constant [ev*s]
-    const = (plank * c)
-    wave =  const / energy   # [m]  waveleght 
-
-    # paxx  = np.ceil(np.pi * wave * z2x / pixel ** 2)
-    # padx = int((pow(2, np.ceil(np.log2(nrays + paxx))) - nrays) * 0.5)
-    # payy  = np.ceil(np.pi * wave * z2y / pixel ** 2)
-    # pady = int((pow(2, np.ceil(np.log2(nslices + payy))) - nslices) * 0.5)
-
-    logger.info(f'Padding values: ({padx},{pady}) = (x,y)')
-
     float_param     = numpy.array([z1x, z1y, z2x, z2y, energy, alpha])
     float_param     = numpy.ascontiguousarray(float_param.astype(numpy.float32))
     float_paramsptr = float_param.ctypes.data_as(ctypes.c_void_p)
@@ -119,6 +101,5 @@ def phase_filters(tomogram,dic):
 
     libraft.phase_filters(tomogramptr, float_paramsptr, int_paramptr, int32(nrays), int32(nangles), int32(nslices), gpusptr, int32(ngpus))
 
-    tomogram = np.swapaxes(tomogram,0,1)
     
-    return tomogram
+    return np.swapaxes(tomogram,0,1)

@@ -102,6 +102,7 @@ def preprocessing_mogno(data, flat, dark, experiment):
    elif method == 'fdk':
       tomo_, shift = correct_rotation_axis360(tomo, experiment)
       tomo = np.copy(tomo_)
+      del(tomo_)
 
       dic                 = {}
       dic['gpu']          = experiment['gpu']

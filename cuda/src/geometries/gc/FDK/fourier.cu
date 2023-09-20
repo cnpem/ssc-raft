@@ -14,7 +14,10 @@ __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process 
     int n_threads = NUM_THREADS;
     long long int n_blocks  = N/n_threads + (N % n_threads == 0 ? 0:1);
     long long int n_blocks_pad  = Npad/n_threads + (Npad % n_threads == 0 ? 0:1);
-    
+
+    printf("FFT: n_threads = %d, n_blocks = %ld, n_blocks_pad = %ld \n",n_threads,n_blocks,n_blocks_pad);
+    printf("FFT: n = %d, npad = %d \n",n,npad);
+
     cudaSetDevice(process.i_gpu);
 
     int vpad[] = {npad};
@@ -93,22 +96,24 @@ __global__ void signal_save(Lab lab, float* proj, cufftComplex* signal, Process 
 extern "C"{
 __global__ void signal_save_pad(Lab lab, float* proj, cufftComplex* signal, Process process){
     long long int npad = blockDim.x * blockIdx.x + threadIdx.x;
-    int i, j, k, ii, jj, kk; 
+    int i, j, k, kk; 
     long long int idx, idp;
     float X, Z, aux;
 
     set_filter_idxs_pad(npad, &k, &j, &i, lab, process);
     idp = (long long int) k  + j*lab.nph + i*lab.nph*lab.nbeta;
 
-    long long int n = npad - 2.0 * lab.padh * (j + i * lab.nbeta);
-    set_filter_idxs(n, &kk, &jj, &ii, lab, process);
-    idx = (long long int) kk + jj*lab.nh + ii*lab.nh*lab.nbeta;
+    kk = ( k - lab.padh );
+    idx = (long long int) kk + j*lab.nh + i*lab.nh*lab.nbeta;
 
     X = kk*lab.dh - lab.h;
-    Z = (ii + process.i*process.z_filter)*lab.dv - lab.v;
+    Z = (i + process.i*process.z_filter)*lab.dv - lab.v;
     aux = lab.D/sqrtf(lab.Dsd*lab.Dsd + Z*Z + X*X);
 
-    if ( (ii < 0) || (ii >= lab.nh) ) return;
+    signal[idp].x = 0.0;
+    signal[idp].y = 0.0;
+
+    if ( (kk < 0) || (kk >= lab.nh) ) return;
 
     signal[idp].x = proj[idx]*aux;
     signal[idp].y = 0.0;
@@ -155,17 +160,17 @@ __global__ void signal_inv(Lab lab, float* Q, cufftComplex* signal, Process proc
 extern "C"{
 __global__ void signal_inv_pad(Lab lab, float* Q, cufftComplex* signal, Process process){
     long long int npad = blockDim.x * blockIdx.x + threadIdx.x ;
-    int i,j,k,ii,jj,kk;
+    int i,j,k,kk;
     long long int idx, idp;
 
     set_filter_idxs_pad(npad, &k, &j, &i, lab, process);
     idp = (long long int) k  + j*lab.nph + i*lab.nph*lab.nbeta;
 
-    long long int n = npad - 2.0 * lab.padh * (j + i*lab.nbeta);
-    set_filter_idxs(n, &kk, &jj, &ii, lab, process);
-    idx = (long long int) kk + jj*lab.nh + ii*lab.nh*lab.nbeta;
+    kk = ( k - lab.padh );
 
-    if ( (ii < 0) || (ii >= lab.nh) ) return;
+    idx = (long long int) kk + j*lab.nh + i*lab.nh*lab.nbeta;
+
+    if ( (kk < 0) || (kk >= lab.nh) ) return;
 
     Q[idx] = signal[idp].x/lab.nph;
 }}
@@ -209,18 +214,9 @@ extern "C"{
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
     
-        // for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*sinf(M_PI*i/lab.nh)/(M_PI*i/lab.nh);
-    
-        // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*sinf(M_PI*(lab.nh/2-i)/lab.nh)/(M_PI*(lab.nh/2-i)/lab.nh);
-    
         for (i = 0; i <=lab.nph/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nph));
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nph/2 - i)/lab.nph));
-    
-        // for (i = 0; i <=lab.nh/2 ; i++) W[i] = W[i]*(expf(1)/(1-4*(i/lab.nh)*(i/lab.nh)))*expf(-1/(1-4*(i/lab.nh)*(i/lab.nh)));
-    
-        // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(expf(1)/(1-4*((lab.nh/2-i)/lab.nh)*((lab.nh/2-i)/lab.nh)))*expf(-1/(1-4*((lab.nh/2-i)/lab.nh)*((lab.nh/2-i)/lab.nh)));
-    
     }
 
     __global__ void filt_Gaussian(Lab lab, float* W){
@@ -292,7 +288,7 @@ extern "C"{
         int i;
         float wmax = 1.0/(2.0*lab.dh);
         
-        for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+        for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
 
@@ -306,17 +302,13 @@ extern "C"{
         int i;
         float wmax = 1.0/(2.0*lab.dh);
         
-        for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nh); 
+        for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
 
         for (i = 0; i <=lab.nph/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nph));
 
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nph/2 - i)/lab.nph));
-
-        // Paola Modification 16 agosto 2023:
-        // for (i = 0; i < lab.nh ; i++) W[i] = (2*i*wmax)/(lab.nh)*(0.54 + 0.46*cosf(2*M_PI*i/lab.nh));
-        // for (i = 1; i < lab.nh/2 ; i++) W[lab.nh/2 + i] = W[lab.nh/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nh/2 - i)/lab.nh));
 
     }
 
