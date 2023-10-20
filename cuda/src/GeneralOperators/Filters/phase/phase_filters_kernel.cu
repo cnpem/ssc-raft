@@ -11,14 +11,32 @@ extern "C" {
 
 	void apply_filter(PAR param, float *data, float *kernel, float *ans, cufftComplex *dataPadded, size_t sizex, size_t sizey, size_t sizez)
 	{
-        padding<<<param.Grd,param.BT>>>(data, dataPadded, 1.0, sizex, sizey, sizez, param.padx, param.pady);
-        // padding_phase_filters<<<param.Grd,param.BT>>>(data, dataPadded, sizex, sizey, sizez, param.padx, param.pady);
+        if (param.padx != 0){
+            // printf("PAD = %d, %d \n", param.padx, param.pady);
+            // printf("Grid = %d, %d, %d \n", param.Grd.x, param.Grd.y, param.Grd.z);
+            // printf("BT = %d, %d, %d \n", param.BT.x, param.BT.y, param.BT.z);
 
-        HANDLE_FFTERROR(cufftExecC2C(param.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
-        CConvolve<<<param.Grd,param.BT>>>(dataPadded, kernel, dataPadded, param.Npadx, param.Npady, sizez);	
-        HANDLE_FFTERROR(cufftExecC2C(param.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
-        fftNormalize<<<param.Grd,param.BT>>>(dataPadded, param.Npadx, param.Npady, sizez);
-        recuperate_padding<<<param.Grd,param.BT>>>(dataPadded, ans, sizex, sizey, sizez, param.padx, param.pady);
+            padding<<<param.Grd,param.BT>>>(data, dataPadded, 1.0, sizex, sizey, sizez, param.padx, param.pady);
+            // printf(cudaGetErrorString(cudaGetLastError()));
+            // cudaDeviceSynchronize();
+            // printf(cudaGetErrorString(cudaGetLastError()));
+            // printf("Aqui no apply filter \n");
+
+            
+            HANDLE_FFTERROR(cufftExecC2C(param.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
+            CConvolve<<<param.Grd,param.BT>>>(dataPadded, kernel, dataPadded, param.Npadx, param.Npady, sizez);	
+            HANDLE_FFTERROR(cufftExecC2C(param.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
+            fftNormalize<<<param.Grd,param.BT>>>(dataPadded, param.Npadx, param.Npady, sizez);
+            recuperate_padding<<<param.Grd,param.BT>>>(dataPadded, ans, sizex, sizey, sizez, param.padx, param.pady);
+
+        }else{
+            // printf("No PAD = %d, %d \n", param.padx, param.pady);
+            HANDLE_FFTERROR(cufftExecC2C(param.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
+            CConvolve<<<param.Grd,param.BT>>>(dataPadded, kernel, dataPadded, param.Npadx, param.Npady, sizez);	
+            HANDLE_FFTERROR(cufftExecC2C(param.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
+            fftNormalize<<<param.Grd,param.BT>>>(dataPadded, param.Npadx, param.Npady, sizez);
+        }
+
 	}
 
     __global__ void CConvolve(cufftComplex *a, float *b, cufftComplex *ans, size_t sizex, size_t sizey, size_t sizez)

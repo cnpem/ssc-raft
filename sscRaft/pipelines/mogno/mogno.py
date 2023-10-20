@@ -2,6 +2,7 @@ from ...rafttypes import *
 import numpy as np
 
 from ...tomogram.flatdark import *
+from ...filters.phase_filters import *
 from ...tomogram.rotationaxis import *
 from ...rings import *
 from ...geometries.gc.fdk import *
@@ -124,7 +125,7 @@ def preprocessing_mogno(data, flat, dark, experiment):
 
    return tomo, shift
 
-def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, experiment: dict) -> np.ndarray:
+def reconstruction_mogno2(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, experiment: dict) -> np.ndarray:
 
    """Computes the Reconstruction of a Conical Sinogram for Mogno Beamline.
 
@@ -188,12 +189,305 @@ def reconstruction_mogno(data: np.ndarray, flat: np.ndarray, dark: np.ndarray, e
       logger.error(f'Invalid reconstruction method:{method}. Choose from options `fdk` or `em`.')
 
 
-   # Garbage Collector
-   # lists are cleared whenever a full collection or
-   # collection of the highest generation (2) is run
-   # collected = gc.collect() # or gc.collect(2)
-   # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
-
    logger.info(f'RECON-MOGNO: Finished reconstruction')
+
+   return recon
+
+def reconstruction_mogno(param = sys.argv):
+
+   """Computes the Reconstruction of a Conical Sinogram for Mogno Beamline.
+
+   Args:
+      param(sys.argv): Arguments from function call param = sys.argv
+
+   Returns:
+      (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [x, y, z].
+
+    """
+
+   # Set json dictionary:
+   dic = Read_Json(param)
+
+   dic['z2[m]'] = dic['z1+z2[m]'] - dic['z1[m]']
+
+   if dic['norm']:
+      tomogram = _FlatDarkCorrection(dic)
+
+   if dic['phase']:
+      tomogram = _PhaseFilter(tomogram, dic)
+
+   if dic['rings']:
+      tomogram = _Rings(tomogram, dic)
+
+   if dic['rotation axis']:
+      tomogram = _rotationAxis(tomogram, dic)
+
+   if dic['recon']:
+      recon = _recon(tomogram,dic)
+
+   return recon
+
+def read_data(detector,filepath,hdf5path):
+
+        start = time.time()
+                
+        data = read_hdf5(filepath,hdf5path)
+
+        elapsed = time.time() - start
+        print(f'Time for read hdf5 data file: {elapsed} seconds')
+        start = time.time()
+
+        dim_data = len(data.shape)
+
+        if detector == 'pco': 
+                # For PCO detector only
+                if dim_data == 2:
+                        data[:11,:]   = 1.0
+                if dim_data == 3:
+                        data[:,:11,:] = 1.0
+        if dim_data == 2:
+                data = np.expand_dims(data,0)
+
+        return data #np.swapaxes(data,0,1)
+
+def read_flat(detector,filepath,hdf5path):
+
+        start = time.time()
+                
+        flat = read_hdf5(filepath,hdf5path)
+
+        elapsed = time.time() - start
+        print(f'Time for read hdf5 flat file: {elapsed} seconds')
+        start = time.time()
+
+        dim_flat = len(flat.shape)
+
+        if detector == 'pco': 
+                # For PCO detector only
+                if dim_flat == 2:
+                        flat[:11,:]   = 1.0
+                if dim_flat == 3:
+                        flat[:,:11,:] = 1.0
+                if dim_flat == 4:
+                        flat[:,:,:11,:] = 1.0
+        if dim_flat == 4:
+                flat = flat[:,0,:,:]
+        if dim_flat == 2:
+                flat = np.expand_dims(flat,0)
+
+        # flat = flat - np.mean(flat, axis=0, dtype=np.float32)
+        return flat #np.swapaxes(flat,0,1)
+
+def read_dark(detector,filepath,hdf5path):
+
+        start = time.time()
+                
+        dark = read_hdf5(filepath,hdf5path)
+
+        elapsed = time.time() - start
+        print(f'Time for read hdf5 dark file: {elapsed} seconds')
+        start = time.time()
+
+        dim_dark = len(dark.shape)
+
+        if detector == 'pco': 
+                # For PCO detector only
+                if dim_dark == 2:
+                        dark[:11,:]   = 0.0
+                if dim_dark == 3:
+                        dark[:,:11,:] = 0.0
+                if dim_dark == 4:
+                        dark[:,:,:11,:] = 0.0
+        if dim_dark == 4:
+                dark = dark[:,0,:,:]
+        if dim_dark == 2:
+                dark = np.expand_dims(dark,0)
+        
+        # dark = dark - np.mean(dark, axis=0, dtype=np.float32)
+        return dark #np.swapaxes(dark,0,1)
+
+def convert_uint8(data):
+   mn = data.min()
+   mx = data.max()
+
+   mx -= mn
+   I = ((data - mn)/mx) * 255
+
+   return I.astype(np.uint8)
+
+def Read_Json(param):
+
+   for j in range(len(param)):
+      if param[j] == '-n':
+         section = param[j+1]
+      elif param[j] == '-j':
+         name = param[j+1]
+
+   jason = open(name)
+   dic = json.load(jason)[section]
+
+   return dic
+
+def read_hdf5(filepath,hdf5path):
+   data = h5py.File(filepath, "r")[hdf5path][:].astype(np.float32)
+
+   return data
+
+def save_hdf5(filepath, recon):
+   file = h5py.File(filepath, 'w') # Save HDF5 with h5py
+   file.create_dataset("data", data = recon) # Save reconstruction to HDF5 output file
+   file.close()
+
+def save_hdf5_tomo(filepath, recon, dic):
+   file = h5py.File(filepath, 'w') # Save HDF5 with h5py
+   file.create_dataset("data", data = recon) # Save reconstruction to HDF5 output file
+   try:
+      # Call function to save the metadata from dictionary 'dic' with the software 'sscRaft' and its version 'sscRaft.__version__'
+      Metadata_hdf5(outputFileHDF5 = file, dic = dic, software = 'sscRaft', version = '2.2.2')
+   except:
+      print("Error! Cannot save metadata in HDF5 output file.")
+      pass
+
+   file.close()
+
+# if dic['norm']:
+def _FlatDarkCorrection(dic):
+   start = time.time()
+
+   path = dic['Ipath']
+   name = dic['Iname']
+   outpath = dic['TempPath']
+
+   hdf5path_data = "scan/detector/data"
+   hdf5path_flat = "scan/detector/flats"
+   hdf5path_dark = "scan/detector/darks"
+   
+   # Input path and name
+   filepath = path + name
+   savepath = outpath + 'Norm_' + name
+
+   # Read Raw data
+   tomogram = read_data(dic['detector'],filepath, hdf5path_data)
+
+   flat = read_flat(dic['detector'],filepath,hdf5path_flat)
+
+   dark = read_dark(dic['detector'],filepath,hdf5path_dark)
+
+   # Enters [angles,slices,rays]
+   tomogram = correct_projections(tomogram, flat[0], dark, dic)
+   # Returns [slices,angles,rays]
+
+   elapsed = time.time() - start
+   print(f'Time for Flat/Dark Correction: {elapsed} seconds')
+   start = time.time()
+   print("Finished Flat/Dark Correction")
+
+   if dic['save norm']:
+      print("Saving File...")
+      save_hdf5(savepath,tomogram)
+      print("Finished Saving")
+
+   return tomogram
+
+# if dic['phase']:
+def _PhaseFilter(tomogram, dic):
+   start = time.time()
+
+   # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
+   outpath = dic['TempPath']
+   name = dic['Iname']
+   savepath = outpath + 'PhaseFilter_' + name
+
+   tomogram = phase_filters(tomogram,dic)
+
+   # All functions on sscRaft returns [slices,angles,rays] (EXCEPT correct_projections)
+
+   elapsed = time.time() - start
+   print(f'Time for Phase Filter: {elapsed} seconds')
+   start = time.time()
+   print("Finished Phase Filter")
+
+   if dic['save phase filter']:
+      print("Saving File...")
+      save_hdf5(savepath,tomogram)
+      print("Finished Saving")
+
+   return tomogram
+
+
+# if dic['rings']:
+def _Rings(tomogram, dic):
+   start = time.time()
+
+   # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
+   outpath = dic['TempPath']
+   name = dic['Iname']
+   savepath = outpath + 'Rings_' + name
+
+   tomogram = rings(tomogram, dic)
+
+   # All functions on sscRaft returns [slices,angles,rays] (EXCEPT correct_projections)
+
+   elapsed = time.time() - start
+   print(f'Time for Rings: {elapsed} seconds')
+   start = time.time()
+   print("Finished Rings")
+
+   if dic['save rings']:
+      print("Saving File...")
+      save_hdf5(savepath,tomogram)
+      print("Finished Saving")
+
+   return tomogram
+
+# Rotation Axis Correction
+# if dic['rotation axis']:
+def _rotationAxis(tomogram, dic):
+   start = time.time()
+
+   # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
+   outpath = dic['TempPath']
+   name = dic['Iname']
+   savepath = outpath + 'RotAxis_' + name
+
+   tomogram, _ = correct_rotation_axis360(tomogram, dic)
+
+   # All functions on sscRaft returns [slices,angles,rays] (EXCEPT correct_projections)
+
+   elapsed = time.time() - start
+   print(f'Time for Rotation Axis: {elapsed} seconds')
+   start = time.time()
+   print("Finished Rotation Axis")
+
+   if dic['save rot axis']:
+      print("Saving File...")
+      save_hdf5(savepath,tomogram)
+      print("Finished Saving")
+   
+   return tomogram
+
+# if dic['recon']:
+def _recon(tomogram,dic):
+   start = time.time()
+
+   # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
+   outpath = dic['TempPath']
+   name = dic['Iname']
+   savepath = outpath + 'Recon_' + name   
+
+   dic['angles'] = np.linspace(0.0, dic['end_angle[degrees]'] * np.pi / 180, tomogram.shape[1], endpoint=False)
+
+   recon = fdk(tomogram, dic)
+
+   # All functions on sscRaft returns [slices,angles,rays] (EXCEPT correct_projections)
+
+   elapsed = time.time() - start
+   print(f'Time for FDK: {elapsed} seconds')
+   print("Finished Reconstruction")
+
+   if dic['save recon']:
+      print("Saving File...")
+      save_hdf5_tomo(savepath, recon, dic)
+      print("Finished Saving")
 
    return recon

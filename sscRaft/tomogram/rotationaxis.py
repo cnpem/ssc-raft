@@ -40,7 +40,6 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
 
     is_autoRot   = experiment['shift'][0]
     shift        = experiment['shift'][1]
-    padding      = 0
 
     if is_autoRot:
         logger.info('Applying automatic rotation axis correction')
@@ -51,20 +50,17 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
         
         shift      = find_rotation_axis_360(np.swapaxes(data,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
 
+        experiment.update({'shift':[is_autoRot,shift]})
+
     else:
         logger.info(f'Applying given rotation axis correction deviation value: {shift}')
 
-    if padding < np.abs(shift):
-        padding = 2 * shift
-
-    padd = padding - 2 * np.abs(shift)
-
-    proj = np.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * padding))
+    proj = np.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * np.abs(shift)))
 
     if(shift < 0):
-        proj[:,:,padd//2 + 2 * np.abs(shift):data.shape[2] + padd//2 + 2 * np.abs(shift)] = data
+        proj[:,:,2 * np.abs(shift):data.shape[2] + 2 * np.abs(shift)] = data
     else:
-        proj[:,:,padd//2:data.shape[2] + padd//2] = data
+        proj[:,:,0:data.shape[2]] = data
 
         logger.info(f'Corrected projection for rotation axis: new shape {proj.shape}')
 

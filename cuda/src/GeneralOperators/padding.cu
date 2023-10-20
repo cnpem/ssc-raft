@@ -50,22 +50,22 @@ extern "C"{
         size_t Npadx = sizex + 2 * padsizex;
         size_t Npady = sizey + 2 * padsizey;
 
-        size_t i      = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j      = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t k      = blockIdx.z*blockDim.z + threadIdx.z;
+        int i      = blockIdx.x*blockDim.x + threadIdx.x;
+        int j      = blockIdx.y*blockDim.y + threadIdx.y;
+        int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-        size_t ii     = ( i - padsizex );
-        size_t jj     = ( j - padsizey );
+        int ii     = (int)( i - padsizex );
+        int jj     = (int)( j - padsizey );
 
-        size_t index  = sizex * k * sizey + sizex * jj + ii;
-        size_t indpad = Npadx * k * Npady + Npadx *  j +  i;
-        
+        long long int index  = sizex * k * sizey + sizex * jj + ii;
+        long long int indpad = Npadx * k * Npady + Npadx *  j +  i;
+
         if ( (i >= Npadx) || (j >= Npady) || (k >= sizez) ) return;
 
         inpadded[indpad].x = value;
         inpadded[indpad].y = 0.0;
 
-        if ( (ii < 0) || (ii >= sizex) || (jj < 0) || (jj >= sizey) ) return;
+        if ( (ii < 0) || (ii >= sizex) || (jj < 0) || (jj >= sizey) || (k >= sizez) ) return;
 
         inpadded[indpad].x = in[index];
 
@@ -76,15 +76,15 @@ extern "C"{
         size_t Npadx = sizex + 2 * padsizex;
         size_t Npady = sizey + 2 * padsizey;
 
-        size_t i      = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j      = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t k      = blockIdx.z*blockDim.z + threadIdx.z;
+        int i      = blockIdx.x*blockDim.x + threadIdx.x;
+        int j      = blockIdx.y*blockDim.y + threadIdx.y;
+        int k      = blockIdx.z*blockDim.z + threadIdx.z;
         
-        size_t ii     = ( i - padsizex );
-        size_t jj     = ( j - padsizey );
-        
-        size_t index  = sizex * k * sizey + sizex * jj + ii;        
-        size_t indpad = Npadx * k * Npady + Npadx *  j +  i;
+        int ii     = (int)( i - padsizex );
+        int jj     = (int)( j - padsizey );
+
+        long long int index  = sizex * k * sizey + sizex * jj + ii;
+        long long int indpad = Npadx * k * Npady + Npadx *  j +  i;
 
         if ( (ii < 0) || (ii >= sizex) || (jj < 0) || (jj >= sizey) || (k >= sizez) ) return;
 

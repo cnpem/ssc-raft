@@ -294,14 +294,15 @@ int memory(Lab lab, int ndev){
     if(n_process < ndev) n_process = ndev;
 
     // n_process = 2*n_process;
-    if(lab.nx > 1800 && lab.nbeta > 1800) n_process = 8;
-    // if(lab.nx > 1800 && lab.nbeta > 1800) n_process = 16;
+    if(lab.nx > 1024 && lab.nbeta > 1024) n_process = 8;
+    if(lab.nx > 2048 && lab.nbeta > 2048) n_process = 16;
+    if(lab.nph >= 4096) n_process = 16;
 
 
     //if(lab.nbeta >= 1900) n_process = 16;
     // if (lab.nbeta >= 3900) n_process = 32;
-    if (lab.nh >= 4000 || lab.nbeta >= 4000) n_process = 16;
-    if (lab.nh >= 8000 || lab.nbeta >= 8000) n_process = 32;
+    if (lab.nh >= 4096 || lab.nbeta >= 4096) n_process = 32;
+    if (lab.nh >= 8000 || lab.nbeta >= 8000) n_process = 64;
 
     printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
 
