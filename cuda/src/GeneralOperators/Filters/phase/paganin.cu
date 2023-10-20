@@ -26,10 +26,50 @@ extern "C" {
 
         paganinReturn<<<param.Grd,param.BT>>>(d_sino, param, nrays, nslices, nangles);
 
-		HANDLE_ERROR(cudaMemcpy(projections, d_sino, n * sizeof(float), cudaMemcpyDeviceToHost));
+        HANDLE_ERROR(cudaMemcpy(projections, d_sino, n * sizeof(float), cudaMemcpyDeviceToHost));
 
 		cudaFree(d_sinoPadded);
 		cudaFree(d_sino);
+    }
+
+	void _paganin_gpu2(PAR param, float *out, float *projections, float *d_kernel, size_t nrays, size_t nangles, size_t nslices)
+    {
+		size_t n    = nrays * nslices * nangles;
+		size_t npad = param.Npadx * param.Npady * nangles;
+		float *d_sino, *sinoo;
+		cufftComplex *d_sinoPadded;
+
+		HANDLE_ERROR(cudaMalloc((void **)&d_sino      , sizeof(float) * n )); 
+        HANDLE_ERROR(cudaMalloc((void **)&sinoo       , sizeof(float) * npad ));
+		HANDLE_ERROR(cudaMalloc((void **)&d_sinoPadded, sizeof(cufftComplex) * npad ));
+
+		HANDLE_ERROR(cudaMemcpy(d_sino, projections, n * sizeof(float), cudaMemcpyHostToDevice));
+
+        apply_filter(param, d_sino, d_kernel, d_sino, d_sinoPadded, nrays, nslices, nangles);
+
+        paganinReturn<<<param.Grd,param.BT>>>(d_sino, param, nrays, nslices, nangles);
+
+        KCopy<<<param.Grd,param.BT>>>(d_sinoPadded, sinoo, param.Npadx, param.Npady, nangles);
+        
+        HANDLE_ERROR(cudaMemcpy(out, sinoo, npad * sizeof(float), cudaMemcpyDeviceToHost));
+        HANDLE_ERROR(cudaMemcpy(projections, d_sino, n * sizeof(float), cudaMemcpyDeviceToHost));
+
+		cudaFree(d_sinoPadded);
+		cudaFree(d_sino);
+        cudaFree(sinoo);
+    }
+
+    __global__ void KCopy(cufftComplex *in, float *out, size_t sizex, size_t sizey, size_t sizez)
+    {
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
+
+        size_t index = sizex * (k * sizey + j) + i;
+        
+        if ( (i >= sizex) || (j >= sizey) || (k >= sizez) ) return;
+
+        out[index] = in[index].x; 
     }
 
  	__global__ void paganinKernel(float *kernel, PAR param, size_t sizex, size_t sizey, size_t sizez)

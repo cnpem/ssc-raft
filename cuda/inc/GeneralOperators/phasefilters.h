@@ -37,6 +37,15 @@ extern "C"{
 	void _rytov_gpu(PAR param, float *projections, float *d_kernel, size_t nrays, size_t nangles, size_t nslices);
 	void _bronnikov_gpu(PAR param, float *projections, float *d_kernel, size_t nrays, size_t nangles, size_t nslices);
 
+	void _paganin_gpu2(PAR param, float *out, float *projections, float *d_kernel, size_t nrays, size_t nangles, size_t nslices);
+
+	void phase_filters2(float *out, float *projections, float *paramf, size_t *parami, 
+				int nrays, int nangles, int nslices,
+				int *gpus, int ngpus);
+	
+	void _phase_filters_threads2(PAR param, float *out, float *projections, size_t nrays, size_t nangles, size_t nslices, int ngpu);
+	__global__ void KCopy(cufftComplex *in, float *out, size_t sizex, size_t sizey, size_t sizez);
+
 }
 
 #endif

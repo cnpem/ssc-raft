@@ -5,8 +5,6 @@ from ctypes import c_float as float32
 from ctypes import c_int as int32
 from ctypes import c_void_p  as void_p
 from ctypes import c_size_t as size_t
-import uuid
-import SharedArray as sa
 
 def RingsMultiGPU(tomogram, dic):
         """Apply rings correction on tomogram by blocks of rings in MULTIGPU

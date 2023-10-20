@@ -182,6 +182,11 @@ try:
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
                                         ctypes.c_void_p, ctypes.c_int]
     libraft.phase_filters.restype  = None
+
+    libraft.phase_filters2.argtypes = [  ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+                                        ctypes.c_void_p, ctypes.c_int]
+    libraft.phase_filters2.restype  = None
     
 except:
     print('-.PHASE_FILTERS-')
