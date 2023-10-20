@@ -211,6 +211,10 @@ def reconstruction_mogno(param = sys.argv):
    dic['z2[m]'] = dic['z1+z2[m]'] - dic['z1[m]']
 
    if dic['norm']:
+      if dic['phase']:
+         dic['uselog'] = False
+      else:
+         dic['uselog'] = True
       tomogram = _FlatDarkCorrection(dic)
 
    if dic['phase']:
@@ -220,12 +224,38 @@ def reconstruction_mogno(param = sys.argv):
       tomogram = _Rings(tomogram, dic)
 
    if dic['rotation axis']:
+      dic['shift'][0] = False
       tomogram = _rotationAxis(tomogram, dic)
 
    if dic['recon']:
       recon = _recon(tomogram,dic)
 
    return recon
+
+def getDeviationAxis(param = sys.argv):
+
+   """Computes the Reconstruction of a Conical Sinogram for Mogno Beamline.
+
+   Args:
+      param(sys.argv): Arguments from function call param = sys.argv
+
+   Returns:
+      (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [x, y, z].
+
+    """
+
+   # Set json dictionary:
+   dic = Read_Json(param)
+
+   dic['z2[m]'] = dic['z1+z2[m]'] - dic['z1[m]']
+
+   dic['uselog'] = True
+   tomogram = _FlatDarkCorrection(dic)
+
+   dic['shift'][0] = True
+   _, deviation = _rotationAxis(tomogram, dic)
+
+   return deviation
 
 def read_data(detector,filepath,hdf5path):
 

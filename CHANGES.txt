@@ -3,6 +3,7 @@ Version 2.2.2 - 2023-10-20
 Added
 ~~~~~
 - New function in Python for a reconstruction pipeline for Mogno beamline 
+- New function in Python for a compute rotation axis deviation ONLY
 - New dictionary entries 
 
 Changed
