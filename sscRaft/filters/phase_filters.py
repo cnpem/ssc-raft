@@ -26,7 +26,12 @@ def phase_filters(tomo,dic):
     z2x       = dic['z2[m]']
     z1y       = z1x+0
     z2y       = z2x+0
-    energy    = dic['energy[KeV]']
+    try:
+       energy    = dic['energy[eV]']
+    except:
+        energy    = dic['energy[KeV]']
+
+
     alpha     = dic['regularization']
     pixel     = dic['detectorPixel[m]']
 
@@ -124,7 +129,11 @@ def phase_filters2(tomogram,dic):
     z2x       = dic['z2[m]']
     z1y       = z1x+0
     z2y       = z2x+0
-    energy    = dic['energy[KeV]']
+    try:
+       energy    = dic['energy[eV]']
+    except:
+        energy    = dic['energy[KeV]']
+
     alpha     = dic['regularization']
     pixel     = dic['detectorPixel[m]']
 
