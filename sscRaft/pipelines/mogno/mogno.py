@@ -137,6 +137,11 @@ def _FlatDarkCorrection(dic):
 
    path = dic['Ipath']
    name = dic['Iname']
+   try:
+      id_sample = dic['id sample']
+   except:
+      id_sample = ""
+   
    outpath = dic['TempPath']
 
    hdf5path_data = "scan/detector/data"
@@ -145,7 +150,7 @@ def _FlatDarkCorrection(dic):
    
    # Input path and name
    filepath = path + name
-   savepath = outpath + 'Norm_' + name
+   savepath = outpath + 'Norm_' + id_sample + '_' + name
 
    # Read Raw data
    tomogram = read_data(dic['detector'],filepath, hdf5path_data)
@@ -177,7 +182,11 @@ def _PhaseFilter(tomogram, dic):
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
    outpath = dic['TempPath']
    name = dic['Iname']
-   savepath = outpath + 'PhaseFilter_' + name
+   try:
+      id_sample = dic['id sample']
+   except:
+      id_sample = ""
+   savepath = outpath + 'PhaseFilter_' + id_sample + '_' + name
 
    tomogram = phase_filters(tomogram,dic)
 
@@ -203,7 +212,12 @@ def _Rings(tomogram, dic):
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
    outpath = dic['TempPath']
    name = dic['Iname']
-   savepath = outpath + 'Rings_' + name
+   try:
+      id_sample = dic['id sample']
+   except:
+      id_sample = ""
+
+   savepath = outpath + 'Rings_' + id_sample + '_' + name
 
    tomogram = rings(tomogram, dic)
 
@@ -229,7 +243,12 @@ def _rotationAxis(tomogram, dic):
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
    outpath  = dic['TempPath']
    name     = dic['Iname']
-   savepath = outpath + 'RotAxis_' + name
+   try:
+      id_sample = dic['id sample']
+   except:
+      id_sample = ""
+
+   savepath = outpath + 'RotAxis_' + id_sample + '_' + name
 
    tomogram, _ = correct_rotation_axis360(tomogram, dic)
 
@@ -254,7 +273,12 @@ def _recon(tomogram,dic):
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
    outpath = dic['TempPath']
    name = dic['Iname']
-   savepath = outpath + 'Recon_' + name   
+   try:
+      id_sample = dic['id sample']
+   except:
+      id_sample = ""
+      
+   savepath = outpath + 'Recon_' + id_sample + '_' + name   
 
    dic['angles'] = np.linspace(0.0, dic['end_angle[degrees]'] * np.pi / 180, tomogram.shape[1], endpoint=False)
 
