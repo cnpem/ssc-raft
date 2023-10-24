@@ -50,8 +50,9 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     
     printf("Process = %d:  n_recon  = %lld,  idx_recon = %lld, z_ph = %f \n",  i, n_recon, idx_recon, z_min);
     
-    // L = sqrt(lab.x*lab.x + lab.y*lab.y);
-    L = std::max(lab.x, lab.y);
+    L = sqrt(lab.x*lab.x + lab.y*lab.y);
+    // L = std::max(lab.x, lab.y);
+    // L = 3 * L;
     
     //variáveis de9tector
    	Z_min = std::max(-lab.v, std::min(  lab.Dsd*z_min/(lab.D - L),  

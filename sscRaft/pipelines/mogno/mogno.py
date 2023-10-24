@@ -493,6 +493,7 @@ def reconstruction_mogno(param = sys.argv):
       (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [x, y, z].
 
     """
+   start = time.time()
 
    # Set json dictionary:
    dic = Read_Json(param)
@@ -505,15 +506,16 @@ def reconstruction_mogno(param = sys.argv):
       else:
          dic['uselog'] = True
       tomogram = _FlatDarkCorrection(dic)
+   # else:
+   #    tomogram = h5py.File(dic['Ipath']+dic['Iname'], "r")["data"][:].astype(np.float32)
    
-   if dic['rotation axis']:
-      dic['shift'][0] = True
-      dic['shift'][1] = 0
+   if dic['rotation axis'] and dic['shift'][0] == True:
 
       nx_search  = dic['findRotationAxis'][0]
       nx_window  = dic['findRotationAxis'][1]
       nsinos     = dic['findRotationAxis'][2]
       deviation  = find_rotation_axis_360(np.swapaxes(tomogram,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
+      dic['shift'][1] = deviation
 
    if dic['phase']:
       tomogram = _PhaseFilter(tomogram, dic)
@@ -523,11 +525,14 @@ def reconstruction_mogno(param = sys.argv):
 
    if dic['rotation axis']:
       dic['shift'][0] = False
-      dic['shift'][1] = deviation 
       tomogram = _rotationAxis(tomogram, dic)
 
    if dic['recon']:
       recon = _recon(tomogram,dic)
+
+   elapsed = time.time() - start
+   print(f'Time for Reconstruction Pipeline: {elapsed} seconds')
+   print("Finished Pipeline")
 
    return recon
 

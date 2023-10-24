@@ -26,6 +26,7 @@ Known Bugs
 ~~~~~~~~~~
 - Memory issues on ``EM`` for cone-beam geometry
 - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
 - ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
 
 [2.2.1] - 2023-09-21
@@ -35,6 +36,7 @@ Added
 - Phase filters: "Paganin, Bronnikov, Rytov, Born" - all by frames
 - Padding inside ``FDK``
 - Inclusion of angles list
+- ``FDK`` Reconstruction by Slices (with bugs)
 - New dictionary entries 
 
 Changed
@@ -52,6 +54,7 @@ Known Bugs
 ~~~~~~~~~~
 - Memory issues on ``EM`` for cone-beam geometry
 - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
 - ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
 - Rotation Axis function with bug for negative deviations
 - Phase filter with bug on CUDA Padding

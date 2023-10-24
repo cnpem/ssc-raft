@@ -39,6 +39,8 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
     x = -lab.x + i*lab.dx;
     y = -lab.y + j*lab.dy;
     z = process.z_ph + k*lab.dz;
+
+    int block = process.n_proj / ( lab.nbeta * lab.nh );
 	
     recon[n] = 0.0;
 
@@ -60,7 +62,8 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
 	
         if( xi < 0) continue;             
         if( xi >= lab.nh) continue; 
-        if( zk < 0) continue;      
+        if( zk < 0) continue;    
+        if( zk >= block) continue;   
         if( zk + process.zi >= lab.nv) continue; 
 
         idx = (long long int) zk*lab.nbeta*lab.nh + m*lab.nh + xi; 
