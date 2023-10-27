@@ -300,16 +300,26 @@ extern "C"{
 
     __global__ void filt_Hamming(Lab lab, float* W){
         int i;
-        float wmax = 1.0/(2.0*lab.dh);
+        float wmax = 1.0f / ( 2.0f * lab.dh );
+
+        float magnx = lab.Dsd / lab.D;
+        float z2x   = lab.Dsd - lab.D;
         
-        for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
+        float gamma = ( lab.reg == 0.0 ? 0.0:(1.0f / lab.reg) ) ;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma  / ( magnx );
+
+        for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2.0f * i * wmax) / ( lab.nph ); 
     
-        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph / 2 + i] = wmax - ( ( 2.0f * i * wmax ) / lab.nph );
 
-        for (i = 0; i <=lab.nph/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nph));
+        for (i = 0; i <=lab.nph/2 ; i++) W[i] = ( W[i] * ( 0.54f + 0.46f * cosf( 2.0f * float(M_PI) * i / lab.nph ) ) ) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
 
-        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nph/2 - i)/lab.nph));
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph / 2 + i] * (0.54f + 0.46f * cosf( 2.0f * M_PI * ( lab.nph / 2 - i ) / lab.nph) ) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
 
+        // for (i = 0; i <=lab.nph/2 ; i++) W[i] = ( W[i] * ( 0.54f + 0.46f * cosf( 2.0f * float(M_PI) * i / lab.nph ) ) );
+
+        // for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph / 2 + i] * (0.54f + 0.46f * cosf( 2.0f * M_PI * ( lab.nph / 2 - i ) / lab.nph) );
     }
 
 }

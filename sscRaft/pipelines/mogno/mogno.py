@@ -506,17 +506,14 @@ def reconstruction_mogno(param = sys.argv):
       else:
          dic['uselog'] = True
       tomogram = _FlatDarkCorrection(dic)
-   # else:
-   #    tomogram = h5py.File(dic['Ipath']+dic['Iname'], "r")["data"][:].astype(np.float32)
+   else:
+      tomogram = h5py.File(dic['Ipath']+dic['Iname'], "r")["data"][:].astype(np.float32)
+      tomogram = -np.log(tomogram)
+      tomogram = np.swapaxes(tomogram,0,1)
    
    if dic['rotation axis'] and dic['shift'][0] == True:
-
-      nx_search  = dic['findRotationAxis'][0]
-      nx_window  = dic['findRotationAxis'][1]
-      nsinos     = dic['findRotationAxis'][2]
-      deviation  = find_rotation_axis_360(np.swapaxes(tomogram,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
-      dic['shift'][1] = deviation
-
+      dic['shift'][1]  = _DeviationAxis(np.swapaxes(tomogram,0,1), dic)
+      
    if dic['phase']:
       tomogram = _PhaseFilter(tomogram, dic)
 
@@ -558,12 +555,35 @@ def getDeviationAxis(param = sys.argv):
 
    dic['shift'][0] = True
    dic['shift'][1] = 0
+   
+   deviation  = _DeviationAxis(np.swapaxes(tomogram,0,1), dic)
+
+   return deviation
+
+def _DeviationAxis(tomogram: np.ndarray, dic: dict):
+
+   """Computes the deviation of the Rotation Axis of a Tomogram measured in 360 degrees rotation.
+
+   Args:
+      tomogram(numpy.ndarray): tomogram corrected by flat/dark. The axes are [angles, slices, x]
+      dic(dictionary): dictionary of parameters
+
+   Dictionary parameters:
+      *``dic['shift']`` (bool,int): Tuple (is_autoRot = True, value = 0). Rotation shift automatic corrrection (is_autoRot).
+      *``dic['findRotationAxis']`` (int,int,int): For rotation axis function. (nx_search=500, nx_window=500, nsinos=None).
+   
+   Returns:
+      (int): Rotation axis deviation 
+
+    """
 
    nx_search  = dic['findRotationAxis'][0]
    nx_window  = dic['findRotationAxis'][1]
    nsinos     = dic['findRotationAxis'][2]
-   
-   deviation  = find_rotation_axis_360(np.swapaxes(tomogram,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
+
+   deviation  = find_rotation_axis_360(tomogram, nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
+
+   dic['shift'][1] = deviation
 
    return deviation
 

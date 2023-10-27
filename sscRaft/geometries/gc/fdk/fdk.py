@@ -112,11 +112,9 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
 
     logger.info(f'Reconstructing {blockslices_recon} slices of {nslices}.')
 
-
     nh, nv = int(nrays), int(nslices)
     h, v   = nh*dh/2, nv*dv/2
     nph    = int(nh + 2 * padh)
-    print("NPH = ",nph)
 
     nbeta  = len(angles)
 
@@ -189,7 +187,5 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     recon_p = recon.ctypes.data_as(ctypes.c_void_p)
 
     libraft.gpu_fdk(lab, recon_p, proj_p, angles_p, gpus_p, int(ndev), time_p)
-
-    # print("Time of execution: \n \n"+"Phantom size"+str(lab.nx)+"\n Nbeta"+str(lab.nbeta)+"\n ngpus"+str(ndev)+"\n"+str(time))
 
     return recon

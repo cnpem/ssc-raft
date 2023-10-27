@@ -17,7 +17,7 @@ typedef struct Parameters
 	    size_t sizeofblock, blocksize, slice, subvolume; /* Thread dimensions */
 
 		int ngpus, *gpus;
-	    cufftHandle mplan, implan;
+	    cufftHandle mplan, mplan2;
 	    cudaStream_t *streams;
         int num_streams;  
 	    dim3 BT, Grd;  

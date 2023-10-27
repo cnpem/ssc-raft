@@ -66,6 +66,24 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
 
     }
 
+    // Normalize kernel by maximum value
+    // cublasHandle_t handle = NULL;
+    // cublasCreate(&handle);
+    // cublasStatus_t stat;
+    // int max;
+
+    // int n_threads = NUM_THREADS;
+    // long long int n_blocks  = N/n_threads + (N % n_threads == 0 ? 0:1);
+
+    // stat = cublasIsamax(handle, lab.nph, *W, 1, &max);
+
+    // if (stat != CUBLAS_STATUS_SUCCESS)
+    //     printf("Cublas Max failed\n");
+
+    // float maximum;
+    // HANDLE_ERROR(cudaMemcpy(&maximum, *W + max, sizeof(float), cudaMemcpyDeviceToHost));
+    // Normalize<<<n_blocks, n_threads>>>(*W, maximum, lab.nph, 1);
+
     cudaDeviceSynchronize(); 
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
@@ -75,6 +93,8 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
 
     clock_t end = clock();
     printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+
+    // cublasDestroy(handle);
 }}
 
 extern "C"{

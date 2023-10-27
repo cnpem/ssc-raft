@@ -32,33 +32,6 @@ extern "C" {
 		cudaFree(d_sino);
     }
 
-	void _paganin_gpu2(PAR param, float *out, float *projections, float *d_kernel, size_t nrays, size_t nangles, size_t nslices)
-    {
-		size_t n    = nrays * nslices * nangles;
-		size_t npad = param.Npadx * param.Npady * nangles;
-		float *d_sino, *sinoo;
-		cufftComplex *d_sinoPadded;
-
-		HANDLE_ERROR(cudaMalloc((void **)&d_sino      , sizeof(float) * n )); 
-        HANDLE_ERROR(cudaMalloc((void **)&sinoo       , sizeof(float) * npad ));
-		HANDLE_ERROR(cudaMalloc((void **)&d_sinoPadded, sizeof(cufftComplex) * npad ));
-
-		HANDLE_ERROR(cudaMemcpy(d_sino, projections, n * sizeof(float), cudaMemcpyHostToDevice));
-
-        apply_filter(param, d_sino, d_kernel, d_sino, d_sinoPadded, nrays, nslices, nangles);
-
-        paganinReturn<<<param.Grd,param.BT>>>(d_sino, param, nrays, nslices, nangles);
-
-        KCopy<<<param.Grd,param.BT>>>(d_sinoPadded, sinoo, param.Npadx, param.Npady, nangles);
-        
-        HANDLE_ERROR(cudaMemcpy(out, sinoo, npad * sizeof(float), cudaMemcpyDeviceToHost));
-        HANDLE_ERROR(cudaMemcpy(projections, d_sino, n * sizeof(float), cudaMemcpyDeviceToHost));
-
-		cudaFree(d_sinoPadded);
-		cudaFree(d_sino);
-        cudaFree(sinoo);
-    }
-
     __global__ void KCopy(cufftComplex *in, float *out, size_t sizex, size_t sizey, size_t sizez)
     {
         size_t i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -96,7 +69,7 @@ extern "C" {
 
         float wxx = wx*wx; float wyy = wy*wy;
 
-        float gamma = 1.0 / param.alpha;
+        float gamma = ( param.alpha == 0.0 ? 0.0:(1.0f / param.alpha) ) ; //1.0 / param.alpha;
 
 		float kernelX = 4.0 * float(M_PI) * float(M_PI) * param.z2x * gamma * wxx  / ( magnx );
 		float kernelY = 4.0 * float(M_PI) * float(M_PI) * param.z2y * gamma * wyy  / ( magny );

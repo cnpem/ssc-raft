@@ -182,11 +182,6 @@ try:
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
                                         ctypes.c_void_p, ctypes.c_int]
     libraft.phase_filters.restype  = None
-
-    libraft.phase_filters2.argtypes = [  ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_void_p, ctypes.c_int]
-    libraft.phase_filters2.restype  = None
     
 except:
     print('-.PHASE_FILTERS-')
@@ -405,7 +400,7 @@ def set_conical_slices(slice_recon_start,slice_recon_end,nslices,nx,ny,z1,z12,pi
         v          = nslices * pixel_det / 2
         dx, dy, dz = pixel_det*magn, pixel_det*magn, pixel_det*magn
         x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
-        L          = max(x,y)
+        L          = numpy.sqrt(x*x + y*y)
 
         z_min_recon = - z + slice_recon_start * dz
         z_max_recon = - z + slice_recon_end   * dz

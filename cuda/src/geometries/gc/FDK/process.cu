@@ -19,7 +19,7 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     long long int  n_filter_pad, idx_filter_pad;
     int zi_filter_pad; 
 
-    nz_gpu = (int) (lab.nv/n_process);
+    nz_gpu = (int) ceil( (float)lab.nv/n_process);
     zi_min = i*nz_gpu;
     zi_max = (int) std::min((i+1)*nz_gpu, lab.nv);
 
@@ -38,7 +38,7 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     printf("Process = %d: n_filter = %lld, idx_filter = %lld, z_filter = %d, nbeta = %d, hbeta = %f \n", i, n_filter, idx_filter, zi_filter, lab.nbeta, lab.dbeta);
     printf("Process = %d: n_filter_pad = %lld, idx_filter_pad = %lld, z_filter_pad = %d \n", i, n_filter_pad, idx_filter_pad, zi_filter_pad);
     
-    nz_gpu = (int) (lab.nz/n_process);
+    nz_gpu = (int) ceil( (float)lab.nz/n_process);
     zi_min = i*nz_gpu;
     zi_max = (int) std::min((i+1)*nz_gpu, lab.nz);
 
@@ -103,7 +103,7 @@ void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gp
     long long int  n_filter_pad, idx_filter_pad;
 
     // Reconstructed object 
-    nz_gpu = (int) ( ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
+    nz_gpu = (int) ceil( (float) ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
     zi_min = lab.slice_recon_start + i*nz_gpu;
     zi_max = (int) std::min(lab.slice_recon_start + (i+1)*nz_gpu, lab.slice_recon_end); 
 
@@ -118,7 +118,7 @@ void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gp
     
     printf("Process = %d:  n_recon  = %lld,  idx_recon = %lld, z_ph = %f \n",  i, n_recon, idx_recon, z_min);
     
-    L = std::max(lab.x, lab.y);
+    L = sqrt(lab.x*lab.x + lab.y*lab.y);
     
     //variáveis dectector
 
@@ -136,7 +136,7 @@ void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gp
     n_proj   = (long long int) (Zi_max-Zi_min)*(lab.nbeta*lab.nh);
 
     // Filter indexes:
-    nz_gpu = (int) ((lab.nv)/n_process); 
+    nz_gpu = (int) ceil( (float)(lab.nv)/n_process); 
     zzi_min = i*nz_gpu;
     zzi_max = (int) std::min((i+1)*nz_gpu, lab.nv); 
 
@@ -185,7 +185,10 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     int zi_filter_pad;
 
     // Reconstructed object 
-    nz_gpu = (int) ( ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
+    printf("block = %d, n_z = %e, vzz = %d \n",( lab.slice_recon_end - lab.slice_recon_start ), (float)( lab.slice_recon_end - lab.slice_recon_start ) / n_process, (int)ceil( (float)( lab.slice_recon_end - lab.slice_recon_start ) / n_process ) );
+
+    nz_gpu = (int) ceil( (float)( lab.slice_recon_end - lab.slice_recon_start ) / n_process ); 
+
     zi_min = lab.slice_recon_start + i*nz_gpu;
     zi_max = (int) std::min(lab.slice_recon_start + (i+1)*nz_gpu, lab.slice_recon_end); 
 
@@ -201,8 +204,8 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     
     printf("Process = %d:  n_recon  = %lld,  idx_recon = %lld, %d, z_ph = %f \n",  i, n_recon, idx_recon, ( zi_min - lab.slice_recon_start ), z_min);
     
-    // L = sqrt(lab.x*lab.x + lab.y*lab.y);
-    L = std::max(lab.x, lab.y);
+    L = sqrt(lab.x*lab.x + lab.y*lab.y);
+    // L = std::max(lab.x, lab.y);
     
     //variáveis dectector
     // For slices ---- Paola 11 set 2023:
@@ -235,7 +238,7 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     n_proj = (long long int) (Zi_max-Zi_min)*(lab.nbeta*lab.nh);
 
     // Filter indexes:
-    nz_gpu = (int) ((Zi_max0 - Zi_min0)/n_process); 
+    nz_gpu = (int) ceil( (float)(Zi_max0 - Zi_min0) / n_process ); 
     zzi_min = Zi_min0 + i*nz_gpu;
     zzi_max = (int) std::min(Zi_min0 + (i+1)*nz_gpu, Zi_max0); // lab.blockv
 
@@ -281,7 +284,10 @@ int memory(Lab lab, int ndev){
     int n_process;
     long long int n_proj, n_recon;
     
-    n_proj = (long long int)(lab.nv)*(long long int)(lab.nbeta)*(long long int)(lab.nh);
+    int block = ( lab.slice_recon_end - lab.slice_recon_start );
+
+    // n_proj = (long long int)(lab.nv)*(long long int)(lab.nbeta)*(long long int)(lab.nh); 
+    n_proj = (long long int)(block)*(long long int)(lab.nbeta)*(long long int)(lab.nph);
 
     n_recon = (long long int)(lab.nx)*(long long int)(lab.ny)*(long long int)(lab.nz);
 
@@ -289,21 +295,42 @@ int memory(Lab lab, int ndev){
     mem_proj = 32*n_proj*1.16*(pow(10,-10));
     mem_recon = 32*n_recon*1.16*(pow(10,-10));
 
-    n_process = (int) std::ceil((mem_proj + mem_recon)/mem_gpu);
+    if ( block <= ndev ){
 
-    // divisão de processos 
-    if(n_process < ndev) n_process = ndev;
+        n_process = ndev;
 
-    // n_process = 2*n_process;
-    if(lab.nx > 1024 && lab.nbeta > 1024) n_process = 8;
-    if(lab.nx > 2048 && lab.nbeta > 2048) n_process = 16;
-    if(lab.nph >= 4096) n_process = 16;
+    }else{
 
+        n_process = (int) std::ceil((mem_proj + mem_recon)/mem_gpu);
 
-    //if(lab.nbeta >= 1900) n_process = 16;
-    // if (lab.nbeta >= 3900) n_process = 32;
-    if (lab.nh >= 4096 || lab.nbeta >= 4096) n_process = 32;
-    if (lab.nh >= 8000 || lab.nbeta >= 8000) n_process = 64;
+        printf("Number of procs = %d, block = %d \n",n_process,block);
+
+        if ( n_process > block ){
+
+            float blocksize = (float)n_process / block;
+
+            if ( blocksize <= 0 )
+
+                n_process = 1;
+
+        }else{
+
+            if ( block > 16 ){
+
+                // n_process = 2*n_process;
+                if(lab.nx > 1024 && lab.nbeta > 1024) n_process = 8;
+                if(lab.nx > 2048 && lab.nbeta > 2048) n_process = 16;
+                if(lab.nph >= 4096) n_process = 16;
+
+                //if(lab.nbeta >= 1900) n_process = 16;
+                // if (lab.nbeta >= 3900) n_process = 32;
+                if (lab.nh >= 4096 || lab.nbeta >= 4096) n_process = 32;
+                if (lab.nh >= 8000 || lab.nbeta >= 8000) n_process = 64;
+
+            
+            } 
+        }
+    }
 
     printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
 
