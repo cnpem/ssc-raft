@@ -177,12 +177,9 @@ extern "C"{
 		Image2D<float> cflat(nrays, numflats, blocksize); // Flat in GPU
 		Image2D<float> cdark(nrays,        1, blocksize); // Dark in GPU
 
-		for(b = 0; b < nblock; b ++){
+		for(b = 0; b < nblock; b++){
 			
 			subblock   = min(nslices - ptr, blocksize);
-			
-			/* Update pointer */
-			ptr = ptr + subblock;
 
 			data.CopyFrom (frames + (size_t)ptr*nrays*nangles , 0, (size_t)subblock * nrays * nangles );
 			cflat.CopyFrom(flat   + (size_t)ptr*nrays*numflats, 0, (size_t)subblock * nrays * numflats);
@@ -196,6 +193,8 @@ extern "C"{
 
 			data.CopyTo(frames + (size_t)ptr*nrays*nangles, 0, (size_t)subblock * nrays * nangles);
       
+			/* Update pointer */
+			ptr = ptr + subblock;
 		}
 
 		cudaDeviceSynchronize();
@@ -212,9 +211,6 @@ extern "C"{
 		for(t = 0; t < ngpus; t++){ 
 			
 			subblock   = min(nslices - ptr, blockgpu);
-			
-			/* Update pointer */
-			ptr = ptr + subblock;
 
 			threads.push_back(std::async( std::launch::async, 
 						flatdark_gpu, 
@@ -236,6 +232,9 @@ extern "C"{
 			// 			numflats, Totalframes, Initframe,
 			// 			is_log, nslices
 			// 			));
+
+			/* Update pointer */
+			ptr = ptr + subblock;
 		}
 
 		for(auto& t : threads)
