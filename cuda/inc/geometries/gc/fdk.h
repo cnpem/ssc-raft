@@ -27,11 +27,12 @@ typedef struct {
     int nbeta;
     int fourier;
     int filter_type; // Filter Types
-    float reg; // Filter regularization
+    float reg; // Phase Filter (Paganin) regularization
     int is_slice; // (bool) Reconstruct a block of slices or not
     int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
     int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
     int nph, padh;
+    float energy;
 
     /* Filter Types definitions
     enum EType

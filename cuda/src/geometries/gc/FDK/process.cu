@@ -193,6 +193,7 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     zi_max = (int) std::min(lab.slice_recon_start + (i+1)*nz_gpu, lab.slice_recon_end); 
 
     printf("n_process = %d, nv = %d, %d \n",n_process,lab.nv,nz_gpu);
+    printf("zi's = %d, %d, %d \n",lab.slice_recon_start + (i+1)*nz_gpu,lab.slice_recon_end,zi_max);
     printf("S0 = %d, S1 = %d, zi_max = %d , zi_min = %d \n",lab.slice_recon_start,lab.slice_recon_end,zi_max,zi_min);
     printf("zimax - zimin = %d, nx = %d, ny = %d , multi = %d \n",(zi_max - zi_min),lab.nx,lab.ny,(zi_max - zi_min)*lab.nx*lab.ny);
 
@@ -333,6 +334,11 @@ int memory(Lab lab, int ndev){
     }
 
     printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
+
+    int nz_gpu = (int) ceil( (float) ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
+
+    if ( nz_gpu * (n_process - 1) > block )
+        n_process = n_process - 1;
 
 
     return n_process;

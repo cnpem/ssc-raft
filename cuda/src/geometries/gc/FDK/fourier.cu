@@ -3,6 +3,9 @@
 #include <cufft.h>
 #include <stdlib.h>
 
+# define vc 299792458           /* Velocity of Light [m/s] */ 
+# define plank 4.135667662E-15  /* Plank constant [ev*s] */
+
 extern "C"{
 __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process){
     int n = lab.nh, npad = lab.nph;
@@ -200,23 +203,46 @@ extern "C"{
     __global__ void filt_Ramp(Lab lab, float* W){
         int i;
         float wmax = 1.0/(2.0*lab.dh);
+
+        float magnx = lab.Dsd / lab.D;
+        float z2x   = lab.Dsd - lab.D;
         
+        float gamma = ( lab.reg == 0.0 ? 0.0:lab.reg ) ;
+
+        float lambda    = ( plank * vc ) / lab.energy;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma * lambda  / ( magnx );
+
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (wmax)/(lab.nph-1) + (2*i*wmax)/(lab.nph-1); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph-1);
+
+        for (i = 0; i <=lab.nph/2 ; i++) W[i] = W[i] * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
+
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph / 2 + i] * ( 1.0f / ( 1.0f + kernelX * W[lab.nph / 2 + i] * W[lab.nph / 2 + i] ) );
+
     }
 
     __global__ void filt_W(Lab lab, float* W){
         int i;
         float wmax = 1.0/(2.0*lab.dh);
+
+        float magnx = lab.Dsd / lab.D;
+        float z2x   = lab.Dsd - lab.D;
+        
+        float gamma = ( lab.reg == 0.0 ? 0.0:lab.reg ) ;
+
+        float lambda    = ( plank * vc ) / lab.energy;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma * lambda  / ( magnx );
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
     
-        for (i = 0; i <=lab.nph/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nph));
+        for (i = 0; i <=lab.nph/2 ; i++) W[i] = W[i]*(0.54 + 0.46*cosf(2*M_PI*i/lab.nph)) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
     
-        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nph/2 - i)/lab.nph));
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*(0.54 + 0.46*cosf(2*M_PI*(lab.nph/2 - i)/lab.nph)) * ( 1.0f / ( 1.0f + kernelX * W[lab.nph / 2 + i] * W[lab.nph / 2 + i] ) );
     }
 
     __global__ void filt_Gaussian(Lab lab, float* W){
@@ -224,13 +250,22 @@ extern "C"{
         float wmax = 1.0/(2.0*lab.dh);
         float w, c = 0.693f;
 
+        float magnx = lab.Dsd / lab.D;
+        float z2x   = lab.Dsd - lab.D;
+        
+        float gamma = ( lab.reg == 0.0 ? 0.0:lab.reg ) ;
+
+        float lambda    = ( plank * vc ) / lab.energy;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma * lambda  / ( magnx );
+
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
 
-        for (i = 0; i <= lab.nph/2 ; i++) W[i] = W[i]*expf(-c*lab.reg*(i/lab.nph)*(i/lab.nph));
+        for (i = 0; i <= lab.nph/2 ; i++) W[i] = W[i]*expf(-c*(i/lab.nph)*(i/lab.nph)) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
 
-        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*expf(-c*lab.reg*((lab.nph/2 - i)/lab.nph)*((lab.nph/2 - i)/lab.nph));
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*expf(-c*((lab.nph/2 - i)/lab.nph)*((lab.nph/2 - i)/lab.nph)) * ( 1.0f / ( 1.0f + kernelX * W[lab.nph / 2 + i] * W[lab.nph / 2 + i] ) );
 
     }
 
@@ -238,47 +273,74 @@ extern "C"{
         int i;
         float wmax = 1.0/(2.0*lab.dh);
         float w;
+
+        float magnx = lab.Dsd / lab.D;
+        float z2x   = lab.Dsd - lab.D;
+        
+        float gamma = ( lab.reg == 0.0 ? 0.0:lab.reg ) ;
+
+        float lambda    = ( plank * vc ) / lab.energy;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma * lambda  / ( magnx );
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
 
-        for (i = 0; i <= lab.nph/2 ; i++) W[i] = W[i]/(1.0 + lab.reg*(i/lab.nph)*(i/lab.nph));
+        for (i = 0; i <= lab.nph/2 ; i++) W[i] = ( W[i]/(1.0 + (i/lab.nph)*(i/lab.nph)) ) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
 
-        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]/(1.0 + lab.reg*((lab.nph/2 - i)/lab.nph)*((lab.nph/2 - i)/lab.nph));
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = ( W[lab.nph/2 + i]/(1.0 + ((lab.nph/2 - i)/lab.nph)*((lab.nph/2 - i)/lab.nph)) ) * ( 1.0f / ( 1.0f + kernelX * W[lab.nph / 2 + i] * W[lab.nph / 2 + i] ) );
 
     }
 
     __global__ void filt_Cosine(Lab lab, float* W){
         int i;
         float wmax = 1.0/(2.0*lab.dh);
+
+        float magnx = lab.Dsd / lab.D;
+        float z2x   = lab.Dsd - lab.D;
+        
+        float gamma = ( lab.reg == 0.0 ? 0.0:lab.reg ) ;
+
+        float lambda    = ( plank * vc ) / lab.energy;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma * lambda  / ( magnx );
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nh/2 + i] = wmax - (2*i*wmax)/(lab.nph);
 
-        for (i = 0; i <= lab.nph/2 ; i++) W[i] = W[i]*cosf( float(M_PI)*0.5f*(i/lab.nph));
+        for (i = 0; i <= lab.nph/2 ; i++) W[i] = W[i]*cosf( float(M_PI)*0.5f*(i/lab.nph)) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
 
-        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*cosf( float(M_PI)*0.5f*((lab.nph/2 - i)/lab.nph));
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*cosf( float(M_PI)*0.5f*((lab.nph/2 - i)/lab.nph)) * ( 1.0f / ( 1.0f + kernelX * W[lab.nph / 2 + i] * W[lab.nph / 2 + i] ) );
     }
 
     __global__ void filt_Rectangle(Lab lab, float* W){
         int i;
         float wmax = 1.0/(2.0*lab.dh);
         float param;
+
+        float magnx = lab.Dsd / lab.D;
+        float z2x   = lab.Dsd - lab.D;
+        
+        float gamma = ( lab.reg == 0.0 ? 0.0:lab.reg ) ;
+
+        float lambda    = ( plank * vc ) / lab.energy;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma * lambda  / ( magnx );
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
 
         for (i = 0; i <= lab.nph/2 ; i++) {
-            param = fmaxf((i/lab.nph) * lab.reg * float(M_PI) * 0.5f, 1E-4f);
-            W[i] = W[i]*sinf(param) / param;
+            param = fmaxf((i/lab.nph) * float(M_PI) * 0.5f, 1E-4f);
+            W[i] = ( W[i]*sinf(param) / param ) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
         }
 
         for (i = 1; i < lab.nph/2 ; i++) {
-            param = fmaxf(((lab.nph/2 - i)/lab.nph) * lab.reg * float(M_PI) * 0.5f, 1E-4f);
-            W[lab.nph/2 + i] = W[lab.nph/2 + i]*sinf(param) / param;
+            param = fmaxf(((lab.nph/2 - i)/lab.nph) * float(M_PI) * 0.5f, 1E-4f);
+            W[lab.nph/2 + i] = ( W[lab.nph/2 + i]*sinf(param) / param) * ( 1.0f / ( 1.0f + kernelX * W[lab.nph / 2 + i] * W[lab.nph / 2 + i] ) );
 
         }
 
@@ -287,14 +349,23 @@ extern "C"{
     __global__ void filt_Hann(Lab lab, float* W){
         int i;
         float wmax = 1.0/(2.0*lab.dh);
+
+        float magnx = lab.Dsd / lab.D;
+        float z2x   = lab.Dsd - lab.D;
+        
+        float gamma = ( lab.reg == 0.0 ? 0.0:lab.reg ) ;
+
+        float lambda    = ( plank * vc ) / lab.energy;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma * lambda  / ( magnx );
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
         for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = wmax - (2*i*wmax)/(lab.nph);
 
-        for (i = 0; i <=lab.nph/2 ; i++) W[i] = W[i]*(0.5 + 0.5*cosf(2*M_PI*i/lab.nph));
+        for (i = 0; i <=lab.nph/2 ; i++) W[i] = W[i]*(0.5 + 0.5*cosf(2*M_PI*i/lab.nph)) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
 
-        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*(0.5 + 0.5*cosf(2*M_PI*(lab.nph/2 - i)/lab.nph));
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph/2 + i]*(0.5 + 0.5*cosf(2*M_PI*(lab.nph/2 - i)/lab.nph)) * ( 1.0f / ( 1.0f + kernelX * W[lab.nph / 2 + i] * W[lab.nph / 2 + i] ) );
 
     }
 
@@ -305,9 +376,11 @@ extern "C"{
         float magnx = lab.Dsd / lab.D;
         float z2x   = lab.Dsd - lab.D;
         
-        float gamma = ( lab.reg == 0.0 ? 0.0:(1.0f / lab.reg) ) ;
+        float gamma = ( lab.reg == 0.0 ? 0.0:lab.reg ) ;
 
-        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma  / ( magnx );
+        float lambda    = ( plank * vc ) / lab.energy;
+
+        float kernelX = 4.0f * float(M_PI) * float(M_PI) * z2x * gamma * lambda  / ( magnx );
 
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2.0f * i * wmax) / ( lab.nph ); 
     
@@ -315,7 +388,7 @@ extern "C"{
 
         for (i = 0; i <=lab.nph/2 ; i++) W[i] = ( W[i] * ( 0.54f + 0.46f * cosf( 2.0f * float(M_PI) * i / lab.nph ) ) ) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
 
-        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph / 2 + i] * (0.54f + 0.46f * cosf( 2.0f * M_PI * ( lab.nph / 2 - i ) / lab.nph) ) * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
+        for (i = 1; i < lab.nph/2 ; i++) W[lab.nph/2 + i] = W[lab.nph / 2 + i] * (0.54f + 0.46f * cosf( 2.0f * M_PI * ( lab.nph / 2 - i ) / lab.nph) ) * ( 1.0f / ( 1.0f + kernelX * W[lab.nph / 2 + i] * W[lab.nph / 2 + i] ) );
 
         // for (i = 0; i <=lab.nph/2 ; i++) W[i] = ( W[i] * ( 0.54f + 0.46f * cosf( 2.0f * float(M_PI) * i / lab.nph ) ) );
 

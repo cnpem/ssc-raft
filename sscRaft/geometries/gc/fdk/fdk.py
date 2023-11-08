@@ -30,13 +30,15 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
         *``dic['filter']`` (str,optional): Type of filter for reconstruction. 
         Options = ('none','gaussian','lorentz','cosine','rectangle','hann','hamming','ramp'). Default is 'hamming'.
         *``dic['regularization']`` (float,optional): Type of filter for reconstruction, small values. Default is 1.
+        *``dic['energy[eV]']`` (float): beam energy in eV
     """
 
     # recon = data 
     regularization = dic['regularization']
 
     Dd, Dsd = dic['z1[m]'], dic['z1+z2[m]']
-    dh, dv = dic['detectorPixel[m]'], dic['detectorPixel[m]']
+    dh, dv  = dic['detectorPixel[m]'], dic['detectorPixel[m]']
+    energy  = dic['energy[eV]']
 
     nrays   = tomogram.shape[-1]
     nangles = tomogram.shape[-2]
@@ -160,7 +162,8 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
                 is_slice = is_slice,
                 slice_recon_start = start_recon_slice, slice_recon_end = end_recon_slice,  
                 slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice,
-                nph = nph, padh = padh)
+                nph = nph, padh = padh,
+                energy = energy)
 
     time = np.zeros(2)
     time = np.ascontiguousarray(time.astype(np.float64))

@@ -131,7 +131,6 @@ def save_hdf5_tomo(filepath, recon, dic):
 
    file.close()
 
-# if dic['norm']:
 def _FlatDarkCorrection(dic):
    start = time.time()
 
@@ -175,7 +174,6 @@ def _FlatDarkCorrection(dic):
 
    return tomogram
 
-# if dic['phase']:
 def _PhaseFilter(tomogram, dic):
    start = time.time()
 
@@ -205,7 +203,6 @@ def _PhaseFilter(tomogram, dic):
    return tomogram
 
 
-# if dic['rings']:
 def _Rings(tomogram, dic):
    start = time.time()
 
@@ -235,8 +232,6 @@ def _Rings(tomogram, dic):
 
    return tomogram
 
-# Rotation Axis Correction
-# if dic['rotation axis']:
 def _rotationAxis(tomogram, dic):
    start = time.time()
 
@@ -266,7 +261,6 @@ def _rotationAxis(tomogram, dic):
    
    return tomogram
 
-# if dic['recon']:
 def _recon(tomogram,dic):
    start = time.time()
 
@@ -526,6 +520,8 @@ def reconstruction_mogno(param = sys.argv):
 
    if dic['recon']:
       recon = _recon(tomogram,dic)
+   else:
+      recon = tomogram
 
    elapsed = time.time() - start
    print(f'Time for Reconstruction Pipeline: {elapsed} seconds')
