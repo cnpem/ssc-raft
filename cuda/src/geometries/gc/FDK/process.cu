@@ -296,43 +296,34 @@ int memory(Lab lab, int ndev){
     mem_proj = 32*n_proj*1.16*(pow(10,-10));
     mem_recon = 32*n_recon*1.16*(pow(10,-10));
 
-    if ( block <= ndev ){
+    int blockgpu = (int) ceil( (float)block / ndev ); 
+
+    if ( ( blockgpu <= 0 )){
+
+        ndev      = 1;
+        n_process = 1;
+
+    }
+
+    if( ( blockgpu >= 1 && ( blockgpu <= 64 ) ) ){
 
         n_process = ndev;
 
     }else{
 
-        n_process = (int) std::ceil((mem_proj + mem_recon)/mem_gpu);
+        // n_process = 2*n_process;
+        if(lab.nx > 1024 && lab.nbeta > 1024) n_process = 16;
+        if(lab.nx > 2048 && lab.nbeta > 2048) n_process = 32;
+        if(lab.nph >= 4096) n_process = 32;
 
-        printf("Number of procs = %d, block = %d \n",n_process,block);
+        //if(lab.nbeta >= 1900) n_process = 16;
+        // if (lab.nbeta >= 3900) n_process = 32;
+        if (lab.nh >= 4096 || lab.nbeta >= 4096) n_process = 64;
+        if (lab.nh >= 8000 || lab.nbeta >= 8000) n_process = 64;
 
-        if ( n_process > block ){
-
-            float blocksize = (float)n_process / block;
-
-            if ( blocksize <= 0 )
-
-                n_process = 1;
-
-        }else{
-
-            if ( block > 16 ){
-
-                // n_process = 2*n_process;
-                if(lab.nx > 1024 && lab.nbeta > 1024) n_process = 8;
-                if(lab.nx > 2048 && lab.nbeta > 2048) n_process = 16;
-                if(lab.nph >= 4096) n_process = 16;
-
-                //if(lab.nbeta >= 1900) n_process = 16;
-                // if (lab.nbeta >= 3900) n_process = 32;
-                if (lab.nh >= 4096 || lab.nbeta >= 4096) n_process = 32;
-                if (lab.nh >= 8000 || lab.nbeta >= 8000) n_process = 64;
-
-            
-            } 
-        }
-    }
-
+        
+    } 
+    
     printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
 
     int nz_gpu = (int) ceil( (float) ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
