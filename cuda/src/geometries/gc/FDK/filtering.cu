@@ -153,7 +153,7 @@ void copy_cpu_filter_conv(float* proj, float* c_proj, float* c_Q, Process proces
     printf(cudaGetErrorString(cudaGetLastError()));
     printf("\n");
 
-    long long int N = process.n_filter;                                         //lab.nbeta * lab.nv * lab.nh;
+    long long int N = process.n_filter;   //lab.nbeta * lab.nv * lab.nh;
     cudaMemcpy(&proj[process.idx_filter], c_Q, N*sizeof(float), cudaMemcpyDeviceToHost);
 
     cudaFree(c_proj);

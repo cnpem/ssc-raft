@@ -34,7 +34,10 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     """
 
     # recon = data 
-    regularization = dic['regularization']
+    try:
+        regularization = dic['paganin regularization']
+    except:
+        regularization = 0.0
 
     Dd, Dsd = dic['z1[m]'], dic['z1+z2[m]']
     dh, dv  = dic['detectorPixel[m]'], dic['detectorPixel[m]']
@@ -54,7 +57,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
 
     padh = int(nrays // 2)
     try:
-        pad  = dic['recon pad']
+        pad  = dic['padding']
         logger.info(f'Set FDK pad value as {pad} x horizontal dimension ({padh}).')
         padh = int(pad * padh)
         # padh = power_of_2_padding(nrays,padh)
@@ -70,16 +73,16 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
         logger.error(f'Missing angles list entry from dictionary!')
         logger.exception(e)
     
-    try:
-        start_recon_slice = dic['slices'][0]
-        end_recon_slice   = dic['slices'][1]
-        is_slice          = 1
-        logger.info(f'Reconstruct slices {start_recon_slice} to {end_recon_slice}.')
-    except:
-        start_recon_slice = 0
-        end_recon_slice   = nslices
-        is_slice          = 0
-        logger.info(f'Reconstruct all slices: {start_recon_slice} to {end_recon_slice}.')  
+    # try:
+    #     start_recon_slice = dic['slices'][0]
+    #     end_recon_slice   = dic['slices'][1]
+    #     is_slice          = 1
+    #     logger.info(f'Reconstruct slices {start_recon_slice} to {end_recon_slice}.')
+    # except:
+    start_recon_slice = 0
+    end_recon_slice   = nslices
+    is_slice          = 0
+    logger.info(f'Reconstruct all slices: {start_recon_slice} to {end_recon_slice}.')  
 
     blockslices_recon = end_recon_slice - start_recon_slice
 
@@ -142,9 +145,6 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     filter     = FilterNumber(dic['filter'])
 
     logger.info(f'FDK filter: {filtername}({filter})')
-
-    if filter == 1 or filter == 2 or filter == 4:
-        logger.info(f'FDK filter regularization: {regularization}')     
     
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 

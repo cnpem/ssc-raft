@@ -193,7 +193,7 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     zi_max = (int) std::min(lab.slice_recon_start + (i+1)*nz_gpu, lab.slice_recon_end); 
 
     printf("n_process = %d, nv = %d, %d \n",n_process,lab.nv,nz_gpu);
-    printf("zi's = %d, %d, %d \n",lab.slice_recon_start + (i+1)*nz_gpu,lab.slice_recon_end,zi_max);
+    printf("zi's = %d, %d, %d, %d \n",lab.slice_recon_start + (i+1)*nz_gpu,lab.slice_recon_end,zi_max,zi_min);
     printf("S0 = %d, S1 = %d, zi_max = %d , zi_min = %d \n",lab.slice_recon_start,lab.slice_recon_end,zi_max,zi_min);
     printf("zimax - zimin = %d, nx = %d, ny = %d , multi = %d \n",(zi_max - zi_min),lab.nx,lab.ny,(zi_max - zi_min)*lab.nx*lab.ny);
 
@@ -234,6 +234,9 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
 
     printf("Zimax = %d, %d, %e, Zimin = %d, %d, %e \n",Zi_max,zi_max,z_max,Zi_min,zi_min,z_min);
 
+    printf("Zi_max-Zi_min = %d, Max = %d, Min = %d \n",Zi_max-Zi_min,Zi_max,Zi_min);
+
+
     idx_proj = (long long int) (Zi_min)*(lab.nbeta*lab.nh);
     idx_proj_max = (long long int) (Zi_max)*(lab.nbeta*lab.nh);
     n_proj = (long long int) (Zi_max-Zi_min)*(lab.nbeta*lab.nh);
@@ -251,7 +254,7 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
     idx_filter_pad = (long long int) zzi_min*lab.nbeta*lab.nph;
     zi_filter_pad  = (int) (n_filter_pad/(lab.nbeta*lab.nph));
 
-    printf("n_process = %d, nph = %d, padh %d \n",n_process,lab.nph,lab.padh);
+    printf("n_process = %d, nph = %d, padh %d, nz filter = %d \n",n_process,lab.nph,lab.padh,nz_gpu);
     printf("Process = %d: n_filter = %lld, idx_filter = %lld, z_filter = %d, nbeta = %d, hbeta = %f \n", i, n_filter, idx_filter, zi_filter, lab.nbeta, lab.dbeta);
     printf("Process = %d: n_filter_pad = %lld, idx_filter_pad = %lld, z_filter_pad = %d \n", i, n_filter_pad, idx_filter_pad, zi_filter_pad);
 
@@ -296,18 +299,15 @@ int memory(Lab lab, int ndev){
     mem_proj = 32*n_proj*1.16*(pow(10,-10));
     mem_recon = 32*n_recon*1.16*(pow(10,-10));
 
-    int blockgpu = (int) ceil( (float)block / ndev ); 
+    int blockgpu = (int) floor( (float)block / ndev ); 
 
-    if ( ( blockgpu <= 0 )){
+    if ( ( blockgpu <= 0 ) ) n_process = 1;
 
-        ndev      = 1;
-        n_process = 1;
-
-    }
 
     if( ( blockgpu >= 1 && ( blockgpu <= 64 ) ) ){
 
         n_process = ndev;
+        printf("A: n_process = %d, n_gpus = %d \n", n_process, ndev);
 
     }else{
 
@@ -323,14 +323,13 @@ int memory(Lab lab, int ndev){
 
         
     } 
-    
-    printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
 
     int nz_gpu = (int) ceil( (float) ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
 
     if ( nz_gpu * (n_process - 1) > block )
         n_process = n_process - 1;
 
+    printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
 
     return n_process;
 }}

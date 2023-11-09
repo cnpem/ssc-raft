@@ -23,6 +23,14 @@ extern "C"
     {
         int i, n_process;
 
+        int block    = ( lab.slice_recon_end - lab.slice_recon_start );
+        int blockgpu = (int) floor( (float)block / ndevs ); 
+
+        if ( ( blockgpu <= 0 ) ) ndevs = 1;
+
+        printf("B: ndevs = %d, blockgpu = %d \n", ndevs, blockgpu);
+
+
         n_process = memory(lab, ndevs);
         
         printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);

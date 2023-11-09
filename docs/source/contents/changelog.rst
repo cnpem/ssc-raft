@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+[2.2.3] - 2023-11-09
+--------------------
+Added
+~~~~~
+- New dictionary entries 
+- Paganin filter on ``FDK``
+- New functions on Mogno pipeline in ``mogno.py``
+
+Changed
+~~~~~~~
+- Dictionary entries 
+- Mogno pipeline function ``reconstruction_mogno()`` in ``mogno.py``
+
+Corretions
+~~~~~~~~~~
+- Memory issues on ``FDK``: illegal memmory access on backprojection
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+
+Removed
+~~~~~~~
+- Mogno pipeline function ``preprocessing_mogno()`` in ``mogno.py``
+
 [2.2.2] - 2023-10-20
 --------------------
 Added
