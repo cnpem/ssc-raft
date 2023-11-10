@@ -51,13 +51,8 @@ def RingsMultiGPU(tomogram, dic):
 
         tomogram = np.ascontiguousarray(tomogram.astype(np.float32))
         tomogramptr = tomogram.ctypes.data_as(void_p)
-        
-        start = time()
 
         libraft.ringsblock(gpusptr, int32(ngpus), tomogramptr, int32(nrays), int32(nangles), int32(nslices), float32(lambdarings), int32(ringsblock))
-        
-        elapsed = time() - start
-        print('Rings Time', elapsed)
 
         return tomogram
 

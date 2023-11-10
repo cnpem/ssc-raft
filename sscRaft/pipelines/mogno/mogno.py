@@ -15,7 +15,7 @@ def read_data(detector,filepath,hdf5path):
         data = read_hdf5(filepath,hdf5path)
 
         elapsed = time.time() - start
-        print(f'Time for read hdf5 data file: {elapsed} seconds')
+        logger.info(f'Time for read hdf5 data file: {elapsed} seconds')
         start = time.time()
 
         dim_data = len(data.shape)
@@ -38,7 +38,7 @@ def read_flat(detector,filepath,hdf5path):
         flat = read_hdf5(filepath,hdf5path)
 
         elapsed = time.time() - start
-        print(f'Time for read hdf5 flat file: {elapsed} seconds')
+        logger.info(f'Time for read hdf5 flat file: {elapsed} seconds')
         start = time.time()
 
         dim_flat = len(flat.shape)
@@ -66,7 +66,7 @@ def read_dark(detector,filepath,hdf5path):
         dark = read_hdf5(filepath,hdf5path)
 
         elapsed = time.time() - start
-        print(f'Time for read hdf5 dark file: {elapsed} seconds')
+        logger.info(f'Time for read hdf5 dark file: {elapsed} seconds')
         start = time.time()
 
         dim_dark = len(dark.shape)
@@ -126,7 +126,7 @@ def save_hdf5_tomo(filepath, recon, dic):
       # Call function to save the metadata from dictionary 'dic' with the software 'sscRaft' and its version 'sscRaft.__version__'
       Metadata_hdf5(outputFileHDF5 = file, dic = dic, software = 'sscRaft', version = '2.2.3')
    except:
-      print("Error! Cannot save metadata in HDF5 output file.")
+      logger.error(f"Error! Cannot save metadata in HDF5 output file.")
       pass
 
    file.close()
@@ -163,14 +163,14 @@ def _FlatDarkCorrection(dic):
    # Returns [slices,angles,rays]
 
    elapsed = time.time() - start
-   print(f'Time for Raft Flat/Dark Correction: {elapsed} seconds')
+   logger.info(f'Time for Raft Flat/Dark Correction: {elapsed} seconds')
    start = time.time()
-   print("Finished Raft Flat/Dark Correction")
+   logger.info("Finished Raft Flat/Dark Correction")
 
    if dic['save norm']:
-      print("Saving File...")
+      logger.info("Saving File...")
       save_hdf5(savepath,tomogram)
-      print("Finished Saving")
+      logger.info("Finished Saving")
 
    return tomogram
 
@@ -191,14 +191,14 @@ def _PhaseFilter(tomogram, dic):
    # All functions on sscRaft returns [slices,angles,rays] (EXCEPT correct_projections)
 
    elapsed = time.time() - start
-   print(f'Time for Raft Phase Filter: {elapsed} seconds')
+   logger.info(f'Time for Raft Phase Filter: {elapsed} seconds')
    start = time.time()
-   print("Finished Raft Phase Filter")
+   logger.info("Finished Raft Phase Filter")
 
    if dic['save phase filter']:
-      print("Saving File...")
+      logger.info("Saving File...")
       save_hdf5(savepath,tomogram)
-      print("Finished Saving")
+      logger.info("Finished Saving")
 
    return tomogram
 
@@ -221,14 +221,14 @@ def _Rings(tomogram, dic):
    # All functions on sscRaft returns [slices,angles,rays] (EXCEPT correct_projections)
 
    elapsed = time.time() - start
-   print(f'Time for Raft Rings: {elapsed} seconds')
+   logger.info(f'Time for Raft Rings: {elapsed} seconds')
    start = time.time()
-   print("Finished Raft Rings")
+   logger.info("Finished Raft Rings")
 
    if dic['save rings']:
-      print("Saving File...")
+      logger.info("Saving File...")
       save_hdf5(savepath,tomogram)
-      print("Finished Saving")
+      logger.info("Finished Saving")
 
    return tomogram
 
@@ -250,14 +250,14 @@ def _rotationAxis(tomogram, dic):
    # All functions on sscRaft returns [slices,angles,rays] (EXCEPT correct_projections)
 
    elapsed = time.time() - start
-   print(f'Time for Raft Rotation Axis: {elapsed} seconds')
+   logger.info(f'Time for Raft Rotation Axis: {elapsed} seconds')
    start = time.time()
-   print("Finished Raft Rotation Axis")
+   logger.info("Finished Raft Rotation Axis")
 
    if dic['save rot axis']:
-      print("Saving File...")
+      logger.info("Saving File...")
       save_hdf5(savepath,tomogram)
-      print("Finished Saving")
+      logger.info("Finished Saving")
    
    return tomogram
 
@@ -281,13 +281,13 @@ def _recon(tomogram,dic):
    # All functions on sscRaft returns [slices,angles,rays] (EXCEPT correct_projections)
 
    elapsed = time.time() - start
-   print(f'Time for Raft FDK: {elapsed} seconds')
-   print("Finished Raft Reconstruction")
+   logger.info(f'Time for Raft FDK: {elapsed} seconds')
+   logger.info("Finished Raft Reconstruction")
 
    if dic['save recon']:
-      print("Saving File...")
+      logger.info("Saving File...")
       save_hdf5_tomo(savepath, recon, dic)
-      print("Finished Saving")
+      logger.info("Finished Saving")
 
    return recon
 
@@ -321,14 +321,23 @@ def reconstruction_mogno(param = sys.argv):
          dic['uselog'] = True
       tomogram = _FlatDarkCorrection(dic)
 
-      if dic['rotation axis'] and dic['shift'][0] == True:
-         dic['shift'][1]  = _DeviationAxis(np.swapaxes(tomogram,0,1), dic)
    else:
-      tomogram = h5py.File(dic['Ipath']+dic['Iname'], "r")["data"][:].astype(np.float32)
-      tomogram = np.swapaxes(tomogram,0,1)
-   
-      if dic['rotation axis'] and dic['shift'][0] == True:
-         dic['shift'][1]  = _DeviationAxis(tomogram, dic)
+      path = dic['Ipath']
+      name = dic['Iname']
+
+      try:
+         hdf5path_data = dic['hdf5path']
+      except:
+         logger.errorprint(f'Raft Pipeline...')
+         logger.error(f'Missing json entry ""hdf5path"" with the path inside hdf5 file.')
+         logger.error(f'Please guarantee that the data has entries: (slices,angles,rays).')
+         logger.error(f'Finishing run...')
+         sys.exit(1)
+
+      tomogram = read_data(dic['detector'],path + name, hdf5path_data)
+
+   if dic['rotation axis'] and dic['shift'][0] == True:
+         dic['shift'][1]  = _DeviationAxis(np.swapaxes(tomogram,0,1), dic)
 
    if phase:
       tomogram = _PhaseFilter(tomogram, dic)
@@ -346,8 +355,41 @@ def reconstruction_mogno(param = sys.argv):
       recon = tomogram
 
    elapsed = time.time() - start
-   print(f'Time for Raft Reconstruction Pipeline: {elapsed} seconds')
-   print("Finished Raft Pipeline")
+   logger.info(f'Time for Raft Reconstruction Pipeline: {elapsed} seconds')
+   logger.info("Finished Raft Pipeline")
+
+   return recon
+
+def getReconstructionProcessing(tomogram: np.ndarray, axis_deviation: int, dic: dict):
+
+   """Computes the Reconstruction of a Conical Sinogram for Mogno Beamline.
+
+   Args:
+      tomogram (numpy ndarray): Tomogram. The axes are [slices, angles, rays].
+
+   Returns:
+      (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [x, y, z].
+
+    """
+   start = time.time()
+
+   dic['shift'][1] = axis_deviation
+   
+   if dic['rings']:
+      tomogram = _Rings(tomogram, dic)
+
+   if dic['rotation axis']:
+      dic['shift'][0] = False
+      tomogram = _rotationAxis(tomogram, dic)
+
+   if dic['recon']:
+      recon = _recon(tomogram,dic)
+   else:
+      recon = tomogram
+
+   elapsed = time.time() - start
+   logger.info(f'Time for Raft Reconstruction Pipeline: {elapsed} seconds')
+   logger.info("Finished Raft Pipeline")
 
    return recon
 
@@ -405,9 +447,9 @@ def _DeviationAxis(tomogram: np.ndarray, dic: dict):
    dic['shift'][1] = deviation
 
    elapsed = time.time() - start
-   print(f'Time for Raft Rotation Axis Deviation: {elapsed} seconds')
+   logger.info(f'Time for Raft Rotation Axis Deviation: {elapsed} seconds')
    start = time.time()
-   print("Finished Raft Rotation Axis Deviation")
+   logger.info("Finished Raft Rotation Axis Deviation")
 
    return deviation
 
