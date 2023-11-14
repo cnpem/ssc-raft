@@ -47,7 +47,7 @@ extern "C" {
 				subblock   = min(nangles - ptr, subvolume);
 				ptr_volume = (size_t)nrays * nslices * ptr;
 				
-				printf("Sub[%d] = %d () \n",i,subblock,ptr);
+				// printf("Sub[%d] = %d () \n",i,subblock,ptr);
 
 				/* Update pointer */
 				ptr = ptr + subblock;
@@ -138,14 +138,14 @@ extern "C" {
 
 		/* Loop for each batch of size 'batch' in threads */
 
-		printf("GPU: %d; zblock = %ld; indBlock = %ld \n", ngpu, zblock, ind_block);
+		// printf("GPU: %d; zblock = %ld; indBlock = %ld \n", ngpu, zblock, ind_block);
 
 		for (bz = 0; bz < ind_block; bz++){
 
 			zblock    = min(nangles - ptr, param.blocksize);
 			ptr_block = (size_t)nrays * nslices * ptr;
 
-			printf("zblock[%d,%ld] = %ld, ptr = %d (%d) \n", ngpu, bz, zblock, ptr, nangles - ptr);
+			// printf("zblock[%d,%ld] = %ld, ptr = %d (%d) \n", ngpu, bz, zblock, ptr, nangles - ptr);
 
 			/* Update pointer */
 			ptr = ptr + zblock;

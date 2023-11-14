@@ -131,7 +131,7 @@ def save_hdf5_tomo(filepath, recon, dic):
 
    file.close()
 
-def _FlatDarkCorrection(dic):
+def FlatDarkCorrection(dic):
    start = time.time()
 
    path = dic['Ipath']
@@ -174,7 +174,7 @@ def _FlatDarkCorrection(dic):
 
    return tomogram
 
-def _PhaseFilter(tomogram, dic):
+def PhaseFilter(tomogram, dic):
    start = time.time()
 
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
@@ -203,7 +203,7 @@ def _PhaseFilter(tomogram, dic):
    return tomogram
 
 
-def _Rings(tomogram, dic):
+def Rings_function(tomogram, dic):
    start = time.time()
 
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
@@ -232,7 +232,7 @@ def _Rings(tomogram, dic):
 
    return tomogram
 
-def _rotationAxis(tomogram, dic):
+def rotationAxis(tomogram, dic):
    start = time.time()
 
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
@@ -261,7 +261,7 @@ def _rotationAxis(tomogram, dic):
    
    return tomogram
 
-def _recon(tomogram,dic):
+def recon(tomogram,dic):
    start = time.time()
 
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
@@ -319,7 +319,7 @@ def reconstruction_mogno(param = sys.argv):
          dic['uselog'] = False
       else:
          dic['uselog'] = True
-      tomogram = _FlatDarkCorrection(dic)
+      tomogram = FlatDarkCorrection(dic)
 
    else:
       path = dic['Ipath']
@@ -337,20 +337,20 @@ def reconstruction_mogno(param = sys.argv):
       tomogram = read_data(dic['detector'],path + name, hdf5path_data)
 
    if dic['rotation axis'] and dic['shift'][0] == True:
-         dic['shift'][1]  = _DeviationAxis(np.swapaxes(tomogram,0,1), dic)
+         dic['shift'][1]  = DeviationAxis(np.swapaxes(tomogram,0,1), dic)
 
    if phase:
-      tomogram = _PhaseFilter(tomogram, dic)
+      tomogram = PhaseFilter(tomogram, dic)
 
    if dic['rings']:
-      tomogram = _Rings(tomogram, dic)
+      tomogram = Rings_function(tomogram, dic)
 
    if dic['rotation axis']:
       dic['shift'][0] = False
-      tomogram = _rotationAxis(tomogram, dic)
+      tomogram = rotationAxis(tomogram, dic)
 
    if dic['recon']:
-      recon = _recon(tomogram,dic)
+      recon = recon(tomogram,dic)
    else:
       recon = tomogram
 
@@ -376,14 +376,14 @@ def getReconstructionProcessing(tomogram: np.ndarray, axis_deviation: int, dic: 
    dic['shift'][1] = axis_deviation
    
    if dic['rings']:
-      tomogram = _Rings(tomogram, dic)
+      tomogram = Rings_function(tomogram, dic)
 
    if dic['rotation axis']:
       dic['shift'][0] = False
-      tomogram = _rotationAxis(tomogram, dic)
+      tomogram = rotationAxis(tomogram, dic)
 
    if dic['recon']:
-      recon = _recon(tomogram,dic)
+      recon = recon(tomogram,dic)
    else:
       recon = tomogram
 
@@ -411,16 +411,16 @@ def getDeviationAxis(param = sys.argv):
    dic['z2[m]'] = dic['z1+z2[m]'] - dic['z1[m]']
 
    dic['uselog'] = True
-   tomogram = _FlatDarkCorrection(dic)
+   tomogram = FlatDarkCorrection(dic)
 
    dic['shift'][0] = True
    dic['shift'][1] = 0
    
-   deviation  = _DeviationAxis(np.swapaxes(tomogram,0,1), dic)
+   deviation  = DeviationAxis(np.swapaxes(tomogram,0,1), dic)
 
    return deviation
 
-def _DeviationAxis(tomogram: np.ndarray, dic: dict):
+def DeviationAxis(tomogram: np.ndarray, dic: dict):
 
    """Computes the deviation of the Rotation Axis of a Tomogram measured in 360 degrees rotation.
 
