@@ -261,7 +261,7 @@ def rotationAxis(tomogram, dic):
    
    return tomogram
 
-def recon(tomogram,dic):
+def recon_(tomogram,dic):
    start = time.time()
 
    # All functions on sscRaft enters [slices,angles,rays] (EXCEPT correct_projections)
@@ -350,7 +350,7 @@ def reconstruction_mogno(param = sys.argv):
       tomogram = rotationAxis(tomogram, dic)
 
    if dic['recon']:
-      recon = recon(tomogram,dic)
+      recon = recon_(tomogram,dic)
    else:
       recon = tomogram
 
@@ -383,7 +383,7 @@ def getReconstructionProcessing(tomogram: np.ndarray, axis_deviation: int, dic: 
       tomogram = rotationAxis(tomogram, dic)
 
    if dic['recon']:
-      recon = recon(tomogram,dic)
+      recon = recon_(tomogram,dic)
    else:
       recon = tomogram
 
