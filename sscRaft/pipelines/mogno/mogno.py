@@ -152,11 +152,24 @@ def FlatDarkCorrection(dic):
    savepath = outpath + 'RaftNorm_' + id_sample + '_' + name
 
    # Read Raw data
-   tomogram = read_data(dic['detector'],filepath, hdf5path_data)
+   try:
+      tomogram = read_data(dic['detector'],filepath, hdf5path_data)
+   except:
+      logger.error(f'No detector acquired data was found in file {filepath}.')
+      logger.error(f'Finishing run...')
+      exit(1)
 
-   flat = read_flat(dic['detector'],filepath,hdf5path_flat)
+   try:
+      flat = read_flat(dic['detector'],filepath,hdf5path_flat)
+   except:
+      logger.warning(f'No Flat-field was found in file {filepath}. Reconstruction continues with no Flat-field.')
+      flat = np.ones((1,tomogram.shape[1],tomogram.shape[2])) 
 
-   dark = read_dark(dic['detector'],filepath,hdf5path_dark)
+   try:
+      dark = read_dark(dic['detector'],filepath,hdf5path_dark)
+   except:
+      logger.warning(f'No Dark-field was found in file {filepath}. Reconstruction continues with no Dark-field.')
+      dark = np.zeros((1,tomogram.shape[1],tomogram.shape[2])) 
 
    # Enters [angles,slices,rays]
    tomogram = correct_projections(tomogram, flat[0], dark, dic)
