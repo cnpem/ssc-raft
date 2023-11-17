@@ -199,8 +199,8 @@ extern "C" {
 		param->lambda    = ( plank * vc ) / param->energy;
 		param->wave      = ( 2.0 * float(M_PI) ) / param->lambda;
 
-		param->Npadx     = sizex + 2.0 * param->padx; 
-		param->Npady     = sizey + 2.0 * param->pady; 
+		// param->Npadx     = sizex + 2.0 * param->padx; 
+		// param->Npady     = sizey + 2.0 * param->pady; 
 
 
 		/* GPUs */

@@ -23,7 +23,6 @@
 #include <cublas_v2.h>
 #include "common/structs.h"
 #include "GeneralOperators/filter.h"
-#include "rebinning/rebinning.h"
 #include "GeneralOperators/alignment.h"
 #include "geometries/gp/fbp.h"
 #include "GeneralOperators/rings.h"

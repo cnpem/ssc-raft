@@ -26,9 +26,20 @@ def phase_filters(tomo,dic):
     z2x       = dic['z2[m]']
     z1y       = z1x+0
     z2y       = z2x+0
-    energy    = dic['energy[KeV]']
     alpha     = dic['regularization']
-    pixel     = dic['detectorPixel[m]']
+    # pixel     = dic['detectorPixel[m]']
+
+    try:
+        energy    = dic['energy[eV]']
+    except:
+        try:
+            energy    = dic['energy[KeV]']
+            logger.warning(f'Conferir a entrada do dicionario `energy[KeV]`e mudar para `energy[eV]`.')
+            logger.warning(f'Finishing run...')
+            sys.exit(0)
+        except:
+            logger.error(f'Missing `energy[eV]` entry from dictionary!')
+            sys.exit(1)
 
     padx = int(nrays // 2)
     pady = int(nrays // 2)

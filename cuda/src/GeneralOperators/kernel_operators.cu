@@ -5,6 +5,51 @@
 #include "../../inc/common/operations.hpp"
 #include "../../inc/common/logerror.hpp"
 
+
+extern "C" {
+	/*---------------------------------
+	Removing Nan's values of an input
+	sinogram
+	Eduardo X. Miqueles 
+	Gilberto Martinez Jr.
+	Fernando S. Furusato 
+	-------------------------------*/
+
+	void removeNan(float *sino, 
+			int length)
+	{
+		int i;
+	
+		for (i = 0; i < length; i++){
+			if ( sino[i] != sino[i] ){
+				sino[i] = 0.0;
+			}
+		}
+	}
+	
+	__global__ void removeNan_block(float *blockSino,
+					int nviews,
+					int nrays,
+					int blockSize)
+	{
+		int tx = threadIdx.x + blockIdx.x*blockDim.x; 
+		int ty = threadIdx.y + blockIdx.y*blockDim.y; 
+		int tz = threadIdx.z + blockIdx.z*blockDim.z;
+		int voxel;
+
+		if( (tx < nrays) && (ty < nviews) && (tz<blockSize) ){
+			voxel = tz*nrays*nviews + ty*nrays + tx;
+			
+			if (blockSino[ voxel ] != blockSino[ voxel ]){
+				blockSino[ voxel ] = 0.0;
+			}
+
+		}
+
+	}
+}
+
+
 extern "C" {
 
 	__device__ float sinc(float x)

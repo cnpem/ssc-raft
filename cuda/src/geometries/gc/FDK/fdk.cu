@@ -16,6 +16,18 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+extern "C"{
+    void getFDK(CFG configs, float *recon, float *tomogram, float *angles)
+    {
+        Lab lab = getLab();
+
+        
+
+    }
+
+}
+
+
 extern "C"
 {
     void gpu_fdk(Lab lab, float *recon, float *proj, float *angles,

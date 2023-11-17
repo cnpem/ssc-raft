@@ -14,48 +14,48 @@
 #include <vector>
 #include <iostream>
 
-typedef struct {  
-    float x,y,z;
-    float dx, dy, dz;
-    int nx, ny, nz;
-    float h,v;
-    float dh, dv;
-    int nh, nv;
-    float D, Dsd;
-    float beta_max;
-    float dbeta;
-    int nbeta;
-    int fourier;
-    int filter_type; // Filter Types
-    float reg; // Filter regularization
-    int is_slice; // (bool) Reconstruct a block of slices or not
-    int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
-    int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
-    int nph, padh;
+// typedef struct {  
+//     float x,y,z;
+//     float dx, dy, dz;
+//     int nx, ny, nz;
+//     float h,v;
+//     float dh, dv;
+//     int nh, nv;
+//     float D, Dsd;
+//     float beta_max;
+//     float dbeta;
+//     int nbeta;
+//     int fourier;
+//     int filter_type; // Filter Types
+//     float reg; // Filter regularization
+//     int is_slice; // (bool) Reconstruct a block of slices or not
+//     int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
+//     int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
+//     int nph, padh;
 
-    /* Filter Types definitions
-    enum EType
-	{
-        none      = 0,
-        gaussian  = 1,
-        lorentz   = 2,
-        cosine    = 3,
-        rectangle = 4,
-        hann      = 5,
-        hamming   = 6,
-        ramp      = 7
-	};
-    */
+//     /* Filter Types definitions
+//     enum EType
+// 	{
+//         none      = 0,
+//         gaussian  = 1,
+//         lorentz   = 2,
+//         cosine    = 3,
+//         rectangle = 4,
+//         hann      = 5,
+//         hamming   = 6,
+//         ramp      = 7
+// 	};
+//     */
 
-} Lab;
+// } Lab;
 
 
-typedef struct {  
-    int i, i_gpu, zi, z_filter, z_filter_pad;
-    long long int n_proj, n_recon, n_filter, n_filter_pad;
-    long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
-    float z_ph, z_det;
-} Process;
+// typedef struct {  
+//     int i, i_gpu, zi, z_filter, z_filter_pad;
+//     long long int n_proj, n_recon, n_filter, n_filter_pad;
+//     long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
+//     float z_ph, z_det;
+// } Process;
 
 
 //FDK Functions

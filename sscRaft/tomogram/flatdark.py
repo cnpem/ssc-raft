@@ -21,8 +21,7 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
 
         is_log     = dic['uselog']
         nrays      = frames.shape[-1]
-        nangles    = frames.shape[0]
-        Tframes    = nangles
+        nangles    = frames.shape[-2]
         
         if is_log:
                 is_log = 1
@@ -32,25 +31,15 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         if len(frames.shape) == 2:
                 nslices = 1
         else:
-                nslices = frames.shape[-2]
+                nslices = frames.shape[0]
 
         if len(flat.shape) == 2:
-                flat = np.expand_dims(flat,0)
                 nflats  = 1
         else:
-                nflats = flat.shape[0]
+                nflats = flat.shape[-2]
 
         if len(dark.shape) == 2:
-                dark = np.expand_dims(dark,0)
-
-        # Change Frames order from [angles,slices,rays] to [slices,angles,rays] for easier computation
-        frames    = np.swapaxes(frames,0,1)
-        
-        # Change Flat order from [number of flats,slices,rays] to [slices,number of flats,rays] for easier computation
-        flat      = np.swapaxes(flat,0,1)
-
-        # Change Dark order from [1,slices,rays] to [slices,1,rays] for easier computation
-        dark      = np.swapaxes(dark,0,1)
+                dark = np.expand_dims(dark,1)
 
         logger.info(f'Number of flats is {nflats}.')
         if nflats > 1:
@@ -72,11 +61,9 @@ def flatdarkMultiGPU(frames, flat, dark, dic):
         nangles    = int32(nangles)
         nslices    = int32(nslices)
         nflats     = int32(nflats)
-        Tframes    = int32(Tframes)
-        Initframes = int32(0)
         is_log     = int32(is_log)
         
-        libraft.flatdark_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, Tframes, Initframes, is_log)
+        libraft.flatdark_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, is_log)
 
         return frames 
 
@@ -86,8 +73,7 @@ def flatdarkGPU(frames, flat, dark, dic):
         gpu        = dic['gpu'][0]     
         is_log     = dic['uselog']
         nrays      = frames.shape[-1]
-        nangles    = frames.shape[0]
-        Tframes    = nangles
+        nangles    = frames.shape[-2]
         
         if is_log:
                 is_log = 1
@@ -97,25 +83,15 @@ def flatdarkGPU(frames, flat, dark, dic):
         if len(frames.shape) == 2:
                 nslices = 1
         else:
-                nslices = frames.shape[-2]
+                nslices = frames.shape[0]
 
         if len(flat.shape) == 2:
-                flat = np.expand_dims(flat,0)
                 nflats  = 1
         else:
-                nflats = flat.shape[0]
+                nflats = flat.shape[-2]
         
         if len(dark.shape) == 2:
-                dark = np.expand_dims(dark,0)
-        
-        # Change Frames order from [angles,slices,rays] to [slices,angles,rays] for easier computation
-        frames    = np.swapaxes(frames,0,1)
-        
-        # Change Flat order from [number of flats,slices,rays] to [slices,number of flats,rays] for easier computation
-        flat      = np.swapaxes(flat,0,1)
-
-        # Change Dark order from [1,slices,rays] to [slices,1,rays] for easier computation
-        dark      = np.swapaxes(dark,0,1)
+                dark = np.expand_dims(dark,1)
 
         logger.info(f'Number of flats is {nflats}.')
         if nflats > 1:
@@ -137,11 +113,9 @@ def flatdarkGPU(frames, flat, dark, dic):
         nangles    = int32(nangles)
         nslices    = int32(nslices)
         nflats     = int32(nflats)
-        Tframes    = int32(Tframes)
-        Initframes = int32(0)
         is_log     = int32(is_log)
         
-        libraft.flatdark_gpu(int32(gpu), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, Tframes, Initframes, is_log)
+        libraft.flatdark_gpu(int32(gpu), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, is_log, nslices)
 
         return frames 
 
@@ -199,8 +173,8 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
         # Garbage Collector
         # lists are cleared whenever a full collection or
         # collection of the highest generation (2) is run
-        # collected = gc.collect() # or gc.collect(2)
-        # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
+        collected = gc.collect() # or gc.collect(2)
+        logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
 
 
         return output

@@ -5,14 +5,12 @@
 
 
 extern "C"{
-    void RingsEM(float* sinogram, float* ptrflat, size_t sizex, size_t sizey, size_t sizez);
-
-    void Rings(float* volume, int vsizex, int vsizey, int vsizez, float lambda, size_t slicesize);
-
-    void applyringsEM(int gpu, float* sinogram, float* ptrflat, int sizex, int sizey, int sizez);
+    
+    float Rings(float* volume, int vsizex, int vsizey, int vsizez, float lambda, size_t slicesize);
 
     void ringsblock(int* gpus, int ngpus, float* data, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks);
 
+    void getRings(float* tomogram, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks);
 }
 
 
