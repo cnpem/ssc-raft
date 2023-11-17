@@ -28,9 +28,13 @@ extern "C" {
 		set_phase_filters_parameters(&param, paramf, parami, nrays, nslices, nangles);
 
 		int subvolume = (nangles + ngpus - 1) / ngpus;
+		int subblock, ptr = 0; 
+		size_t ptr_volume = 0;
 
 		if (ngpus == 1){ /* 1 device */
+
 			_phase_filters_threads(param, projections, nrays, nangles, nslices, gpus[0]);
+
 		}else{
 		/* Launch async Threads for each device.
 			Each device solves a block of 'nrays * nangles' size.
@@ -40,13 +44,16 @@ extern "C" {
 
 			for (i = 0; i < ngpus; i++){
 				
-				if(subvolume*(i+1) > nangles)
-					subvolume = nangles - subvolume*i;
-
-				if(subvolume < 1)
-					continue;
+				subblock   = min(nangles - ptr, subvolume);
+				ptr_volume = (size_t)nrays * nslices * ptr;
 				
-				threads.push_back( std::async( std::launch::async, _phase_filters_threads, param, projections + (size_t)nrays * nslices * subvolume * i, (size_t)nrays, (size_t)subvolume, (size_t)nslices, gpus[i]));		
+				// printf("Sub[%d] = %d () \n",i,subblock,ptr);
+
+				/* Update pointer */
+				ptr = ptr + subblock;
+				
+				threads.push_back( std::async( std::launch::async, _phase_filters_threads, param, projections + ptr_volume, (size_t)nrays, (size_t)subblock, (size_t)nslices, gpus[i]));		
+
 			}
 		
 			// Log("Synchronizing all threads...\n");
@@ -125,19 +132,29 @@ extern "C" {
 
 		size_t zblock = param.blocksize;
 
+		size_t ind_block = (size_t)ceil( (float) nangles / param.blocksize );
+		int ptr = 0;
+		size_t ptr_block = 0;
+
 		/* Loop for each batch of size 'batch' in threads */
 
-		for (bz = 0; bz < nangles; bz += param.blocksize){
+		// printf("GPU: %d; zblock = %ld; indBlock = %ld \n", ngpu, zblock, ind_block);
 
-			zblock = min((size_t)fabs(nangles - bz),param.blocksize);
+		for (bz = 0; bz < ind_block; bz++){
+
+			zblock    = min(nangles - ptr, param.blocksize);
+			ptr_block = (size_t)nrays * nslices * ptr;
+
+			// printf("zblock[%d,%ld] = %ld, ptr = %d (%d) \n", ngpu, bz, zblock, ptr, nangles - ptr);
+
+			/* Update pointer */
+			ptr = ptr + zblock;
 
 			if( zblock != param.blocksize){
 
-				cudaDeviceSynchronize();
 				HANDLE_FFTERROR(cufftDestroy(param.mplan));
 
 				HANDLE_FFTERROR(cufftPlanMany(&param.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, (int)zblock));
-				cudaDeviceSynchronize();
 			}
 				
 			switch ((int)param.filter){
@@ -147,27 +164,26 @@ extern "C" {
 					break;
 				case 1:
 					/* code */
-					_paganin_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_paganin_gpu(param, projections + ptr_block, d_kernel, nrays, zblock, nslices);
 					break;
 				case 2:
 					/* code */
-					_bronnikov_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_bronnikov_gpu(param, projections + ptr_block, d_kernel, nrays, zblock, nslices);
 					break;
 				case 3:
 					/* code */
-					_born_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_born_gpu(param, projections + ptr_block, d_kernel, nrays, zblock, nslices);
 					break;
 				case 4:
 					/* code */
-					_rytov_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_rytov_gpu(param, projections + ptr_block, d_kernel, nrays, zblock, nslices);
 					break;
 
 				default:
 					printf("Using paganin as default phase filter!");
-					_paganin_gpu(param, projections + (size_t)nrays * nslices * bz, d_kernel, nrays, zblock, nslices);
+					_paganin_gpu(param, projections + ptr_block, d_kernel, nrays, zblock, nslices);
 					break;
 			}	
-			
 		}
 		cudaDeviceSynchronize();
 
@@ -205,15 +221,16 @@ extern "C" {
 
 		/* GPUs */
 		/* Initialize Device sizes variables */
-		size_t Nsx      = 128;
-		size_t Nsy      = 1; 
+		size_t Nsx      = 16;
+		size_t Nsy      = 16; 
 		size_t Nsz      = 1;
 
 		param->BT       = dim3(Nsx,Nsy,Nsz);
         const int bx    = ( param->Npadx + Nsx - 1 ) / Nsx;	
 		const int by    = ( param->Npady + Nsy - 1 ) / Nsy;
-		const int bz    = ( sizez + Nsz - 1 ) / Nsz;
+		const int bz    = ( sizez        + Nsz - 1 ) / Nsz;
 		param->Grd      = dim3(bx,by,bz);
 	}
 
 }
+

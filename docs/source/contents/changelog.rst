@@ -4,6 +4,89 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+[2.2.3] - 2023-11-09
+--------------------
+Added
+~~~~~
+- New dictionary entries 
+- Paganin filter on ``FDK``
+- New functions on Mogno pipeline in ``mogno.py``
+
+Changed
+~~~~~~~
+- Dictionary entries 
+- Mogno pipeline function ``reconstruction_mogno()`` in ``mogno.py``
+
+Corretions
+~~~~~~~~~~
+- Memory issues on ``FDK``: illegal memmory access on backprojection
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+
+Removed
+~~~~~~~
+- Mogno pipeline function ``preprocessing_mogno()`` in ``mogno.py``
+
+[2.2.2] - 2023-10-20
+--------------------
+Added
+~~~~~
+- New function in Python for a reconstruction pipeline for Mogno beamline
+- New function in Python for a compute rotation axis deviation ONLY
+- New dictionary entries 
+
+Changed
+~~~~~~~
+- Pipeline for Mogno beamline has the rotation axis correction done right before the ``FDK``
+
+Corretions
+~~~~~~~~~~
+- Rotation Axis function ``correct_rotation_axis360()`` in ``rotationaxis.py`` is corrected for negative deviations
+- Phase filter CUDA padding is corrected
+- ``FDK`` processes setting was increased.
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+
+[2.2.1] - 2023-09-21
+--------------------
+Added
+~~~~~
+- Phase filters: "Paganin, Bronnikov, Rytov, Born" - all by frames
+- Padding inside ``FDK``
+- Inclusion of angles list
+- ``FDK`` Reconstruction by Slices (with bugs)
+- New dictionary entries 
+
+Changed
+~~~~~~~
+- Padding is now done inside CUDA functions
+- Metadata datasets modifications in saving 
+- Rotation Axis function ``correct_rotation_axis360()`` in ``rotationaxis.py``: set ``padding = 0`` variable 
+- ``FDK`` receives an angles list
+
+Corretions
+~~~~~~~~~~
+- The ``FDK`` resconstruction multiplication factor of ``2`` related to filtering computed by Fourier Transform is corrected.
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+- Rotation Axis function with bug for negative deviations
+- Phase filter with bug on CUDA Padding
+
 [2.2.0] - 2023-07-17
 --------------------
 Added

@@ -423,7 +423,14 @@ extern "C"{
         rImage smooth(msizex,msizey);
         rImage sinobar(msizex,msizey);
 
+        // if (lambda < 0){
+        //     printf("Rings Lambda automatic computation value: ");
+        // }else{
+        //     printf("Rings Lambda value: ");
+        // }
         lambda = VolumeAverage(sinobar.gpuptr, volume, vsizex, vsizey, vsizez, lambda, slicesize);
+        
+        // printf("Rings Lambda value: %e \n",lambda);
         
         sinobar.LoadFromGPU();
         cudaDeviceSynchronize();

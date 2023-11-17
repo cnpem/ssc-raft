@@ -26,25 +26,19 @@ def phase_filters(tomo,dic):
     z2x       = dic['z2[m]']
     z1y       = z1x+0
     z2y       = z2x+0
-    alpha     = dic['regularization']
-    # pixel     = dic['detectorPixel[m]']
-
     try:
-        energy    = dic['energy[eV]']
+       energy    = dic['energy[eV]']
     except:
-        try:
-            energy    = dic['energy[KeV]']
-            logger.warning(f'Conferir a entrada do dicionario `energy[KeV]`e mudar para `energy[eV]`.')
-            logger.warning(f'Finishing run...')
-            sys.exit(0)
-        except:
-            logger.error(f'Missing `energy[eV]` entry from dictionary!')
-            sys.exit(1)
+        energy    = dic['energy[KeV]']
+
+
+    alpha     = dic['phase filter regularization']
+    pixel     = dic['detectorPixel[m]']
 
     padx = int(nrays // 2)
     pady = int(nrays // 2)
     try:
-        pad  = dic['phase pad']
+        pad  = dic['padding']
         padx = int(pad * padx)
         pady = int(pad * pady)
         # padx = power_of_2_padding(nrays,padx)
@@ -80,16 +74,26 @@ def phase_filters(tomo,dic):
         logger.error(f'Data has wrong shape = {tomogram.shape}. It needs to be 2D or 3D.')
         sys.exit(1)
 
-    if nangles == 1:
-        blocksize = 1
-    else:
+    try:
         blocksize = dic['blocksize']
+        
+        if nangles == 1:
+            blocksize = 1
+        else:
+            blocksize = dic['blocksize']
+    except:
+        blocksize = 32
+
+        if nangles == 1:
+            blocksize = 1
+        else:
+            blocksize = 32
 
     if blocksize > ( nangles // ngpus ):
         logger.error(f'Blocksize is bigger than the number of angles ({nangles}) divided by the number of GPUs selected ({ngpus})!')
         sys.exit(1)
 
-    filtername = dic['phase filter']
+    filtername = dic['phase filter method']
     filter     = PhaseFilterNumber(dic['phase filter'])
     
     if filter == 0:
@@ -97,7 +101,7 @@ def phase_filters(tomo,dic):
         logger.warning(f'Finishing Run ...')
         sys.exit(0)
     else:
-        logger.info(f'Phase filter: {filtername}({filter})')
+        logger.info(f'Phase filter method: {filtername}({filter})')
 
     float_param     = numpy.array([z1x, z1y, z2x, z2y, energy, alpha])
     float_param     = numpy.ascontiguousarray(float_param.astype(numpy.float32))
@@ -112,5 +116,5 @@ def phase_filters(tomo,dic):
 
     libraft.phase_filters(tomogramptr, float_paramsptr, int_paramptr, int32(nrays), int32(nangles), int32(nslices), gpusptr, int32(ngpus))
 
-    
     return np.swapaxes(tomogram,0,1)
+

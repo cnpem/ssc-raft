@@ -8,8 +8,7 @@ One can install the latest version of ``sscRaft`` directly from our ``pip server
 
 .. code-block:: bash
 
-    pip config --user set global.extra-index-url http://gcc.lnls.br:3128/simple/
-    pip config --user set global.trusted-host gcc.lnls.br
+    pip config --user set global.extra-index-url https://gccpypi:glpat-whUuAPrr3UR38NXmzzkj@gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 
     pip install sscRaft==version
 
@@ -17,7 +16,7 @@ Where ``version`` is the version number the ``sscRaft``
 
 .. code-block:: bash
 
-    pip install sscRaft==2.1.0
+    pip install sscRaft==2.2.2
 
 
 Or manually download it from the `package <http://gcc.lnls.br:3128/packages/>`_ list.

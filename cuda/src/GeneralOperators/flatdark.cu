@@ -149,7 +149,9 @@ extern "C"{
 
 		int b;
 		int blocksize = min(nslices,32); // Herança do Giovanni -> Mudar
-		size_t offset = (size_t)gpu * nslices * nrays;
+
+		size_t nblock = (size_t)ceil( (float) nslices / blocksize );
+		int ptr = 0, subblock;
 
 		dim3 blocks = dim3(nrays,nangles,blocksize);
 		blocks.x = ( nrays + 127 ) / 128;
@@ -162,21 +164,24 @@ extern "C"{
 		Image2D<float> cflat(nrays, numflats, blocksize); // Flat in GPU
 		Image2D<float> cdark(nrays,        1, blocksize); // Dark in GPU
 
-		for(b = 0; b < nslices; b += blocksize){
+		for(b = 0; b < nblock; b++){
 			
-			blocksize = min(blocksize,nslices-b);
+			subblock   = min(nslices - ptr, blocksize);
 
-			data.CopyFrom (frames + (size_t)b*nrays*nangles                   , 0, (size_t)blocksize * nrays * nangles                     );
-			cflat.CopyFrom(flat   + (size_t)b*nrays*numflats + offset*numflats, 0, (size_t)blocksize * nrays * numflats + offset * numflats);
-			cdark.CopyFrom(dark   + (size_t)b*nrays          + offset         , 0, (size_t)blocksize * nrays            + offset           );
-			// data.CopyFrom (frames + (size_t)b*nrays*nangles , 0, (size_t)blocksize * nrays * nangles );
-			// cflat.CopyFrom(flat   + (size_t)b*nrays*numflats, 0, (size_t)blocksize * nrays * numflats);
-			// cdark.CopyFrom(dark   + (size_t)b*nrays         , 0, (size_t)blocksize * nrays           );
+			data.CopyFrom (frames + (size_t)ptr*nrays*nangles , 0, (size_t)subblock * nrays * nangles );
+			cflat.CopyFrom(flat   + (size_t)ptr*nrays*numflats, 0, (size_t)subblock * nrays * numflats);
+			cdark.CopyFrom(dark   + (size_t)ptr*nrays         , 0, (size_t)subblock * nrays           );
 
-			getFlatDarkCorrection(data.gpuptr, cflat.gpuptr, cdark.gpuptr, nrays, nangles, blocksize, numflats, is_log, BT, blocks);
+			if ( is_log == 1 ){
+				KFlatDarklog<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,nangles,subblock), numflats, Totalframes, Initframe);
+			}else{
+				KFlatDark<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,nangles,subblock), numflats, Totalframes, Initframe);
+			}
 
-			data.CopyTo(frames + (size_t)b*nrays*nangles, 0, (size_t)blocksize * nrays * nangles);
+			data.CopyTo(frames + (size_t)ptr*nrays*nangles, 0, (size_t)subblock * nrays * nangles);
       
+			/* Update pointer */
+			ptr = ptr + subblock;
 		}
 
 		cudaDeviceSynchronize();
@@ -186,13 +191,24 @@ extern "C"{
 	{
 		int t;
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
+		int ptr = 0, subblock;
 		
 		std::vector<std::future<void>> threads;
 		
 		for(t = 0; t < ngpus; t++){ 
 			
-			blockgpu = min(nslices - blockgpu * t, blockgpu);
+			subblock   = min(nslices - ptr, blockgpu);
 
+			threads.push_back(std::async( std::launch::async, 
+						flatdark_gpu, 
+						gpus[t], 
+						frames + (size_t)ptr*nrays*nangles, 
+						flat   + (size_t)ptr*nrays*numflats, 
+						dark   + (size_t)ptr*nrays, 
+						nrays, subblock, nangles, 
+						numflats, Totalframes, Initframe,
+						is_log, nslices
+						));
 			// threads.push_back(std::async( std::launch::async, 
 			// 			flatdark_gpu, 
 			// 			gpus[t], 
@@ -203,16 +219,9 @@ extern "C"{
 			// 			numflats, Totalframes, Initframe,
 			// 			is_log, nslices
 			// 			));
-			threads.push_back(std::async( std::launch::async, 
-						flatdark_gpu, 
-						gpus[t], 
-						frames + (size_t)t*blockgpu*nrays*nangles, 
-						flat, 
-						dark, 
-						nrays, blockgpu, nangles, 
-						numflats,
-						is_log, nslices
-						));
+
+			/* Update pointer */
+			ptr = ptr + subblock;
 		}
 
 		for(auto& t : threads)

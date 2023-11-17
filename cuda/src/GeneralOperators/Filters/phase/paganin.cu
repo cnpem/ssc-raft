@@ -26,10 +26,23 @@ extern "C" {
 
         paganinReturn<<<param.Grd,param.BT>>>(d_sino, param, nrays, nslices, nangles);
 
-		HANDLE_ERROR(cudaMemcpy(projections, d_sino, n * sizeof(float), cudaMemcpyDeviceToHost));
+        HANDLE_ERROR(cudaMemcpy(projections, d_sino, n * sizeof(float), cudaMemcpyDeviceToHost));
 
 		cudaFree(d_sinoPadded);
 		cudaFree(d_sino);
+    }
+
+    __global__ void KCopy(cufftComplex *in, float *out, size_t sizex, size_t sizey, size_t sizez)
+    {
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
+
+        size_t index = sizex * (k * sizey + j) + i;
+        
+        if ( (i >= sizex) || (j >= sizey) || (k >= sizez) ) return;
+
+        out[index] = in[index].x; 
     }
 
  	__global__ void paganinKernel(float *kernel, PAR param, size_t sizex, size_t sizey, size_t sizez)
@@ -56,7 +69,7 @@ extern "C" {
 
         float wxx = wx*wx; float wyy = wy*wy;
 
-        float gamma = 1.0 / param.alpha;
+        float gamma = ( param.alpha == 0.0 ? 0.0:(1.0f / param.alpha) ) ; //1.0 / param.alpha;
 
 		float kernelX = 4.0 * float(M_PI) * float(M_PI) * param.z2x * gamma * wxx  / ( magnx );
 		float kernelY = 4.0 * float(M_PI) * float(M_PI) * param.z2y * gamma * wyy  / ( magny );
