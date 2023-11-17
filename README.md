@@ -13,7 +13,7 @@ Authors:
 	
 	Giovanni Baraldi	Scientific Computing Group/LNLS/CNPEM
 
-	Larissa M. Moreno	Mogno Beamline/LNLS/CNPEM
+	Larissa M. Moreno	Scientific Computing Group/LNLS/CNPEM
 
 	Otávio M. Paiano	Mogno Beamline/LNLS/CNPEM
 	 
@@ -28,9 +28,10 @@ The library sscRaft can be installed with either `pip` or `git`.
 One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install with the following steps
 
 ```bash
-    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git
+    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git
     cd ssc-raft 
-    python3 setup.py install --user --cuda
+    make clean 
+	 make
 ```
 
 ### PIP
@@ -57,12 +58,13 @@ Or manually download it from the [package](https://gcc.lnls.br:3128/packages/) l
 6. `Rings`: rings removal
 7. `Centersino`: parallel beam center alignment
 8. `Filters`: filters
-
+9. `FDK`: Conebeam filter backprojection
+5. `EM`: bug for parallel beam 360 panoramic
 
 ## To Do:
-1. `FDK`: add cone beam filter backprojection
-2. `WIGLLE`: add parallel beam projetion alignment
-3. `Tomo360`: Correction of bug for odd angle dimension
-4. `Aceleration`
-5. `EM FST`
-6. `EM`: bug for parallel beam 360 panoramic
+
+1. `WIGLLE`: add parallel beam projetion alignment
+2. `Tomo360`: Correction of bug for odd angle dimension
+3. `Aceleration`:
+4. `EM FST`:
+

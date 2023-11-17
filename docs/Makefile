@@ -8,7 +8,7 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = build
 
-all: out doxygen html
+all: out html
 
 out:
 	mkdir -p build

@@ -52,7 +52,7 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx_rtd_theme', '
 
 The `folder_path` variable in the configuration file `source/conf.py` must be changed to add source files folders
 ```python
-folder_path = '../../sscPrain/' #your source files paths
+folder_path = '../../sscRaft/' #your source files paths
 ```
 
 ## Tips

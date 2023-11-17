@@ -8,172 +8,173 @@ from ctypes import c_float as float32
 from ctypes import c_int as int32
 from ctypes import c_void_p  as void_p
 from ctypes import c_size_t as size_t
-import uuid
-import SharedArray as sa
 
 
 def flatdarkMultiGPU(frames, flat, dark, dic):
         
-        gpus = dic['gpu']     
-        ngpus = len(gpus)
+        gpus       = dic['gpu']     
+        ngpus      = len(gpus)
 
-        gpus = numpy.array(gpus)
-        gpus = np.ascontiguousarray(gpus.astype(np.int32))
-        gpusptr = gpus.ctypes.data_as(void_p)
+        gpus       = numpy.array(gpus)
+        gpus       = np.ascontiguousarray(gpus.astype(np.intc))
+        gpusptr    = gpus.ctypes.data_as(void_p)
 
-        nrays   = frames.shape[-1]
-        nangles = frames.shape[0]
+        is_log     = dic['uselog']
+        nrays      = frames.shape[-1]
+        nangles    = frames.shape[-2]
         
+        if is_log:
+                is_log = 1
+        else:
+                is_log = 0
+
         if len(frames.shape) == 2:
                 nslices = 1
         else:
-                nslices = frames.shape[-2]
+                nslices = frames.shape[0]
 
-        nflats = flat.shape[0]
-        flat = np.ascontiguousarray(flat.astype(np.float32))
-        flatptr = flat.ctypes.data_as(void_p)
+        if len(flat.shape) == 2:
+                nflats  = 1
+        else:
+                nflats = flat.shape[-2]
 
-        dark = np.ascontiguousarray(dark.astype(np.float32))
-        darkptr = dark.ctypes.data_as(void_p)
+        if len(dark.shape) == 2:
+                dark = np.expand_dims(dark,1)
+
+        logger.info(f'Number of flats is {nflats}.')
+        if nflats > 1:
+                logger.info(f'Interpolating flats before and after.')
+
+        logger.info(f'Flat dimension is ({flat.shape}) = (slices,number of flats,rays).')
+        logger.info(f'Dark dimension is ({dark.shape}) = (slices,number of darks,rays).')
+
+        flat      = np.ascontiguousarray(flat.astype(np.float32))
+        flatptr   = flat.ctypes.data_as(void_p)
+
+        dark      = np.ascontiguousarray(dark.astype(np.float32))
+        darkptr   = dark.ctypes.data_as(void_p)
         
-        frames = np.ascontiguousarray(frames.astype(np.float32))
+        frames    = np.ascontiguousarray(frames.astype(np.float32))
         framesptr = frames.ctypes.data_as(void_p)
 
-        nrays   = int32(nrays)
-        nangles = int32(nangles)
-        nslices = int32(nslices)
-        nflats  = int32(nflats)
+        nrays      = int32(nrays)
+        nangles    = int32(nangles)
+        nslices    = int32(nslices)
+        nflats     = int32(nflats)
+        is_log     = int32(is_log)
         
-        libraft.flatdarktransposeblock(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
+        libraft.flatdark_block(gpusptr, int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, is_log)
 
-        return frames #np.swapaxes(frames,0,1)
+        return frames 
 
 
-def flatdarkGPU(frames, flat, dark, gpu = 0):
+def flatdarkGPU(frames, flat, dark, dic):
         
-        ngpus   = gpu
-
-        nrays   = frames.shape[-1]
-        nangles = frames.shape[0]
+        gpu        = dic['gpu'][0]     
+        is_log     = dic['uselog']
+        nrays      = frames.shape[-1]
+        nangles    = frames.shape[-2]
         
+        if is_log:
+                is_log = 1
+        else:
+                is_log = 0
+
         if len(frames.shape) == 2:
                 nslices = 1
         else:
-                nslices = frames.shape[-2]
+                nslices = frames.shape[0]
 
-        nflats = flat.shape[0]
-        flat = np.ascontiguousarray(flat.astype(np.float32))
-        flatptr = flat.ctypes.data_as(void_p)
-
-        dark = np.ascontiguousarray(dark.astype(np.float32))
-        darkptr = dark.ctypes.data_as(void_p)
-        
-        frames = np.ascontiguousarray(frames.astype(np.float32))
-        framesptr = frames.ctypes.data_as(void_p)
-        
-        nrays   = int32(nrays)
-        nangles = int32(nangles)
-        nslices = int32(nslices)
-        nflats  = int32(nflats)
-
-        libraft.flatdarktransposegpu(int32(ngpus), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats)
-
-        return frames #np.swapaxes(frames,0,1)
-
-def _worker_flatdark_(params, start, end, gpu, process):
-
-        output = params[0]
-        data   = params[1]
-        dic    = params[6]
-        flat   = params[7]
-        dark   = params[8]
-
-        logger.info(f'flatdark: begin process {process} on gpu {gpu}')
-
-        output[start:end,:,:] = flatdarkGPU( data[:,start:end,:], flat[:,start:end,:], dark[start:end,:], dic, gpu )
-
-        logger.info(f'flatdark: end process {process} on gpu {gpu}')
-    
-
-def _build_flatdark_(params):
- 
-        nslices = params[2]
-        gpus    = params[5]
-        ngpus = len(gpus)
-
-        b = int( numpy.ceil( nslices/ngpus )  ) 
-
-        processes = []
-        for process in range( ngpus ):
-                begin_ = process*b
-                end_   = min( (process+1)*b, nslices )
-
-                p = multiprocessing.Process(target=_worker_flatdark_, args=(params, begin_, end_, gpus[process], process))
-                processes.append(p)
-    
-        for p in processes:
-                p.start()
-
-        for p in processes:
-                p.join()
-
-
-def flatdark_gpublock( frames, flat, dark, dic ):
-
-        nslices     = frames.shape[1]
-        nangles     = frames.shape[0]
-        nrays       = frames.shape[2]
-        gpus        = dic['gpu']
-
-        name = str( uuid.uuid4())
-
-        try:
-                sa.delete(name)
-        except:
-                pass
-
-        output  = sa.create(name,[nslices, nangles, nrays], dtype=np.float32)
-
-        _params_ = ( output, frames, nslices, nangles, nrays, gpus, dic, flat, dark)
-
-        _build_flatdark_( _params_ )
-
-        sa.delete(name)
-
-        return output
-
-
-def flatdarkLog_threads(frames, flat, dark, dic, **kwargs):
-        
-        dicparams = ('gpu','360pan')
-        defaut = ([0],False)
-        
-        SetDictionary(dic,dicparams,defaut)
-
-        gpus  = dic['gpu']
-
-        if len(gpus) == 1:
-                gpu = gpus[0]
-                output = flatdarkGPU( frames, flat, dark, dic, gpu )
+        if len(flat.shape) == 2:
+                nflats  = 1
         else:
-                output = flatdark_gpublock( frames, flat, dark, dic ) 
-
-        return np.swapaxes(output,1,0)
-
-
-def flatdarkLog(frames, flat, dark, dic, **kwargs):
+                nflats = flat.shape[-2]
         
-        dicparams = ('gpu','360pan')
-        defaut = ([0],False)
+        if len(dark.shape) == 2:
+                dark = np.expand_dims(dark,1)
+
+        logger.info(f'Number of flats is {nflats}.')
+        if nflats > 1:
+                logger.info(f'Interpolating flats before and after.')
+
+        logger.info(f'Flat dimension is ({flat.shape}) = (slices,number of flats,rays).')
+        logger.info(f'Dark dimension is ({dark.shape}) = (slices,number of darks,rays).')
+
+        flat      = np.ascontiguousarray(flat.astype(np.float32))
+        flatptr   = flat.ctypes.data_as(void_p)
+
+        dark      = np.ascontiguousarray(dark.astype(np.float32))
+        darkptr   = dark.ctypes.data_as(void_p)
+        
+        frames    = np.ascontiguousarray(frames.astype(np.float32))
+        framesptr = frames.ctypes.data_as(void_p)
+
+        nrays      = int32(nrays)
+        nangles    = int32(nangles)
+        nslices    = int32(nslices)
+        nflats     = int32(nflats)
+        is_log     = int32(is_log)
+        
+        libraft.flatdark_gpu(int32(gpu), framesptr, flatptr, darkptr, nrays, nslices, nangles, nflats, is_log, nslices)
+
+        return frames 
+
+
+def correct_projections(frames, flat, dark, dic, **kwargs):
+        """ Function to correct tomography projections (or frames) with flat and dark. 
+        
+        Can be computed in two ways.
+
+        .. math::
+        T = \log{- \frac{D - D_d}{D_f - D_d}}
+
+        for transmission tomography, and
+
+        .. math::
+        T = \frac{D - D_d}{D_f - D_d}
+
+        for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the projection volume, 
+        :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
+
+        Args:
+            frames (ndarray): Frames (or projections) of size [angles, slices, rays]
+            flat (ndarray): Flat of size [number of flats, slices, rays]
+            dark (ndarray): Dark of size [slices, rays]
+            dic (dictionary): Dictionary with the parameters info.
+
+        Returns:
+            ndarray: Corrected frames (or projections)of  size [slices, angles, rays]
+        
+         Dictionary parameters:
+                *``experiment['gpu']`` (int list): List of GPUs.
+                *``experiment['uselog']`` (bool): Apply logarithm or not.
+        """        
+        logger.info(f'Begin Flat and Dark correction.')
+
+        dicparams = ('gpu','uselog')
+        defaut    = ([0],True)
         
         SetDictionary(dic,dicparams,defaut)
 
-        gpus  = dic['gpu']
+        gpus = dic['gpu']
 
         if len(gpus) == 1:
-                gpu = gpus[0]
-                output = flatdarkGPU( frames, flat, dark, gpu )
+                output = flatdarkGPU( frames, flat, dark, dic )
         else:
                 output = flatdarkMultiGPU( frames, flat, dark, dic ) 
 
-        return np.swapaxes(output,1,0)
+        # if dic['uselog']:
+        #         output[np.isinf(output)] = 0.0
+        #         output[np.isnan(output)] = 0.0
+        # else:
+        #         output[np.isinf(output)] = 1.0
+        #         output[np.isnan(output)] = 1.0
+
+        # Garbage Collector
+        # lists are cleared whenever a full collection or
+        # collection of the highest generation (2) is run
+        collected = gc.collect() # or gc.collect(2)
+        logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
+
+
+        return output

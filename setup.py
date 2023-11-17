@@ -106,8 +106,8 @@ if CUDA:
 		          sources=list(raft_codes),
                           library_dirs=[CUDA['lib']],
                           runtime_library_dirs=[CUDA['lib']],
-                          extra_compile_args={'nvcc': ['-Xcompiler','-use_fast_math', '--ptxas-options=-v', '-c', '--compiler-options', '-fPIC']},
-                          extra_link_args=['-std=c++14','-lm','-lpthread','-lcudart','-lcufft','-lcublas'],
+                          extra_compile_args={'nvcc': ['-shared', '-Xcompiler','-fPIC', '-std=c++14', '-O3', '-use_fast_math', '--gpu-architecture=sm_70', '-lpthread', '-lcudart','-lcufft','-lcublas']},
+                          extra_link_args=['-std=c++14','-O3','-pthread','-W','-lm','-lpthread','-lcudart','-lcufft','-lcublas'],
                           include_dirs = [ CUDA['include'], raft_include1, raft_include2, raft_include3, raft_include4])
     
 else:

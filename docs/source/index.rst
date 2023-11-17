@@ -12,13 +12,17 @@ which is the case needed for LNLS/Sirius imaging beamlines as Carnaúba, Cateret
 among others.
 
 Codes and public prototypes are being increasingly included within this project,
-as long as they are tested and developed by the Scientific Computing team.  
+as long as they are tested and developed by the Scientific Computing Group.  
 
 **Author(s)**
         
         Eduardo Miqueles (eduardo.miqueles@lnls.br)
 
-        Paola Ferraz Cunha
+        Paola Ferraz Cunha (paola.ferraz@lnls.br)
+
+        Larissa Macul Moreno
+
+        Otávio Moreira Paiano
 
         Gilberto Martinez Jr. 
 
@@ -29,6 +33,7 @@ as long as they are tested and developed by the Scientific Computing team.
    :maxdepth: 4
    :caption: Contents:
 
+   contents/changelog
    contents/public
    contents/example     
    contents/install

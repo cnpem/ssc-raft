@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <cufft.h>
 #include <stdlib.h>
-#include "../../../../inc/gc/fdk.h"
+#include "../../../../inc/geometries/gc/fdk.h"
 #include <fstream>
 #include <future>
 #include <thread>
@@ -11,206 +11,195 @@
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     return 0;
 }
 
-
-extern "C"{
-void gpu_fdk(   Lab lab, Rings_ ring, float *recon, float *proj, 
-                int* gpus, int ndevs, double *time){	
-
-    int i, k, n_process;
-    
-    n_process = memory(lab, ndevs);
-    printf("n_process = %d, n_gpus = %d \n", n_process, ndevs);
-
-    Process* process = (Process*) malloc(sizeof(Process)*n_process);
-    for(i = 0; i < n_process; i++) set_process(lab, i, &process[i], n_process, gpus, ndevs);
-
-
-    printf("Filter:\n");
-    clock_t f_begin = clock();
-    k = 0;
-    std::vector<thread> threads_filt;
-
-    float* c_filter[ndevs];
-    cufftComplex* c_signal[ndevs];
-    float* c_W[ndevs];
-
-    while(k < n_process){
-
-        if(k % ndevs == 0){
-            for(i = 0; i < ndevs; i++) 
-                copy_gpu_filter(lab, proj, &c_filter[i], &c_signal[i], &c_W[i], process[k+i]);   
-            cudaDeviceSynchronize();
-        }
-
-        threads_filt.emplace_back(thread( filtering, ring, lab, c_filter[k%ndevs], c_signal[k%ndevs], c_W[k%ndevs], process[k])) ;
-        k = k+1;
-
-        if(k % ndevs == 0){
-            for(i = 0; i < ndevs; i++) threads_filt[i].join();
-            threads_filt.clear();
-            cudaDeviceSynchronize();
-
-            for(i = 0; i < ndevs; i++) 
-                copy_cpu_filter(proj, c_filter[i], c_signal[i], c_W[i], process[k-ndevs+i]);            
-        }
-    }
-
-    clock_t f_end = clock();
-    time[0] = double(f_end - f_begin)/CLOCKS_PER_SEC;
-
-
-    printf("Backproject:\n");
-    clock_t b_begin = clock();
-    k = 0;
-    std::vector<thread> threads_back;
-    float* c_proj[ndevs];
-    float* c_recon[ndevs];
-
-    while(k < n_process){
-
-        if(k % ndevs == 0){
-            for(i = 0; i < ndevs; i++)
-                copy_to_gpu_back(lab, proj, recon, &c_proj[i], &c_recon[i], process[k+i]);   
-            cudaDeviceSynchronize();    
-        }
-
-        threads_back.emplace_back(thread( backprojection, lab, c_recon[k%ndevs], c_proj[k%ndevs], process[k])) ;
-        k = k+1;
-
-        if(k % ndevs == 0){
-            for(i = 0; i < ndevs; i++) threads_back[i].join();
-            threads_back.clear();
-            cudaDeviceSynchronize();
-            for(i = 0; i < ndevs; i++)
-                copy_to_cpu_back(recon, c_proj[i], c_recon[i], process[k-ndevs+i]); 
-        }
-    }
-
-    clock_t b_end = clock();
-    time[1] = double(b_end - b_begin)/CLOCKS_PER_SEC;
-
-	free(process);
-}}
-
-extern "C"{
-void copy_to_gpu_back(Lab lab, float* proj, float* recon, float** c_proj, float** c_recon, Process process) {
-    long long int N,M;	
-    clock_t begin = clock();
-    cudaSetDevice(process.i_gpu);
-
-    N = process.n_recon;
-    M = process.n_proj;                                        //lab.nx * lab.ny * lab.nz;
-
-    printf("Allocating gpu memory...");
-    cudaMalloc(c_recon, N * sizeof(float));
-
-    cudaMalloc(c_proj, M * sizeof(float));     
-    cudaMemcpy(*c_proj, &proj[process.idx_proj], M * sizeof(float), cudaMemcpyHostToDevice);
- 
-    printf("GPU memory allocated...\n");
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
-
-    clock_t end = clock();
-    printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
-}}
-
-extern "C"{
-void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon,  Process process) {
-    clock_t begin = clock();
-    cudaSetDevice(process.i_gpu);
-
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
-
-    long long int N = process.n_recon;                                         //lab.nbeta * lab.nv * lab.nh;
-    cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost);
-
-    cudaFree(c_proj);
-    cudaFree(c_recon);
-    clock_t end = clock();
-    printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
-}}
-
-extern "C"{
-void backprojection(Lab lab, float* recon, float* proj, Process process) {
-    long long int M;	
-    long int n_blocks;
-    int n_threads;
-
-    M = process.n_recon;                                        //lab.nx * lab.ny * lab.nz;
-    
-    n_threads = NUM_THREADS;
-    n_blocks  = M/n_threads + (M % n_threads == 0 ? 0:1);   
-    
-    cudaSetDevice(process.i_gpu);
-
-    clock_t b_begin = clock();
-
-    backproj<<<n_blocks, n_threads>>>(recon, proj, lab, process);
-
-    clock_t b_end = clock();
-    printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);
-}}
-
-extern "C"{
-void copy_gpu_filter(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process) {
-    int n = lab.nh;
-    long long int batch = process.z_filter*lab.nbeta;
-    long long int N = process.n_filter;
-
-    clock_t begin = clock();
-    cudaSetDevice(process.i_gpu);
-
-    cudaMalloc(c_signal, sizeof(cufftComplex)*N);
-
-    cudaMalloc(c_proj, process.n_filter * sizeof(float));    
-    cudaMemcpy(*c_proj, &proj[process.idx_filter], process.n_filter * sizeof(float), cudaMemcpyHostToDevice);
-
-    cudaMalloc(W, lab.nh * sizeof(float));
-    filt_W<<<1, 1>>>(lab, *W);
- 
-    printf("GPU memory allocated...\n");
-
-    clock_t end = clock();
-    printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
-}}
-
-extern "C"{
-void copy_cpu_filter(float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process) {
-    clock_t begin = clock();
-    cudaSetDevice(process.i_gpu);
-
-    cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
-
-    long long int N = process.n_filter;                                         //lab.nbeta * lab.nv * lab.nh;
-    cudaMemcpy(&proj[process.idx_filter], c_proj, N*sizeof(float), cudaMemcpyDeviceToHost);
-
-    cudaFree(c_proj);
-    cudaFree(c_signal);
-    cudaFree(c_W);
-
-    clock_t end = clock();
-    printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
-}}
-
-
-void filtering(Rings_ ring, Lab lab, float* proj, cufftComplex* signal, float* W, Process process)
+extern "C"
 {
-    // rings
-    ringsgpu_fdk(process.i_gpu, proj, ring.nrays, ring.nangles, process.zi_filter, rings.lambda_rings, rings.ringblocks);
+    void gpu_fdk(Lab lab, float *recon, float *proj, float *angles,
+                 int *gpus, int ndevs, double *time)
+    {
+        int i, n_process;
 
-    // fdk()
-    fft(lab, proj, signal, W, process)
+        int block    = ( lab.slice_recon_end - lab.slice_recon_start );
+        int blockgpu = (int) floor( (float)block / ndevs ); 
 
-    return
+        if ( ( blockgpu <= 0 ) ) ndevs = 1;
+
+        printf("B: ndevs = %d, blockgpu = %d \n", ndevs, blockgpu);
+
+
+        n_process = memory(lab, ndevs);
+        
+        printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);
+        printf("nh = %d, nv = %d, nx = %d, ny = %d, nz = %d \n",  lab.nh,  lab.nv, lab.nx, lab.ny, lab.nz);
+        printf("dh = %e, dv = %e, dx = %e, dy = %e, dz = %e \n",  lab.dh,  lab.dv, lab.dx, lab.dy, lab.dz);
+        printf("dbeta = %e, nbeta = %d, \n",  lab.dbeta,  lab.nbeta);
+        printf("D = %e, Dsd = %e, \n",  lab.D,  lab.Dsd);
+
+        Process *process = (Process *)malloc(sizeof(Process) * n_process);
+        
+        if(lab.is_slice == 1){
+            printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
+            
+            for (i = 0; i < n_process; i++)
+                set_process_slices_2(lab, i, &process[i], n_process, gpus, ndevs);
+        }else{
+            printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
+
+            for (i = 0; i < n_process; i++)
+                set_process(lab, i, &process[i], n_process, gpus, ndevs);
+            
+        }
+
+        printf("Filter:\n");
+        clock_t f_begin = clock();
+
+        if (lab.fourier == 1)
+        {
+            set_filtering_fft(lab, proj, n_process, ndevs, process);
+        }
+        else
+        {
+            set_filtering_conv(lab, proj, n_process, ndevs, process);
+        }
+
+        clock_t f_end = clock();
+        time[0] = double(f_end - f_begin) / CLOCKS_PER_SEC;
+
+        cudaDeviceSynchronize();
+        printf(cudaGetErrorString(cudaGetLastError()));
+        printf("\n");
+
+        printf("Backproject:\n");
+        clock_t b_begin = clock();
+
+        set_backprojection(lab, recon, proj, angles, n_process, ndevs, process);
+
+        clock_t b_end = clock();
+        time[1] = double(b_end - b_begin) / CLOCKS_PER_SEC;
+
+        cudaDeviceSynchronize();
+        printf(cudaGetErrorString(cudaGetLastError()));
+        printf("\n");
+
+        free(process);
+    }
 }
 
+extern "C"
+{
+    void set_backprojection(Lab lab, float *recon, float *proj, float *angles, int n_process, int ndevs, Process *process)
+    {
 
+        int i, k = 0;
+        std::vector<thread> threads_back;
+        float *c_proj[ndevs];
+        float *c_recon[ndevs];
+        float *c_beta[ndevs];
 
+        while (k < n_process)
+        {
+
+            if (k % ndevs == 0)
+            {
+                for (i = 0; i < ndevs; i++)
+                    copy_to_gpu_back(lab, proj, recon, angles, &c_proj[i], &c_recon[i], &c_beta[i], process[k + i]);
+                cudaDeviceSynchronize();
+            }
+
+            threads_back.emplace_back(thread(backprojection, lab, c_recon[k % ndevs], c_proj[k % ndevs], c_beta[k % ndevs], process[k]));
+            k = k + 1;
+
+            if (k % ndevs == 0)
+            {
+                for (i = 0; i < ndevs; i++)
+                    threads_back[i].join();
+                threads_back.clear();
+                cudaDeviceSynchronize();
+
+                for (i = 0; i < ndevs; i++)
+                    copy_to_cpu_back(recon, c_proj[i], c_recon[i], c_beta[i], process[k - ndevs + i]);
+            }
+        }
+    }
+}
+
+extern "C"
+{
+    void set_filtering_fft(Lab lab, float *proj, int n_process, int ndevs, Process *process)
+    {
+
+        int i, k = 0;
+        std::vector<thread> threads_filt;
+
+        float *c_filter[ndevs];
+        cufftComplex *c_signal[ndevs];
+        float *c_W[ndevs];
+
+        while (k < n_process)
+        {
+
+            if (k % ndevs == 0)
+            {
+                for (i = 0; i < ndevs; i++)
+                    copy_gpu_filter_fft(lab, proj, &c_filter[i], &c_signal[i], &c_W[i], process[k + i]);
+                cudaDeviceSynchronize();
+            }
+
+            threads_filt.emplace_back(thread(fft, lab, c_filter[k % ndevs], c_signal[k % ndevs], c_W[k % ndevs], process[k]));
+            k = k + 1;
+
+            if (k % ndevs == 0)
+            {
+                for (i = 0; i < ndevs; i++)
+                    threads_filt[i].join();
+                threads_filt.clear();
+                cudaDeviceSynchronize();
+
+                for (i = 0; i < ndevs; i++)
+                    copy_cpu_filter_fft(proj, c_filter[i], c_signal[i], c_W[i], process[k - ndevs + i]);
+            }
+        }
+    }
+}
+
+extern "C"
+{
+    void set_filtering_conv(Lab lab, float *proj, int n_process, int ndevs, Process *process)
+    {
+
+        int i, k = 0;
+        std::vector<thread> threads_filt;
+
+        float *c_filter[ndevs];
+        float *c_Q[ndevs];
+
+        while (k < n_process)
+        {
+
+            if (k % ndevs == 0)
+            {
+                for (i = 0; i < ndevs; i++)
+                    copy_gpu_filter_conv(lab, proj, &c_filter[i], &c_Q[i], process[k + i]);
+                cudaDeviceSynchronize();
+            }
+
+            threads_filt.emplace_back(thread(filtering_conv, lab, c_filter[k % ndevs], c_Q[k % ndevs], process[k]));
+            k = k + 1;
+
+            if (k % ndevs == 0)
+            {
+                for (i = 0; i < ndevs; i++)
+                    threads_filt[i].join();
+                threads_filt.clear();
+                cudaDeviceSynchronize();
+
+                for (i = 0; i < ndevs; i++)
+                    copy_cpu_filter_conv(proj, c_filter[i], c_Q[i], process[k - ndevs + i]);
+            }
+        }
+    }
+}

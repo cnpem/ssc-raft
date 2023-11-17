@@ -7,174 +7,216 @@
 
 
 extern "C"{
-   static __global__ void KFlatDarkTranspose(float* in, float* dark, float* flat, dim3 size, int numflats)
+
+    __global__ void RemoveMeanKernel(float *in, float *mean, int sizex, int sizey, int sizez)
+    {
+        int i = blockIdx.x*blockDim.x + threadIdx.x;
+        int j = blockIdx.y*blockDim.y + threadIdx.y;
+        int k = blockIdx.z*blockDim.z + threadIdx.z;
+        int index = sizex * ( k * sizey + j) + i;
+
+        if ( (i >= sizex) || (j >= sizey) || ( k >= sizez) ) return;
+			in[index] = in[index] - mean[j];
+    }
+
+    __global__ void ComputeMeanKernel(float *in, float *mean, int sizex, int sizey, int sizez)
+    {
+        int i = blockIdx.x*blockDim.x + threadIdx.x;
+        int j = blockIdx.y*blockDim.y + threadIdx.y;
+        int k = blockIdx.z*blockDim.z + threadIdx.z;
+        int index = sizex * ( k * sizey + j) + i;
+
+		size_t N = sizex * sizez;
+
+        if ( (i >= sizex) || (j >= sizey) || ( k >= sizez) ) return;
+		extern __shared__ float temp[];
+		
+		if (sizex < blockDim.x || sizey < blockDim.y || sizez < blockDim.z) {
+            for (int ii = 0; ii < blockDim.x*blockDim.y*blockDim.z; ii++)
+                temp[ii] = 0.0;
+        }
+        temp[blockDim.x*(threadIdx.z*blockDim.y + threadIdx.y) + threadIdx.x] = in[index] / N;
+        __syncthreads();
+        if (threadIdx.x == 0 && threadIdx.y == 0) { // for each slice in z, only one thread/block runs
+            float sum = 0.0;
+            for (int ii = 0; ii < blockDim.x*blockDim.y; ii++)
+                sum += temp[ii + threadIdx.z*blockDim.x*blockDim.y];
+        	atomicAdd(mean + j,sum);
+		}
+    }
+
+	void remove_mean_flat_dark(float *flat, float *dark, int sizex, int sizez, int numflats)
+	{
+		Image2D<float> dflat(sizex, numflats, sizez); // Flat in GPU
+		Image2D<float> ddark(sizex, 1, sizez); // Dark in GPU
+
+		dflat.CopyFrom(flat, 0, (size_t)sizex*numflats*sizez);
+		ddark.CopyFrom(dark, 0, (size_t)sizex*sizez         );
+
+		float *mean_flat, *mean_dark;
+
+		dim3 blocks = dim3(sizex,numflats,sizez);
+		blocks.x = ( sizex + 127 ) / 128; 
+
+		HANDLE_ERROR(cudaMalloc((void **)&mean_flat, sizeof(float) * numflats )); 
+		HANDLE_ERROR(cudaMalloc((void **)&mean_dark, sizeof(float)             )); 
+
+		ComputeMeanKernel<<<blocks,128>>>(dflat.gpuptr, mean_flat, sizex, numflats, sizez);
+		ComputeMeanKernel<<<blocks,128>>>(ddark.gpuptr, mean_dark, sizex,        1, sizez);
+
+		RemoveMeanKernel<<<blocks,128>>>(dflat.gpuptr, mean_flat, sizex, numflats, sizez);
+		RemoveMeanKernel<<<blocks,128>>>(ddark.gpuptr, mean_dark, sizex,        1, sizez);
+
+		dflat.CopyTo(flat, 0, (size_t)sizex*numflats*sizez);
+		ddark.CopyTo(dark, 0, (size_t)sizex*sizez         );
+
+	}
+
+   	static __global__ void KFlatDark(float* in, float* dark, float* flat, dim3 size, int numflats, int Totalframes, int Initframe)
 	{  
       // Supports 2 flats only
 		size_t idx = threadIdx.x + blockIdx.x*blockDim.x;
-		
-		if(idx < size.x && blockIdx.y < size.y)
-		{
-			float dk = dark[blockIdx.y * size.x + idx];
-			float ft = flat[blockIdx.y * size.x + idx];
+		size_t line;
+		float ft, flat_before, flat_after, dk, T, Q, S, interp, tol = 1e-14;
+
+		if(idx < size.x && blockIdx.y < size.y && blockIdx.z < size.z){
 			
-         if(numflats > 1){
-				float interp = float(blockIdx.z+1)/float(size.z+1);
-				ft = ft*(1.0f-interp) + interp*(float)flat[size.x*size.y + blockIdx.y * size.x + idx];
+			dk          = dark[size.x * blockIdx.z            + idx];
+			flat_before = flat[size.x * numflats * blockIdx.z + idx];
+			line        = size.x * size.y * blockIdx.z + size.x * blockIdx.y + idx;
+
+         	if(numflats > 1){
+				interp     = float( blockIdx.y + Initframe ) / float( Totalframes ); 
+				flat_after = flat[size.x * numflats * blockIdx.z + size.x + idx];
+				ft         = flat_before * ( 1.0f - interp ) + interp * flat_after;
+			}else{
+				ft = flat_before;
 			}
 
-			size_t line = size.y*blockIdx.z + blockIdx.y;
-			// size_t coll = blockIdx.y * size.z + blockIdx.z;
+			T = in[line] - dk;
+			Q = ft       - dk;
+
+			if ( T < tol )
+				T = 1.0;
 			
-			// out[coll * size.x + idx] = -log( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
-			in[line * size.x + idx] = -log( fmaxf(in[line * size.x + idx] - dk, 0.5f) / fmaxf(ft-dk,0.5f) );
+			if ( Q < tol )
+				Q = 1.0;
+
+			S = T / Q;
+
+			if ( S < tol )
+				S = 1.0;
+
+			// in[line] = fmaxf(T, 0.5f) / fmaxf(Q,0.5f) ; // Old version (Giovanni)
+			in[line] = S;
 
 		}
 	}
 
-	void flatdarktransposegpu(int gpu, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
+	static __global__ void Klog(float* in, dim3 size)
+	{  
+		size_t idx = threadIdx.x + blockIdx.x*blockDim.x;
+		size_t line;
+
+		if(idx < size.x && blockIdx.y < size.y && blockIdx.z < size.z){
+			
+			line     = size.x * size.y * blockIdx.z + size.x * blockIdx.y + idx;
+
+			in[line] = - logf( in[line] );
+
+		}
+	}
+
+	void getFlatDarkCorrection(float* frames, float* flat, float* dark, int sizex, int sizey, int sizez, int numflats, int islog, dim3 BT, dim3 Grd)
+	{
+		/* Do here the mean of flat and dark acquisitions */
+
+		/* Do the dark subtraction and division by flat (with or without log) */
+		KFlatDark<<<Grd,BT>>>(frames, dark, flat, dim3(sizex,sizey,sizez), numflats, sizey, 0);
+		
+		if ( islog == 1 )
+			Klog<<<Grd,BT>>>(frames, dim3(sizex,sizey,sizez));
+
+	}
+
+	void flatdark_gpu(int gpu, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats, int is_log, int totalslices)
 	{	
-      // Supports 2 flats max
-      cudaSetDevice(gpu);
+		// Supports 2 flats max
+		cudaSetDevice(gpu);
+
+		// Remove mean of flat and dark:
+		// remove_mean_flat_dark(flat, dark, nrays, totalslices, numflats);
 
 		int b;
-      int blocksize = min(nslices,32);
+		int blocksize = min(nslices,32); // Herança do Giovanni -> Mudar
+		size_t offset = (size_t)gpu * nslices * nrays;
 
-      dim3 blocks = dim3(nrays,blocksize,nangles);
-		blocks.x = (nrays+127) / 128;
+		dim3 blocks = dim3(nrays,nangles,blocksize);
+		blocks.x = ( nrays + 127 ) / 128;
 
-		rImage data(nrays,blocksize,nangles);
-		Image2D<float> cflat(nrays, blocksize, numflats);
-		Image2D<float> cdark(nrays, blocksize);
+		dim3 BT = dim3(128,1,1)
 
-      for(b = 0; b < nslices; b += blocksize){
+		// GPUs Pointers: declaration and allocation
+		rImage data(nrays,nangles,blocksize); // Frames in GPU 
+
+		Image2D<float> cflat(nrays, numflats, blocksize); // Flat in GPU
+		Image2D<float> cdark(nrays,        1, blocksize); // Dark in GPU
+
+		for(b = 0; b < nslices; b += blocksize){
+			
 			blocksize = min(blocksize,nslices-b);
 
-         data.CopyFrom(frames + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
-			cflat.CopyFrom(flat + (size_t)b*nrays*numflats, 0, (size_t)nrays*numflats*blocksize);
-			cdark.CopyFrom(dark + (size_t)b*nrays, 0, (size_t)nrays*blocksize);
+			data.CopyFrom (frames + (size_t)b*nrays*nangles                   , 0, (size_t)blocksize * nrays * nangles                     );
+			cflat.CopyFrom(flat   + (size_t)b*nrays*numflats + offset*numflats, 0, (size_t)blocksize * nrays * numflats + offset * numflats);
+			cdark.CopyFrom(dark   + (size_t)b*nrays          + offset         , 0, (size_t)blocksize * nrays            + offset           );
+			// data.CopyFrom (frames + (size_t)b*nrays*nangles , 0, (size_t)blocksize * nrays * nangles );
+			// cflat.CopyFrom(flat   + (size_t)b*nrays*numflats, 0, (size_t)blocksize * nrays * numflats);
+			// cdark.CopyFrom(dark   + (size_t)b*nrays         , 0, (size_t)blocksize * nrays           );
 
-         KFlatDarkTranspose<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,blocksize,nangles), cflat.sizez);
+			getFlatDarkCorrection(data.gpuptr, cflat.gpuptr, cdark.gpuptr, nrays, nangles, blocksize, numflats, is_log, BT, blocks);
 
-         data.CopyTo(frames + (size_t)b*nrays*nangles, 0, (size_t)nrays*nangles*blocksize);
+			data.CopyTo(frames + (size_t)b*nrays*nangles, 0, (size_t)blocksize * nrays * nangles);
       
-      }
+		}
 
 		cudaDeviceSynchronize();
 	}
 
-	void flatdarktransposeblock(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats)
+	void flatdark_block(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats, int is_log)
 	{
 		int t;
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
 		
-		// printf("Aqui\n");
 		std::vector<std::future<void>> threads;
-
-		// printf("Aqui2\n");
-
-		// printf("valores cu: %d, %d,%d,%d %d %d\n",ngpus,nrays,nangles,nslices,numflats,blockgpu);
-
+		
 		for(t = 0; t < ngpus; t++){ 
 			
 			blockgpu = min(nslices - blockgpu * t, blockgpu);
-			// printf("Aqui3 %d %d %ld %d %d\n",t,blockgpu,(size_t)t*blockgpu*nrays*nangles,nrays,nangles);
 
-			threads.push_back(std::async( std::launch::async, flatdarktransposegpu, gpus[t], frames + (size_t)t*blockgpu*nrays*nangles, 
-						flat + (size_t)t*blockgpu*nrays*numflats, dark + (size_t)t*blockgpu*nrays, nrays, blockgpu, nangles, numflats
+			// threads.push_back(std::async( std::launch::async, 
+			// 			flatdark_gpu, 
+			// 			gpus[t], 
+			// 			frames + (size_t)t*blockgpu*nrays*nangles, 
+			// 			flat   + (size_t)t*blockgpu*nrays*numflats, 
+			// 			dark   + (size_t)t*blockgpu*nrays, 
+			// 			nrays, blockgpu, nangles, 
+			// 			numflats, Totalframes, Initframe,
+			// 			is_log, nslices
+			// 			));
+			threads.push_back(std::async( std::launch::async, 
+						flatdark_gpu, 
+						gpus[t], 
+						frames + (size_t)t*blockgpu*nrays*nangles, 
+						flat, 
+						dark, 
+						nrays, blockgpu, nangles, 
+						numflats,
+						is_log, nslices
 						));
 		}
 
 		for(auto& t : threads)
 			t.get();
 	}
-
-	void _CPUReduceBLock16(float* out, uint16_t* frames, uint16_t* cflat, uint16_t* cdark, 
-		size_t sizex, size_t sizey, size_t sizez, size_t block, int numflats, int tidx, int nthreads)
-	{
-		for(size_t z = (size_t)tidx; z < sizez; z += (size_t)nthreads)
-		{
-			for(size_t by = 0; by < block; by++)
-			{
-				for(size_t x = 0; x < sizex; x++)
-				{
-					size_t step = sizey/block;
-					float val = 0;
-
-					for(size_t fy = 0; fy < step; fy++)
-					{
-						float flat = cflat[(by*step+fy)*sizex + x];
-						float dark = cdark[(by*step+fy)*sizex + x];
-
-						if(numflats>1)
-						{
-							float interp = float(z+1)/float(sizez+1);
-							flat = flat*(1.0f-interp) + interp*cflat[sizex*sizey + (by*step+fy)*sizex + x];
-						}
-
-						val += -logf( fmaxf(frames[z*sizex*sizey + (by*step+fy)*sizex + x]-dark,0.5f) / fmaxf(flat-dark,0.5f) );
-
-					}
-					out[by*sizez*sizex + sizex*z + x] = val;
-				}
-			}
-		}
-	}
-
-	void CPUReduceBLock16(float* out, uint16_t* frames, uint16_t* cflat, uint16_t* cdark, 
-	size_t sizex, size_t sizey, size_t sizez, size_t block, int numflats)
-	{
-		std::vector<std::future<void>> threads;
-		for(int t=0; t<16; t++)
-			threads.push_back( std::async(std::launch::async, _CPUReduceBLock16, out, frames, cflat, cdark, 
-				sizex, sizey, sizez, block, numflats, t, 16) );
-
-		for(int t=0; t<16; t++)
-				threads[t].get();
-	}
 }
 
-extern "C"{
-	void flatdarkcpu(float* out, float* frames, float* cflat, float* cdark, 
-		size_t sizex, size_t sizey, size_t sizez, size_t block, int numflats, int tidx, int nthreads)
-	{
-		for(size_t z = (size_t)tidx; z < sizez; z += (size_t)nthreads)
-		{
-			for(size_t by = 0; by < block; by++)
-			{
-				for(size_t x = 0; x < sizex; x++)
-				{
-					size_t step = sizey/block;
-					float val = 0;
-
-					for(size_t fy = 0; fy < step; fy++)
-					{
-						float flat = cflat[(by*step+fy)*sizex + x];
-						float dark = cdark[(by*step+fy)*sizex + x];
-
-						if(numflats>1)
-						{
-							float interp = float(z+1)/float(sizez+1);
-							flat = flat*(1.0f-interp) + interp*cflat[sizex*sizey + (by*step+fy)*sizex + x];
-						}
-
-						val += -logf( fmaxf(frames[z*sizex*sizey + (by*step+fy)*sizex + x]-dark,0.5f) / fmaxf(flat-dark,0.5f) );
-
-					}
-					out[by*sizez*sizex + sizex*z + x] = val;
-				}
-			}
-		}
-	}
-
-	void flatdarkcpublock(float* out, float* frames, float* cflat, float* cdark, 
-	size_t sizex, size_t sizey, size_t sizez, size_t block, int numflats)
-	{
-		std::vector<std::future<void>> threads;
-		for(int t=0; t<16; t++)
-			threads.push_back( std::async(std::launch::async, flatdarkcpu, out, frames, cflat, cdark, 
-				sizex, sizey, sizez, block, numflats, t, 16) );
-
-		for(int t=0; t<16; t++)
-				threads[t].get();
-	}
-}

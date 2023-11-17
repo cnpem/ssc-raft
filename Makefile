@@ -1,4 +1,4 @@
-RUNDIR=	sscRaft sscRaft/parallel/ cuda/ example/
+RUNDIR=	sscRaft sscRaft/ cuda/ example/
 
 all: install
 
