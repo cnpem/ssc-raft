@@ -341,7 +341,7 @@ def reconstruction_mogno(param = sys.argv):
       try:
          hdf5path_data = dic['hdf5path']
       except:
-         logger.errorprint(f'Raft Pipeline...')
+         logger.error(f'Raft Pipeline...')
          logger.error(f'Missing json entry ""hdf5path"" with the path inside hdf5 file.')
          logger.error(f'Please guarantee that the data has entries: (slices,angles,rays).')
          logger.error(f'Finishing run...')
