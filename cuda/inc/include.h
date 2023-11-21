@@ -1,3 +1,4 @@
+#pragma once
 #include <cuda.h>
 #include <cufft.h>
 #include <complex.h>

@@ -3,7 +3,7 @@ RUNDIR=	sscRaft sscRaft/ cuda/ example/
 all: install
 
 install:
-	python3 setup.py install --cuda --user
+	python3 setup.py install --user
 
 clean:
 	rm -fr build/ *.egg-info/ dist/	*~
