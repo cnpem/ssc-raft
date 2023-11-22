@@ -153,8 +153,8 @@ extern "C"{
 		size_t nblock = (size_t)ceil( (float) nslices / blocksize );
 		int ptr = 0, subblock;
 
-		dim3 blocks = dim3(nrays,nangles,blocksize);
-		blocks.x = ( nrays + 127 ) / 128;
+		dim3 Grd = dim3(nrays,nangles,blocksize);
+		Grd.x = ( nrays + 127 ) / 128;
 
 		dim3 BT = dim3(128,1,1)
 
@@ -172,11 +172,7 @@ extern "C"{
 			cflat.CopyFrom(flat   + (size_t)ptr*nrays*numflats, 0, (size_t)subblock * nrays * numflats);
 			cdark.CopyFrom(dark   + (size_t)ptr*nrays         , 0, (size_t)subblock * nrays           );
 
-			if ( is_log == 1 ){
-				KFlatDarklog<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,nangles,subblock), numflats, Totalframes, Initframe);
-			}else{
-				KFlatDark<<<blocks,128>>>(data.gpuptr, cdark.gpuptr, cflat.gpuptr, dim3(nrays,nangles,subblock), numflats, Totalframes, Initframe);
-			}
+			getFlatDarkCorrection(data.gpuptr, cflat.gpuptr, cdark.gpuptr, nrays, nangles, subblock, numflats, is_log, BT, Grd);
 
 			data.CopyTo(frames + (size_t)ptr*nrays*nangles, 0, (size_t)subblock * nrays * nangles);
       

@@ -55,7 +55,7 @@ typedef struct Parameters
     float cr, rr, sr;
     float Lt, Lr;
     float Dt, Dr;
-    size_t Nx, Ny, Nz, Nt, nx, ny, nz, nt; /* Thread dimensions */
+    size_t Nx, Ny, Nz, Nt, nt; /* Thread dimensions */
     size_t sizeofblock, blocksize, slice, subvolume; /* Thread dimensions */
     float d1x, d1y, d2x, d2y;
     float mx, my;

@@ -8,6 +8,12 @@ add_compile_options(-use_fast_math)
 
 include_directories(
     cuda/inc
+    cuda/inc/common
+    cuda/inc/common10
+    cuda/inc/geometries/gc
+    cuda/inc/geometries/gp 
+    cuda/inc/GeneralOperators
+    cuda/inc/pipeline 
 )
 
 file(GLOB_RECURSE RAFT_SRC cuda/src/**/*.c*)

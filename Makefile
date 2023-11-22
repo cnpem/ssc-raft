@@ -6,6 +6,6 @@ install:
 	python3 setup.py install --user
 
 clean:
-	rm -fr build/ *.egg-info/ dist/	*~
+	rm -fr _skbuild/ build/ *.egg-info/ dist/	*~
 	@for j in ${RUNDIR}; do rm -rf $$j/*.pyc; rm -rf $$j/*~; done
 

@@ -466,7 +466,7 @@ extern "C"{
 
 			tomogram.CopyFrom(data + bz*nrays*nangles, 0, nrays*nangles*blocksize);
 
-            void getRings(tomogram.gpuptr, nrays, nangles, blocksize, lambda_rings, ringblocks);
+            getRings(tomogram.gpuptr, nrays, nangles, blocksize, lambda_rings, ringblocks);
 
             tomogram.CopyTo(data + bz*nrays*nangles, 0, nrays*nangles*blocksize);
 	    }
