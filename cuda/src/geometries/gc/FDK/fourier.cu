@@ -9,7 +9,7 @@
 extern "C"{
 __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process){
     int n = lab.nh, npad = lab.nph;
-    long long int batch = process.z_filter*lab.nbeta;
+    // long long int batch = process.z_filter*lab.nbeta;
     long long int batch_pad = process.z_filter_pad*lab.nbeta;
     long long int N = process.n_filter;
     long long int Npad = process.n_filter_pad;
@@ -248,7 +248,7 @@ extern "C"{
     __global__ void filt_Gaussian(Lab lab, float* W){
         int i;
         float wmax = 1.0/(2.0*lab.dh);
-        float w, c = 0.693f;
+        float c = 0.693f;
 
         float magnx = lab.Dsd / lab.D;
         float z2x   = lab.Dsd - lab.D;
@@ -272,7 +272,6 @@ extern "C"{
     __global__ void filt_Lorentz(Lab lab, float* W){
         int i;
         float wmax = 1.0/(2.0*lab.dh);
-        float w;
 
         float magnx = lab.Dsd / lab.D;
         float z2x   = lab.Dsd - lab.D;

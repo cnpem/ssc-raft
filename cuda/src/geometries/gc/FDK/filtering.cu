@@ -7,7 +7,7 @@
 
 extern "C"{
 void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process) {
-    long long int N = process.n_filter;
+    // long long int N = process.n_filter;
     long long int Npad = process.n_filter_pad;
 
     clock_t begin = clock();

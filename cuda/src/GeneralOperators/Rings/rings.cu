@@ -391,26 +391,26 @@ extern "C"{
         HANDLE_ERROR( cudaGetLastError() );
     }
 
-    static __global__ void KDIV(float* divv, float* flat, dim3 shp)
-    {
-        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-        size_t idy = blockIdx.y * blockDim.y + threadIdx.y;
-        size_t idz = blockIdx.z;
+    // static __global__ void KDIV(float* divv, float* flat, dim3 shp)
+    // {
+    //     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    //     size_t idy = blockIdx.y * blockDim.y + threadIdx.y;
+    //     size_t idz = blockIdx.z;
 
-        if(idx < shp.x && idy < shp.y && idz < shp.z)
-            divv[idx + idy*shp.x + idz*shp.x*shp.y] /= flat[idx + shp.x*idz];
+    //     if(idx < shp.x && idy < shp.y && idz < shp.z)
+    //         divv[idx + idy*shp.x + idz*shp.x*shp.y] /= flat[idx + shp.x*idz];
         
-    }
-    static __global__ void KMUL(float* divv, float* flat, dim3 shp)
-    {
-        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
-        size_t idy = blockIdx.y * blockDim.y + threadIdx.y;
-        size_t idz = blockIdx.z;
+    // }
+    // static __global__ void KMUL(float* divv, float* flat, dim3 shp)
+    // {
+    //     size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+    //     size_t idy = blockIdx.y * blockDim.y + threadIdx.y;
+    //     size_t idz = blockIdx.z;
 
-        if(idx < shp.x && idy < shp.y && idz < shp.z)
-            divv[idx + idy*shp.x + idz*shp.x*shp.y] *= flat[idx + shp.x*idz];
+    //     if(idx < shp.x && idy < shp.y && idz < shp.z)
+    //         divv[idx + idy*shp.x + idz*shp.x*shp.y] *= flat[idx + shp.x*idz];
         
-    }
+    // }
     
     float Rings(float* volume, int vsizex, int vsizey, int vsizez, float lambda, size_t slicesize)
     {

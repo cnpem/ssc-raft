@@ -118,7 +118,7 @@ __global__ void single_pixel_carries_no_information_2d(
     float curr, tv_term;
     float xprev, xnext;
     float yprev, ynext;
-    float zprev, znext;
+    // float zprev, znext;
     float sum_diff, sqrt_sum_sq_diff;
     bool ok;
     size_t i = blockDim.x * blockIdx.x + threadIdx.x;

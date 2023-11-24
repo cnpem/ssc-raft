@@ -85,12 +85,7 @@ extern "C" {
         size_t k     = blockIdx.z*blockDim.z + threadIdx.z;
         size_t ind   = sizex * k * sizey + sizex * j + i;
 
-        float tol = 1e-10;
-
         if ( (i >= sizex ) || (j >= sizey) || (k >= sizez)) return;
-
-        // if ( data[ind] < tol )
-		// 		data[ind] = 1.0;
 
         data[ind] = - logf( data[ind] );
         // data[ind] = - logf( fmaxf(data[ind], 0.5f) );

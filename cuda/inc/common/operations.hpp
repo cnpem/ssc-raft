@@ -118,7 +118,7 @@ namespace BasicOps
         inline __device__ size_t GetIndex(){ return threadIdx.x + blockDim.x * (blockIdx.x + gridDim.x * (blockIdx.y + gridDim.y*blockIdx.z)); }
 
         template<typename Type1, typename Type2>
-        inline __global__ void KB_Add(Type1* a, const Type2* b, size_t size, size_t size2)
+        __global__ void KB_Add(Type1* a, const Type2* b, size_t size, size_t size2)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -128,7 +128,7 @@ namespace BasicOps
         }
 
         template<typename Type1, typename Type2>
-        inline __global__ void KB_Sub(Type1* a, const Type2* b, size_t size, size_t size2)
+        __global__ void KB_Sub(Type1* a, const Type2* b, size_t size, size_t size2)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -138,7 +138,7 @@ namespace BasicOps
         }
 
         template<typename Type1, typename Type2>
-        inline __global__ void KB_Mul(Type1* a, const Type2* b, size_t size, size_t size2)
+        __global__ void KB_Mul(Type1* a, const Type2* b, size_t size, size_t size2)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -149,7 +149,7 @@ namespace BasicOps
         
 
         template<typename Type1, typename Type2>
-        inline __global__ void KB_Div(Type1* a, const Type2* b, size_t size, size_t size2)
+        __global__ void KB_Div(Type1* a, const Type2* b, size_t size, size_t size2)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -159,7 +159,7 @@ namespace BasicOps
         }
 
         template<typename Type1, typename Type2=Type1>
-        inline __global__ void KB_Add(Type1* a, Type2 n, size_t size)
+        __global__ void KB_Add(Type1* a, Type2 n, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -169,7 +169,7 @@ namespace BasicOps
         }
 
         template<typename Type1, typename Type2=Type1>
-        inline __global__ void KB_Sub(Type1* a, Type2 n, size_t size)
+        __global__ void KB_Sub(Type1* a, Type2 n, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -179,7 +179,7 @@ namespace BasicOps
         }
 
         template<typename Type1, typename Type2=Type1>
-        inline __global__ void KB_Mul(Type1* a, Type2 n, size_t size)
+        __global__ void KB_Mul(Type1* a, Type2 n, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -189,7 +189,7 @@ namespace BasicOps
         }
 
         template<typename Type1, typename Type2=Type1>
-        inline __global__ void KB_Div(Type1* a, Type2 n, size_t size)
+        __global__ void KB_Div(Type1* a, Type2 n, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -203,7 +203,7 @@ namespace BasicOps
 
 
         template<typename Type>
-        inline __global__ void KB_Log(Type* a, size_t size)
+        __global__ void KB_Log(Type* a, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -213,7 +213,7 @@ namespace BasicOps
         }
 
         template<typename Type>
-        inline __global__ void KB_Exp(Type* a, size_t size, bool bNeg)
+        __global__ void KB_Exp(Type* a, size_t size, bool bNeg)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -224,7 +224,7 @@ namespace BasicOps
         }
 
         template<typename Type>
-        inline __global__ void KB_Clamp(Type* a, const Type b, const Type c, size_t size)
+        __global__ void KB_Clamp(Type* a, const Type b, const Type c, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -234,13 +234,13 @@ namespace BasicOps
         }
 
         template<typename Type>
-        inline __global__ void KB_log1j(float* out, const Type* in, size_t size) {}
+        __global__ void KB_log1j(float* out, const Type* in, size_t size) {}
         
         template<typename Type>
-        inline __global__ void KB_exp1j(Type* out, const float* in, size_t size) {}
+        __global__ void KB_exp1j(Type* out, const float* in, size_t size) {}
 
         template<>
-        inline __global__ void KB_log1j<complex>(float* out, const complex* in, size_t size)
+        __global__ void KB_log1j<complex>(float* out, const complex* in, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -250,7 +250,7 @@ namespace BasicOps
         }
         
         template<>
-        inline __global__ void KB_exp1j<complex>(complex* out, const float* in, size_t size)
+        __global__ void KB_exp1j<complex>(complex* out, const float* in, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -261,10 +261,10 @@ namespace BasicOps
 
 
         template<typename Type>
-        inline __global__ void KB_Power(Type* a, float P, size_t size) {}
+        __global__ void KB_Power(Type* a, float P, size_t size) {}
 
         template<>
-        inline __global__ void KB_Power<float>(float* out, float P, size_t size)
+        __global__ void KB_Power<float>(float* out, float P, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -274,7 +274,7 @@ namespace BasicOps
         }
 
         template<>
-        inline __global__ void KB_Power<complex>(complex* out, float P, size_t size)
+        __global__ void KB_Power<complex>(complex* out, float P, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -284,10 +284,10 @@ namespace BasicOps
         }
 
         template<typename Type>
-        inline __global__ void KB_ABS2(float* out, Type* a, size_t size) {}
+        __global__ void KB_ABS2(float* out, Type* a, size_t size) {}
 
         template<>
-        inline __global__ void KB_ABS2<complex>(float* out, complex* in, size_t size)
+        __global__ void KB_ABS2<complex>(float* out, complex* in, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -297,7 +297,7 @@ namespace BasicOps
         }
 
         template<>
-        inline __global__ void KB_ABS2<float>(float* out, float* in, size_t size)
+        __global__ void KB_ABS2<float>(float* out, float* in, size_t size)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -308,7 +308,7 @@ namespace BasicOps
 
         #ifdef _USING_FP16
         template<typename Type2, typename Type1>
-        inline __global__ void KConvert(Type2* out, Type1* in, size_t size, float threshold)
+        __global__ void KConvert(Type2* out, Type1* in, size_t size, float threshold)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -325,7 +325,7 @@ namespace BasicOps
         }
 
         template<>
-        inline __global__ void KConvert<complex,complex16>(complex* out, complex16* in, size_t size, float threshold)
+        __global__ void KConvert<complex,complex16>(complex* out, complex16* in, size_t size, float threshold)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -334,7 +334,7 @@ namespace BasicOps
                 out[index] = complex(in[index]);
         }
         template<>
-        inline __global__ void KConvert<complex16,complex>(complex16* out, complex* in, size_t size, float threshold)
+        __global__ void KConvert<complex16,complex>(complex16* out, complex* in, size_t size, float threshold)
         {
                 const size_t index = GetIndex();
                 if(index >= size)
@@ -415,7 +415,7 @@ namespace BasicOps
         }
 
         template<typename Type>
-        inline __global__ void KFFTshift1(Type* img, size_t sizex, size_t sizey)
+        __global__ void KFFTshift1(Type* img, size_t sizex, size_t sizey)
         {
                 size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
                 size_t idy = threadIdx.y + blockIdx.y * blockDim.y;
@@ -432,7 +432,7 @@ namespace BasicOps
                 }
         }
         template<typename Type>
-        inline __global__ void KFFTshift2(Type* img, size_t sizex, size_t sizey)
+        __global__ void KFFTshift2(Type* img, size_t sizex, size_t sizey)
         {
                 size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
                 size_t idy = threadIdx.y + blockIdx.y * blockDim.y;
@@ -449,7 +449,7 @@ namespace BasicOps
                 }
         }
         template<typename Type>
-        inline __global__ void KFFTshift3(Type* img, size_t sizex, size_t sizey, size_t sizez)
+        __global__ void KFFTshift3(Type* img, size_t sizex, size_t sizey, size_t sizez)
         {
                 size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
                 size_t idy = threadIdx.y + blockIdx.y * blockDim.y;
@@ -498,7 +498,7 @@ namespace Reduction
                 }
         }
 
-        inline __global__ void KGlobalReduce(float* out, const float* in, size_t size)
+        __global__ void KGlobalReduce(float* out, const float* in, size_t size)
         {
                 __shared__ float intermediate[32];
                 if(threadIdx.x<32)
@@ -523,7 +523,7 @@ namespace Reduction
 namespace Sync
 {
         template<typename Type>
-        inline __global__ void KWeightedLerp(Type* val, const Type* acc, const float* div, size_t size, float lerp)
+        __global__ void KWeightedLerp(Type* val, const Type* acc, const float* div, size_t size, float lerp)
         {	
                 size_t index = BasicOps::GetIndex();
                 if(index >= size)
@@ -534,7 +534,7 @@ namespace Sync
         }
 
         template<typename Type>
-        inline __global__ void KMaskedSum(Type* cval, const Type* acc, size_t size, const uint32_t* mask2)
+        __global__ void KMaskedSum(Type* cval, const Type* acc, size_t size, const uint32_t* mask2)
         {
                 size_t index = BasicOps::GetIndex();
                 if(index >= size)
@@ -548,7 +548,7 @@ namespace Sync
         }
 
         template<typename Type>
-        inline __global__ void KMaskedBroadcast(Type* cval, const Type* acc, size_t size, const uint32_t* mask2)
+        __global__ void KMaskedBroadcast(Type* cval, const Type* acc, size_t size, const uint32_t* mask2)
         {
                 size_t index = BasicOps::GetIndex();
                 if(index >= size)
@@ -562,10 +562,10 @@ namespace Sync
         }
 
         template<typename Type>
-        inline __global__ void KSetMask(uint32_t* mask, const Type* value, size_t size, float thresh){};
+        __global__ void KSetMask(uint32_t* mask, const Type* value, size_t size, float thresh){};
 
         template<>
-        inline __global__ void KSetMask<float>(uint32_t* mask, const float* fval, size_t size, float thresh)
+        __global__ void KSetMask<float>(uint32_t* mask, const float* fval, size_t size, float thresh)
         {
                 __shared__ uint32_t shvalue[1];
                 if(threadIdx.x < 32)

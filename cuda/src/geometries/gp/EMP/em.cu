@@ -158,7 +158,7 @@ extern "C" {
  
       int k, X, Y;
 
-      float s, x, y, linesum, ctheta, stheta, theta, t;  
+      float s, x, y, linesum, ctheta, stheta, t;  
       float dt = 2.0*a/(nrays-1);
       // float dtheta = PI/(nangles-1);
  
@@ -286,7 +286,7 @@ extern "C" {
  
       int k, X, Y, voxel;
 
-      float s, x, y, linesum, ctheta, stheta, theta, t;  
+      float s, x, y, linesum, ctheta, stheta, t;  
       float dt = 2.0*a/(nrays-1);
       // float dtheta = PI/(nangles-1);
       float value;

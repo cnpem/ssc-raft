@@ -139,7 +139,7 @@ extern "C"{
 	// 	 BasicOps::set_pixel(out, fpixel, tx, ty, sizex, threshold, raftDataType);
 	// }
 
-	inline __global__ void BandFilterC2C(complex* vec, size_t sizex, int center, CFilter mfilter = CFilter())
+	__global__ void BandFilterC2C(complex* vec, size_t sizex, int center, CFilter mfilter = CFilter())
 	{
 		int tx = blockIdx.x * blockDim.x + threadIdx.x;
 		int ty = blockIdx.y * blockDim.y + threadIdx.y;

@@ -321,7 +321,7 @@ double update_recon(
     float tv, float max_val,
     cudaStream_t *stream)
 {
-    double log_likelyhood;
+    double log_likelihood = 0;
     std::cout << "number of batches: " << num_of_batches << std::endl;
     for (int ibat = 0; ibat < num_of_batches; ++ibat) {
         copy_recon_to_gpus(recon, recon_cu, stream, size_recon_bulk_bytes, ibat, ngpus);
@@ -337,7 +337,7 @@ double update_recon(
         copy_recon_to_cpu(recon, new_recon_cu, stream, size_recon_bulk_bytes, ibat, ngpus);
     }
     
-    return log_likelyhood;
+    return log_likelihood;
 }
 
 
@@ -589,7 +589,7 @@ void distribute_boundaries(
     struct Lab lab, 
     int num_of_recon_bulks) 
 {
-    int nz_up, nz_lw;
+    // int nz_up, nz_lw;
     double delta_up, delta_lw;
     double tan_up, tan_lw;
     double Dsr; // distance: source <-> rotation axis.

@@ -72,7 +72,7 @@ extern "C"{
 
 	}
 
-   	static __global__ void KFlatDark(float* in, float* dark, float* flat, dim3 size, int numflats, int Totalframes, int Initframe)
+   	static __global__ void KFlatDark(float* in, float* dark, float* flat, dim3 size, int numflats, int totalslices, int Initframe)
 	{  
       // Supports 2 flats only
 		size_t idx = threadIdx.x + blockIdx.x*blockDim.x;
@@ -86,7 +86,7 @@ extern "C"{
 			line        = size.x * size.y * blockIdx.z + size.x * blockIdx.y + idx;
 
          	if(numflats > 1){
-				interp     = float( blockIdx.y + Initframe ) / float( Totalframes ); 
+				interp     = float( blockIdx.y + Initframe ) / float( totalslices ); 
 				flat_after = flat[size.x * numflats * blockIdx.z + size.x + idx];
 				ft         = flat_before * ( 1.0f - interp ) + interp * flat_after;
 			}else{
@@ -156,7 +156,7 @@ extern "C"{
 		dim3 Grd = dim3(nrays,nangles,blocksize);
 		Grd.x = ( nrays + 127 ) / 128;
 
-		dim3 BT = dim3(128,1,1)
+		dim3 BT = dim3(128,1,1);
 
 		// GPUs Pointers: declaration and allocation
 		rImage data(nrays,nangles,blocksize); // Frames in GPU 
@@ -202,19 +202,8 @@ extern "C"{
 						flat   + (size_t)ptr*nrays*numflats, 
 						dark   + (size_t)ptr*nrays, 
 						nrays, subblock, nangles, 
-						numflats, Totalframes, Initframe,
-						is_log, nslices
+						numflats, is_log, nslices
 						));
-			// threads.push_back(std::async( std::launch::async, 
-			// 			flatdark_gpu, 
-			// 			gpus[t], 
-			// 			frames + (size_t)t*blockgpu*nrays*nangles, 
-			// 			flat   + (size_t)t*blockgpu*nrays*numflats, 
-			// 			dark   + (size_t)t*blockgpu*nrays, 
-			// 			nrays, blockgpu, nangles, 
-			// 			numflats, Totalframes, Initframe,
-			// 			is_log, nslices
-			// 			));
 
 			/* Update pointer */
 			ptr = ptr + subblock;

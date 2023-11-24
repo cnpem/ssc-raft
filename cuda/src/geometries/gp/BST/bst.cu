@@ -7,7 +7,7 @@
 // #include "../../../../inc/common/operations.hpp"
 // #include "../../../../inc/common/logerror.hpp"
 
-inline __global__ void SetX(complex* out, float* in, int sizex)
+__global__ void SetX(complex* out, float* in, int sizex)
 {
 	size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
 	size_t ty = blockIdx.y + gridDim.y * blockIdx.z;
@@ -19,7 +19,7 @@ inline __global__ void SetX(complex* out, float* in, int sizex)
 	}
 }
 
-inline __global__ void GetX(float* out, complex* in, int sizex)
+__global__ void GetX(float* out, complex* in, int sizex)
 {
 	size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
 	size_t ty = blockIdx.y + gridDim.y * blockIdx.z;

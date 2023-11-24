@@ -64,7 +64,7 @@ extern "C"{
 
 	// inline __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy);
 	
-	inline __global__ void BandFilterC2C(complex* vec, size_t sizex, int center, struct CFilter mfilter);
+	__global__ void BandFilterC2C(complex* vec, size_t sizex, int center, struct CFilter mfilter);
 	
 	// void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, struct CFilter reg);
 

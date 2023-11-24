@@ -29,7 +29,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
 
     float    x, y, z;
     float u, v, X, Z;
-    float cosb, sinb, Q, L;
+    float cosb, sinb, Q;
 
     int xi, zk;
 
@@ -44,7 +44,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
 	
     recon[n] = 0.0;
 
-    L = sqrtf(x*x + y*y);
+    // float L = sqrtf(x*x + y*y);
     // if( L <= lab.x && L <= lab.y){
     for(m = 0; m < lab.nbeta; m++){
 

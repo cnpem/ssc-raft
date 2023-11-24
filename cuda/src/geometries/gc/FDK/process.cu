@@ -97,8 +97,8 @@ void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gp
     long long int  n_filter, idx_filter, n_recon, idx_recon, n_proj, idx_proj;
     float z_min, z_max, Z_min, Z_max, L;  
     int nz_gpu,  zi_min, zi_max, Zi_max, Zi_min, zi_filter, zi_filter_pad; 
-    int zi_min0, zi_max0, Zi_max0, Zi_min0; 
-    float z_min0, z_max0, Z_max0, Z_min0; 
+    // int zi_min0, zi_max0, Zi_max0, Zi_min0; 
+    // float z_min0, z_max0, Z_max0, Z_min0; 
     int zzi_min, zzi_max;
     long long int  n_filter_pad, idx_filter_pad;
 
@@ -175,10 +175,10 @@ void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gp
 extern "C"{
 void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs){   
 
-    long long int  n_filter, idx_filter, n_recon, idx_recon, n_proj, idx_proj, idx_proj_max;
+    long long int  n_filter, idx_filter, n_recon, idx_recon, n_proj, idx_proj;
     float z_min, z_max, Z_min, Z_max, L;  
     int nz_gpu,  zi_min, zi_max, Zi_max, Zi_min, zi_filter; 
-    int zi_min0, zi_max0, Zi_max0, Zi_min0; 
+    int Zi_max0, Zi_min0; 
     float z_min0, z_max0, Z_max0, Z_min0; 
     int zzi_min, zzi_max;
     long long int  n_filter_pad, idx_filter_pad;
@@ -238,7 +238,7 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
 
 
     idx_proj = (long long int) (Zi_min)*(lab.nbeta*lab.nh);
-    idx_proj_max = (long long int) (Zi_max)*(lab.nbeta*lab.nh);
+    // idx_proj_max = (long long int) (Zi_max)*(lab.nbeta*lab.nh);
     n_proj = (long long int) (Zi_max-Zi_min)*(lab.nbeta*lab.nh);
 
     // Filter indexes:
@@ -284,20 +284,20 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
 
 extern "C"{
 int memory(Lab lab, int ndev){
-    long double mem_gpu, mem_recon, mem_proj;
+    // long double mem_gpu, mem_recon, mem_proj;
     int n_process;
-    long long int n_proj, n_recon;
+    // long long int n_proj, n_recon;
     
     int block = ( lab.slice_recon_end - lab.slice_recon_start );
 
     // n_proj = (long long int)(lab.nv)*(long long int)(lab.nbeta)*(long long int)(lab.nh); 
-    n_proj = (long long int)(block)*(long long int)(lab.nbeta)*(long long int)(lab.nph);
+    // n_proj = (long long int)(block)*(long long int)(lab.nbeta)*(long long int)(lab.nph);
 
-    n_recon = (long long int)(lab.nx)*(long long int)(lab.ny)*(long long int)(lab.nz);
+    // n_recon = (long long int)(lab.nx)*(long long int)(lab.ny)*(long long int)(lab.nz);
 
-    mem_gpu = 40;
-    mem_proj = 32*n_proj*1.16*(pow(10,-10));
-    mem_recon = 32*n_recon*1.16*(pow(10,-10));
+    // mem_gpu = 40;
+    // mem_proj = 32*n_proj*1.16*(pow(10,-10));
+    // mem_recon = 32*n_recon*1.16*(pow(10,-10));
 
     int blockgpu = (int) floor( (float)block / ndev ); 
 
@@ -329,7 +329,7 @@ int memory(Lab lab, int ndev){
     if ( nz_gpu * (n_process - 1) > block )
         n_process = n_process - 1;
 
-    printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
+    // printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
 
     return n_process;
 }}

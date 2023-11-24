@@ -29,7 +29,7 @@ public:
 // Warning: Fills empty space with non-zeros
 // -> Blame EM
 template<typename Type>
-inline __global__ void KCopyShiftX(Type* out, Type* in, size_t outsizex, size_t insizex, size_t nangles, int csino, float filler)
+__global__ void KCopyShiftX(Type* out, Type* in, size_t outsizex, size_t insizex, size_t nangles, int csino, float filler)
 {
 	size_t idx = blockIdx.x*blockDim.x + threadIdx.x;
 	size_t idy = blockIdx.y;
@@ -44,7 +44,7 @@ inline __global__ void KCopyShiftX(Type* out, Type* in, size_t outsizex, size_t 
 }
 
 template<typename Type>
-inline __global__ void KSetToOne(Type* vec, size_t size)
+__global__ void KSetToOne(Type* vec, size_t size)
 {
 	size_t idx = blockDim.x * blockIdx.x + threadIdx.x;
 	if(idx < size)

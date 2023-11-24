@@ -94,7 +94,10 @@ typedef struct Parameters
 
 typedef struct config
 {   
-    /* Recon variables */
+    /* Geometry */
+    int geometry;
+
+    /* Reconstruction variables */
     int   nx, ny, nz;
     float  x,  y,  z;
     float dx, dy, dz;
@@ -105,14 +108,16 @@ typedef struct config
     float dh, dv, dangles;
 
     /* Padding */
-    int padx, pady, nprays, npslices;
+    int padx, pady, padz, pad_nrays, pad_nangles, pad_nslices;
 
     /* General reconstruction variables*/
     float pixelDetx, pixelDety;
+    float detector_pixel_x, detector_pixel_y;
     float energy, lambda, wave;
     float z1, z2, z12;
     float z1x, z1y, z2x, z2y;
     float magnx, magny;
+    float magnitude_x, magnitude_y;
 
     /* GPU variables */
     int ngpus, *gpus;
@@ -124,29 +129,37 @@ typedef struct config
     /* General variables */
 
     /* Bool variables - Pipeline */
-    int iscorrection, isphaseretrieval, isphasefilter, isrings, isrotoffset;
+    int do_flat_dark_correction, do_phase_filter;
+    int do_rings, do_rotation_offset,do_alignment;
+    int do_reconstruction;
 
     /* Flat/Dark Correction */
-    int islog;
+    int flat_dark_do_log;
     int numflats;
 
     /* Phase Filter */
-    int phase_filter; /* Phase Filter type */
-    float phase_filter_reg; /* Phase Filter regularization parameter */
+    int phase_filter_type; /* Phase Filter type */
+    float phase_filter_regularization; /* Phase Filter regularization parameter */
 
     /* Rings */
     int rings_block;
     float rings_lambda;
-    float comp_rings_lambda;
+    float rings_computed_lambda;
 
     /* Rotation Axis Correction */
-    int axis_offset;
+    int rotation_axis_offset;
 
     /* Reconstruction method variables */
-    int recon_method;
-    int filter_recon; /* Reconstruction Filter type */
-    float reg_filter_recon; /* Reconstruction Filter regularization parameter */
-    float regularization; /* General regularization parameter */
+    int reconstruction_method;
+    int reconstruction_filter_type; /* Reconstruction Filter type */
+    float reconstruction_filter_regularization; /* Reconstruction Filter regularization parameter */
+    float reconstruction_regularization; /* General regularization parameter */
+
+    /* Slices */
+    // int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
+    // int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
+    int reconstruction_start_slice, reconstruction_end_slice; // Slices: start slice = reconstruction_start_slice, end slice = reconstruction_end_slice
+    int tomogram_start_slice, tomogram_end_slice; // Slices: start slice = tomogram_start_slice, end slice = tomogram_end_slice
 
     /* Paralell */
 
@@ -160,14 +173,11 @@ typedef struct config
     /* EM FST */
 
     /* Conical */
-    int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
-    int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
 
     /* FDK */
 
     /* EM Conical */
     
-
 }CFG;
 
 typedef struct workspace
@@ -179,6 +189,9 @@ typedef struct workspace
 typedef struct { 
     /* GPU */ 
     int index, index_gpu;
+
+    /* Processes*/
+    int batch_size_tomo, batch_size_recon, batch_index;
 
     /* Tomogram (or detector) and reconstruction filter (v of vertical) */
     int indv, indv_filter;
@@ -196,40 +209,41 @@ typedef struct Profiling
 
 }PROF;
 
-typedef struct {  
-    float x,y,z;
-    float dx, dy, dz;
-    int nx, ny, nz;
-    float h,v;
-    float dh, dv;
-    int nh, nv;
-    float D, Dsd;
-    float beta_max;
-    float dbeta;
-    int nbeta;
-    int fourier;
-    int filter_type; // Filter Types
-    float reg; // Filter regularization
-    int is_slice; // (bool) Reconstruct a block of slices or not
-    int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
-    int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
-    int nph, padh;
+// typedef struct {  
+//     float x,y,z;
+//     float dx, dy, dz;
+//     int nx, ny, nz;
+//     float h,v;
+//     float dh, dv;
+//     int nh, nv;
+//     float D, Dsd;
+//     float beta_max;
+//     float dbeta;
+//     int nbeta;
+//     int fourier;
+//     int filter_type; // Filter Types
+//     float reg; // Filter regularization
+//     int is_slice; // (bool) Reconstruct a block of slices or not
+//     int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
+//     int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
+//     int nph, padh;
+//     float energy;
 
-    /* Filter Types definitions
-    enum EType
-	{
-        none      = 0,
-        gaussian  = 1,
-        lorentz   = 2,
-        cosine    = 3,
-        rectangle = 4,
-        hann      = 5,
-        hamming   = 6,
-        ramp      = 7
-	};
-    */
+//     /* Filter Types definitions
+//     enum EType
+// 	{
+//         none      = 0,
+//         gaussian  = 1,
+//         lorentz   = 2,
+//         cosine    = 3,
+//         rectangle = 4,
+//         hann      = 5,
+//         hamming   = 6,
+//         ramp      = 7
+// 	};
+//     */
 
-} Lab;
+// } Lab;
 
 
 
