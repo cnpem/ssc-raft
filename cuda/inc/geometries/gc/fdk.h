@@ -14,6 +14,8 @@
 #include <vector>
 #include <iostream>
 
+#include "../../pipeline/process.h"
+
 typedef struct {  
     float x,y,z;
     float dx, dy, dz;
@@ -51,12 +53,12 @@ typedef struct {
 } Lab;
 
 
-typedef struct {  
-    int i, i_gpu, zi, z_filter, z_filter_pad;
-    long long int n_proj, n_recon, n_filter, n_filter_pad;
-    long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
-    float z_ph, z_det;
-} Process;
+// typedef struct {  
+//     int i, i_gpu, zi, z_filter, z_filter_pad;
+//     long long int n_proj, n_recon, n_filter, n_filter_pad;
+//     long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
+//     float z_ph, z_det;
+// } Process;
 
 
 //FDK Functions

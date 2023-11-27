@@ -5,8 +5,7 @@
 #include "../../../../inc/common/operations.hpp"
 #include "../../../../inc/common/logerror.hpp"
 
-# define vc 299792458           /* Velocity of Light [m/s] */ 
-# define plank 4.135667662E-15  /* Plank constant [ev*s] */
+
 
 extern "C" {
 

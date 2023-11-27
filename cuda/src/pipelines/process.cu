@@ -1,24 +1,32 @@
 #include "../../inc/include.h"
-#include "../../inc/common/kernel_operators.hpp"
-#include "../../inc/common/complex.hpp"
-#include "../../inc/common/types.hpp"
-#include "../../inc/common/operations.hpp"
-#include "../../inc/common/logerror.hpp"
 
 extern "C"{
-	Process *setProcesses(CFG configs, int i, int n_total_processes, int *gpus, int ngpus)
+	Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes)
 	{  
-        int index;
+        int process_index;
 
-        Process *process = (Process *)malloc(sizeof(Process) * n_total_processes);
-             
-        if( configs.isconical == 1){
-            for (index = 0; index < n_total_processes; index++)
-                setProcessConical(configs, &process[index], index, n_total_processes, gpus, ngpus);
-        }else{
-            for (index = 0; index < n_total_processes; index++)
-                setProcessParallel(configs, &process[index], index, n_total_processes, gpus, ngpus);
-        } 
+        Process *process = (Process *)malloc(sizeof(Process) * total_number_of_processes);
+
+        switch (configs.geometry){
+            case 0:
+                /* Parallel */
+                for (process_index = 0; process_index < total_number_of_processes; process_index++)
+                    setProcessParallel(configs, process, gpus, process_index, total_number_of_processes);
+                break;
+            case 1:
+                /* Conebeam */
+                for (process_index = 0; process_index < total_number_of_processes; process_index++)
+                    setProcessConebeam(configs, process, gpus, process_index, total_number_of_processes);
+                break;
+            case 2:
+                /* Fanbeam - the process division for Fanbeam geometry is the same as the Parallel one */
+               for (process_index = 0; process_index < total_number_of_processes; process_index++)
+                    setProcessParallel(configs, process, gpus, process_index, total_number_of_processes);
+                break;
+            default:
+                printf("Nope.");
+                break;
+        }	
 
         return process; 
                 
@@ -27,7 +35,7 @@ extern "C"{
 
 
 extern "C"{
-    void setProcessParallel(CFG configs, Process* process, int index, int n_total_processes, int *gpus, int ngpus)
+    void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
     {   
         /* Declare variables */
         long long int  n_recon, n_tomo, ind_recon, ind_tomo;
@@ -48,8 +56,8 @@ extern "C"{
 
         /* Set process struct */
         (*process).index            = index;
-        (*process).index_gpu        = (int)gpus[index % ngpus]; 
-        (*process).batch_index      = (int)index % ngpus;
+        (*process).index_gpu        = (int)gpus[index % gpus.ngpus]; 
+        (*process).batch_index      = (int)index % gpus.ngpus;
         (*process).batch_size_tomo  = (int)( indz_max - indz );
         (*process).batch_size_recon = (int)( indz_max - indz );
 
@@ -67,7 +75,7 @@ extern "C"{
 
 
 extern "C"{
-    void setProcessConical(CFG configs, Process* process, int index, int n_total_processes, int *gpus, int ngpus)
+    void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
     {   
         /* Declare variables */
         int nz_block;
@@ -118,8 +126,8 @@ extern "C"{
 
         /* Set process struct */
         (*process).index            = index;
-        (*process).index_gpu        = (int)gpus[index % ngpus]; 
-        (*process).batch_index      = (int)index % ngpus;
+        (*process).index_gpu        = (int)gpus[index % gpus.ngpus]; 
+        (*process).batch_index      = (int)index % gpus.ngpus;
         (*process).batch_size_tomo  = (int)( indv_max - indv );
         (*process).batch_size_recon = (int)( indz_max - indz );
 
@@ -144,7 +152,7 @@ extern "C"{
 
 
 extern "C"{
-    int getTotalProcesses(CFG configs, int ngpus)
+    int getTotalProcesses(CFG configs, GPU gpus)
     {
         // long double mem_gpu, mem_recon, mem_tomo;
         int n_total_process;
@@ -160,7 +168,7 @@ extern "C"{
         // n_total_process = (int) std::ceil((mem_tomo + mem_recon)/mem_gpu);
 
         // divisão de processos 
-        if(n_total_process < ngpus) n_total_process = ngpus;
+        if(n_total_process < gpus.ngpus) n_total_process = gpus.ngpus;
 
         if(configs.pad_nrays > 1800 && configs.nangles > 1800) n_total_process = 8;
 

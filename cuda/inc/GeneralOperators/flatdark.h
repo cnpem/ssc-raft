@@ -7,17 +7,13 @@
 
 extern "C"{
 
-        void flatdark_gpu(int gpu, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats, int is_log, int totalslices);
+	void getFlatDarkMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nangles, int nslices, int numflats, int is_log);
 
-        void flatdark_block(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nslices, int nangles, int numflats, int is_log);
+        void getFlatDarkGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, dim3 size, int numflats, int is_log);
 
-        __global__ void RemoveMeanKernel(float *in, float *mean, int sizex, int sizey, int sizez);
+	void getFlatDarkCorrection(float* frames, float* flat, float* dark, dim3 size, int numflats, GPU gpus);
 
-        __global__ void ComputeMeanKernel(float *in, float *mean, int sizex, int sizey, int sizez);
-
-	void remove_mean_flat_dark(float *flat, float *dark, int sizex, int sizez, int numflats);
-
-        void getFlatDarkCorrection(float* frames, float* flat, float* dark, int sizex, int sizey, int sizez, int numflats, int islog, dim3 BT, dim3 Grd);
+	void getLog(float *tomogram, dim3 size, int numflats, GPU gpus);
 
 }
 

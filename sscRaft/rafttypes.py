@@ -144,14 +144,6 @@ try:
                                         ctypes.c_int, ctypes.c_int]
     libraft.findcentersino16.restype = ctypes.c_int
 
-    libraft.ringsgpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_int, ctypes.c_float, ctypes.c_int]
-    libraft.ringsgpu.restype  = None
-
-    libraft.ringsblock.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_int, ctypes.c_float, ctypes.c_int]
-    libraft.ringsblock.restype  = None
-
     libraft.fbpgpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_void_p, ctypes.c_float, 
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int]
@@ -161,22 +153,35 @@ try:
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_void_p, ctypes.c_float, 
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int]
     libraft.fbpblock.restype  = None
-   
-    libraft.flatdark_gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdark_gpu.restype  = None
         
-    libraft.flatdark_block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.flatdark_block.restype  = None
-
-    
 except:
     print('-.RAFT_PARALLEL-')
     pass
 
-######## Paganin ##########
+######## Raft - Rings ##########
+try:
+    libraft.getRingsMultiGPU.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
+                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+                                        ctypes.c_float, ctypes.c_int]
+    
+    libraft.getRingsMultiGPU.restype  = None
+    
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_RINGS-')
+    pass
 
+######## Raft - Flat/Dark Correction ##########
+try:
+    libraft.getFlatDarkMultiGPU.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+                                                ctypes.c_int, ctypes.c_int]
+    
+    libraft.getFlatDarkMultiGPU.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_FLAT_DARK_CORRECTION-')
+    pass
+
+######## Phase Filters ##########
 try:
     libraft.phase_filters.argtypes = [  ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
                                         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
@@ -184,7 +189,7 @@ try:
     libraft.phase_filters.restype  = None
     
 except:
-    print('-.PHASE_FILTERS-')
+    print('Cannot find C/CUDA library: -.PHASE_FILTERS-')
     pass
 
 
@@ -340,7 +345,7 @@ def SetDic(dic, paramname, deff):
                                         dic[paramname][i] = deff[i]
 
         except:
-                print('Using default -', paramname,':', deff)
+                logger.warning(f'Using default - {paramname}: {deff}.')
                 dic[paramname] = deff
 
                 
@@ -363,7 +368,6 @@ def Metadata_hdf5(outputFileHDF5, dic, software, version):
         dic['Software'] = software
         dic['Version']  = version
 
-        
         if isinstance(outputFileHDF5, str):
 
                 if os.path.exists(outputFileHDF5):

@@ -1,18 +1,12 @@
 #include "../../inc/include.h"
-#include "../../inc/common/kernel_operators.hpp"
-#include "../../inc/common/complex.hpp"
-#include "../../inc/common/types.hpp"
-#include "../../inc/common/operations.hpp"
-#include "../../inc/common/logerror.hpp"
-
 
 extern "C"{
-	WKP *allocateWorkspace(CFG configs, int blocksize)
+	WKP *allocateWorkspace(CFG configs, Process process)
 	{  /* Allocate struct prain with all GPU the variables */
 		WKP *workspace = (WKP *)malloc(sizeof(WKP));
 
-		size_t n = configs.nangles * configs.nrays * blocksize;
-		size_t m = configs.nx      * configs.ny    * blocksize;
+		size_t n = process.n_tomo;
+		size_t m = process.n_recon;
 
 		/* GPU */
 		/* Float */
@@ -38,7 +32,6 @@ extern "C"{
 		HANDLE_ERROR(cudaFree(workspace->dark  ));
 		HANDLE_ERROR(cudaFree(workspace->angles));
 
-        free(workspace);	
 	}
 }
 

@@ -1,19 +1,12 @@
 #include "../../inc/include.h"
-#include "../../inc/common/kernel_operators.hpp"
-#include "../../inc/common/complex.hpp"
-#include "../../inc/common/types.hpp"
-#include "../../inc/common/operations.hpp"
-#include "../../inc/common/logerror.hpp"
-
 
 extern "C"{
     void ReconstructionPipeline(float *recon, float *data, float *flats, float *darks, float *angles,
-	float *parameters_float, int *parameters_int,
+	float *parameters_float, int *parameters_int, int *flags,
 	int *gpus, int ngpus)
 	{
-
         int i, Maxgpu;
-        int process_index, total_number_of_processes;
+        int total_number_of_processes;
 
 		/* Multiples devices */
 		cudaGetDeviceCount(&Maxgpu);
@@ -22,79 +15,66 @@ extern "C"{
 		for(i = 0; i < ngpus; i++) 
 			assert(gpus[i] < Maxgpu && "Invalid device number.");
 
-        CFG configs;
+        CFG configs; GPU gpu_parameters;
+
+        setReconstructionParameters(&configs, parameters_float, parameters_int, flags);
+
+        setGPUParameters(&gpu_parameters, dim3(configs.pad_nrays,configs.pad_nangles,configs.pad_nslices), ngpus, gpus);
 
         /* Set total number of processes to be sent to the GPUs */
-        total_number_of_processes = getTotalProcesses(configs, ngpus);
+        total_number_of_processes = getTotalProcesses(configs, gpu_parameters);
                 
         /* Set processes pipeline for different geometries */
-        Process *process = (Process *)malloc(sizeof(Process) * total_number_of_processes);
+        Process *process = setProcesses(configs, gpu_parameters, total_number_of_processes);
 
-        switch (configs.geometry){
-            case 0:
-                /* Parallel */
-                for (process_index = 0; process_index < total_number_of_processes; process_index++)
-                    setProcessParallel(configs, process, process_index, total_number_of_processes, gpus, ngpus);
-                break;
-            case 1:
-                /* Conebeam */
-                for (process_index = 0; process_index < total_number_of_processes; process_index++)
-                    setProcessConical(configs, process, process_index, total_number_of_processes, gpus, ngpus);
-                break;
-            case 2:
-                /* Fanbeam */
-                printf("No pipeline for Fanbeam yet.");
-                break;
-            default:
-                printf("Nope.");
-                break;
-        }	
+        // clock_t b_begin = clock();
 
-        clock_t b_begin = clock();
+        _setReconstructionPipeline(configs, process, gpu_parameters, recon, data, flats, darks, angles, total_number_of_processes);
 
-        _setReconstructionPipeline(configs, process, data, flats, darks, angles, total_number_of_processes, ngpus);
+        // clock_t b_end = clock();
+        // double time = double(b_end - b_begin) / CLOCKS_PER_SEC;
 
-        clock_t b_end = clock();
-        double time = double(b_end - b_begin) / CLOCKS_PER_SEC;
+        // cudaDeviceSynchronize();
 
-        cudaDeviceSynchronize();
-        printf(cudaGetErrorString(cudaGetLastError()));
-        printf("\n");
+        HANDLE_ERROR(cudaGetLastError());
 
+        /* Free process (array of structs) */
         free(process);
     }
 }
 
 
 extern "C"{
-    void _setReconstructionPipeline(CFG configs, Process process,
+    void _setReconstructionPipeline(CFG configs, Process *process, GPU gpus,
     float *recon, float *data, 
     float *flats, float *darks, float *angles,
-    int total_number_of_processes, int ngpus)
+    int total_number_of_processes)
     {
         int process_index, i;
 
         std::vector<thread> threads_back;
         
-        // float *c_proj[ndevs];
-        // float *c_recon[ndevs];
-        // float *c_beta[ndevs];
-
         // GPUs Pointers: declaration and allocation
         WKP *workspace = (WKP *)malloc(sizeof(WKP) * total_number_of_processes); 
 
         while (process_index < total_number_of_processes){
 
-            threads_back.emplace_back( thread(_ReconstructionProcessesPipeline, configs, workspace[process_index], data, flats, darks, angles, process[process_index]) );		
+            threads_back.emplace_back( thread(_ReconstructionProcessPipeline, configs, workspace[process_index], process[process_index], gpus, recon, data, flats, darks, angles) );		
 
             process_index = process_index + 1;
 
-            for (i = 0; i < total_number_of_processes; i++)
-                threads_back[i].join();
+            if (process_index % gpus.ngpus == 0){
 
-            threads_back.clear();
-        
+                for (i = 0; i < gpus.ngpus; i++)
+                    threads_back[i].join();
+
+                threads_back.clear();
+                cudaDeviceSynchronize();
+            }
         }
+
+        /* Free workspace (array of structs) */
+        free(workspace);
         
     }
 }
@@ -102,7 +82,8 @@ extern "C"{
 
 extern "C" {
 
-	void _ReconstructionProcessesPipeline(CFG configs, WKP *workspace, float *recon, float *frames, float *flats, float *darks, float *angles, Process process)
+	void _ReconstructionProcessPipeline(CFG configs, WKP *workspace, Process process, GPU gpus, 
+    float *recon, float *frames, float *flats, float *darks, float *angles)
 	{	
 		/* Initialize GPU device */
 		HANDLE_ERROR(cudaSetDevice(process.index_gpu));
@@ -118,28 +99,37 @@ extern "C" {
         HANDLE_ERROR(cudaMemcpy(workspace->dark,  &darks[process.ind_tomo], process.n_tomo * sizeof(float), cudaMemcpyHostToDevice));
 
         /* Enter Reconstruction Pipeline */
-        _ReconstructionPipeline(configs, workspace, process);
+        _ReconstructionPipeline(configs, workspace, process, gpus);
 
         /* Copy Reconstructed data from device to host */
         HANDLE_ERROR(cudaMemcpy(&recon[process.ind_recon], workspace->recon, process.n_recon * sizeof(float), cudaMemcpyDeviceToHost));
 
-		cudaDeviceSynchronize();
+        freeWorkspace(workspace, configs);
+
+		// cudaDeviceSynchronize();
 	}
 }
 
 
 extern "C"{
-    void _Reconstruction(CFG configs, WKP *workspace, int max_block_size, int ngpu)
+    void _ReconstructionPipeline(CFG configs, WKP *workspace, Process process, GPU gpus)
     {
-		
+        float lambda_computed;
+
+        dim3 tomo_size  = dim3(configs.nrays, configs.nangles, process.batch_size_tomo );
+        dim3 recon_size = dim3(configs.nx   , configs.ny     , process.batch_size_recon);
+
         if( configs.do_flat_dark_correction == 1)
-            getFlatDarkCorrection(configs, workspace->tomo, workspace->flat, workspace->dark, configs.nrays, configs.nangles, max_block_size, configs.numflats);
+            getFlatDarkCorrection(workspace->tomo, workspace->flat, workspace->dark, tomo_size, configs.numflats, gpus);
+
+        if( configs.flat_dark_do_log == 1) 
+            getLog(workspace->tomo, tomo_size, gpus);
 
         // if( configs.do_phase_filter == 1) 
         //     getPaganinFilter();
 
         if( configs.do_rings == 1) 
-            getRings(workspace->tomo, configs.nrays, configs.nangles, max_block_size, configs.rings_lambda, configs.rings_block);
+            getRings(workspace->tomo, tomo_size, lambda_computed, configs.rings_lambda, configs.rings_block, gpus);
         
         // if( configs.do_rotation_offset == 1) 
         //     getRotAxisOfssetCorrection();
@@ -150,19 +140,19 @@ extern "C"{
         switch (configs.geometry){
             case 0:
                 /* Parallel */
-                getReconstructionParallel(configs, workspace->tomo);
+                getReconstructionParallel(configs, process, gpus, workspace->tomo);
                 break;
             case 1:
                 /* Conebeam */
-                getReconstructionConebeam(configs, workspace->tomo);
+                getReconstructionConebeam(configs, process, gpus, workspace->tomo);
                 break;
             case 2:
                 /* Fanbeam */
-                printf("No pipeline for Fanbeam yet.");
+                printf("No pipeline for Fanbeam yet. \n");
                 // getReconstructionFanbeam(configs, workspace->tomo);
                 break;
             default:
-                printf("Nope.");
+                printf("Nope. \n");
                 break;
         }	
         
@@ -172,7 +162,8 @@ extern "C"{
 
 extern "C"{
 
-    void getReconstructionParallel(CFG configs, float *tomogram){
+    void getReconstructionParallel(CFG configs, Process process, GPU gpus, float *tomogram)
+    {
 
         switch (configs.reconstruction_method){
             case 0:
@@ -195,12 +186,13 @@ extern "C"{
                 
                 break;
             default:
-                printf("Nope.");
+                printf("Nope. \n");
                 break;
         }	
     }
 
-    void getReconstructionConebeam(CFG configs, float *tomogram){
+    void getReconstructionConebeam(CFG configs, Process process, GPU gpus, float *tomogram)
+    {
 
         switch (configs.reconstruction_method){
             case 0:
@@ -240,12 +232,13 @@ extern "C"{
                 
                 break;
             default:
-                printf("Nope.");
+                printf("Nope. \n");
                 break;
         }	
     }
 
-    // void getReconstructionFanbeam(CFG configs, float *tomogram){
+    // void getReconstructionFanbeam(CFG configs, Process process, GPU gpus, float *tomogram)
+    // {
 
     //     switch (configs.reconstruction_method){
     //         case 0:
@@ -274,7 +267,7 @@ extern "C"{
     //             break;
 
     //         default:
-    //             printf("Nope.");
+    //             printf("Nope. \n");
     //             break;
     //     }	
     // }

@@ -6,11 +6,12 @@
 
 extern "C"{
     
-    float Rings(float* volume, int vsizex, int vsizey, int vsizez, float lambda, size_t slicesize);
+    void getRingsMultiGPU(int *gpus, int ngpus, float *data, float *lambda_computed, int nrays, int nangles, int nslices, float lambda_rings, int ring_blocks);
 
-    void ringsblock(int* gpus, int ngpus, float* data, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks);
+    void getRingsGPU(GPU gpus, int gpu, float *data, float *lambda_computed, dim3 size, float lambda_rings, int ring_blocks);
 
-    void getRings(float* tomogram, int nrays, int nangles, int nslices, float lambda_rings, int ringblocks);
+    float getRings(float *tomogram, dim3 size, float lambda_rings, int ring_blocks, GPU gpus);
+
 }
 
 
