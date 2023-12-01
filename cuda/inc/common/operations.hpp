@@ -7,15 +7,15 @@
 
 @copyright Copyright (c) 2021
 
- */
+*/
 
 #ifndef _OPERATIONS_H
 #define _OPERATIONS_H
 
 #ifdef __CUDACC__
- #define restrict __restrict__
+        #define restrict __restrict__
 #else
- #define restrict
+        #define restrict
 #endif
 
 #include "complex.hpp"
@@ -23,92 +23,67 @@
 #include "logerror.hpp"
 
 
-inline __device__ int iabs(int n)
-{
-	return n<0?-n:n;
+extern "C"{
+
+    __global__ void padding(float *in, cufftComplex *inpadded, float value, dim3 size, dim3 padsize);
+
+    __global__ void recuperate_padding(cufftComplex *inpadded, float *in, dim3 size, dim3 padsize);
+
 }
 
-static __device__ __host__ float clamp(float f, float a, float b)
-{
-    return fmaxf(a, fminf(f, b));
-}
+inline __device__ int iabs(int n){return n<0?-n:n;}
 
-static __device__ half clamp(half f, half a, half b)
-{
-    return fmaxf(a, fminf(f, b));
-}
-static __device__ __host__ half clamp(half f, float a=-32768.0f, float b=32768.0f)
-{
-    return fmaxf(__float2half(a), fminf(f, __float2half(b)));
-}
+static __device__ __host__ float clamp(float f, float a, float b){return fmaxf(a, fminf(f, b));}
+
+static __device__ half clamp(half f, half a, half b){return fmaxf(a, fminf(f, b));}
+
+static __device__ __host__ half clamp(half f, float a=-32768.0f, float b=32768.0f){ return fmaxf(__float2half(a), fminf(f, __float2half(b)));}
 
 #if __CUDA_ARCH__ >= 530
-static __device__ complex16 clamp(complex16 f, float a, float b)
-{
-    return complex16(clamp(f.x,a,b),clamp(f.y,a,b));
-} 
+static __device__ complex16 clamp(complex16 f, float a, float b){return complex16(clamp(f.x,a,b),clamp(f.y,a,b));} 
 #endif
 
 static __device__ __host__ complex clamp(const complex& f, float a, float b)
 {
-    return complex(clamp(f.x,a,b),clamp(f.y,a,b));
-}
-static __device__ __host__ complex clamp(const complex& f, const complex& a, const complex& b)
-{
-    return complex(clamp(f.x,a.x,b.x),clamp(f.y,a.y,b.y));
+        return complex(clamp(f.x,a,b),clamp(f.y,a,b));
 }
 
-inline __device__ complex exp1j(float f)
+static __device__ __host__ complex clamp(const complex& f, const complex& a, const complex& b)
 {
-	complex c;
-	__sincosf(f, &c.y, &c.x);
-	return c;
+        return complex(clamp(f.x,a.x,b.x),clamp(f.y,a.y,b.y));
 }
+
+inline __device__ complex exp1j(float f){complex c;__sincosf(f, &c.y, &c.x); return c;}
 
 template<typename Type>
 inline __device__ __host__ Type sq(const Type& x){ return x*x; }
 
-struct EType
-{
+struct EType{
+
         enum class TypeEnum 
         {
-                INVALID=0,
-                UINT8=1,
-                UINT16=2,
-                INT32=3,
-                HALF=4,
-                FLOAT32=5,
-                DOUBLE=6,
+                INVALID = 0,
+                UINT8   = 1,
+                UINT16  = 2,
+                INT32   = 3,
+                HALF    = 4,
+                FLOAT32 = 5,
+                DOUBLE  = 6,
                 NUM_ENUMS
         };
 
         EType() = default;
         EType(TypeEnum etype): type(etype) {};
 
-        static size_t Size(TypeEnum datatype)
-        {
-                static const size_t datasizes[] = {0,1,2,4,2,4,8};
-                return datasizes[static_cast<int>(datatype)];
-        }
-        size_t Size() const { return Size(type); }
+        static size_t Size(TypeEnum datatype);
 
-        static std::string String(TypeEnum type)
-        {  
-                static const std::string datanames[] = {"INVALID", "UINT8", "UINT16", "INT32", "HALF", "FLOAT32", "DOUBLE"};
-                return datanames[static_cast<int>(type)];
-        };
+        size_t Size() const { return Size(type); };
+
+        static std::string String(TypeEnum type);
+
         std::string String() { return String(type); };
 
-        static EType Type(const std::string& nametype)
-        {
-                EType etype;
-
-                for(int i=0; i<static_cast<int>(TypeEnum::NUM_ENUMS); i++)
-                        if( nametype == String( static_cast<TypeEnum>(i) ) )
-                                etype.type = static_cast<TypeEnum>(i);
-
-                return etype;
-        }
+        static EType Type(const std::string& nametype);
 
         TypeEnum type = TypeEnum::INVALID;
 };
@@ -118,248 +93,90 @@ namespace BasicOps
         inline __device__ size_t GetIndex(){ return threadIdx.x + blockDim.x * (blockIdx.x + gridDim.x * (blockIdx.y + gridDim.y*blockIdx.z)); }
 
         template<typename Type1, typename Type2>
-        __global__ void KB_Add(Type1* a, const Type2* b, size_t size, size_t size2)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] += b[index%size2];
-        }
+        __global__ void KB_Add(Type1* a, const Type2* b, size_t size, size_t size2);
 
         template<typename Type1, typename Type2>
-        __global__ void KB_Sub(Type1* a, const Type2* b, size_t size, size_t size2)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] -= b[index%size2];
-        }
+        __global__ void KB_Sub(Type1* a, const Type2* b, size_t size, size_t size2);
 
         template<typename Type1, typename Type2>
-        __global__ void KB_Mul(Type1* a, const Type2* b, size_t size, size_t size2)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] *= b[index%size2];
-        }
-        
+        __global__ void KB_Mul(Type1* a, const Type2* b, size_t size, size_t size2);
 
         template<typename Type1, typename Type2>
-        __global__ void KB_Div(Type1* a, const Type2* b, size_t size, size_t size2)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] /= b[index%size2];
-        }
+        __global__ void KB_Div(Type1* a, const Type2* b, size_t size, size_t size2);
 
         template<typename Type1, typename Type2=Type1>
-        __global__ void KB_Add(Type1* a, Type2 n, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] += n;
-        }
+        __global__ void KB_Add(Type1* a, Type2 n, size_t size);
 
         template<typename Type1, typename Type2=Type1>
-        __global__ void KB_Sub(Type1* a, Type2 n, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] -= n;
-        }
+        __global__ void KB_Sub(Type1* a, Type2 n, size_t size);
 
         template<typename Type1, typename Type2=Type1>
-        __global__ void KB_Mul(Type1* a, Type2 n, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] *= n;
-        }
+        __global__ void KB_Mul(Type1* a, Type2 n, size_t size);
 
         template<typename Type1, typename Type2=Type1>
-        __global__ void KB_Div(Type1* a, Type2 n, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                if(index >= size)
-                        return;
-
-                a[index] /= n;
-        }
-
+        __global__ void KB_Div(Type1* a, Type2 n, size_t size);
 
         template<typename Type>
-        __global__ void KB_Log(Type* a, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] = logf(fmaxf(a[index],1E-10f));
-        }
+        __global__ void KB_Log(Type* a, size_t size);
 
         template<typename Type>
-        __global__ void KB_Exp(Type* a, size_t size, bool bNeg)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                float var = a[index];
-                a[index] = expf( bNeg ? (-var) : var );
-        }
+        __global__ void KB_Exp(Type* a, size_t size, bool bNeg);
 
         template<typename Type>
-        __global__ void KB_Clamp(Type* a, const Type b, const Type c, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                a[index] = clamp(a[index],b,c);
-        }
+        __global__ void KB_Clamp(Type* a, const Type b, const Type c, size_t size);
 
         template<typename Type>
-        __global__ void KB_log1j(float* out, const Type* in, size_t size) {}
+        __global__ void KB_log1j(float* out, const Type* in, size_t size);// {}
         
         template<typename Type>
-        __global__ void KB_exp1j(Type* out, const float* in, size_t size) {}
+        __global__ void KB_exp1j(Type* out, const float* in, size_t size);// {}
 
         template<>
-        __global__ void KB_log1j<complex>(float* out, const complex* in, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                out[index] = in[index].angle();
-        }
+        __global__ void KB_log1j<complex>(float* out, const complex* in, size_t size);
         
         template<>
-        __global__ void KB_exp1j<complex>(complex* out, const float* in, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                out[index] = complex::exp1j(in[index]);
-        }
-
+        __global__ void KB_exp1j<complex>(complex* out, const float* in, size_t size);
 
         template<typename Type>
-        __global__ void KB_Power(Type* a, float P, size_t size) {}
+        __global__ void KB_Power(Type* a, float P, size_t size);// {}
 
         template<>
-        __global__ void KB_Power<float>(float* out, float P, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                out[index] = expf(logf(fmaxf(fabsf(out[index]),1E-25f))*P);
-        }
+        __global__ void KB_Power<float>(float* out, float P, size_t size);
 
         template<>
-        __global__ void KB_Power<complex>(complex* out, float P, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                out[index] = complex::exp1j(out[index].angle()*P)*expf(logf(fmaxf(out[index].abs(),1E-25f))*P);
-        }
+        __global__ void KB_Power<complex>(complex* out, float P, size_t size);
 
         template<typename Type>
-        __global__ void KB_ABS2(float* out, Type* a, size_t size) {}
+        __global__ void KB_ABS2(float* out, Type* a, size_t size);// {}
 
         template<>
-        __global__ void KB_ABS2<complex>(float* out, complex* in, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                out[index] = in[index].abs2();
-        }
+        __global__ void KB_ABS2<complex>(float* out, complex* in, size_t size);
 
         template<>
-        __global__ void KB_ABS2<float>(float* out, float* in, size_t size)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-
-                out[index] = in[index]*in[index];
-        }
+        __global__ void KB_ABS2<float>(float* out, float* in, size_t size);
 
         #ifdef _USING_FP16
         template<typename Type2, typename Type1>
-        __global__ void KConvert(Type2* out, Type1* in, size_t size, float threshold)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
-                
-                float res = (float)in[index];
-                
-                if(std::is_same<Type2,__half>::value == true)
-                        res *= 1024.0f;
-                else if(std::is_floating_point<Type2>::value == false)
-                        res = fminf(res/threshold,1.0f) * ((1UL<<(8*(sizeof(Type2) & 0X7) ))-1);
-
-                out[index] = Type2(res);
-        }
+        __global__ void KConvert(Type2* out, Type1* in, size_t size, float threshold);
 
         template<>
-        __global__ void KConvert<complex,complex16>(complex* out, complex16* in, size_t size, float threshold)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
+        __global__ void KConvert<complex,complex16>(complex* out, complex16* in, size_t size, float threshold);
 
-                out[index] = complex(in[index]);
-        }
         template<>
-        __global__ void KConvert<complex16,complex>(complex16* out, complex* in, size_t size, float threshold)
-        {
-                const size_t index = GetIndex();
-                if(index >= size)
-                        return;
+        __global__ void KConvert<complex16,complex>(complex16* out, complex* in, size_t size, float threshold);
 
-                out[index] = complex16(in[index]);
-        }
         #endif
 
         // #if !defined(DOXYGEN_SHOULD_SKIP_THIS) // adding because sphinx exhale has a bug
         template<typename Type>
-        inline __device__ Type convert(float var, float threshold )
-        {
-                return var; 
-        }
+        inline __device__ Type convert(float var, float threshold ){return var;};
         // #endif // DOXYGEN_SHOULD_SKIP_THIS
 
         /*we divide by 1024 just for normalization*/
         
         #ifdef _USING_FP16
         template<>
-        inline __device__ half convert(float var, float threshold)
-        {
-                return __float2half(var);
-        }
+        inline __device__ half convert(float var, float threshold){return __float2half(var);};
         #endif
 
         template<>
@@ -367,14 +184,14 @@ namespace BasicOps
         {
                 var = __saturatef(var/(2*threshold) + 0.5f);
                 return  ((1<<16)-1) * var;
-        }
+        };
 
         template<>
         inline __device__ uint8_t convert(float var, float threshold)
         {
                 var = __saturatef(var/(2*threshold) + 0.5f);
                 return  ((1<<8)-1) * var;
-        }
+        };
 
         // float just has 24 bits (e.g 1 << 24)
         template<>
@@ -382,13 +199,13 @@ namespace BasicOps
         {
                 var = __saturatef(var/(2*threshold) + 0.5f);
                 return  ((1<<24)-1) * var;
-        }
+        };
 
         template<typename Type>
         inline __device__ void set_pixel(void *recon, float var, int i, int j, int wdI, float threshold)
         {
                 ((Type *)recon)[j*wdI + i]  = convert<Type>(var, threshold);
-        }
+        };
         
         inline __device__ void set_pixel(void *recon, float var, int i, int j, int wdI, float threshold, EType::TypeEnum raftDatatype)
         {
@@ -412,59 +229,17 @@ namespace BasicOps
                         break;
         #endif
                 }
-        }
+        };
 
         template<typename Type>
-        __global__ void KFFTshift1(Type* img, size_t sizex, size_t sizey)
-        {
-                size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
-                size_t idy = threadIdx.y + blockIdx.y * blockDim.y;
-                size_t idz = blockIdx.z;
+        __global__ void KFFTshift1(Type* img, size_t sizex, size_t sizey);
 
-                if(idx < sizex/2 && idy < sizey)
-                {
-                        size_t index1 = idz*sizex*sizey + idy*sizex + idx;
-                        size_t index2 = idz*sizex*sizey + idy*sizex + idx+sizex/2;
-
-                        Type temp = img[index1];
-                        img[index1] = img[index2];
-                        img[index2] = temp;
-                }
-        }
         template<typename Type>
-        __global__ void KFFTshift2(Type* img, size_t sizex, size_t sizey)
-        {
-                size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
-                size_t idy = threadIdx.y + blockIdx.y * blockDim.y;
-                size_t idz = blockIdx.z;
+        __global__ void KFFTshift2(Type* img, size_t sizex, size_t sizey);
 
-                if(idx < sizex && idy < sizey/2)
-                {
-                        size_t index1 = idz*sizex*sizey + idy*sizex + idx;
-                        size_t index2 = idz*sizex*sizey + (idy+sizey/2)*sizex + (idx+sizex/2)%sizex;
-
-                        Type temp = img[index1];
-                        img[index1] = img[index2];
-                        img[index2] = temp;
-                }
-        }
         template<typename Type>
-        __global__ void KFFTshift3(Type* img, size_t sizex, size_t sizey, size_t sizez)
-        {
-                size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
-                size_t idy = threadIdx.y + blockIdx.y * blockDim.y;
-                size_t idz = blockIdx.z;
+        __global__ void KFFTshift3(Type* img, size_t sizex, size_t sizey, size_t sizez);
 
-                if(idx < sizex && idy < sizey/2)
-                {
-                        size_t index1 = idz*sizex*sizey + idy*sizex + idx;
-                        size_t index2 = ((idz+sizez/2)%sizez)*sizex*sizey + (idy+sizey/2)*sizex + (idx+sizex/2)%sizex;
-
-                        Type temp = img[index1];
-                        img[index1] = img[index2];
-                        img[index2] = temp;
-                }
-        }
 }
 
 namespace Reduction
@@ -498,94 +273,27 @@ namespace Reduction
                 }
         }
 
-        __global__ void KGlobalReduce(float* out, const float* in, size_t size)
-        {
-                __shared__ float intermediate[32];
-                if(threadIdx.x<32)
-                        intermediate[threadIdx.x] = 0;
-                __syncthreads();
-                
-                float mine = 0;
+        __global__ void KGlobalReduce(float* out, const float* in, size_t size);
 
-                for(size_t index = threadIdx.x + blockIdx.x*blockDim.x; index < size; index += blockDim.x*gridDim.x)
-                        mine += in[index];
-
-                atomicAdd(intermediate + threadIdx.x%32, mine);
-
-                __syncthreads();
-
-                KSharedReduce32(intermediate);
-                if(threadIdx.x==0)
-                        out[blockIdx.x] = intermediate[0];
-        }
 }
 
 namespace Sync
 {
         template<typename Type>
-        __global__ void KWeightedLerp(Type* val, const Type* acc, const float* div, size_t size, float lerp)
-        {	
-                size_t index = BasicOps::GetIndex();
-                if(index >= size)
-                        return;
-
-                Type weighed = acc[index] / (div[index]+1E-10f);
-                val[index] = weighed*lerp + val[index]*(1.0f-lerp);
-        }
+        __global__ void KWeightedLerp(Type* val, const Type* acc, const float* div, size_t size, float lerp);
 
         template<typename Type>
-        __global__ void KMaskedSum(Type* cval, const Type* acc, size_t size, const uint32_t* mask2)
-        {
-                size_t index = BasicOps::GetIndex();
-                if(index >= size)
-                        return;
-
-                uint32_t mask = mask2[index/32];
-                bool value = (mask>>(index&0x1F)) & 0x1;
-
-                if(value)
-                        cval[index] += acc[index];
-        }
+        __global__ void KMaskedSum(Type* cval, const Type* acc, size_t size, const uint32_t* mask2);
 
         template<typename Type>
-        __global__ void KMaskedBroadcast(Type* cval, const Type* acc, size_t size, const uint32_t* mask2)
-        {
-                size_t index = BasicOps::GetIndex();
-                if(index >= size)
-                        return;
-
-                uint32_t mask = mask2[index/32];
-                bool value = (mask>>(index&0x1F)) & 0x1;
-
-                if(value)
-                        cval[index] = acc[index];
-        }
+        __global__ void KMaskedBroadcast(Type* cval, const Type* acc, size_t size, const uint32_t* mask2);
 
         template<typename Type>
-        __global__ void KSetMask(uint32_t* mask, const Type* value, size_t size, float thresh){};
+        __global__ void KSetMask(uint32_t* mask, const Type* value, size_t size, float thresh); //{};
 
         template<>
-        __global__ void KSetMask<float>(uint32_t* mask, const float* fval, size_t size, float thresh)
-        {
-                __shared__ uint32_t shvalue[1];
-                if(threadIdx.x < 32)
-                        shvalue[threadIdx.x] = 0;
+        __global__ void KSetMask<float>(uint32_t* mask, const float* fval, size_t size, float thresh);
 
-                __syncthreads();
-
-                size_t index = BasicOps::GetIndex();
-                if(index >= size)
-                        return;
-
-                uint32_t value = (fval[index] > thresh) ? 1 : 0;
-                value = value << threadIdx.x;
-                        
-                atomicOr(shvalue, value);
-
-                __syncthreads();
-                if(threadIdx.x==0)
-                        mask[index/32] = shvalue[0];
-        }
 }
 
 #endif

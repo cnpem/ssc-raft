@@ -1,6 +1,7 @@
 #ifndef _TOMOOPR_H
 #define _TOMOOPR_H
 
+#include "operations.hpp"
 #include "types.hpp"
 #include "logerror.hpp"
 

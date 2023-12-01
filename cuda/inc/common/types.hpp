@@ -10,14 +10,7 @@
  #define restrict
 #endif
 
-#include <cuda_runtime_api.h>
-#include <cuda.h>
-#include "cufft.h"
-#include <iostream>
-#include <cassert>
-#include <vector>
-#include <sstream>
-#include <string>
+#include "../include.h"
 
 #include "complex.hpp"
 #include "operations.hpp"

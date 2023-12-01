@@ -1,7 +1,7 @@
 #ifndef RAFT_PROC_H
 #define RAFT_PROC_H
 
-#include "../common/configs.h"
+#include "../common/config.h"
 
 typedef struct Processes{ 
     /* GPU */ 
@@ -32,6 +32,8 @@ extern "C"{
     void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
 
     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
+
+    void setProcessFrames(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
     
     int getTotalProcesses(CFG configs, GPU gpus);
 

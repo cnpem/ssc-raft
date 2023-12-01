@@ -23,21 +23,3 @@
 #include <omp.h>
 #include <math.h>
 #include <cublas_v2.h>
-#include "common/configs.h"
-#include "common/structs.h"
-#include "common/kernel_operators.hpp"
-#include "common/complex.hpp"
-#include "common/types.hpp"
-#include "common/operations.hpp"
-#include "common/logerror.hpp"
-#include "pipeline/pipeline.h"
-#include "pipeline/process.h"
-#include "pipeline/workspace.h"
-#include "GeneralOperators/filter.h"
-#include "GeneralOperators/alignment.h"
-#include "GeneralOperators/rings.h"
-#include "GeneralOperators/flatdark.h"
-#include "GeneralOperators/phasefilters.h"
-#include "GeneralOperators/operators.h"
-#include "geometries/gp/fbp.h"
-
