@@ -1,6 +1,6 @@
 // Authors: Giovanni Baraldi, Eduardo X. Miqueles
 
-#include "../../../../inc/sscraft.h"
+#include "../../../../inc/reconstructions.h"
 
 __global__ void SetX(complex* out, float* in, int sizex)
 {

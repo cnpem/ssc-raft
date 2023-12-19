@@ -1,6 +1,4 @@
-#include "../../inc/include.h"
-#include "../../inc/common/config.h"
-
+#include "../../inc/common/configs.h"
 
 extern "C"{
 
@@ -16,7 +14,7 @@ extern "C"{
 		int Nsz                = 1;
 
 		gpus_parameters->BT    = dim3(Nsx,Nsy,Nsz);
-        const int bx           = ( size_pad.x + Nsx - 1 ) / Nsx;	
+		const int bx           = ( size_pad.x + Nsx - 1 ) / Nsx;	
 		const int by           = ( size_pad.y + Nsy - 1 ) / Nsy;
 		const int bz           = ( size_pad.z + Nsz - 1 ) / Nsz;
 		gpus_parameters->Grd   = dim3(bx,by,bz);
@@ -50,7 +48,6 @@ extern "C"{
 		configs->tomo.dx                   = parameters_float[12];
 		configs->tomo.dy                   = parameters_float[13];
 		configs->tomo.dz                   = parameters_float[14];
-
 
 		/* Set Padding */
 		configs->tomo.pad                  = dim3(parameters_int[7],parameters_int[8],parameters_int[9]); 
@@ -102,8 +99,8 @@ extern "C"{
 		configs->flags.do_flat_dark_log         = flags[1];
 		configs->flags.do_phase_filter          = flags[2];
 		configs->flags.do_rings                 = flags[3];
-		configs->flags.do_rotation_offset       = flags[4];
-		configs->flags.do_alignment             = flags[5];
+		configs->flags.do_rotation              = flags[4];
+		configs->flags.do_rotation_correction   = flags[5];
 		configs->flags.do_reconstruction        = flags[6];
 
 		/* Set Flat/Dark Correction */
@@ -217,4 +214,166 @@ extern "C"{
 
 	}
 
+
+	void setFBPParameters(CFG *configs, float *parameters_float, int *parameters_int)
+	{
+		/* Set Geometry */
+		configs->geometry.geometry         = 0;
+
+		/* Set Reconstruction variables */
+		configs->recon.size                = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
+
+		configs->recon.x                   = parameters_float[0];
+		configs->recon.y                   = parameters_float[1];
+		configs->recon.z                   = parameters_float[2];
+		configs->recon.dx                  = parameters_float[3]; 
+		configs->recon.dy                  = parameters_float[4];
+		configs->recon.dz                  = parameters_float[5];
+		
+		/* Set Tomogram (or detector) variables (h for horizontal (nrays) and v for vertical (nslices)) */
+		configs->tomo.size                 = dim3(parameters_int[4],parameters_int[5],parameters_int[6]); 
+
+		configs->tomo.nrays                = parameters_float[6];
+		configs->tomo.nangles              = parameters_float[7];
+		configs->tomo.nslices              = parameters_float[8];
+
+		configs->tomo.x                    = parameters_float[9];
+		configs->tomo.y                    = parameters_float[10];
+		configs->tomo.z                    = parameters_float[11];
+		configs->tomo.dx                   = parameters_float[12];
+		configs->tomo.dy                   = parameters_float[13];
+		configs->tomo.dz                   = parameters_float[14];
+
+
+		/* Set Padding */
+		configs->tomo.pad                  = dim3(parameters_int[7],parameters_int[8],parameters_int[9]); 
+
+		int npadx                          = configs->tomo.size.x * ( 1 + 2 * configs->tomo.pad.x ); 
+		int npady                          = configs->tomo.size.y * ( 1 + 2 * configs->tomo.pad.y ); 
+		int npadz                          = configs->tomo.size.z * ( 1 + 2 * configs->tomo.pad.z );
+
+		configs->tomo.npad                 = dim3(npadx,npady,npadz); 
+
+		/* Set General reconstruction variables*/
+		configs->geometry.detector_pixel_x = parameters_float[15];
+		configs->geometry.detector_pixel_y = parameters_float[16];
+		configs->geometry.energy           = parameters_float[17];
+		configs->geometry.z1x              = parameters_float[18];
+		configs->geometry.z1y              = parameters_float[19];
+		configs->geometry.z2x              = parameters_float[20];
+		configs->geometry.z2y              = parameters_float[21];
+
+		/* Set wavelenght (lambda) and wavenumber (wave) */
+		configs->geometry.lambda           = ( plank * vc          ) / configs->geometry.energy;
+		configs->geometry.wave             = ( 2.0   * float(M_PI) ) / configs->geometry.lambda;
+
+		/* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
+	
+		configs->geometry.magnitude_x = 1.0;
+		configs->geometry.magnitude_y = 1.0;
+				
+		/* Paralell */
+
+		/* Set FBP */
+
+		/* Set Reconstruction method variables */
+		configs->reconstruction_method          = parameters_int[10];
+		configs->reconstruction_filter_type     = parameters_int[11];   /* Reconstruction Filter type */
+
+		float paganin_reg                       = ( parameters_float[22] == 0.0 ? 0.0 : parameters_float[22] ); /* Reconstruction Filter regularization parameter */
+		configs->reconstruction_paganin_reg     = 4.0f * float(M_PI) * float(M_PI) * configs->geometry.z2x * paganin_reg * configs->geometry.lambda  / ( configs->geometry.magnitude_x );
+		configs->reconstruction_reg             = parameters_float[23]; /* General regularization parameter */
+
+		/* Set Slices on Reconstruction and on Tomogram */
+		/* For Parallel and Fanbeam geometry, 
+		Slices on reconstrucion are the SAME as the slices on tomogram.
+		For Conebeam geometry, 
+		Slices on reconstrucion are DIFFERENT as the slices on tomogram. 
+		*/
+		configs->recon.start_slice              = parameters_int[12]; /* Slices: start slice on reconstruction */  
+		configs->recon.end_slice                = parameters_int[13]; /* Slices: end slice on reconstruction */ 
+
+		configs->tomo.start_slice               = parameters_int[14]; /* Slices: start slice on tomogram */ 
+		configs->tomo.end_slice                 = parameters_int[15]; /* Slices: end slice on tomogram */ 
+
+	}
+
+	void setEMParameters(CFG *configs, float *parameters_float, int *parameters_int)
+	{
+		/* Set Geometry */
+		configs->geometry.geometry         = 0;
+
+		/* Set Reconstruction variables */
+		configs->recon.size                = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
+
+		configs->recon.x                   = parameters_float[0];
+		configs->recon.y                   = parameters_float[1];
+		configs->recon.z                   = parameters_float[2];
+		configs->recon.dx                  = parameters_float[3]; 
+		configs->recon.dy                  = parameters_float[4];
+		configs->recon.dz                  = parameters_float[5];
+		
+		/* Set Tomogram (or detector) variables (h for horizontal (nrays) and v for vertical (nslices)) */
+		configs->tomo.size                 = dim3(parameters_int[4],parameters_int[5],parameters_int[6]); 
+
+		configs->tomo.nrays                = parameters_float[6];
+		configs->tomo.nangles              = parameters_float[7];
+		configs->tomo.nslices              = parameters_float[8];
+
+		configs->tomo.x                    = parameters_float[9];
+		configs->tomo.y                    = parameters_float[10];
+		configs->tomo.z                    = parameters_float[11];
+		configs->tomo.dx                   = parameters_float[12];
+		configs->tomo.dy                   = parameters_float[13];
+		configs->tomo.dz                   = parameters_float[14];
+
+
+		/* Set Padding */
+		configs->tomo.pad                  = dim3(parameters_int[7],parameters_int[8],parameters_int[9]); 
+
+		int npadx                          = configs->tomo.size.x * ( 1 + 2 * configs->tomo.pad.x ); 
+		int npady                          = configs->tomo.size.y * ( 1 + 2 * configs->tomo.pad.y ); 
+		int npadz                          = configs->tomo.size.z * ( 1 + 2 * configs->tomo.pad.z );
+
+		configs->tomo.npad                 = dim3(npadx,npady,npadz); 
+
+		/* Set General reconstruction variables*/
+		configs->geometry.detector_pixel_x = parameters_float[15];
+		configs->geometry.detector_pixel_y = parameters_float[16];
+		configs->geometry.energy           = parameters_float[17];
+		configs->geometry.z1x              = parameters_float[18];
+		configs->geometry.z1y              = parameters_float[19];
+		configs->geometry.z2x              = parameters_float[20];
+		configs->geometry.z2y              = parameters_float[21];
+
+		/* Set wavelenght (lambda) and wavenumber (wave) */
+		configs->geometry.lambda           = ( plank * vc          ) / configs->geometry.energy;
+		configs->geometry.wave             = ( 2.0   * float(M_PI) ) / configs->geometry.lambda;
+
+		/* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
+	
+		configs->geometry.magnitude_x = 1.0;
+		configs->geometry.magnitude_y = 1.0;
+				
+		/* Paralell */
+
+		/* Set FBP */
+
+		/* Set Reconstruction method variables */
+		configs->em_iterations          = parameters_int[10];
+		configs->reconstruction_reg     = parameters_float[22]; /* General regularization parameter */
+
+		/* Set Slices on Reconstruction and on Tomogram */
+		/* For Parallel and Fanbeam geometry, 
+		Slices on reconstrucion are the SAME as the slices on tomogram.
+		For Conebeam geometry, 
+		Slices on reconstrucion are DIFFERENT as the slices on tomogram. 
+		*/
+		configs->recon.start_slice              = parameters_int[11]; /* Slices: start slice on reconstruction */  
+		configs->recon.end_slice                = parameters_int[12]; /* Slices: end slice on reconstruction */ 
+
+		configs->tomo.start_slice               = parameters_int[13]; /* Slices: start slice on tomogram */ 
+		configs->tomo.end_slice                 = parameters_int[14]; /* Slices: end slice on tomogram */ 
+
+	}
 }

@@ -1,4 +1,4 @@
-#include "../../inc/sscraft.h"
+#include "../../inc/common/configs.h"
 
 extern "C"{
 	Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes)

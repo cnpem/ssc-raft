@@ -1,7 +1,7 @@
 // Authors: Gilberto Martinez, Eduardo X Miqueles, Giovanni Baraldi, Paola Ferraz
 
-#include "../../../../inc/sscraft.h"
-
+#include "../../../../inc/filters.h"
+#include "../../../../inc/reconstructions.h"
 
 extern "C"{
     void getFBP(CFG configs, GPU gpus, float *recon, float *tomogram, float *angles, dim3 tomo_size, dim3 tomo_pad, dim3 recon_size)
@@ -25,12 +25,11 @@ extern "C"{
         filterFBP(gpus, filter, tomogram, filter_kernel, tomo_size, tomo_pad);
 
         BackProjection_RT<<<gpus.Grd,gpus.BT>>>(recon, tomogram, sintable, costable, recon_size, tomo_size);
-
-        cudaDeviceSynchronize();
         
         cudaFree(sintable);
         cudaFree(costable);
         cudaFree(filter_kernel);
+        cudaDeviceSynchronize();
     }
 
     void getFBP_thresh(CFG configs, GPU gpus, float *recon, float *tomogram, float *angles, dim3 tomo_size, dim3 tomo_pad, dim3 recon_size)
@@ -69,8 +68,8 @@ extern "C"{
 
         if ( (k >= nangles) ) return;
 
-        sintable[k] = __asinf(angles[k]);
-        costable[k] = __acosf(angles[k]);
+        sintable[k] = asinf(angles[k]);
+        costable[k] = acosf(angles[k]);
     }
 }
 
@@ -115,12 +114,11 @@ extern "C"{
                   );
   
             HANDLE_ERROR(cudaMemcpy(recon + ptr_block_recon, drecon, (size_t)configs.recon.size.x * configs.recon.size.y * subblock * sizeof(float), cudaMemcpyDeviceToHost));                 
-
         }
-        cudaDeviceSynchronize();
         cudaFree(dangles);
         cudaFree(dtomo);
         cudaFree(drecon);
+        cudaDeviceSynchronize();
     }
 
     void getFBPMultiGPU(float* recon, float* tomogram, float* angles, float *paramf, int *parami, int* gpus, int ngpus)
@@ -128,7 +126,7 @@ extern "C"{
         int i, Maxgpudev;
 		
 		/* Multiples devices */
-		cudaGetDeviceCount(&Maxgpudev);
+		HANDLE_ERROR(cudaGetDeviceCount(&Maxgpudev));
 
 		/* If devices input are larger than actual devices on GPU, exit */
 		for(i = 0; i < ngpus; i++) 
@@ -140,12 +138,12 @@ extern "C"{
 
         setGPUParameters(&gpu_parameters, configs.tomo.npad, ngpus, gpus);
 
-		int subvolume = (tomo.size.z + ngpus - 1) / ngpus;
+		int subvolume = (configs.tomo.size.z + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; 
 
 		if (ngpus == 1){ /* 1 device */
 
-			getFBPGPU(configs, gpu_parameters, recon, tomogram, angles, gpus[0]);
+			getFBPGPU(configs, gpu_parameters, recon, tomogram, angles, subvolume, gpus[0]);
 
 		}else{
 		/* Launch async Threads for each device.
@@ -156,7 +154,7 @@ extern "C"{
 
 			for (i = 0; i < ngpus; i++){
 				
-				subblock   = min(tomo.size.z - ptr, subvolume);
+				subblock   = min(configs.tomo.size.z - ptr, subvolume);
 
 
 				threads.push_back( std::async( std::launch::async, 
@@ -215,7 +213,7 @@ extern "C"{
             if ( ( T >= 0 ) && ( T < ( tomo_size.x - 1 ) ) ){
                 frac = t-T;
 
-                sum += sino[tomo_size.y * tomo_size.x * k + angle * tomo_size.x + T] * (1.0f - frac) + sino[angle * tomo_size.x + T + 1] * frac;
+                sum += tomo[tomo_size.y * tomo_size.x * k + angle * tomo_size.x + T] * (1.0f - frac) + tomo[angle * tomo_size.x + T + 1] * frac;
             }
         }        
 
@@ -250,7 +248,7 @@ extern "C"{
             if ( ( T >= 0 ) && ( T < ( tomo_size.x - 1 ) ) ){
                 frac = t-T;
 
-                sum += sino[tomo_size.y * tomo_size.x * k + angle * tomo_size.x + T] * (1.0f - frac) + sino[angle * tomo_size.x + T + 1] * frac;
+                sum += tomo[tomo_size.y * tomo_size.x * k + angle * tomo_size.x + T] * (1.0f - frac) + tomo[angle * tomo_size.x + T + 1] * frac;
             }
         }        
 
@@ -258,92 +256,7 @@ extern "C"{
         its desired range (controled by the threshold variable)
         and to its desired data type (uint8, unint16, and etc...)
         */
-        BasicOps::set_pixel(recon, sum*norm, i, ind, recon_size.x, threshold, datatype);
+        // BasicOps::set_pixel((void*)recon, sum*norm, (int)i, (int)ind, (int)recon_size.x, threshold, datatype);
     } 
 
-    __global__ void KRadon_RT(float* restrict frames, const float* image, int nrays, int nangles)
-    {
-        int ray = (blockDim.x * blockIdx.x + threadIdx.x);
-        int ang = (blockDim.y * blockIdx.y + threadIdx.y);
-        const size_t sizef = nrays*nrays;
-        
-        if ( ray>=nrays || ang >= nangles )
-            return;
-        
-        float btheta = float(M_PI)*float(ang + nangles/2)/nangles;
-        
-        float ct = nrays/2;
-        float cos_t = cosf(btheta + 1E-5f);
-        float sin_t = sinf(btheta + 1E-5f);
-
-        float x = ct - 2.0f*ct*cos_t + (ray-nrays/2)*sin_t;
-        float y = ct - 2.0f*ct*sin_t - (ray-nrays/2)*cos_t;
-
-        float tx0 = -x/cos_t;
-        float tx1 = (nrays-x)/cos_t;
-
-        float ty0 = -y/sin_t;
-        float ty1 = (nrays-y)/sin_t;
-
-        float d1 = fmaxf(fminf(tx0,tx1), fminf(ty0,ty1));
-        int d2 = int(ceil(fminf(fmaxf(tx0,tx1), fmaxf(ty0,ty1)) - d1)+0.1f);
-
-        x += d1*cos_t;
-        y += d1*sin_t;
-        
-        float radon = 0;
-        for(int s=0; s<d2; s++)
-        {
-            radon += image[(int(y+0.5f)*nrays + int(x+0.5f))%sizef + blockIdx.z*sizef];
-
-            x += cos_t;
-            y += sin_t;
-        }
-
-        frames[blockIdx.z*size_t(nrays*nangles) + nrays*ang + ray] = radon;
-    }
-
-}
-
-extern "C"
-{
-	void GRadon(int device, float* _frames, float* _image, int nrays, int nangles, int blocksize)
-	{
-		cudaSetDevice(device);
-
-		rImage frames(nrays,nangles,blocksize);
-		rImage image(_image,nrays,nrays,blocksize);
-
-		KRadon_RT<<<dim3(nrays/64,nangles,blocksize),64>>>(frames.gpuptr, image.gpuptr, nrays, nangles);
-
-		frames.CopyTo(_frames);
-		cudaDeviceSynchronize();
-	}
-
-	void GBackprojection(int device, float* _recon, float* _sino, int nrays, int nangles, int blocksize)
-	{
-		cudaSetDevice(device);
-
-		rImage sintable(nangles,1);
-		rImage costable(nangles,1);
-
-		for(int a=0; a<nangles; a++)
-		{
-			sintable.cpuptr[a] = sinf(float(M_PI)*a/float(nangles));
-			costable.cpuptr[a] = cosf(float(M_PI)*a/float(nangles));
-		}
-
-		sintable.LoadToGPU();
-		costable.LoadToGPU();
-
-		rImage recon(nrays,nrays,blocksize);
-		rImage sino(_sino,nrays,nangles,blocksize);
-
-		KBackProjection_RT<<<dim3(nrays/64,nrays,blocksize),64>>>(
-			(char*)recon.gpuptr, sino.gpuptr, nrays, nrays, nangles, EType::TypeEnum::FLOAT32, 0, sintable.gpuptr, costable.gpuptr);
-
-		recon.CopyTo(_recon);
-		cudaDeviceSynchronize();
-
-	}
 }

@@ -16,7 +16,7 @@
 // our libs:
 #include "../../../../inc/geometries/parallel/fst.h"
 #include "../../../../inc/geometries/parallel/fst_kernel.h"
-#include "../../../../inc/common/cufft_utils.h"
+#include "../../../../inc/common/logerror.hpp"
 
 extern "C" {
 int fst_gpu(

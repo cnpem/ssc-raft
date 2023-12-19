@@ -1,11 +1,12 @@
-#include "../../../inc/sscraft.h"
+#include "../../../inc/filters.h"
+#include "../../../inc/common/ffts.h"
 
 extern "C"{
 	
 	void filterFBP(GPU gpus, Filter filter, float *tomogram, cufftComplex *filter_kernel, dim3 size, dim3 size_pad)
 	{	
 		int n[] = {(int)size_pad.x};
-		cufftPlanMany(&gpus.mplan1dC2C, 1, n, n, 1, size_pad.x, n, 1, size_pad.x, CUFFT_C2C, (long long int)size.y * size.z);
+		HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan1dC2C, 1, n, n, 1, size_pad.x, n, 1, size_pad.x, CUFFT_C2C, (long long int)size.y * size.z));
 
 		_fbp_filter<<<gpus.Grd,gpus.BT>>>(filter, filter_kernel, size_pad);
 
@@ -87,6 +88,8 @@ extern "C" {
 		cudaFree(dataPadded);
 	}
 
+    
+
     __global__ void ProdComplexFloat(cufftComplex *a, float *b, cufftComplex *ans, dim3 size)
     {
         size_t i = blockIdx.x*blockDim.x + threadIdx.x;
@@ -110,33 +113,6 @@ extern "C" {
 
         if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
         ans[index] = ComplexMult(a[index],b[ind]);
-		// ans[index] = a[index] * b[ind];
-    }
-
-    __global__ void fftNormalize2d(cufftComplex *c, dim3 size)
-    {
-        int N = ( size.x * size.y );	
-        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
-        size_t index = size.x * ( k * size.y + j) + i;
-        
-        if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
-        
-        c[index].x /= (float)N; c[index].y /= (float)N; 
-    }
-
-	__global__ void fftNormalize1d(cufftComplex *c, dim3 size)
-    {
-        int N = ( size.x );	
-        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
-        size_t index = size.x * ( k * size.y + j) + i;
-        
-        if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
-        
-        c[index].x /= (float)N; c[index].y /= (float)N; 
     }
 
     __global__ void fftshiftKernel(float *c, dim3 size)
@@ -350,4 +326,182 @@ extern "C" {
 	// 	//cudaMemset(sinoblock, 0, nrays*nangles*4);
 	// }
 
+}
+
+__host__ __device__ inline float Filter::apply(float input)
+{
+	float param = 0.0f;
+
+	if (type == EType::gaussian)
+	{
+		input *= exp(-0.693f * reg * input * input);
+		input /= (1.0f + paganin * input * input);
+	}
+	else if (type == EType::lorentz)
+	{
+		input /= 1.0f + reg * input * input;
+		input /= (1.0f + paganin * input * input);
+	}
+	else if (type == EType::cosine)
+	{
+		input *= cosf(float(M_PI) * 0.5f * input);
+		input /= (1.0f + paganin * input * input);
+	}
+	else if (type == EType::rectangle)
+	{
+		param = fmaxf(input * reg * float(M_PI) * 0.5f, 1E-4f);
+		input *= sinf(param) / param;
+		input /= (1.0f + paganin * input * input);
+	}
+	else if (type == EType::hann)
+	{
+		input *= input * 0.5f + 0.5f * cosf(2.0f * float(M_PI) * input);
+		input /= (1.0f + paganin * input * input);
+	}
+	else if (type == EType::hamming)
+	{
+		input *= input * (0.54f + 0.46f * cosf(2.0f * float(M_PI) * input));
+		input /= (1.0f + paganin * input * input);
+	}
+	else if (type == EType::ramp)
+	{
+		input /= (1.0f + paganin * input * input);
+	}
+
+	return input;
+}
+
+Convolution::Plan(cufftHandle _mplan, cufftHandle _implan, int _dim, dim3 _pad, Convolution::fftType _type) :
+mplan(mplan), implan(_implan), dim(_dim), pad(_pad), typefft((fftType)_type)
+{	
+    int sizeArray[dim];
+
+    if ( dim == 1 ) 
+        sizeArray[dim] = {(int)pad.x};
+    else
+        sizeArray[dim] = {(int)pad.x,(int)pad.y};
+
+    int rank      = dim;
+    int inembed   = sizeArray;
+    int istride   = 1;
+    int idist     = pad.x;
+    int onembed   = sizeArray;
+    int ostride   = 1;
+    int odist     = pad.x;
+    size_t _batch = pad.z;
+	
+    switch (typefft){
+	    case 0:
+            HANDLE_FFTERROR(cufftPlanMany(&mplan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_C2C, batch));
+            break;
+	    case 1:
+            HANDLE_FFTERROR(cufftPlanMany(&mplan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_C2C, batch));
+            HANDLE_FFTERROR(cufftPlanMany(&implan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_C2R, batch));
+            break;
+	    case 2:
+            HANDLE_FFTERROR(cufftPlanMany(&mplan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_R2C, batch));
+            HANDLE_FFTERROR(cufftPlanMany(&implan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_C2R, batch));
+		    break;
+	    case 3:
+            HANDLE_FFTERROR(cufftPlanMany(&mplan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_R2C, batch));
+            HANDLE_FFTERROR(cufftPlanMany(&implan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_C2C, batch));
+		    break;
+	    case 4:
+            HANDLE_FFTERROR(cufftPlanMany(&mplan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_C2R, batch));
+            HANDLE_FFTERROR(cufftPlanMany(&implan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_R2C, batch));
+		    break;
+	    default:
+            HANDLE_FFTERROR(cufftPlanMany(&mplan, rank, sizeArray, inembed, istride, idist, onembed, ostride, odist, CUFFT_C2C, batch));
+		    break;
+	}
+}
+
+Convolution::~Plan(cufftHandle _mplan, cufftHandle _implan, Convolution::fftType _type) :
+mplan(mplan), implan(_implan), typefft((fftType)_type)
+{
+    switch (typefft){
+	    case 0:
+            HANDLE_FFTERROR(cufftDestroy(mplan));
+            break;
+	    case 1:
+            HANDLE_FFTERROR(cufftDestroy(mplan));
+            HANDLE_FFTERROR(cufftDestroy(implan));
+            break;
+	    case 2:
+            HANDLE_FFTERROR(cufftDestroy(mplan));
+            HANDLE_FFTERROR(cufftDestroy(implan));
+            break;
+	    case 3:
+            HANDLE_FFTERROR(cufftDestroy(mplan));
+            HANDLE_FFTERROR(cufftDestroy(implan));
+            break;
+	    case 4:
+            HANDLE_FFTERROR(cufftDestroy(mplan));
+            HANDLE_FFTERROR(cufftDestroy(implan));
+            break;
+	    default:
+            HANDLE_FFTERROR(cufftDestroy(mplan));
+		    break;
+	}
+}
+
+template<typename Type1, typename Type2, typename Type3>
+void Convolution::convolve(GPU gpus, Type1 *gpuptr, Type2 *kernel)
+{
+    fftType type  = typefft;  
+    padType _type = Convolution::setPad<Type1,Type3>();
+
+    Type3* padgpuptr = Opt::allocGPU<Type3>(size_t npad);
+
+    Convolution::padd<Type1,Type3>(gpus, gpuptr, padgpuptr);
+    
+    if (type){
+	    case 0:
+            cufftComplex* ipadgpuptr = padgpuptr;
+            HANDLE_FFTERROR(cufftExecC2C(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+		    break;
+	    case 1:
+            float* padgpuptr = Opt::allocGPU<Type3>(size_t npad);
+            HANDLE_FFTERROR(cufftExecC2R(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+		    break;
+	    case 2:
+            HANDLE_FFTERROR(cufftExecR2C(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+		    break;
+	    case 3:
+            HANDLE_FFTERROR(cufftExecR2R(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+		    break;
+	    default:
+            HANDLE_FFTERROR(cufftExecC2C(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+		    break;
+	}
+
+    Opt::pointTopointProd<Type3, Type2>(gpus, Type1 *a, Type2 *b, Type1 *ans, pad, dim3 sizeb)
+
+    switch (type){
+	    case 0:	
+            HANDLE_FFTERROR(cufftExecC2C(mplan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
+            Convolution::Recpadd<cufftComplex, Type1>(gpus, padgpuptr, gpuptr);
+		    break;
+	    case 1:
+            HANDLE_FFTERROR(cufftExecR2C(implan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
+            Convolution::Recpadd<cufftComplex, Type1>(gpus, padgpuptr, gpuptr);
+		    break;
+	    case 2:
+            HANDLE_FFTERROR(cufftExecC2R(implan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
+            Convolution::Recpadd<float, Type1>(gpus, padgpuptr, gpuptr);
+		    break;
+	    case 3:	
+            HANDLE_FFTERROR(cufftExecR2R(implan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
+            Convolution::Recpadd<float, Type1>(gpus, padgpuptr, gpuptr);
+		    break;
+	    default:
+            HANDLE_FFTERROR(cufftExecC2C(implan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
+            Convolution::Recpadd<cufftComplex, Type1>(gpus, padgpuptr, gpuptr);
+		    break;
+	}
+    
+    HANDLE_ERROR(cudaFree(padgpuptr));
+
+    if (type == fftType::C2R_R2C || type == fftType::R2C_C2R)
+        HANDLE_ERROR(cudaFree(ipadgpuptr));    
 }

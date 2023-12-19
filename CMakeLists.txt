@@ -10,10 +10,8 @@ include_directories(
     cuda/inc
     cuda/inc/common
     cuda/inc/common10
-    cuda/inc/geometries/gc
-    cuda/inc/geometries/gp 
-    cuda/inc/GeneralOperators
-    cuda/inc/pipeline 
+    cuda/inc/geometries/parallel
+    cuda/inc/geometries/conebeam 
 )
 
 file(GLOB_RECURSE RAFT_SRC cuda/src/**/*.c*)

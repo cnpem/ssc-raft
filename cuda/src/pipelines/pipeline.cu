@@ -1,4 +1,6 @@
-#include "../../inc/sscraft.h"
+#include "../../inc/pipeline.h"
+#include "../../inc/processing.h"
+#include "../../inc/reconstructions.h"
 
 using std::thread;
 
@@ -127,11 +129,16 @@ extern "C"{
         if( configs.flags.do_rings == 1) 
             lambda_computed = getRings(workspace->tomo, tomo_size, configs.rings_lambda, configs.rings_block, gpus);
         
-        // if( configs.flags.do_rotation_offset == 1) 
-        //     getRotAxisOfsset();
+        // if( configs.flags.do_rotation == 1 && configs.flags.do_rotation_auto_offset == 1) 
+        //     int rotation_axis_offset = getRotAxisOfsset();
+        // else
+        //     rotation_axis_offset = configs.rotation_axis_offset;
 
         // if( configs.flags.do_alignment == 1) 
         //     getTomogramAlignment();
+
+        // if( configs.flags.do_rotation == 1 && configs.flags.do_rotation_correction == 1 && configs.reconstruction_method != 0) 
+        //     setRotAxisCorrection();
 
         switch (configs.geometry.geometry){
             case 0:
@@ -168,8 +175,7 @@ extern "C"{
             case 0:
                 /* FBP */
                 getFBP( configs, gpus, workspace->recon, workspace->tomo, workspace->angles, 
-                        tomo_size, pad_size, recon_size
-                        );
+                        tomo_size, pad_size, recon_size);
                 break;
             case 1:
                 /* BST */
@@ -177,11 +183,11 @@ extern "C"{
                 break;
             case 2:
                 /* EM RT eEM */
-                
+                get_eEM_RT(configs, gpus, workspace->recon, workspace->tomo, workspace->angles, process.batch_size_tomo);
                 break;
             case 3:
                 /* EM RT tEM */
-                
+                get_tEM_RT(configs, gpus, workspace->recon, workspace->tomo, workspace->flat, workspace->angles, process.batch_size_tomo);
                 break;
             case 4:
                 /* EM RT eEM TV */

@@ -1,4 +1,4 @@
-#include "../../../inc/sscraft.h"
+#include "../../../inc/processing.h"
 
 template <bool bShared>
 __global__ void KConvolve0(float *restrict image0, const float *kernel, size_t sizex, int hkernelsize, float *globalmem)

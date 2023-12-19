@@ -1,5 +1,5 @@
-#include "../../../../inc/sscraft.h"
-
+#include "../../../../inc/filters.h"
+#include "../../../../inc/processing.h"
 
 extern "C" {
 

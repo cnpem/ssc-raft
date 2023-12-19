@@ -14,7 +14,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../../pipeline/process.h"
+#include "../../processing.h"
 
 typedef struct {  
     float x,y,z;

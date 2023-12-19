@@ -14,7 +14,7 @@
 // our libs:
 #include "../../../../inc/geometries/parallel/fst.h"
 #include "../../../../inc/geometries/parallel/fst_kernel.h"
-#include "../../../../inc/common/cufft_utils.h"
+#include "../../../../inc/common/logerror.hpp"
 
 
 #define BYTES_TO_GB (1.0/(1024.0*1024.0*1024.0))

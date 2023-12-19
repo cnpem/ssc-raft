@@ -13,6 +13,7 @@
 #include "cuComplex.h"
 #include <cuda_runtime_api.h>
 #include <cuda.h>
+#include <cufft.h>
 
 #ifndef __host__
         #define __host__

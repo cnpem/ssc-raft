@@ -12,13 +12,13 @@
 #include <sstream>
 #include <string>
 
-inline void SaveLog(){};
+// inline void SaveLog(){};
 
-#define Log(message){ std::cout << message << std::endl; }
+// #define Log(message){ std::cout << message << std::endl; }
 
-#define ErrorAssert(statement, message){ if(!(statement)){ std::cerr << __LINE__ << " in " << __FILE__ << ": " << message << "\n" << std::endl; Log(message); SaveLog(); exit(-1); } }
+// #define ErrorAssert(statement, message){ if(!(statement)){ std::cerr << __LINE__ << " in " << __FILE__ << ": " << message << "\n" << std::endl; Log(message); SaveLog(); exit(-1); } }
 
-#define HANDLE_ERROR(errexp){ cudaError_t cudaerror = errexp; ErrorAssert( cudaerror == cudaSuccess, "Cuda error: " << std::string(cudaGetErrorString( cudaerror )) ) }
+// #define HANDLE_ERROR(errexp){ cudaError_t cudaerror = errexp; ErrorAssert( cudaerror == cudaSuccess, "Cuda error: " << std::string(cudaGetErrorString( cudaerror )) ) }
 
 extern "C"{
 __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process){

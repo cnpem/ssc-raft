@@ -1,4 +1,4 @@
-#include "../../../inc/sscraft.h"
+#include "../../../inc/filters.h"
 
 extern "C" {
 
@@ -9,7 +9,7 @@ extern "C" {
 		int i, Maxgpudev;
 		
 		/* Multiples devices */
-		cudaGetDeviceCount(&Maxgpudev);
+		HANDLE_ERROR(cudaGetDeviceCount(&Maxgpudev));
 
 		/* If devices input are larger than actual devices on GPU, exit */
 		for(i = 0; i < ngpus; i++) 
@@ -59,7 +59,7 @@ extern "C" {
 				threads[i].get();
 		}	
 
-		cudaDeviceSynchronize();
+		HANDLE_ERROR(cudaDeviceSynchronize());
 	}
 
 	void getPhaseFilterGPU(GPU gpus, GEO geometry, DIM tomo,
@@ -94,9 +94,9 @@ extern "C" {
 			HANDLE_ERROR(cudaMemcpy(projections, dprojections + ptr_block, (size_t)tomo.size.x * tomo.size.y * subblock * sizeof(float), cudaMemcpyDeviceToHost));
 
 		}
-		cudaDeviceSynchronize();
+		HANDLE_ERROR(cudaDeviceSynchronize());
 
-		cudaFree(dprojections);
+		HANDLE_ERROR(cudaFree(dprojections));
 
 	}
 
@@ -109,7 +109,7 @@ extern "C" {
 		setPhaseFilterKernel(gpus, geometry, phase_kernel, size_pad, phase_type, phase_reg);
 
 		/* Plan for Fourier transform - cufft */
-		int n[] = {size_pad.x,size_pad.x};
+		int n[] = {(int)size_pad.x,(int)size_pad.x};
 		HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, size.z));
 
 		applyPhaseFilter(gpus, projections, phase_kernel, phase_type, size, size_pad);
@@ -118,7 +118,7 @@ extern "C" {
 
 		/* Destroy plan */
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
-		cudaFree(phase_kernel);
+		HANDLE_ERROR(cudaFree(phase_kernel));
 	}
 
 	void applyPhaseFilter(GPU gpus, float *projections, float *kernel, 
