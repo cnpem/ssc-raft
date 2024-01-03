@@ -355,12 +355,12 @@ __host__ __device__ inline float Filter::apply(float input)
 	}
 	else if (type == EType::hann)
 	{
-		input *= input * 0.5f + 0.5f * cosf(2.0f * float(M_PI) * input);
+		input *= 0.5f + 0.5f * cosf(2.0f * float(M_PI) * input);
 		input /= (1.0f + paganin * input * input);
 	}
 	else if (type == EType::hamming)
 	{
-		input *= input * (0.54f + 0.46f * cosf(2.0f * float(M_PI) * input));
+		input *= (0.54f + 0.46f * cosf(2.0f * float(M_PI) * input));
 		input /= (1.0f + paganin * input * input);
 	}
 	else if (type == EType::ramp)
