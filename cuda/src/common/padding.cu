@@ -2,66 +2,76 @@
 #include "../../../inc/common/ffts.h"
 
 
+template<typename Type>
+padType Convolution::setPad(fftType type_fft){return paddingType<Type>(fftType type_fft);}
+
+template<>
+padType paddingType<Type>(fftType type_fft){return padType::none;}
+
+template<>
+padType paddingType<float>(fftType type_fft)
+{
+    if (type_fft == fftType::C2C){
+        return padType::R2C;
+    }else if (type_fft == fftType::R2R){
+        return padType::R2R;
+    }else{
+        return padType::R2C;
+    }
+}
+
+template<>
+padType paddingType<cufftComplex>(fftType type_fft)
+{
+    if (type_fft == fftType::C2C){
+        return padType::C2C;
+    }else if (type_fft == fftType::R2R){
+        return padType::C2R;
+    }else{
+        return padType::C2C;
+    }
+}
+
 template<typename TypeIn, typename TypeOut>
-padType Convolution::setPad(){return paddingType<TypeIn,TypeOut>();}
-
-template<>
-padType paddingType<TypeIn,TypeOut>(){return padType::none;}
-
-template<>
-padType paddingType<float,float>(){return padType::R2R;}
-
-template<>
-padType paddingType<cufftComplex,cufftComplex>(){return padType::C2C;}
-
-    template<>
-padType paddingType<cufftComplex,float>(){return padType::C2R;}
-
-    template<>
-padType paddingType<float,cufftComplex>(){return padType::R2C;}
-
-template<typename TypeIn, typename TypeOut>
-void Convolution::padd(GPU gpus, TypeIn *in, TypeOut *padded, padType type)
+void Convolution::padding(GPU gpus, TypeIn *in, TypeOut *padded, padType type)
 {
     switch (type){
         case 0:
-            paddC2C<<<gpus.Grd,gpus.BT>>>(in, padded, padval, size, pad);
+            paddC2C<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
             break;
         case 1:
-            paddR2C<<<gpus.Grd,gpus.BT>>>(in, padded, padval, size, pad);
+            paddR2C<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
             break;
         case 2:
-            paddC2R<<<gpus.Grd,gpus.BT>>>(in, padded, padval, size, pad);
+            paddC2R<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
             break;
         case 3:
-            paddR2R<<<gpus.Grd,gpus.BT>>>(in, padded, padval, size, pad);
+            paddR2R<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
             break;
         default:
-            paddC2C<<<gpus.Grd,gpus.BT>>>(in, padded, padval, size, pad);
+            paddC2C<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
             break;
     }
 }
 
 template<typename TypeIn, typename TypeOut>
-void Convolution::Recpadd(GPU gpus, TypeIn *inpadded, TypeOut *out)
+void Convolution::remove_padding(GPU gpus, TypeIn *inpadded, TypeOut *out, padType type)
 {
-    padType _type = Convolution::setPad<TypeIn, TypeOut>();
-
-    switch (_type){
+    switch (type){
         case 0:
-            recuperate_paddC2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, pad, dim);
+            remove_paddC2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
             break;
-        case 0:
-            recuperate_paddR2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, pad, dim);
+        case 1:
+            remove_paddC2R<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
             break;
-        case 0:
-            recuperate_paddC2R<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, pad, dim);
+        case 2:
+            remove_paddR2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
             break;
-        case 0:
-            recuperate_paddR2R<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, pad, dim);
+        case 3:
+            remove_paddR2R<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
             break;
         default:
-            recuperate_paddC2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, pad, dim);
+            remove_paddC2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
             break;
     }
 }
@@ -167,7 +177,7 @@ float value, dim3 size, dim3 padsize)
     outpadded[indpad] = in[index];
 }
 
-__global__ void recuperate_paddC2R(cufftComplex *inpadded, float *out, 
+__global__ void remove_paddC2R(cufftComplex *inpadded, float *out, 
 dim3 size, dim3 padsize, int dim)
 {
     size_t norm = (dim - 1) * size.x - (dim - 2) *(size.x * size.y);
@@ -190,7 +200,7 @@ dim3 size, dim3 padsize, int dim)
     out[index] = inpadded[indpad].x / norm; 
 }
 
-__global__ void recuperate_paddC2C(cufftComplex *inpadded, cufftComplex *out, 
+__global__ void remove_paddC2C(cufftComplex *inpadded, cufftComplex *out, 
 dim3 size, dim3 padsize, int dim)
 {
     size_t norm = (dim - 1) * size.x - (dim - 2) *(size.x * size.y);
@@ -214,7 +224,7 @@ dim3 size, dim3 padsize, int dim)
     out[index].y = inpadded[indpad].y / norm;
 }
 
-__global__ void recuperate_paddR2C(float *inpadded, cufftComplex *out, 
+__global__ void remove_paddR2C(float *inpadded, cufftComplex *out, 
 dim3 size, dim3 padsize, int dim)
 {
     size_t norm = (dim - 1) * size.x - (dim - 2) *(size.x * size.y);
@@ -237,7 +247,7 @@ dim3 size, dim3 padsize, int dim)
     out[index].x = inpadded[indpad] / norm;        
 }
 
-__global__ void recuperate_paddR2R(float *inpadded, float *out, 
+__global__ void remove_paddR2R(float *inpadded, float *out, 
 dim3 size, dim3 padsize, int dim)
 {
     size_t norm = (dim - 1) * size.x - (dim - 2) *(size.x * size.y);

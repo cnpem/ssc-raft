@@ -446,60 +446,84 @@ mplan(mplan), implan(_implan), typefft((fftType)_type)
 }
 
 template<typename Type1, typename Type2, typename Type3>
-void Convolution::convolve(GPU gpus, Type1 *gpuptr, Type2 *kernel)
+void Convolution::convolve(GPU gpus, Type1 *input, Type2 *kernel, Type3 *output)
 {
-    fftType type  = typefft;  
-    padType _type = Convolution::setPad<Type1,Type3>();
-
-    Type3* padgpuptr = Opt::allocGPU<Type3>(size_t npad);
-
-    Convolution::padd<Type1,Type3>(gpus, gpuptr, padgpuptr);
+    fftType _fft  = typefft;  
+    padType _pad_forward = Convolution::setPad<Type1>(_fft);
+    padType _pad_inverse = Convolution::setPad<Type2>(_fft);
     
-    if (type){
+    switch (_pad_forward){
 	    case 0:
-            cufftComplex* ipadgpuptr = padgpuptr;
-            HANDLE_FFTERROR(cufftExecC2C(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+            cufftComplex* padgpuptr = Opt::allocGPU<cufftComplex>(n_pad);
+            Convolution::padding<cufftComplex,cufftComplex>(gpus, input, padgpuptr);
 		    break;
 	    case 1:
-            float* padgpuptr = Opt::allocGPU<Type3>(size_t npad);
-            HANDLE_FFTERROR(cufftExecC2R(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+            cufftComplex* padgpuptr = Opt::allocGPU<cufftComplex>(n_pad);
+            Convolution::padding<float,cufftComplex>(gpus, input, padgpuptr);
 		    break;
-	    case 2:
-            HANDLE_FFTERROR(cufftExecR2C(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+        case 2:
+            float* padgpuptr = Opt::allocGPU<float>(n_pad);
+            Convolution::padding<cufftComplex,float>(gpus, input, padgpuptr);
 		    break;
-	    case 3:
-            HANDLE_FFTERROR(cufftExecR2R(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+        case 3:
+            float* padgpuptr = Opt::allocGPU<float>(n_pad);
+            Convolution::padding<float,float>(gpus, input, padgpuptr);
 		    break;
 	    default:
-            HANDLE_FFTERROR(cufftExecC2C(mplan, padgpuptr, ipadgpuptr, CUFFT_FORWARD));
+            cufftComplex* padgpuptr = Opt::allocGPU<cufftComplex>(n_pad);
+            Convolution::padding<Type1,cufftComplex>(gpus, input, padgpuptr);
+		    break;
+	}
+
+    switch (_fft){
+	    case 0:
+            HANDLE_FFTERROR(cufftExecC2C(mplan, padgpuptr, padgpuptr, CUFFT_FORWARD));
+		    break;
+	    case 1:
+            HANDLE_FFTERROR(cufftExecR2R(mplan, padgpuptr, padgpuptr, CUFFT_FORWARD));
+		    break;
+	    default:
+            HANDLE_FFTERROR(cufftExecC2C(mplan, padgpuptr, padgpuptr, CUFFT_FORWARD));
 		    break;
 	}
 
     Opt::pointTopointProd<Type3, Type2>(gpus, Type1 *a, Type2 *b, Type1 *ans, pad, dim3 sizeb)
 
-    switch (type){
+    switch (_fft){
 	    case 0:	
-            HANDLE_FFTERROR(cufftExecC2C(mplan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
-            Convolution::Recpadd<cufftComplex, Type1>(gpus, padgpuptr, gpuptr);
+            HANDLE_FFTERROR(cufftExecC2C(mplan, padgpuptr, padgpuptr, CUFFT_INVERSE));
+            Convolution::remove_padding<cufftComplex, cufftComplex>(gpus, padgpuptr, gpuptr);
 		    break;
 	    case 1:
-            HANDLE_FFTERROR(cufftExecR2C(implan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
-            Convolution::Recpadd<cufftComplex, Type1>(gpus, padgpuptr, gpuptr);
+            HANDLE_FFTERROR(cufftExecR2R(implan, padgpuptr, padgpuptr, CUFFT_INVERSE));
+            Convolution::remove_padding<float, float>(gpus, padgpuptr, gpuptr);
 		    break;
-	    case 2:
-            HANDLE_FFTERROR(cufftExecC2R(implan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
-            Convolution::Recpadd<float, Type1>(gpus, padgpuptr, gpuptr);
-		    break;
-	    case 3:	
-            HANDLE_FFTERROR(cufftExecR2R(implan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
-            Convolution::Recpadd<float, Type1>(gpus, padgpuptr, gpuptr);
-		    break;
+
 	    default:
-            HANDLE_FFTERROR(cufftExecC2C(implan, ipadgpuptr, padgpuptr, CUFFT_INVERSE));
-            Convolution::Recpadd<cufftComplex, Type1>(gpus, padgpuptr, gpuptr);
+            HANDLE_FFTERROR(cufftExecC2C(implan, padgpuptr, padgpuptr, CUFFT_INVERSE));
+            Convolution::remove_padding<cufftComplex, cufftComplex>(gpus, padgpuptr, gpuptr);
 		    break;
 	}
     
+    switch (_pad_inverse){
+	    case 0:
+            Convolution::remove_padding<cufftComplex,cufftComplex>(gpus, padgpuptr, output, _pad_inverse);
+		    break;
+	    case 1:
+            Convolution::padding<float,cufftComplex>(gpus, input, padgpuptr);
+		    break;
+        case 2:
+            Convolution::padding<cufftComplex,float>(gpus, input, padgpuptr);
+		    break;
+        case 3:
+            Convolution::padding<float,float>(gpus, input, padgpuptr);
+		    break;
+	    default:
+            cufftComplex* padgpuptr = Opt::allocGPU<cufftComplex>(n_pad);
+            Convolution::padding<Type1,cufftComplex>(gpus, input, padgpuptr);
+		    break;
+	}
+
     HANDLE_ERROR(cudaFree(padgpuptr));
 
     if (type == fftType::C2R_R2C || type == fftType::R2C_C2R)
