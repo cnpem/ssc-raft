@@ -5,27 +5,28 @@ Reconstruction Algorithms for Tomography
 
 Authors:
 
-	Eduardo X. Miqueles	    Scientific Computing Group/LNLS/CNPEM
+	Eduardo X. Miqueles	Scientific Computing Group/LNLS/CNPEM
 	
-	Paola Cunha Ferraz 	    Scientific Computing Group/LNLS/CNPEM
+	Paola Ferraz Cunha	Scientific Computing Group/LNLS/CNPEM
 	
 	Gilberto Martinez Jr.	Scientific Computing Group/LNLS/CNPEM
 	
-	Giovanni Baraldi	    Scientific Computing Group/LNLS/CNPEM
+	Giovanni Baraldi	Scientific Computing Group/LNLS/CNPEM
 
-	Larissa M. Moreno	    Scientific Computing Group/LNLS/CNPEM
+	Larissa M. Moreno	Scientific Computing Group/LNLS/CNPEM
 
-	Otávio M. Paiano	    Scientific Computing Group/Mogno Beamline/LNLS/CNPEM
+	Otávio M. Paiano	Mogno Beamline/LNLS/CNPEM
+	
 
-	Alan Z. Peixinho	    Scientific Computing Group/LNLS/CNPEM
-	 
-
-For more information on installation and usage we refer the user to the Scientific Computing Group (GCC) website [sscRaft Documentation](https://gcc.lnls.br/wiki/docs/ssc-raft/).
+More information on the `sscRaft` package on [sscRaft website](https://gcc.lnls.br/wiki/docs/ssc-raft/).
 
 ## Install:
 
-The prerequisite for installing sscRaft is `Python` and `CUDA` to run the routines.
+This package uses `C`, `C++`, `CUDA`, `CUBLAS`, `CUFFT`, `PTHREADS` 
+and `PYTHON3`. The requirements for installing `sscRaft` are found in the `requirement.txt` file.
+
 The library sscRaft can be installed with either `pip` or `git`. 
+
 
 ### GIT
 
@@ -34,32 +35,43 @@ One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install with
 ```bash
     git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
     cd ssc-raft 
-    make clean & make
+    python3 -m pip install -r requirements.txt
+    make clean && make
 ```
 
-Example:
+The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 3.0.0
 
 ```bash
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v2.2.3 --single-branch
+    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.0.0 --single-branch
     cd ssc-raft 
-    make clean & make
+    python3 -m pip install -r requirements.txt
+    make clean && make
 ```
+
 
 ### PIP
 
 One can install the latest version of sscRaft directly from our `pip server` 
 
 ```bash
-	pip install sscRaft==<version> --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+pip install sscRaft==version --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+
 ```
 
-Example:
+Where `version` is the version number of the `sscRaft`
+
 ```bash
-	pip install sscRaft==2.2.3 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+pip install sscRaft==3.0.0 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 ```
 
+## MEMORY
 
+Be careful using GPU functions due to memory allocation.
 
+## UNINSTALL
 
+To uninstall `sscRaft` use the command
 
-
+```bash
+    pip uninstall sscRaft -y
+```

@@ -1,5 +1,5 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef RAFT_ERROR_H
+#define RAFT_ERROR_H
 
 #include <cufft.h>
 #include "cuComplex.h"

@@ -6,7 +6,6 @@ import multiprocessing
 import os
 import sys
 import numpy
-import gc
 import json
 import h5py
 
@@ -61,7 +60,7 @@ libraft  = load_library(_lib, ext)
 #| Function prototypes |#
 #########################
 
-######## EM ##########
+######## Parallel Raft ##########
 
 try:
     libraft.tEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
@@ -94,33 +93,19 @@ try:
                             c_int, c_int, c_int, c_int, c_int, c_int]
     libraft.eEMgpu.restype  = None
 
-    libraft.emfreq.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                            c_int, c_int, c_int, c_int, c_int, c_float, c_int, c_int]
-    libraft.emfreq.restype  = None
+    libraft.emfreqgpu.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+                                    ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+                                    ctypes.c_float, ctypes.c_float, ctypes.c_int, ctypes.c_int]
+    libraft.emfreqgpu.restype  = None
 
     libraft.emfreqblock.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                            c_int, c_int, c_int, c_int, c_int, c_float, c_int, c_int, ctypes.c_void_p]
+                                    ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+                                    ctypes.c_float, ctypes.c_float, ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
     libraft.emfreqblock.restype  = None
 
 except:
     print('-.RAFT_PARALLEL_EM-')
     pass
-
-######## Rebinning ##########
-
-try:
-    libraft.CPUrebinning.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
-    libraft.CPUrebinning.restype  = None
-    
-    libraft.GPUrebinning.argtypes = [ ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int]
-    libraft.GPUrebinning.restype  = None
-    
-except:
-    print('-.REB-')
-    pass
-
-######## Parallel Raft ##########
 
 try:
     libraft.ComputeTomo360Offsetgpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int]

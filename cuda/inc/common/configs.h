@@ -19,7 +19,7 @@
 #define SIGN(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 #define APPROXINVX(x,e) ((SIGN(x))/(sqrtf( SQR(e) + SQR(x) )))
 
-#include "include.h"
+#include "../include.h"
 
 typedef struct dimension
 {   

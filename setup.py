@@ -4,27 +4,48 @@
 from setuptools import find_packages
 from skbuild import setup
 
+from sscRaft import __version__
+
+# install_requires = []
+
 install_requires = [
-    'cmake>=3.16',
-    'scikit-build',
-    'ninja'
+    # 'setuptools_scm[toml]>=6',
+    # 'setuptools==64',
+#     'cmake>=3.16',
+#     'scikit-build',
+    'ninja',
+    'click==8.0.4',
+    'colorama==0.4.5',
+    'rich==12.6.0',
+    'mdurl==0.1.0',
+    'Pygments==2.14.0',
+    'shellingham==1.5.0',
+    'typer==0.9.0',
+    'typing_extensions==4.1.1',
+#    'setuptools_scm[toml]>=5',
+#    'setuptools==64'
 ]
 
 # Main setup configuration.
 setup(
-    name='sscRaft',
-    version=open('VERSION').read().strip(),
+    name = "sscRaft",
+    version = __version__,
     packages=find_packages(),
     include_package_data=True,
+
+    entry_points = {
+        'console_scripts': [
+            'ssc-raft = sscRaft.cli.ssc_raft_cli:app',
+        ]
+    },
+
     zip_safe=False,
-    author=
-    'Eduardo X. Miqueles / Paola Ferraz Cunha / Giovanni Baraldi / Gilberto Martinez Jr.',
-    author_email='eduardo.miqueles@lnls.br',
+    author='Eduardo X. Miqueles / Paola Ferraz / Giovanni Baraldi / Gilberto Martinez Jr.',
+    author_email='eduardo.miqueles@lnls.br,paola.ferraz@lnls.br',
     description='Reconstruction algorithms for tomography',
-    keywords=['raft', 'tomography', 'radon', 'imaging'],
-    url='http://www.',
+    keywords=['raft', 'tomography', 'radon', 'imaging', 'filtered backprojection', 'fdk', 'expectation-maximization','rings','tomogram alignment'],
+    url='https://gcc.lnls.br/ssc/ssc-raft/index.html',
     download_url='',
-    license='BSD',
     platforms='Any',
     install_requires=install_requires,
     classifiers=[

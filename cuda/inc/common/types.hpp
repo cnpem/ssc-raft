@@ -1,8 +1,8 @@
 // @Author: Giovanni L. Baraldi
 // File contains implementations for single and multigpu memory management, along with some commom operations.
 
-#ifndef _TYPES_H
-#define _TYPES_H
+#ifndef RAFT_TYPES_H
+#define RAFT_TYPES_H
 
 #ifdef __CUDACC__
 #define restrict __restrict__

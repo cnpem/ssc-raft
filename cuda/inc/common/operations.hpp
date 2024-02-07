@@ -9,8 +9,8 @@
 
 */
 
-#ifndef _OPERATIONS_H
-#define _OPERATIONS_H
+#ifndef RAFT_OPERATIONS_H
+#define RAFT_OPERATIONS_H
 
 #ifdef __CUDACC__
 	#define restrict __restrict__
@@ -20,7 +20,7 @@
 
 #include "complex.hpp"
 #include "logerror.hpp"
-#include "configs.hpp"
+#include "configs.h"
 
 extern "C"{
 
@@ -295,29 +295,13 @@ namespace Sync
 
 }
 
-namespace Opt
+namespace opt
 {
     inline __host__ __device__ int assert_dimension(int size1, int size2){ return ( size1 == size2 ? 1 : 0 ); };
 
-	inline __device__ size_t getIndex3d(dim3 size)
-    { 
-        size_t i     = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j     = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t k     = blockIdx.z*blockDim.z + threadIdx.z;
-        size_t ind   = size.x * j + i;
-        size_t index = size.y * k * size.x + ind;
-
-        return index; 
-    };
-
-    inline __device__ size_t getIndex2d(dim3 size)
-    { 
-        size_t i     = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j     = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t index = size.x * j + i;
-
-        return index; 
-    };
+	inline __host__ __device__ size_t getIndex3d(dim3 size, int i, int j, int k){ return (size_t)(size.y * k * size.x + size.x * j + i); };
+    
+    inline __host__ __device__ size_t getIndex2d(dim3 size, int i, int j, int k){ return (size_t)(size.x * j + i); };
 
     inline __host__ __device__ int assert_dimension_xyz(dim3 size1, dim3 size2)
     { 
@@ -386,5 +370,11 @@ namespace Opt
     __global__ void product_Complex_by_Complex(cufftComplex *a, cufftComplex *b, cufftComplex *ans, dim3 sizea, dim3 sizeb);
 
 }
+
+
+/* Function declaration for file ./cuda/src/common/opt.cu */
+
+__global__ void setSinCosTable(float *sintable, float *costable, float *angles, int nangles)
+
 
 #endif

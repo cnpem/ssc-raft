@@ -1,5 +1,5 @@
-#ifndef RAFT_CONE_FDK_H
-#define RAFT_CONE_FDK_H
+#ifndef RAFT_FDK_CONE_H
+#define RAFT_FDK_CONE_H
 
 #define NUM_THREADS 128
 #define EPSILON_GX 1e-8
@@ -14,7 +14,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../../processing.h"
+#include "../common/configs.h"
 
 typedef struct {  
     float x,y,z;

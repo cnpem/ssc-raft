@@ -1,8 +1,8 @@
 // @Author: Giovanni L. Baraldi
 // File contains implementations for f32 and f16 complex numbers and some useful operations.
 
-#ifndef _COMPLEX24_H
-#define _COMPLEX24_H
+#ifndef RAFT_COMPLEX24_H
+#define RAFT_COMPLEX24_H
 
 #ifdef __CUDACC__
         #define restrict __restrict__

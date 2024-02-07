@@ -1,4 +1,2 @@
-# -*- coding: utf-8 -*-
-
-from .gp import *
-from .gc import *
+from .parallel import *
+from .conebeam import *
