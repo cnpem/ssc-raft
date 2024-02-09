@@ -1,11 +1,11 @@
 // Authors: Giovanni Baraldi, Eduardo X. Miqueles
 
-#include "../../../../inc/geometries/parallel/bst.h"
-// #include "../../../../inc/common/kernel_operators.hpp"
-// #include "../../../../inc/common/complex.hpp"
-// #include "../../../../inc/common/types.hpp"
-// #include "../../../../inc/common/operations.hpp"
-#include "../../../../inc/common/logerror.hpp"
+#include "geometries/parallel/bst.hpp"
+#include "processing/filters.hpp"
+#include "common/complex.hpp"
+#include "common/types.hpp"
+#include "common/operations.hpp"
+#include "common/logerror.hpp"
 
 inline __global__ void SetX(complex* out, float* in, int sizex)
 {
@@ -28,6 +28,39 @@ inline __global__ void GetX(float* out, complex* in, int sizex)
 	
 	if(tx < sizex)
 		out[ty*sizex + tx] = in[ty*sizex + tx].x;
+}
+
+inline __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy)
+{
+    size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
+    size_t ty = blockIdx.y + blockDim.y * blockIdx.z;
+    
+    if(tx >= sizex)
+        return;
+    
+    float fpixel = (in[ty*sizex + tx].x)/float(sizex);
+    BasicOps::set_pixel(out, fpixel, tx, ty, sizex, threshold, raftDataType);
+}
+
+void BSTFilter(cufftHandle plan, 
+complex* filtersino, float* sinoblock, 
+size_t nrays, size_t nangles, int csino, Filter reg)
+{
+
+    dim3 filterblock((nrays+255)/256,nangles,1);
+    dim3 filterthread(256,1,1);
+
+    SetX<<<filterblock,filterthread>>>(filtersino, sinoblock, nrays);
+        
+    HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_FORWARD));
+        
+    BandFilterC2C<<<filterblock,filterthread>>>(filtersino, nrays, csino, reg);
+        
+    HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_INVERSE));
+    
+    GetX<<<filterblock,filterthread>>>(sinoblock, filtersino, nrays);
+
+    //cudaMemset(sinoblock, 0, nrays*nangles*4);
 }
 
 __global__ void sino2p(complex* padded, float* in, size_t nrays, size_t nangles, int pad0, int csino)
@@ -229,28 +262,4 @@ void BST_core(
 }
 
 
-// extern "C"
-// {
-	
-// void GPUBST(int devv, float* blockRecon, float* sinoblock, int nrays, int nangles, int isizez, int padding)
-// {	
-// 	cudaSetDevice(devv);
-// 	size_t sizez = size_t(isizez);
-// 	size_t sizeimage = size_t(nrays);
-	
-// 	rImage sino(nrays, nangles, min(sizez,32ul), MemoryType::EAllocGPU);
-// 	rImage recon(sizeimage,sizeimage, min(sizez,32ul), MemoryType::EAllocGPU);
 
-// 	for(size_t b=0; b < sizez; b += 32)
-// 	{
-// 		size_t blocksize = min(sizez-b,32ul);
-// 		size_t reconoffset = b*sizeimage*sizeimage;
-
-// 		sino.CopyFrom(sinoblock + b*nrays*nangles, 0, blocksize*nrays*nangles);
-
-// 		BST(recon.gpuptr, sino.gpuptr, nrays, nangles, blocksize, sizeimage, padding);
-// 		recon.CopyTo(reconoffset + blockRecon, 0, blocksize*sizeimage*sizeimage);
-// 	}
-// 	cudaDeviceSynchronize();
-// }
-// }

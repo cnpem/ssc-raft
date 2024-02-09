@@ -1,4 +1,4 @@
-#include "../../../../inc/geometries/parallel/em.h"
+#include "geometries/parallel/em.hpp"
 
 //---------------------------
 // transmission-EM algorithm

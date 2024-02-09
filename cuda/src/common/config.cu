@@ -1,4 +1,4 @@
-#include "../../inc/common/configs.h"
+#include "common/configs.hpp"
 
 extern "C"{
 

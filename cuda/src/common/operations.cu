@@ -1,6 +1,6 @@
-#include "../../inc/include.h"
-#include "../../inc/common/operations.hpp"
-#include "../../inc/common/types.hpp"
+#include "include.hpp"
+#include "common/operations.hpp"
+#include "common/types.hpp"
 
 /*======================================================================*/
 /* struct EType (in 'inc/commons/operations.hpp') functions definitions */

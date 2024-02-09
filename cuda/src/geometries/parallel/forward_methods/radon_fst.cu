@@ -12,8 +12,8 @@
 #include <cuda_runtime.h>
 #include <cufftXt.h>
 // our libs:
-#include "../../../../inc/geometries/parallel/radon.h"
-#include "../../../../inc/common/cufft_utils.h"
+#include "geometries/parallel/radon.hpp"
+#include "common10/cufft_utils.h"
 
 
 extern "C" {

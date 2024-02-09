@@ -1,4 +1,4 @@
-#include "../../inc/common/configs.h"
+#include "common/configs.hpp"
 
 extern "C"{
 	Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes)
@@ -37,40 +37,41 @@ extern "C"{
 extern "C"{
     void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
     {   
+        /* Processes to parallelize the data z-axis by independent blocks */
         /* Declare variables */
-        long long int  n_recon, n_tomo, ind_recon, ind_tomo;
-        int indz, indz_max, nz_block;  
+        long long int  n_obj, n_tomo, ind_obj, ind_tomo;
+        int ind, ind_max, block;  
 
         /* Set indexes */
-        nz_block             = (int) ( configs.tomo.size.z / n_total_processes ); 
+        block    = (int) ( configs.tomo.size.z / n_total_processes ); 
 
-        indz                 = index * nz_block;
+        ind      = index * block;
 
-        indz_max             = (int) std::min( ( index + 1 ) * nz_block, (int)configs.tomo.size.z);
+        ind_max  = (int) std::min( ( index + 1 ) * block, (int)configs.tomo.size.z);
 
         /* Indexes for Reconstruction division - same as Tomogram division */
-        n_recon              = (long long int) ( indz_max - indz ) * configs.recon.size.x * configs.recon.size.y;
-        ind_recon            = (long long int)              indz   * configs.recon.size.x * configs.recon.size.y;
+        n_obj    = (long long int) ( ind_max - ind ) * configs.obj.size.x * configs.obj.size.y;
+        ind_obj  = (long long int)             ind   * configs.obj.size.x * configs.obj.size.y;
 
         /* Indexes for Tomogram division - same as Reconstruction division */
-        n_tomo               = (long long int) ( indz_max - indz ) * configs.tomo.size.x * configs.tomo.size.y;
-        ind_tomo             = (long long int)              indz   * configs.tomo.size.x * configs.tomo.size.y;
+        n_tomo   = (long long int) ( ind_max - ind ) * configs.tomo.size.x * configs.tomo.size.y;
+        ind_tomo = (long long int)             ind   * configs.tomo.size.x * configs.tomo.size.y;
 
         /* Set process struct */
-        (*process).index            = index;
-        (*process).index_gpu        = (int)gpus.gpus[index % gpus.ngpus]; 
-        (*process).batch_index      = (int)index % gpus.ngpus;
-        (*process).batch_size_tomo  = (int)( indz_max - indz );
-        (*process).batch_size_recon = (int)( indz_max - indz );
+        (*process).index          = index;
+        (*process).index_gpu      = (int)gpus.gpus[index % gpus.ngpus]; 
+        (*process).batch_index    = (int)index % gpus.ngpus;
+        (*process).tomobatch_size = (int)( ind_max - ind );
+        (*process).objbatch_size  = (int)( ind_max - ind );
 
         /* Tomogram division */
-        (*process).indv             = indz;
-        (*process).ind_tomo         = ind_tomo;
-        (*process).n_tomo           = n_tomo;
+        (*process).tomo_index_z   = ind;
+        (*process).tomoptr_index  = ind_tomo;
+        (*process).tomoptr_size   = n_tomo;
 
         /* Reconstruction division */
-        (*process).n_recon          = n_recon;
-        (*process).ind_recon        = ind_recon;
+        (*process).objptr_size    = n_obj;
+        (*process).objptr_index   = ind_obj;
         
     }
 }
@@ -79,122 +80,80 @@ extern "C"{
 extern "C"{
     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
     {   
+        /* Processes to parallelize the data z-axis by independent blocks */
         /* Declare variables */
-        int nz_block;
+        int block;  
 
         /* Reconstruction */
-        long long int n_recon, ind_recon;
+        long long int n_obj, ind_obj;
         int indz, indz_max; 
-        float z, z_max;
+        float posz, posz_max;
         
         /* Tomogram and reconstruction filter (v of vertical) */
         long long int n_tomo, ind_tomo, n_filter, ind_filter;
-        int indv, indv_max, indv_filter;
-        float v, v_max, lenght;
+        int ind, ind_max, indz_filter;
+        float pos, pos_max, lenght;
 
         /* Reconstruction (or object) variables */ 
-        nz_block    = (int) ( ( configs.recon.end_slice - configs.recon.start_slice ) / n_total_processes ); 
+        block    = (int) ( ( configs.obj.zslice1 - configs.obj.zslice0 ) / n_total_processes ); 
         
-        indz        = configs.recon.start_slice + index * nz_block;
+        indz        = configs.obj.zslice0 + index * block;
         
-        indz_max    = (int) std::min( configs.recon.start_slice + ( index + 1 ) * nz_block, configs.recon.end_slice ); 
+        indz_max    = (int) std::min( configs.obj.zslice0 + ( index + 1 ) * block, configs.obj.zslice1 ); 
 
-        n_recon     = (long long int) ( indz_max -                      indz ) * configs.recon.size.x * configs.recon.size.y;
-        ind_recon   = (long long int) ( indz     - configs.recon.start_slice ) * configs.recon.size.x * configs.recon.size.y;
+        n_obj     = (long long int) ( indz_max -                indz ) * configs.obj.size.x * configs.obj.size.y;
+        ind_obj   = (long long int) ( indz     - configs.obj.zslice0 ) * configs.obj.size.x * configs.obj.size.y;
 
-        z           = - configs.recon.z +     indz * configs.recon.dz;
-        z_max       = - configs.recon.z + indz_max * configs.recon.dz;
+        posz           = - configs.obj.z +     indz * configs.obj.dz;
+        posz_max       = - configs.obj.z + indz_max * configs.obj.dz;
                 
-        lenght      = sqrtf( configs.recon.x * configs.recon.x + configs.recon.y * configs.recon.y );
+        lenght      = sqrtf( configs.obj.x * configs.obj.x + configs.obj.y * configs.obj.y );
         
         /* Tomogram (or detector) and filter (with padding) variables */
         float z12x  = configs.geometry.z1x + configs.geometry.z2x;
         float z12y  = configs.geometry.z1y + configs.geometry.z2y;
 
         /* Tomogram */
-        v           = std::max(- configs.tomo.z, std::min( z12x * z     / ( configs.geometry.z1x - lenght ), z12x *     z / ( configs.geometry.z1x + lenght ) ) );
-        v_max       = std::min(+ configs.tomo.z, std::max( z12x * z_max / ( configs.geometry.z1x + lenght ), z12x * z_max / ( configs.geometry.z1x - lenght ) ) ); 
+        pos           = std::max(- configs.tomo.z, std::min( z12x * posz     / ( configs.geometry.z1x - lenght ), z12x *     posz / ( configs.geometry.z1x + lenght ) ) );
+        pos_max       = std::min(+ configs.tomo.z, std::max( z12x * posz_max / ( configs.geometry.z1x + lenght ), z12x * posz_max / ( configs.geometry.z1x - lenght ) ) ); 
 
-        indv        = std::max(                        0, (int) floor( ( v     + configs.tomo.z ) / configs.tomo.dz ) );
-        indv_max    = std::min( (int)configs.tomo.size.z, (int)  ceil( ( v_max + configs.tomo.z ) / configs.tomo.dz ) );
+        ind        = std::max(                        0, (int) floor( ( pos     + configs.tomo.z ) / configs.tomo.dz ) );
+        ind_max    = std::min( (int)configs.tomo.size.z, (int)  ceil( ( pos_max + configs.tomo.z ) / configs.tomo.dz ) );
 
-        n_tomo      = (long long int) ( indv_max -                     indv) * ( configs.tomo.size.x * configs.tomo.size.y );
-        ind_tomo    = (long long int) ( indv     - configs.tomo.start_slice) * ( configs.tomo.size.x * configs.tomo.size.y );
+        n_tomo      = (long long int) ( ind_max -                  ind ) * ( configs.tomo.size.x * configs.tomo.size.y );
+        ind_tomo    = (long long int) ( ind     - configs.tomo.zslice0 ) * ( configs.tomo.size.x * configs.tomo.size.y );
 
         /* Set process struct */
 
         /* Reconstruction Filter */
-        n_filter    = (long long int) ( indv_max -                     indv ) * ( configs.tomo.npad.x * configs.tomo.size.y );
-        ind_filter  = (long long int) ( indv     - configs.tomo.start_slice ) * ( configs.tomo.npad.x * configs.tomo.size.y );
-        indv_filter = (          int) (                            n_filter ) / ( configs.tomo.npad.x * configs.tomo.size.y );
+        n_filter    = (long long int) ( ind_max -                 ind  ) * ( configs.tomo.padsize.x * configs.tomo.size.y );
+        ind_filter  = (long long int) ( ind     - configs.tomo.zslice0 ) * ( configs.tomo.padsize.x * configs.tomo.size.y );
+        indz_filter = (          int) (                       n_filter ) / ( configs.tomo.padsize.x * configs.tomo.size.y );
 
         /* Set process struct */
-        (*process).index            = index;
-        (*process).index_gpu        = (int)gpus.gpus[index % gpus.ngpus]; 
-        (*process).batch_index      = (int)index % gpus.ngpus;
-        (*process).batch_size_tomo  = (int)( indv_max - indv );
-        (*process).batch_size_recon = (int)( indz_max - indz );
+        (*process).index           = index;
+        (*process).index_gpu       = (int)gpus.gpus[index % gpus.ngpus]; 
+        (*process).batch_index     = (int)index % gpus.ngpus;
+        (*process).tomobatch_size  = (int)(  ind_max -  ind );
+        (*process).objbatch_size   = (int)( indz_max - indz );
 
         /* Tomogram division */
-        (*process).indv             = indv;
-        (*process).ind_tomo         = ind_tomo;
-        (*process).n_tomo           = n_tomo;
+        (*process).tomo_index_z    = ind;
+        (*process).tomoptr_index   = ind_tomo;
+        (*process).tomoptr_size    = n_tomo;
 
         /* Reconstruction Filter division */
-        (*process).n_filter         = n_filter;
-        (*process).ind_filter       = ind_filter;
-        (*process).indv_filter      = indv_filter; 
+        (*process).filterptr_size  = n_filter;
+        (*process).filterptr_index = ind_filter;
+        (*process).filter_index_z  = indz_filter; 
 
         /* Reconstruction division */
-        (*process).n_recon          = n_recon;
-        (*process).ind_recon        = ind_recon;
-        (*process).z                = z;
-        (*process).z_det            = - configs.tomo.z + indv * configs.tomo.dz;
-        
+        (*process).objptr_size     = n_obj;
+        (*process).objptr_index    = ind_obj;
+        (*process).obj_posz        = posz;
+        (*process).tomo_posz       = - configs.tomo.z + ind * configs.tomo.dz;
     }
 }
-
-extern "C"{
-    void setProcessFrames(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
-    {   
-                /* Declare variables */
-        long long int  n_recon, n_tomo, ind_recon, ind_tomo;
-        int indz, indz_max, nz_block;  
-
-        /* Set indexes */
-        nz_block             = (int) ( configs.tomo.size.z / n_total_processes ); 
-
-        indz                 = index * nz_block;
-
-        indz_max             = (int) std::min( ( index + 1 ) * nz_block, (int)configs.tomo.size.z);
-
-        /* Indexes for Reconstruction division - same as Tomogram division */
-        n_recon              = (long long int) ( indz_max - indz ) * configs.recon.size.x * configs.recon.size.y;
-        ind_recon            = (long long int)              indz   * configs.recon.size.x * configs.recon.size.y;
-
-        /* Indexes for Tomogram division - same as Reconstruction division */
-        n_tomo               = (long long int) ( indz_max - indz ) * configs.tomo.size.x * configs.tomo.size.y;
-        ind_tomo             = (long long int)              indz   * configs.tomo.size.x * configs.tomo.size.y;
-
-        /* Set process struct */
-        (*process).index            = index;
-        (*process).index_gpu        = (int)gpus.gpus[index % gpus.ngpus]; 
-        (*process).batch_index      = (int)index % gpus.ngpus;
-        (*process).batch_size_tomo  = (int)( indz_max - indz );
-        (*process).batch_size_recon = (int)( indz_max - indz );
-
-        /* Tomogram division */
-        (*process).indv             = indz;
-        (*process).ind_tomo         = ind_tomo;
-        (*process).n_tomo           = n_tomo;
-
-        /* Reconstruction division */
-        (*process).n_recon          = n_recon;
-        (*process).ind_recon        = ind_recon;
-        
-    }
-}
-
 
 extern "C"{
     int getTotalProcesses(CFG configs, GPU gpus)

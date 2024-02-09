@@ -18,9 +18,9 @@
 	#define restrict
 #endif
 
-#include "complex.hpp"
-#include "logerror.hpp"
-#include "configs.h"
+#include "common/complex.hpp"
+#include "common/logerror.hpp"
+#include "common/configs.hpp"
 
 extern "C"{
 
@@ -299,9 +299,22 @@ namespace opt
 {
     inline __host__ __device__ int assert_dimension(int size1, int size2){ return ( size1 == size2 ? 1 : 0 ); };
 
-	inline __host__ __device__ size_t getIndex3d(dim3 size, int i, int j, int k){ return (size_t)(size.y * k * size.x + size.x * j + i); };
+	inline __host__ __device__ size_t getIndex3d(dim3 size)
+    { 
+        size_t I = blockIdx.x*blockDim.x + threadIdx.x; 
+        size_t J = blockIdx.y*blockDim.y + threadIdx.y; 
+        size_t K = blockIdx.z*blockDim.z + threadIdx.z; 
+        
+        return (size_t)(IND(I,J,K,size.x,size.y)); 
+    };
     
-    inline __host__ __device__ size_t getIndex2d(dim3 size, int i, int j, int k){ return (size_t)(size.x * j + i); };
+    inline __host__ __device__ size_t getIndex2d(dim3 size)    
+    { 
+        int I = blockIdx.x*blockDim.x + threadIdx.x; 
+        int J = blockIdx.y*blockDim.y + threadIdx.y; 
+        
+        return (size_t)(IND(I,J,0,size.x,size.y)); 
+    };
 
     inline __host__ __device__ int assert_dimension_xyz(dim3 size1, dim3 size2)
     { 
@@ -347,7 +360,15 @@ namespace opt
     };
 
     template<typename Type>
-    Type* allocGPU(size_t nsize);
+    Type* allocGPU(size_t size);
+
+    template<typename Type>
+    void opt::CPUToGPU(Type *cpuptr, Type *gpuptr, size_t size);
+
+    template<typename Type>
+    void opt::GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size);
+
+    void opt::MPlanFFT(cufftHandle mplan, int dim, dim3 size);
 
     template<typename Type1, typename Type2>
     void pointTopointProd(GPU gpus, Type1 *a, Type2 *b, Type1 *ans, dim3 sizea, dim3 sizeb);
@@ -374,7 +395,8 @@ namespace opt
 
 /* Function declaration for file ./cuda/src/common/opt.cu */
 
+void getLog(float *data, dim3 size);
 __global__ void setSinCosTable(float *sintable, float *costable, float *angles, int nangles)
-
+static __global__ void Klog(float* data, dim3 size);
 
 #endif

@@ -1,13 +1,13 @@
-#include "../../../../inc/include.h"
-#include "../../../../inc/geometries/parallel/em.h"
+#include "include.hpp"
+#include "geometries/parallel/em.hpp"
 // #include "../../../../inc/common/kernel_operators.hpp"
 // #include "../../../../inc/common/complex.hpp"
 // #include "../../../../inc/common/types.hpp"
 // #include "../../../../inc/common/operations.hpp"
 // #include "../../../../inc/common/logerror.hpp"
-#include "../../../../inc/geometries/parallel/radon.h"
-#include "../../../../inc/geometries/parallel/bst.h"
-#include "../../../../inc/common10/cufft_utils.h"
+#include "geometries/parallel/radon.hpp"
+#include "geometries/parallel/bst.hpp"
+#include "common10/cufft_utils.h"
 
 #define NITER_MIN_REG 20 // must be greater than 1 so back_cu and recon_cu are all meaningful.
 

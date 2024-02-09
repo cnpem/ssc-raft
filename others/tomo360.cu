@@ -1,4 +1,4 @@
-#include "../../../inc/processing.h"
+#include "processing/processing.hpp"
 
 extern "C"{
 	__global__ void KPhaseCorrelation(complex* ph1, complex* ph2, size_t sizex)

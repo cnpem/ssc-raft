@@ -1,98 +1,26 @@
-#include "../../inc/include.h"
-#include "../../../inc/common/ffts.h"
+#include "common/configs.hpp"
+#include "common/opt.hpp"
 
+/*============================================================================*/
+/* namespace opt (in 'inc/commons/opt.hpp') functions definitions */
 
-template<typename Type>
-padType Convolution::setPad(fftType type_fft){return paddingType<Type>(fftType type_fft);}
-
-template<>
-padType paddingType<Type>(fftType type_fft){return padType::none;}
-
-template<>
-padType paddingType<float>(fftType type_fft)
+__global__ void opt::paddR2C(float *in, cufftComplex *outpadded, 
+dim3 size, dim3 pad, float value)
 {
-    if (type_fft == fftType::C2C){
-        return padType::R2C;
-    }else if (type_fft == fftType::R2R){
-        return padType::R2R;
-    }else{
-        return padType::R2C;
-    }
-}
-
-template<>
-padType paddingType<cufftComplex>(fftType type_fft)
-{
-    if (type_fft == fftType::C2C){
-        return padType::C2C;
-    }else if (type_fft == fftType::R2R){
-        return padType::C2R;
-    }else{
-        return padType::C2C;
-    }
-}
-
-template<typename TypeIn, typename TypeOut>
-void Convolution::padding(GPU gpus, TypeIn *in, TypeOut *padded, padType type)
-{
-    switch (type){
-        case 0:
-            paddC2C<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
-            break;
-        case 1:
-            paddR2C<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
-            break;
-        case 2:
-            paddC2R<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
-            break;
-        case 3:
-            paddR2R<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
-            break;
-        default:
-            paddC2C<<<gpus.Grd,gpus.BT>>>(in, padded, pad_value, size, final_pad_size);
-            break;
-    }
-}
-
-template<typename TypeIn, typename TypeOut>
-void Convolution::remove_padding(GPU gpus, TypeIn *inpadded, TypeOut *out, padType type)
-{
-    switch (type){
-        case 0:
-            remove_paddC2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
-            break;
-        case 1:
-            remove_paddC2R<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
-            break;
-        case 2:
-            remove_paddR2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
-            break;
-        case 3:
-            remove_paddR2R<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
-            break;
-        default:
-            remove_paddC2C<<<gpus.Grd,gpus.BT>>>(inpadded, out, size, final_pad_size, dim);
-            break;
-    }
-}
-
-__global__ void paddR2C(float *in, cufftComplex *outpadded, 
-float value, dim3 size, dim3 padsize)
-{
-    int padx = (int)( ( padsize.x - size.x ) / 2 );
-    int pady = (int)( ( padsize.y - size.y ) / 2 );
+    int Npadx = 2 * pad.x + size.x;
+    int Npady = 2 * pad.y + size.y;
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx );
-    int jj     = (int)( j - pady );
+    int ii     = (int)( i - pad.x );
+    int jj     = (int)( j - pad.y );
 
-    long long int index  =    size.x * k *    size.y +    size.x * jj + ii;
-    long long int indpad = padsize.x * k * padsize.y + padsize.x *  j +  i;
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
 
-    if ( (i >= padsize.x) || (j >= padsize.y) || (k >= size.z) ) return;
+    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
     outpadded[indpad].x = value;
     outpadded[indpad].y = 0.0;
@@ -102,23 +30,23 @@ float value, dim3 size, dim3 padsize)
     outpadded[indpad].x = in[index];
 }
 
-__global__ void paddC2C(cufftComplex *in, cufftComplex *outpadded, 
-float value, dim3 size, dim3 padsize)
+__global__ void opt::paddC2C(cufftComplex *in, cufftComplex *outpadded,
+dim3 size, dim3 pad, float value)
 {
-    int padx = (int)( ( padsize.x - size.x ) / 2 );
-    int pady = (int)( ( padsize.y - size.y ) / 2 );
+    int Npadx = 2 * pad.x + size.x;
+    int Npady = 2 * pad.y + size.y;
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx );
-    int jj     = (int)( j - pady );
+    int ii     = (int)( i - pad.x );
+    int jj     = (int)( j - pad.y );
 
-    long long int index  =    size.x * k *    size.y +    size.x * jj + ii;
-    long long int indpad = padsize.x * k * padsize.y + padsize.x *  j +  i;
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
 
-    if ( (i >= padsize.x) || (j >= padsize.y) || (k >= size.z) ) return;
+    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
     outpadded[indpad].x = value;
     outpadded[indpad].y = value;
@@ -129,23 +57,23 @@ float value, dim3 size, dim3 padsize)
     outpadded[indpad].y = in[index].y;
 }
 
-__global__ void paddC2R(cufftComplex *in, float *outpadded, 
-float value, dim3 size, dim3 padsize)
+__global__ void opt::paddC2R(cufftComplex *in, float *outpadded, 
+dim3 size, dim3 pad, float value)
 {
-    int padx = (int)( ( padsize.x - size.x ) / 2 );
-    int pady = (int)( ( padsize.y - size.y ) / 2 );
+    int Npadx = 2 * pad.x + size.x;
+    int Npady = 2 * pad.y + size.y;
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx );
-    int jj     = (int)( j - pady );
+    int ii     = (int)( i - pad.x );
+    int jj     = (int)( j - pad.y );
 
-    long long int index  =    size.x * k *    size.y +    size.x * jj + ii;
-    long long int indpad = padsize.x * k * padsize.y + padsize.x *  j +  i;
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
 
-    if ( (i >= padsize.x) || (j >= padsize.y) || (k >= size.z) ) return;
+    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
     outpadded[indpad] = value;
 
@@ -154,69 +82,69 @@ float value, dim3 size, dim3 padsize)
     outpadded[indpad] = in[index].x;
 }
 
-__global__ void paddR2R(float *in, float *outpadded, 
-float value, dim3 size, dim3 padsize)
+__global__ void opt::paddR2R(float *in, float *outpadded, 
+dim3 size, dim3 pad, float value)
 {
-    int padx = (int)( ( padsize.x - size.x ) / 2 );
-    int pady = (int)( ( padsize.y - size.y ) / 2 );
+    int Npadx = 2 * pad.x + size.x;
+    int Npady = 2 * pad.y + size.y;
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx );
-    int jj     = (int)( j - pady );
+    int ii     = (int)( i - pad.x );
+    int jj     = (int)( j - pad.y );
 
-    long long int index  =    size.x * k *    size.y +    size.x * jj + ii;
-    long long int indpad = padsize.x * k * padsize.y + padsize.x *  j +  i;
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
 
-    if ( (i >= padsize.x) || (j >= padsize.y) || (k >= size.z) ) return;
+    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
     outpadded[indpad] = in[index];
 }
 
-__global__ void remove_paddC2R(cufftComplex *inpadded, float *out, 
-dim3 size, dim3 padsize, int dim)
+__global__ void opt::remove_paddC2R(cufftComplex *inpadded, float *out, 
+dim3 size, dim3 pad, int dim)
 {
-    size_t norm = (dim - 1) * size.x - (dim - 2) *(size.x * size.y);
+    size_t norm = (dim - 1) * (size.x * size.y) + (2 - dim) * size.x;
 
-    int padx    = (int)( ( padsize.x - size.x ) / 2 );
-    int pady    = (int)( ( padsize.y - size.y ) / 2 );
+    int Npadx   = 2 * pad.x + size.x;
+    int Npady   = 2 * pad.y + size.y;
 
     int i       = blockIdx.x*blockDim.x + threadIdx.x;
     int j       = blockIdx.y*blockDim.y + threadIdx.y;
     int k       = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii      = (int)( i - padx );
-    int jj      = (int)( j - pady );
+    int ii      = (int)( i - pad.x );
+    int jj      = (int)( j - pad.y );
 
-    long long int index  =    size.x * k *    size.y +    size.x * jj + ii;
-    long long int indpad = padsize.x * k * padsize.y + padsize.x *  j +  i;
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
     out[index] = inpadded[indpad].x / norm; 
 }
 
-__global__ void remove_paddC2C(cufftComplex *inpadded, cufftComplex *out, 
-dim3 size, dim3 padsize, int dim)
+__global__ void opt::remove_paddC2C(cufftComplex *inpadded, cufftComplex *out, 
+dim3 size, dim3 pad, int dim)
 {
-    size_t norm = (dim - 1) * size.x - (dim - 2) *(size.x * size.y);
+    size_t norm = (dim - 1) * (size.x * size.y) + (2 - dim) * size.x;
 
-    int padx    = (int)( ( padsize.x - size.x ) / 2 );
-    int pady    = (int)( ( padsize.y - size.y ) / 2 );
+    int Npadx   = 2 * pad.x + size.x;
+    int Npady   = 2 * pad.y + size.y;
 
     int i       = blockIdx.x*blockDim.x + threadIdx.x;
     int j       = blockIdx.y*blockDim.y + threadIdx.y;
     int k       = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii      = (int)( i - padx );
-    int jj      = (int)( j - pady );
+    int ii      = (int)( i - pad.x );
+    int jj      = (int)( j - pad.y );
 
-    long long int index  =    size.x * k *    size.y +    size.x * jj + ii;
-    long long int indpad = padsize.x * k * padsize.y + padsize.x *  j +  i;
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
@@ -224,46 +152,46 @@ dim3 size, dim3 padsize, int dim)
     out[index].y = inpadded[indpad].y / norm;
 }
 
-__global__ void remove_paddR2C(float *inpadded, cufftComplex *out, 
-dim3 size, dim3 padsize, int dim)
+__global__ void opt::remove_paddR2C(float *inpadded, cufftComplex *out, 
+dim3 size, dim3 pad, int dim)
 {
-    size_t norm = (dim - 1) * size.x - (dim - 2) *(size.x * size.y);
+    size_t norm = (dim - 1) * (size.x * size.y) + (2 - dim) * size.x;
 
-    int padx    = (int)( ( padsize.x - size.x ) / 2 );
-    int pady    = (int)( ( padsize.y - size.y ) / 2 );
+    int Npadx   = 2 * pad.x + size.x;
+    int Npady   = 2 * pad.y + size.y;
 
     int i       = blockIdx.x*blockDim.x + threadIdx.x;
     int j       = blockIdx.y*blockDim.y + threadIdx.y;
     int k       = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii      = (int)( i - padx );
-    int jj      = (int)( j - pady );
+    int ii      = (int)( i - pad.x );
+    int jj      = (int)( j - pad.y );
 
-    long long int index  =    size.x * k *    size.y +    size.x * jj + ii;
-    long long int indpad = padsize.x * k * padsize.y + padsize.x *  j +  i;
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
     out[index].x = inpadded[indpad] / norm;        
 }
 
-__global__ void remove_paddR2R(float *inpadded, float *out, 
-dim3 size, dim3 padsize, int dim)
+__global__ void opt::remove_paddR2R(float *inpadded, float *out, 
+dim3 size, dim3 pad, int dim)
 {
-    size_t norm = (dim - 1) * size.x - (dim - 2) *(size.x * size.y);
+    size_t norm = (dim - 1) * (size.x * size.y) + (2 - dim) * size.x;
 
-    int padx    = (int)( ( padsize.x - size.x ) / 2 );
-    int pady    = (int)( ( padsize.y - size.y ) / 2 );
+    int Npadx   = 2 * pad.x + size.x;
+    int Npady   = 2 * pad.y + size.y;
 
     int i       = blockIdx.x*blockDim.x + threadIdx.x;
     int j       = blockIdx.y*blockDim.y + threadIdx.y;
     int k       = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii      = (int)( i - padx );
-    int jj      = (int)( j - pady );
+    int ii      = (int)( i - pad.x );
+    int jj      = (int)( j - pad.y );
 
-    long long int index  =    size.x * k *    size.y +    size.x * jj + ii;
-    long long int indpad = padsize.x * k * padsize.y + padsize.x *  j +  i;
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
@@ -271,7 +199,6 @@ dim3 size, dim3 padsize, int dim)
 }
 
 extern "C"{
-
     __global__ void padding(float *in, cufftComplex *inpadded, float value, dim3 size, dim3 padsize)
     {
         size_t Npadx = size.x + 2 * padsize.x;
@@ -317,5 +244,5 @@ extern "C"{
         in[index] = inpadded[indpad].x;
         
     }
-
 }
+

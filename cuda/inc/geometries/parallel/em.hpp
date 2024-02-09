@@ -1,7 +1,7 @@
 #ifndef RAFT_EM_PAR_H
 #define RAFT_EM_PAR_H
 
-#include "../../common/configs.h"
+#include "common/configs.hpp"
 
 
 /* EM Parallel */

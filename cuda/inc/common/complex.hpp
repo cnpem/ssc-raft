@@ -31,6 +31,7 @@ struct complex: public cuComplex
         complex() = default;
         __host__ __device__ complex(float f){ x=f; y=0; };
         __host__ __device__ complex(float f1, float f2){ x=f1; y=f2; };
+
         __hevice complex& operator+=(const complex& other){ x += other.x; y += other.y; return *this; };
         __hevice complex& operator-=(const complex& other){ x -= other.x; y -= other.y; return *this; };
         __hevice complex& operator*=(const complex& other){ float tx=x; float ox = other.x; x = x*other.x - y*other.y; y = tx*other.y + y*ox; return *this; };
@@ -71,6 +72,12 @@ struct complex: public cuComplex
         __device__ complex(const struct complex16& c16);
         __host__ __device__ const complex& ToC32() const { return *this; };
 };
+
+// struct real: public cuComplex
+// {
+//         real() = default;
+//         __host__ __device__ real(complex f){ f.x; };
+// };
 
 inline __device__ void atomicAdd(complex* ptr, const complex& val){ atomicAdd((float*)ptr, val.x); atomicAdd(1+(float*)ptr, val.y); }; 
 inline __device__ cufftComplex ComplexMult(cufftComplex a, cufftComplex b){ cufftComplex ans; ans.x = a.x * b.x - a.y * b.y; ans.y = a.x * b.y + a.y * b.x; return ans; };

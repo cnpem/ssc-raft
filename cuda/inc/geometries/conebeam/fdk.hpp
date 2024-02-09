@@ -14,7 +14,7 @@
 #include <vector>
 #include <iostream>
 
-#include "../common/configs.h"
+#include "common/configs.hpp"
 
 typedef struct {  
     float x,y,z;

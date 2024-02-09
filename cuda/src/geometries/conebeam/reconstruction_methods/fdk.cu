@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <cufft.h>
 #include <stdlib.h>
-#include "../../../../inc/geometries/conebeam/fdk.h"
+#include "geometries/conebeam/fdk.hpp"
 #include <fstream>
 #include <future>
 #include <thread>

@@ -1,4 +1,4 @@
-#include "../../../../../../inc/geometries/conebeam/fdk.h"
+#include "geometries/conebeam/fdk.hpp"
 #include <stdio.h>
 #include <cufft.h>
 

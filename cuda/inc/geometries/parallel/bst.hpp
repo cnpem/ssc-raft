@@ -1,7 +1,7 @@
 #ifndef RAFT_BST_PAR_H
 #define RAFT_BST_PAR_H
 
-#include "../../common/configs.h"
+#include "common/configs.hpp"
 
 extern "C" {
 

@@ -1,5 +1,5 @@
-#include "../../../../inc/filters.h"
-#include "../../../../inc/processing.h"
+#include "processing/filters.hpp"
+#include "processing/processing.hpp"
 
 extern "C" {
 

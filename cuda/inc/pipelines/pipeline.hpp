@@ -1,7 +1,7 @@
 #ifndef RAFT_PIPE_H
 #define RAFT_PIPE_H
 
-#include "../common/configs.h"
+#include "common/configs.hpp"
 
 extern "C"{
 
@@ -21,7 +21,7 @@ extern "C"{
 
     void getReconstructionParallel(CFG configs, Process process, GPU gpus,  WKP *workspace);
     void getReconstructionConebeam(CFG configs, Process process, GPU gpus,  WKP *workspace);
-    // void getReconstructionFanbeam(CFG configs, Process process, GPU gpus,  WKP *workspace);
+    void getReconstructionMethods(CFG configs, Process process, GPU gpus, WKP *workspace);
 
 }
 

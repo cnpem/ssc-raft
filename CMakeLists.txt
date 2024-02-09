@@ -8,10 +8,6 @@ add_compile_options(-use_fast_math)
 
 include_directories(
     cuda/inc
-    cuda/inc/common
-    cuda/inc/common10
-    cuda/inc/geometries/parallel
-    cuda/inc/geometries/conebeam 
 )
 
 file(GLOB_RECURSE RAFT_SRC cuda/src/**/*.c*)

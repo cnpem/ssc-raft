@@ -3,11 +3,11 @@
 #ifndef RAFT_FILTER_H
 #define RAFT_FILTER_H
 
-#include "../common/configs.h"
-#include "../common/types.hpp"
-#include "../common/operations.hpp"
-#include "../common/complex.hpp"
-#include "../common/logerror.hpp"
+#include "common/configs.hpp"
+#include "common/types.hpp"
+#include "common/operations.hpp"
+#include "common/complex.hpp"
+#include "common/logerror.hpp"
 
 struct Filter{
 
@@ -33,48 +33,7 @@ struct Filter{
 	int axis_offset = 0.0f;
 	
 	__host__ __device__ inline float apply(float input);
-	// {
-	// 	float param = 0.0f;
-
-	// 	if(type == EType::gaussian){
-	// 		input *= exp( -0.693f * reg * input * input );
-	// 		input /= ( 1.0f + paganin * input * input );
-	// 	}
-	// 	else if(type == EType::lorentz){
-	// 		input /= 1.0f + reg * input * input;
-	// 		input /= ( 1.0f + paganin * input * input );
-	// 	}
-	// 	else if(type == EType::cosine){
-	// 		input *= cosf(	float(M_PI) * 0.5f * input );
-	// 		input /= ( 1.0f + paganin * input * input );
-	// 	}
-	// 	else if(type == EType::rectangle){
-	// 		param  = fmaxf(input * reg * float(M_PI) * 0.5f, 1E-4f);
-	// 		input *= sinf( param ) / param;
-	// 		input /= ( 1.0f + paganin * input * input );
-	// 	}
-	// 	else if(type == EType::hann){
-	// 		input *= input * 0.5f + 0.5f * cosf( 2.0f * float(M_PI) * input );
-	// 		input /= ( 1.0f + paganin * input * input );
-	// 	}
-	// 	else if(type == EType::hamming){
-	// 		input *= input * ( 0.54f + 0.46f * cosf( 2.0f * float(M_PI) * input ) );
-	// 		input /= ( 1.0f + paganin * input * input );
-	// 	}
-	// 	else if(type == EType::ramp){
-	// 		input /= ( 1.0f + paganin * input * input );
-	// 	}
-
-	// 	return input;
-	// }
 };
-
-
-
-
-
-
-
 
 
 extern "C"{
@@ -98,17 +57,17 @@ extern "C"{
 	
 	// void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, struct Filter reg);
 
-	void filterFBP(GPU gpus, Filter filter, float *tomogram, cufftComplex *filter_kernel, dim3 size, dim3 size_pad);
-	void convolution_mplan2DR2R(GPU gpus, float *data, float *kernel, float pad_value, dim3 size, dim3 size_pad);
-	void convolution_mplan1DR2R(GPU gpus, float *data, cufftComplex *kernel, float pad_value, dim3 size, dim3 size_pad);
+	void filterFBP(GPU gpus, Filter filter, 
+    float *tomogram, cufftComplex *filter_kernel, 
+    dim3 size, dim3 size_pad);
+    
+    void convolution_Real_C2C(GPU gpus, 
+        float *data, cufftComplex *kernel, 
+        dim3 size, dim3 kernel_size, 
+        dim3 pad, float pad_value, int dim);
 
-	__global__ void _fbp_filter(Filter filter, cufftComplex *kernel, dim3 size);
+	__global__ void fbp_filter_kernel(Filter filter, cufftComplex *kernel, dim3 size);
 
-
-	__global__ void ProdComplexFloat(cufftComplex *a, float *b, cufftComplex *ans, dim3 size);
-	__global__ void ProdComplexComplex(cufftComplex *a, cufftComplex *b, cufftComplex *ans, dim3 size);
-    __global__ void fftNormalize1d(cufftComplex *c, dim3 size);
-    __global__ void fftNormalize2d(cufftComplex *c, dim3 size);
     __global__ void fftshiftKernel(float *c, dim3 size);
     __global__ void Normalize(float *a, float b, dim3 size);
 

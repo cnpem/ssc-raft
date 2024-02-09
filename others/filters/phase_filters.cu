@@ -1,10 +1,10 @@
-#include "../../../inc/filters.h"
+#include "processing/filters.hpp"
 
 extern "C" {
 
-	void getPhaseFilterMultiGPU(float *projections, float *paramf, int *parami, 
-	int phase_type, float phase_reg,
-	int *gpus, int ngpus)
+	void getPhaseFilterMultiGPU(int *gpus, int ngpus, 
+    float *projections, float *paramf, int *parami, 
+	int phase_type, float phase_reg)
 	{	
 		int i, Maxgpudev;
 		
@@ -19,14 +19,16 @@ extern "C" {
 
         setPhaseFilterParameters(&geometry, &tomo, paramf, parami);
 
-        setGPUParameters(&gpu_parameters, tomo.npad, ngpus, gpus);
+        setGPUParameters(&gpu_parameters, tomo.padsize, ngpus, gpus);
 
 		int subvolume = (tomo.size.z + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; size_t ptr_volume = 0;
 
 		if (ngpus == 1){ /* 1 device */
 
-			getPhaseFilterGPU(gpu_parameters, geometry, tomo, projections, phase_type, phase_reg, gpus[0]);
+			getPhaseFilterGPU(  gpu_parameters, geometry, tomo, 
+                                projections, 
+                                phase_type, phase_reg, gpus[0]);
 
 		}else{
 		/* Launch async Threads for each device.
@@ -45,7 +47,8 @@ extern "C" {
 				
 				threads.push_back( std::async(  std::launch::async, 
 												getPhaseFilterGPU, 
-												gpu_parameters, geometry, tomo,
+												gpu_parameters, 
+                                                geometry, tomo,
 												projections + ptr_volume, 
 												phase_type, phase_reg, 
 												gpus[i]

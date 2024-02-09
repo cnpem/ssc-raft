@@ -1,5 +1,5 @@
 #include <cufft.h>
-#include "../../../../inc/geometries/gp/fst.h"
+#include ".geometries/gp/fst.hpp"
 
 // in case it is compiled with host compiler instead of nvcc:
 #include <cuda.h>

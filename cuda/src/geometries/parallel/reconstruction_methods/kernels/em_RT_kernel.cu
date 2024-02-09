@@ -1,4 +1,4 @@
-#include "../../../../inc/reconstructions.h"
+#include "geometries/parallel/em.hpp"
 
 extern "C" {
   __global__ void kernel_ones(float *output, int sizeImage, int nrays, int nangles,  int blockSize)

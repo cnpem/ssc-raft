@@ -1,8 +1,8 @@
 #ifndef RAFT_FBP_PAR_H
 #define RAFT_FBP_PAR_H
 
-#include "../../common/configs.h"
-#include "../../processing/filters.h"
+#include "common/configs.hpp"
+#include "processing/filters.hpp"
 
 extern "C"{
 

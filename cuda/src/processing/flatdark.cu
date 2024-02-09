@@ -1,66 +1,60 @@
-#include "../../inc/processing.h"
+#include "common/logerror.hpp"
+#include "common/operations.hpp"
+#include "processing/processing.hpp"
+
+
+static __global__ void KFlatDark(float* data, 
+float* dark, float* flat, 
+dim3 size, int numflats)
+{  
+    // Supports 2 flats only
+    long long int idx = threadIdx.x + blockIdx.x*blockDim.x;
+    long long int idy = threadIdx.y + blockIdx.y*blockDim.y;
+
+    long long int line;
+    float ft, flat_before, flat_after, dk, T, Q, interp;
+
+    if(idx < size.x && idy < size.y && blockIdx.z < size.z){
+        
+        dk          = dark[size.x * blockIdx.z            + idx];
+        flat_before = flat[size.x * numflats * blockIdx.z + idx];
+
+        line        = size.x * size.y * blockIdx.z + size.x * idy + idx;
+
+        if(numflats > 1){
+            interp     = float( idy ) / float( size.y ); 
+
+            flat_after = flat[size.x * numflats * blockIdx.z + size.x + idx];
+
+            ft         = flat_before * ( 1.0f - interp ) + interp * flat_after;
+        }else{
+            ft         = flat_before;
+        }
+
+        T          = data[line] - dk;
+        Q          = ft         - dk;
+
+        data[line] = fmaxf(T, 0.5f) / fmaxf(Q,0.5f); 
+    }
+}
 
 extern "C"{
-
-   	static __global__ void KFlatDark(float* data, float* dark, float* flat, dim3 size, int numflats)
-	{  
-      // Supports 2 flats only
-		long long int idx = threadIdx.x + blockIdx.x*blockDim.x;
-		long long int line;
-		float ft, flat_before, flat_after, dk, T, Q, interp;
-
-		if(idx < size.x && blockIdx.y < size.y && blockIdx.z < size.z){
-			
-			dk          = dark[size.x * blockIdx.z            + idx];
-			flat_before = flat[size.x * numflats * blockIdx.z + idx];
-
-			line        = size.x * size.y * blockIdx.z + size.x * blockIdx.y + idx;
-
-         	if(numflats > 1){
-				interp     = float( blockIdx.y ) / float( size.y ); 
-
-				flat_after = flat[size.x * numflats * blockIdx.z + size.x + idx];
-
-				ft         = flat_before * ( 1.0f - interp ) + interp * flat_after;
-			}else{
-				ft = flat_before;
-			}
-
-			T = data[line] - dk;
-			Q = ft         - dk;
-
-			data[line] = fmaxf(T, 0.5f) / fmaxf(Q,0.5f) ; 
-
-		}
-	}
-
-	static __global__ void Klog(float* in, dim3 size)
-	{  
-		long long int idx = threadIdx.x + blockIdx.x*blockDim.x;
-		long long int line;
-
-		if(idx < size.x && blockIdx.y < size.y && blockIdx.z < size.z){
-			
-			line     = size.x * size.y * blockIdx.z + size.x * blockIdx.y + idx;
-
-			in[line] = - logf( in[line] );
-
-		}
-	}
-
-	void getLog(float *tomogram, dim3 size, GPU gpus)
+	void getFlatDarkCorrection(float* frames, 
+    float* flat, float* dark, 
+    dim3 size, int numflats, GPU gpus)
 	{
-		Klog<<<gpus.Grd,gpus.BT>>>(tomogram, dim3(size.x,size.y,size.z));
+        dim3 threadsPerBlock(gpus.BT.x,   gpus.BT.y, size.z);
+        dim3       gridBlock(gpus.Grd.x, gpus.Grd.y,      1);
+
+		/* Do the dark subtraction and division by flat (without log) */
+		KFlatDark<<<gridBlock,threadsPerBlock>>>(frames, dark, flat, size, numflats);
+
+        HANDLE_ERROR(cudaGetLastError());
 	}
 
-	void getFlatDarkCorrection(float* frames, float* flat, float* dark, dim3 size, int numflats, GPU gpus)
-	{
-		/* Do the dark subtraction and division by flat (with or without log) */
-		KFlatDark<<<gpus.Grd,gpus.BT>>>(frames, dark, flat, dim3(size.x,size.y,size.z), numflats);
-
-	}
-
-	void getFlatDarkGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, dim3 size, int numflats, int is_log)
+	void getFlatDarkGPU(GPU gpus, int gpu, 
+    float* frames, float* flat, float* dark, 
+    dim3 size, int numflats, int is_log)
 	{	
 		// Supports 2 flats max
 		cudaSetDevice(gpu);
@@ -70,36 +64,44 @@ extern "C"{
 
 		int nblock = (int)ceil( (float) size.z / blocksize );
 		int ptr = 0, subblock;
-
+        
+        size_t n = size.x * size.y;
 		// GPUs Pointers: declaration and allocation
-		rImage data(size.x,size.y,blocksize); // Frames in GPU 
-
-		Image2D<float> cflat(size.x, numflats, blocksize); // Flat in GPU
-		Image2D<float> cdark(size.x,        1, blocksize); // Dark in GPU
+        float *d_frames = opt::allocGPU<float>((size_t) n                 * blocksize);
+        float *d_flat   = opt::allocGPU<float>((size_t) size.x * numflats * blocksize);
+        float *d_dark   = opt::allocGPU<float>((size_t) size.x            * blocksize);
 
 		for(i = 0; i < nblock; i++){
 			
 			subblock = min(size.z - ptr, blocksize);
 
-			data.CopyFrom (frames + (size_t)ptr * size.x * size.y  , 0, (size_t)subblock * size.x * size.y  );
-			cflat.CopyFrom(flat   + (size_t)ptr * size.x * numflats, 0, (size_t)subblock * size.x * numflats);
-			cdark.CopyFrom(dark   + (size_t)ptr * size.x           , 0, (size_t)subblock * size.x           );
-
-			getFlatDarkCorrection(data.gpuptr, cflat.gpuptr, cdark.gpuptr, dim3(size.x, size.y, subblock), numflats, gpus);
+            opt::CPUToGPU<float>(frames + (size_t)ptr * n                 , d_frames, (size_t)subblock *                 n);
+            opt::CPUToGPU<float>(flat   + (size_t)ptr * size.x * numflats , d_flat  , (size_t)subblock * size.x * numflats);
+            opt::CPUToGPU<float>(dark   + (size_t)ptr * size.x            , d_dark  , (size_t)subblock * size.x           );
+        
+			getFlatDarkCorrection(d_frames, d_flat, d_dark, dim3(size.x, size.y, subblock), numflats, gpus);
 
 			if (is_log == 1)
-				getLog(data.gpuptr, dim3(size.x, size.y, subblock), gpus);
+				getLog(d_frames, dim3(size.x, size.y, subblock));
 
-			data.CopyTo(frames + (size_t)ptr * size.x * size.y, 0, (size_t)subblock * size.x * size.y);
-      
+            opt::GPUToCPU<float>(frames + (size_t)ptr * n , d_frames, (size_t)subblock * n);
+
 			/* Update pointer */
 			ptr = ptr + subblock;
 		}
+        cudaFree(d_frames);
+        cudaFree(d_flat);
+        cudaFree(d_dark);
 
-		cudaDeviceSynchronize();
+        HANDLE_ERROR(cudaGetLastError());
+
+		cudaDeviceSynchronize();    
 	}
 
-	void getFlatDarkMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nangles, int nslices, int numflats, int is_log)
+	void getFlatDarkMultiGPU(int* gpus, int ngpus, 
+    float* frames, float* flat, float* dark, 
+    int nrays, int nangles, int nslices, int numflats, 
+    int is_log)
 	{
 		int i;
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
@@ -112,7 +114,13 @@ extern "C"{
 		std::vector<std::future<void>> threads;
 		
 		if ( ngpus == 1 ){
-			getFlatDarkGPU(gpu_parameters, gpus[0], frames, flat, dark, dim3(nrays, nangles, nslices), numflats, is_log);
+			getFlatDarkGPU( gpu_parameters, 
+                            gpus[0], 
+                            frames, 
+                            flat, 
+                            dark, 
+                            dim3(nrays, nangles, nslices), 
+                            numflats, is_log);
 		}else{
 			for(i = 0; i < ngpus; i++){ 
 				
@@ -122,9 +130,9 @@ extern "C"{
 							getFlatDarkGPU, 
 							gpu_parameters,
 							gpus[i], 
-							frames + (size_t)ptr*nrays*nangles, 
-							flat   + (size_t)ptr*nrays*numflats, 
-							dark   + (size_t)ptr*nrays, 
+							frames + (size_t)ptr * nrays * nangles, 
+							flat   + (size_t)ptr * nrays * numflats, 
+							dark   + (size_t)ptr * nrays, 
 							dim3(nrays, nangles, subblock), 
 							numflats, is_log
 							));
@@ -135,7 +143,6 @@ extern "C"{
 
 			for(auto& t : threads)
 				t.get();
-
 		}
 	}
 }

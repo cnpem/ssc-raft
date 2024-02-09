@@ -1,8 +1,6 @@
-#include "../../../../inc/include.h"
-#include "../../../../inc//geometries/conebeam/fdk.h"
-#include "../../../../inc/common/types.hpp"
-
-
+#include "include.hpp"
+#include "geometries/conebeam/fdk.hpp"
+#include "common/types.hpp"
 
 extern "C"{
 void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process) {

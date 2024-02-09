@@ -1,4 +1,6 @@
-#include "../../../inc/processing.h"
+#include "common/logerror.hpp"
+#include "common/operations.hpp"
+#include "processing/processing.hpp"
 
 template <bool bShared>
 __global__ void KConvolve0(float *restrict image0, const float *kernel, size_t sizex, int hkernelsize, float *globalmem)
@@ -457,7 +459,9 @@ extern "C"{
         return lambda_computed;
     }
 
-    void getRingsGPU(GPU gpus, int gpu, float *data, float *lambda_computed, dim3 size, float lambda_rings, int ring_blocks)
+    void getRingsGPU(GPU gpus, int gpu, 
+    float *data, float *lambda_computed, 
+    dim3 size, float lambda_rings, int ring_blocks)
     {
         cudaSetDevice(gpu);
 
@@ -467,27 +471,34 @@ extern "C"{
         int nblock = (int)ceil((float)size.z / blocksize);
         int ptr = 0, subblock;
 
-        rImage tomogram(size.x, size.y, blocksize);
+        float *tomogram = opt::allocGPU<float>((size_t) size.x * size.y * blocksize);
 
         for (i = 0; i < nblock; i++){
             
             subblock = min(size.z - ptr, blocksize);
 
-            tomogram.CopyFrom(data + (size_t)ptr * size.x * size.y, 0, (size_t)size.x * size.y * subblock);
+            opt::CPUToGPU<float>(data + (size_t)ptr * size.x * size.y, tomogram, (size_t)subblock * size.x * size.y);
 
-            (*lambda_computed) = getRings(tomogram.gpuptr, dim3(size.x, size.y, subblock), lambda_rings, ring_blocks, gpus);
-
-            tomogram.CopyTo(data + (size_t)ptr * size.x * size.y, 0, (size_t)size.x * size.y * subblock);
+            (*lambda_computed) = getRings(tomogram, dim3(size.x, size.y, subblock), lambda_rings, ring_blocks, gpus);
+            
+            opt::GPUToCPU<float>(data + (size_t)ptr * size.x * size.y, tomogram, (size_t)subblock * size.x * size.y);
 
             /* Update pointer */
             ptr = ptr + subblock;
         }
+        cudaFree(tomogram);
+
+        HANDLE_ERROR(cudaGetLastError());
+        cudaDeviceSynchronize();    
     }
 }
 
 extern "C"{
 
-    void getRingsMultiGPU(int *gpus, int ngpus, float *data, float *lambda_computed, int nrays, int nangles, int nslices, float lambda_rings, int ring_blocks)
+    void getRingsMultiGPU(int *gpus, int ngpus, 
+    float *data, float *lambda_computed, 
+    int nrays, int nangles, int nslices, 
+    float lambda_rings, int ring_blocks)
     {
         int i;
         int blockgpu = (nslices + ngpus - 1) / ngpus;
@@ -497,10 +508,15 @@ extern "C"{
 
         setGPUParameters(&gpu_parameters, dim3(nrays, nangles, nslices), ngpus, gpus);
 
-        std::vector<std::future<void>> threads;
+		std::vector<std::future<void>> threads;
 
         if (ngpus == 1){
-            getRingsGPU(gpu_parameters, gpu_parameters.gpus[0], data, &lambda_computed[0], dim3(nrays, nangles, nslices), lambda_rings, ring_blocks);
+            getRingsGPU(gpu_parameters, 
+            gpus[0], 
+            data, 
+            &lambda_computed, 
+            dim3(nrays, nangles, nslices), 
+            lambda_rings, ring_blocks);
         }else{
             for (i = 0; i < ngpus; i++){
 

@@ -1,7 +1,7 @@
 #ifndef RAFT_CONFIGS_H
 #define RAFT_CONFIGS_H
 
-#define IND(I,J,K,NX,NY) ( (I) + (J) * (NX) + (K) * (NX) * (NY) )
+#define IND(I,J,K,NX,NY) (long long int)( (I) + (J) * (NX) + (K) * (NX) * (NY) )
 
 #define vc 299792458           /* Velocity of Light [m/s] */ 
 #define plank 4.135667662E-15  /* Plank constant [ev*s] */
@@ -19,28 +19,43 @@
 #define SIGN(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 #define APPROXINVX(x,e) ((SIGN(x))/(sqrtf( SQR(e) + SQR(x) )))
 
-#include "../include.h"
+#include "include.hpp"
+
 
 typedef struct dimension
 {   
-    dim3 size;
-    float  x,  y,  z;
-    float dx, dy, dz;
-    dim3  pad;
-    dim3  npad;
-    int start_slice, end_slice; /* Slices: start and end slice */
-    int nrays, nangles, nslices;
+    dim3 size; /* Dimension values */
+    float  posx,  posy,  posz; /* points values */
+    float    dx,    dy,    dz; /* spacing values */
+    float    Lx,    Ly,    Lz; /* Dimension length valuess */
 
-}DIM;
+    size_t xyz = size.x * size.y * size.x; /* Total number of points */
+    size_t xy  = size.x * size.y; /* Total number of points on xy-plane */
+
+    int xslice0, xslice1; /* Slices X: start (0)  and end slice (1)*/
+    int yslice0, yslice1; /* Slices Y: start (0)  and end slice (1)*/
+    int zslice0, zslice1; /* Slices Z: start (0)  and end slice (1)*/
+
+    dim3  padsize; /* Padded dimensions: (size + 2 * pad) */
+    dim3  pad;     /* Pad value */
+
+    dim3 batchsize;
+    dim3 padbatchsize;
+
+}DIM; /* Data dimensions */
 
 typedef struct geometry
 {   
-    /* Geometry */
+    /* Geometry: 
+        0 -> parallel
+        1 -> conebeam
+        2 -> fanbeam 
+    */
     int geometry;
 
     /* General reconstruction variables*/
     float detector_pixel_x, detector_pixel_y;
-    float energy, lambda, wave;
+    float energy, wavelenght, wavenumber;
     float z1x, z1y, z2x, z2y;
     float magnitude_x, magnitude_y;  
     
@@ -67,7 +82,7 @@ typedef struct config
     FLAG flags;
 
     /* Reconstruction variables */
-    DIM recon;
+    DIM obj;
     
     /* Tomogram variables */
     DIM tomo; 
@@ -76,7 +91,7 @@ typedef struct config
     int numflats, numdarks;
 
     /* Phase Filter */
-    int phase_filter_type;  /* Phase Filter type */
+    int  phase_filter_type;  /* Phase Filter type */
     float phase_filter_reg; /* Phase Filter regularization parameter */
 
     /* Rings */
@@ -101,7 +116,7 @@ typedef struct config
 
     /* BST */
 
-    /* EM */
+    /* EM Parallel */
     int em_iterations;
 
     /* Conical */
@@ -113,7 +128,7 @@ typedef struct config
 }CFG;
 
 
-typedef struct Devices
+struct GPU
 {   
     /* GPU variables */
     int ngpus, *gpus;
@@ -124,10 +139,7 @@ typedef struct Devices
     /* Fourier Transforms */
     /* Plan FFTs*/
     cufftHandle mplan;
-    cufftHandle mplan2dC2C, mplan2dR2C, mplan2dC2R, mplan2dR2R;
-    cufftHandle mplan1dC2C, mplan1dR2C, mplan1dC2R, mplan1dR2R;
-
-}GPU;
+};
 
 
 extern "C" {
@@ -146,31 +158,33 @@ extern "C" {
 
 typedef struct workspace
 {	/* GPU */
-	float *tomo, *recon;
+	float *tomo, *obj;
 	float *flat, *dark, *angles; 
 }WKP;
 
-typedef struct Processes{ 
+struct Process{ 
+    /* Process variables to parallelize the data z-axis by independent blocks */
+
     /* GPU */ 
     int index, index_gpu;
 
     /* Processes*/
-    int batch_size_tomo, batch_size_recon, batch_index;
+    int tomobatch_size, objbatch_size, batch_index;
 
-    /* Tomogram (or detector) and reconstruction filter (v of vertical) */
-    int indv, indv_filter;
-    long long int ind_tomo, n_tomo, ind_filter, n_filter;
+    /* Tomogram (or detector) and reconstruction filter */
+    int tomo_index_z, filter_index_z;
+    long long int tomoptr_index, tomoptr_size, filterptr_index, filterptr_size;
+    float tomo_posz;
 
-    /* Reconstruction */
-    long long int ind_recon, n_recon;
-    float z, z_det;
+    /* Object - Reconstruction */
+    long long int objptr_index, objptr_size;
+    float obj_posz;
 
-    int i, i_gpu, zi, z_filter, z_filter_pad;
-    long long int n_proj, n_filter_pad;
-    long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
-    float z_ph;
-
-}Process;
+    // int i, i_gpu, zi, z_filter, z_filter_pad;
+    // long long int n_proj, n_filter_pad;
+    // long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
+    // float z_ph;
+};
 
 
 /* Commom parameters */
@@ -196,8 +210,6 @@ extern "C"{
     void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
 
     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
-
-    void setProcessFrames(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
     
     int getTotalProcesses(CFG configs, GPU gpus);
 

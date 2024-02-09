@@ -10,11 +10,11 @@
 #define restrict
 #endif
 
-#include "../include.h"
+#include "include.hpp"
 
-#include "complex.hpp"
-#include "operations.hpp"
-#include "logerror.hpp"
+#include "common/complex.hpp"
+#include "common/operations.hpp"
+#include "common/logerror.hpp"
 
 #ifndef __host__
 #define __host__

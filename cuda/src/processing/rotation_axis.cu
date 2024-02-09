@@ -1,7 +1,9 @@
 // Authors: Giovanni Baraldi, Gilberto Martinez, Eduardo Miqueles
 // Sinogram centering
 
-#include "../../../inc/processing.h"
+#include "common/logerror.hpp"
+#include "common/operations.hpp"
+#include "processing/processing.hpp"
 
 extern "C"{
     __global__ void KCrossFrame16(complex* f, complex* g, const uint16_t* frame0, const uint16_t* frame1, const uint16_t* dark, const uint16_t* flat, size_t sizex)
@@ -37,7 +39,9 @@ extern "C"{
         }
     }
 
-    int Centersino16(uint16_t* frame0, uint16_t* frame1, uint16_t* dark, uint16_t* flat, size_t sizex, size_t sizey)
+    int getCentersino16(uint16_t* frame0, uint16_t* frame180, 
+    uint16_t* dark, uint16_t* flat, 
+    size_t sizex, size_t sizey)
     {
 
         dim3 blocks((sizex+127)/128,sizey,1);
@@ -52,7 +56,7 @@ extern "C"{
         cufftPlan1d(&plan, sizex, CUFFT_C2C, sizey);
         cufftPlanMany(&plan2, 1, n, inembed, sizex, 1, inembed, sizex, 1, CUFFT_C2C, sizex);
 
-        KCrossFrame16<<<blocks,threads>>>(f.gpuptr, g.gpuptr, frame0, frame1, dark, flat, sizex);
+        KCrossFrame16<<<blocks,threads>>>(f.gpuptr, g.gpuptr, frame0, frame180, dark, flat, sizex);
         
         cufftExecC2C(plan, f.gpuptr, f.gpuptr, CUFFT_FORWARD);
         cufftExecC2C(plan, g.gpuptr, g.gpuptr, CUFFT_FORWARD);
@@ -116,7 +120,9 @@ extern "C"{
         }
     }
 
-    int Centersino(float* frame0, float* frame1, float* dark, float* flat, size_t sizex, size_t sizey)
+    int getCentersino(float* frame0, float* frame180, 
+    float* dark, float* flat, 
+    size_t sizex, size_t sizey)
     {
 
         dim3 blocks((sizex+127)/128,sizey,1);
@@ -131,7 +137,7 @@ extern "C"{
         cufftPlan1d(&plan, sizex, CUFFT_C2C, sizey);
         cufftPlanMany(&plan2, 1, n, inembed, sizex, 1, inembed, sizex, 1, CUFFT_C2C, sizex);
 
-        KCrossFrame<<<blocks,threads>>>(f.gpuptr, g.gpuptr, frame0, frame1, dark, flat, sizex);
+        KCrossFrame<<<blocks,threads>>>(f.gpuptr, g.gpuptr, frame0, frame180, dark, flat, sizex);
         
         cufftExecC2C(plan, f.gpuptr, f.gpuptr, CUFFT_FORWARD);
         cufftExecC2C(plan, g.gpuptr, g.gpuptr, CUFFT_FORWARD);
@@ -179,16 +185,18 @@ extern "C"{
 }
 
 extern "C"{
-    int findcentersino16(uint16_t* frame0, uint16_t* frame1, uint16_t* dark, uint16_t* flat, int sizex, int sizey)
+    int findcentersino16(uint16_t* frame0, uint16_t* frame180, 
+    uint16_t* dark, uint16_t* flat, int sizex, int sizey)
     {
-        Image2D<uint16_t> fr0(frame0,sizex,sizey), fr1(frame1,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);	
-        return Centersino16(fr0.gpuptr, fr1.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
+        Image2D<uint16_t> fr0(frame0,sizex,sizey), fr1(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);	
+        return getCentersino16(fr0.gpuptr, fr1.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
     }
 
-    int findcentersino(float* frame0, float* frame1, float* dark, float* flat, int sizex, int sizey)
+    int findcentersino(float* frame0, float* frame180, 
+    float* dark, float* flat, int sizex, int sizey)
     {
-        Image2D<float> fr0(frame0,sizex,sizey), fr1(frame1,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);	
-        return Centersino(fr0.gpuptr, fr1.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
+        Image2D<float> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);	
+        return getCentersino(fr0.gpuptr, fr1180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
     }
 
 }

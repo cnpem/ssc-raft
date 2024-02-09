@@ -6,8 +6,8 @@
 #include <vector>
 #include <algorithm> // std::min_element.
 #include <stdlib.h>  // size_t and malloc for backcounts.
-#include "../../../../inc/geometries/conebeam/emc_manager.cuh"
-#include "../../../../inc/geometries/conebeam/emc_kernel.cuh"
+#include "geometries/conebeam/emc_manager.cuh"
+#include "geometries/conebeam/emc_kernel.cuh"
 
 
 #define MAX_GPUS 64

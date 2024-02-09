@@ -1,11 +1,16 @@
-#include "../../inc/pipeline.h"
-#include "../../inc/processing.h"
-#include "../../inc/reconstructions.h"
+#include "pipeline.hpp"
+#include "processing.hpp"
+#include "geometries/parallel/em.hpp"
+#include "geometries/parallel/fbp.hpp"
+#include "geometries/parallel/bst.hpp"
+#include "geometries/conebeam/em.hpp"
+#include "geometries/conebeam/fdk.hpp"
 
 using std::thread;
 
 extern "C"{
-    void ReconstructionPipeline(float *recon, float *data, float *flats, float *darks, float *angles,
+    void ReconstructionPipeline(float *obj, float *data, 
+    float *flats, float *darks, float *angles,
 	float *parameters_float, int *parameters_int, int *flags,
 	int *gpus, int ngpus)
 	{
@@ -23,7 +28,7 @@ extern "C"{
 
         setReconstructionParameters(&configs, parameters_float, parameters_int, flags);
 
-        setGPUParameters(&gpu_parameters, configs.tomo.npad, ngpus, gpus);
+        setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
         /* Set total number of processes to be sent to the GPUs */
         total_number_of_processes = getTotalProcesses(configs, gpu_parameters);
@@ -33,12 +38,9 @@ extern "C"{
 
         // clock_t b_begin = clock();
 
-        _setReconstructionPipeline(configs, process, gpu_parameters, recon, data, flats, darks, angles, total_number_of_processes);
-
-        // clock_t b_end = clock();
-        // double time = double(b_end - b_begin) / CLOCKS_PER_SEC;
-
-        // cudaDeviceSynchronize();
+        _setReconstructionPipeline(configs, process, gpu_parameters, 
+                                    obj, data, flats, darks, angles, 
+                                    total_number_of_processes);
 
         HANDLE_ERROR(cudaGetLastError());
 
@@ -50,9 +52,8 @@ extern "C"{
 
 extern "C"{
     void _setReconstructionPipeline(CFG configs, Process *process, GPU gpus,
-    float *recon, float *data, 
-    float *flats, float *darks, float *angles,
-    int total_number_of_processes)
+    float *obj, float *data, float *flats, float *darks, 
+    float *angles, int total_number_of_processes)
     {
         int gpu_index, process_index = 0;
 
@@ -60,7 +61,13 @@ extern "C"{
 
         while (process_index < total_number_of_processes){
 
-            threads_pipeline.emplace_back( thread(_ReconstructionProcessPipeline, configs, process[process_index], gpus, recon, data, flats, darks, angles) );		
+            threads_pipeline.emplace_back( 
+                                            thread(
+                                            _ReconstructionProcessPipeline, 
+                                            configs, process[process_index], 
+                                            gpus, obj, data, flats, darks, 
+                                            angles
+                                            ));		
 
             process_index = process_index + 1;
 
@@ -73,7 +80,6 @@ extern "C"{
                 cudaDeviceSynchronize();
             }
         }
-        
     }
 }
 
@@ -81,26 +87,30 @@ extern "C"{
 extern "C" {
 
 	void _ReconstructionProcessPipeline(CFG configs, Process process, GPU gpus, 
-    float *recon, float *frames, float *flats, float *darks, float *angles)
+    float *obj, float *data, float *flats, float *darks, float *angles)
 	{	
 		/* Initialize GPU device */
 		HANDLE_ERROR(cudaSetDevice(process.index_gpu));
-		
+
+        &configs->tomo->batchsize    = dim3(   configs.tomo.size.x, configs.tomo.size.y, process.tomobatch_size);
+        &configs->tomo->padbatchsize = dim3(configs.tomo.padsize.x, configs.tomo.size.y, process.tomobatch_size);
+        &configs->obj->batchsize     = dim3(    configs.obj.size.x,  configs.obj.size.y,  process.objbatch_size);
+
         /* Local GPUs Pointers: allocation */
         WKP *workspace = allocateWorkspace(configs, process);
 
         /* Copy data from host to device */
         HANDLE_ERROR(cudaMemcpy(workspace->angles, angles, configs.tomo.size.y * sizeof(float), cudaMemcpyHostToDevice));
 
-        HANDLE_ERROR(cudaMemcpy(workspace->tomo, frames + process.ind_tomo, process.n_tomo * sizeof(float), cudaMemcpyHostToDevice));
-        HANDLE_ERROR(cudaMemcpy(workspace->flat,  flats + process.ind_tomo, process.n_tomo * sizeof(float), cudaMemcpyHostToDevice));
-        HANDLE_ERROR(cudaMemcpy(workspace->dark,  darks + process.ind_tomo, process.n_tomo * sizeof(float), cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMemcpy(workspace->tomo,  data + process.tomoptr_index, process.tomoptr_size * sizeof(float), cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMemcpy(workspace->flat, flats + process.tomoptr_index, process.tomoptr_size * sizeof(float), cudaMemcpyHostToDevice));
+        HANDLE_ERROR(cudaMemcpy(workspace->dark, darks + process.tomoptr_index, process.tomoptr_size * sizeof(float), cudaMemcpyHostToDevice));
 
         /* Enter Reconstruction Pipeline */
         _ReconstructionPipeline(configs, workspace, process, gpus);
 
         /* Copy Reconstructed data from device to host */
-        HANDLE_ERROR(cudaMemcpy(&recon[process.ind_recon], workspace->recon, process.n_recon * sizeof(float), cudaMemcpyDeviceToHost));
+        HANDLE_ERROR(cudaMemcpy(&obj[process.objptr_index], workspace->obj, process.objptr_size * sizeof(float), cudaMemcpyDeviceToHost));
 
         freeWorkspace(workspace, configs);
 
@@ -112,22 +122,25 @@ extern "C" {
 extern "C"{
     void _ReconstructionPipeline(CFG configs, WKP *workspace, Process process, GPU gpus)
     {
-        float lambda_computed = 0;
+        float rings_lambda_computed = 0;
 
-        dim3 tomo_size  = dim3(configs.tomo.size.x , configs.tomo.size.y , process.batch_size_tomo );
-        dim3 recon_size = dim3(configs.recon.size.x, configs.recon.size.y, process.batch_size_recon);
 
         if( configs.flags.do_flat_dark_correction == 1)
-            getFlatDarkCorrection(workspace->tomo, workspace->flat, workspace->dark, tomo_size, configs.numflats, gpus);
+            getFlatDarkCorrection(workspace->tomo, workspace->flat, workspace->dark, 
+            configs.tomo.batchsize, configs.numflats, gpus);
 
         if( configs.flags.do_flat_dark_log == 1) 
-            getLog(workspace->tomo, tomo_size, gpus);
+            getLog(workspace->tomo, configs.tomo.batchsize, gpus);
 
         if( configs.flags.do_phase_filter == 1) 
-            getPhaseFilter(gpus, configs.geometry, workspace->tomo, configs.phase_filter_type, configs.phase_filter_reg, tomo_size, configs.tomo.npad);
+            getPhaseFilter(gpus, configs.geometry, workspace->tomo, 
+            configs.phase_filter_type, configs.phase_filter_reg, 
+            configs.tomo.batchsize, configs.tomo.padsize);
 
         if( configs.flags.do_rings == 1) 
-            lambda_computed = getRings(workspace->tomo, tomo_size, configs.rings_lambda, configs.rings_block, gpus);
+            rings_lambda_computed = getRings(workspace->tomo, 
+            configs.tomo.batchsize, configs.rings_lambda, 
+            configs.rings_block, gpus);
         
         // if( configs.flags.do_rotation == 1 && configs.flags.do_rotation_auto_offset == 1) 
         //     int rotation_axis_offset = getRotAxisOfsset();
@@ -155,39 +168,63 @@ extern "C"{
                 // getReconstructionFanbeam(configs, process, gpus, workspace);
                 break;
             default:
-                printf("Nope. \n");
+                getReconstructionMethods(configs, process, gpus, workspace);
                 break;
         }	
-        
-
     }
 }
 
 extern "C"{
 
-    void getReconstructionParallel(CFG configs, Process process, GPU gpus,  WKP *workspace)
+    void getReconstructionParallel(CFG configs, Process process, GPU gpus, WKP *workspace)
     {
-        dim3 tomo_size  = dim3(configs.tomo.size.x , configs.tomo.size.y , process.batch_size_tomo );
-        dim3 pad_size   = dim3(configs.tomo.npad.x , configs.tomo.size.y , process.batch_size_tomo );
-        dim3 recon_size = dim3(configs.recon.size.x, configs.recon.size.y, process.batch_size_recon);
+       getReconstructionMethods(configs, process, gpus, workspace);	
+    }
 
+    void getReconstructionConebeam(CFG configs, Process process, GPU gpus, WKP *workspace)
+    {
+        getReconstructionMethods(configs, process, gpus, workspace);
+    }
+
+    void getReconstructionMethods(CFG configs, Process process, GPU gpus, WKP *workspace)
+    {
         switch (configs.reconstruction_method){
             case 0:
                 /* FBP */
-                getFBP( configs, gpus, workspace->recon, workspace->tomo, workspace->angles, 
-                        tomo_size, pad_size, recon_size);
+                getFBP( configs, gpus, 
+                        workspace->obj, 
+                        workspace->tomo, 
+                        workspace->angles, 
+                        configs.tomo.batchsize, 
+                        configs.tomo.padbatchsize, 
+                        configs.obj.batchsize);
                 break;
             case 1:
                 /* BST */
-                
+                // getBST( configs, gpus, 
+                //         workspace->obj, 
+                //         workspace->tomo, 
+                //         workspace->angles, 
+                //         configs.tomo.batchsize, 
+                //         configs.tomo.padbatchsize, 
+                //         configs.obj.batchsize);
                 break;
             case 2:
                 /* EM RT eEM */
-                get_eEM_RT(configs, gpus, workspace->recon, workspace->tomo, workspace->angles, process.batch_size_tomo);
+                get_eEM_RT( configs, gpus, 
+                            workspace->obj, 
+                            workspace->tomo, 
+                            workspace->angles, 
+                            process.tomobatch_size);
                 break;
             case 3:
                 /* EM RT tEM */
-                get_tEM_RT(configs, gpus, workspace->recon, workspace->tomo, workspace->flat, workspace->angles, process.batch_size_tomo);
+                get_tEM_RT( configs, gpus, 
+                            workspace->obj, 
+                            workspace->tomo, 
+                            workspace->flat, 
+                            workspace->angles, 
+                            process.tomobatch_size);
                 break;
             case 4:
                 /* EM RT eEM TV */
@@ -208,76 +245,31 @@ extern "C"{
             case 8:
                 /* EM FST tEM TV*/
                 
-                break;
-            default:
-                printf("Nope. \n");
-                break;
-        }	
-    }
-
-    void getReconstructionConebeam(CFG configs, Process process, GPU gpus, WKP *workspace)
-    {
-
-        switch (configs.reconstruction_method){
-            case 0:
+            case 9:
                 /* FDK */
                 break;
-            case 1:
+            case 10:
                 /* EM Conical eEM*/
                 
                 break;
-            case 2:
+            case 11:
                 /* EM Conical tEM*/
                 
                 break;
-            case 3:
+            case 12:
                 /* EM Conical eEM TV*/
                 
                 break;
-            case 4:
+            case 13:
                 /* EM Conical tEM TV*/
-                
                 break;
             default:
-                printf("Nope. \n");
+                printf("No reconstruction method selected. Finshing run... \n");
+                return EXIT_SUCCESS
                 break;
         }	
     }
 
-    // void getReconstructionFanbeam(CFG configs, Process process, GPU gpus,  WKP *workspace)
-    // {
-
-    //     switch (configs.reconstruction_method){
-    //         case 0:
-    //             /* FDK */
-    //             printf("No filter was selected!");
-    //             break;
-    //         case 1:
-    //             /* EM Conical */
-                
-    //             break;
-    //         case 2:
-    //             /* FBP */
-                
-    //             break;
-    //         case 3:
-    //             /* BST */
-                
-    //             break;
-    //         case 4:
-    //             /* EM RT */
-                
-    //             break;
-    //         case 5:
-    //             /* EM FST */
-                
-    //             break;
-
-    //         default:
-    //             printf("Nope. \n");
-    //             break;
-    //     }	
-    // }
 }
 
 /* ==================================================================== */
