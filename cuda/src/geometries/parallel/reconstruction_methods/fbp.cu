@@ -29,11 +29,12 @@ extern "C"{
         BackProjection_RT<<<gpus.Grd,gpus.BT>>>(obj, tomogram, 
                                                 sintable, costable, 
                                                 obj_size, tomo_size);
+
+        cudaDeviceSynchronize();
         
         cudaFree(sintable);
         cudaFree(costable);
         cudaFree(filter_kernel);
-        cudaDeviceSynchronize();
     }
 
 }
@@ -69,21 +70,22 @@ extern "C"{
 			/* Update pointer */
 			ptr = ptr + subblock;
 			
-            opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, (size_t)configs.tomo.size.x * configs.tomo.size.y * subblock);
+            opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
+                                (size_t)configs.tomo.size.x * configs.tomo.size.y * subblock);
 
             getFBP( configs, gpus, dobj, dtomo, dangles, 
-                    dim3(configs.tomo.size.x , configs.tomo.size.y , subblock), 
-                    dim3(configs.tomo.padsize.x , configs.tomo.size.y , subblock),
-                    dim3(configs.obj.size.x, configs.obj.size.y, subblock)
-                  );
+                    dim3(configs.tomo.size.x   , configs.tomo.size.y, subblock), 
+                    dim3(configs.tomo.padsize.x, configs.tomo.size.y, subblock),
+                    dim3(configs.obj.size.x    , configs.obj.size.y , subblock));
 
             opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, (size_t)configs.obj.size.x * configs.obj.size.y * subblock);
 
         }
+        cudaDeviceSynchronize();
+
         cudaFree(dangles);
         cudaFree(dtomo);
         cudaFree(dobj);
-        cudaDeviceSynchronize();
     }
 
     void getFBPMultiGPU(int* gpus, int ngpus, 
@@ -187,30 +189,38 @@ extern "C"{
 
     } 
 
-    __global__ void BackProjection_SS(float *image, float *blocksino,
-    int sizeImage, int nrays, int nangles,  int blockSize)
+    __global__ void BackProjection_SS(float *image, float *blocksino, float *angles,
+    dim3 obj_size, dim3 tomo_size)
     {
         int i, j, k, T, z;
         float t, cs, x, y, cosk, sink;
         float xymin = -1.0;
-        float dxy = 2.0 / (sizeImage - 1);
-        float dt = 2.0 / (nrays - 1);
-        float dth = PI / nangles;
+
+        float dx = 2.0 / (obj_size.x - 1);
+        float dy = 2.0 / (obj_size.y - 1);
+
+        int nrays   = tomo_size.x;
+        int nangles = tomo_size.y;
+        int nslices = tomo_size.z;
+
+        float dt    = 2.0 / (nrays - 1);
         float tmin = -1.0;
+
+        float dth = angles[1] - angles[0];
         
         i = (blockDim.x * blockIdx.x + threadIdx.x);
         j = (blockDim.y * blockIdx.y + threadIdx.y);
         z = (blockDim.z * blockIdx.z + threadIdx.z);
     
-        if ( (i<sizeImage) && (j < sizeImage) && (z<blockSize)  ){
+        if ( (i<obj_size.x) && (j < obj_size.y) && (z<obj_size.z)  ){
         
             cs = 0;
             
-            x = xymin + i * dxy;
-            y = xymin + j * dxy;
+            x = xymin + i * dx;
+            y = xymin + j * dy;
             
             for(k=0; k < (nangles); k++){
-                __sincosf(k * dth, &sink, &cosk);
+                __sincosf(angles[k], &sink, &cosk);
                 
                 t = x * cosk + y * sink;
                 
@@ -222,7 +232,7 @@ extern "C"{
                 }
             }
         
-            image[z * sizeImage * sizeImage + j * sizeImage + i]  = (cs*dth); 
+            image[z * obj_size.y * obj_size.x + j * obj_size.x + i]  = (cs*dth); 
         }
     }
 

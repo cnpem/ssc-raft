@@ -1,6 +1,6 @@
-#include "include.hpp"
 #include "common/configs.hpp"
 #include "common/logerror.hpp"
+
 
 extern "C"{
 	WKP *allocateWorkspace(CFG configs, Process process)
@@ -15,7 +15,7 @@ extern "C"{
 		HANDLE_ERROR(cudaMalloc((void **)&workspace->flat  , sizeof(float) * (size_t)process.tomobatch_size * configs.tomo.x ));
 		HANDLE_ERROR(cudaMalloc((void **)&workspace->dark  , sizeof(float) * (size_t)process.tomobatch_size * configs.tomo.x ));
         HANDLE_ERROR(cudaMalloc((void **)&workspace->angles, sizeof(float) *                                  configs.tomo.y ));
-
+        
 		return workspace;
 	}
 }

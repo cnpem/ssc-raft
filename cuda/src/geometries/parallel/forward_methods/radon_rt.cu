@@ -99,118 +99,128 @@ extern "C" {
     }
 }
 
-// extern "C" {
-//     void _radonp_gpu(float* h_output, float* h_input, float *angles, dim3 sizeImage, int nrays, int nangles, int device, int blocksize, float a)
-//     {
-//         cudaSetDevice(device);
-        
-//         float *d_output, *d_input, *d_angles;
-        
-//         // Allocate GPU buffers for the output sinogram
-//         cudaMalloc(&d_output, (size_t)nrays       *     nangles * blocksize * sizeof(float) );
-//         cudaMalloc(&d_input , (size_t)sizeImage.x * sizeImage.y * blocksize * sizeof(float) );
-//         cudaMalloc(&d_angles,                                       nangles * sizeof(float) );
-        
-//         cudaMemcpy(d_input, h_input, (size_t)sizeImage.x * sizeImage.y * blocksize * sizeof(float), cudaMemcpyHostToDevice);
-        
-//         cudaMemcpy(d_angles, angles, nangles * sizeof(float), cudaMemcpyHostToDevice);		
+extern "C" {
+    void getRadonRT(float* obj, float* projection, float *angles, 
+    dim3 obj_size, dim3 tomo_size, float ax, float ay)
+    {
+        int nrays   = tomo_size.x;
+        int nangles = tomo_size.y;
+        int nslices = tomo_size.z;
 
-//         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-//         dim3 gridBlock((int)ceil((nrays)/threadsPerBlock.x)+1,
-//             (int)ceil((nangles)/threadsPerBlock.y)+1,
-//             (int)ceil(blocksize/threadsPerBlock.z)+1);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock((int)ceil( nrays   / threadsPerBlock.x ) + 1,
+                       (int)ceil( nangles / threadsPerBlock.y ) + 1,
+                       (int)ceil( nslices / threadsPerBlock.z ) + 1);
         
-//         Radon_RT_version_sscRadon<<<gridBlock, threadsPerBlock>>>(d_output, d_input, d_angles, sizeImage, nrays, nangles, blocksize, a, a);
+        Radon_RT_version_sscRadon<<<gridBlock, threadsPerBlock>>>(  obj, projection, angles, 
+                                                                    obj_size, 
+                                                                    nrays, nangles, 
+                                                                    nslices, 
+                                                                    ax, ay);
+
+    }
+}
+
+//----------------------
+// Radon RT
+//----------------------
+
+extern "C"{   
+
+    void getRadonRTGPU(float* obj, float* projection, float *angles, 
+    dim3 obj_size, dim3 tomo_size, float ax, float ay, int ngpu)
+    {
+        cudaSetDevice(ngpu);
+
+        int nrays   = tomo_size.x;
+        int nangles = tomo_size.y;
+        int nslices = tomo_size.z;
+
+        int b;
+        int blocksize = min(nslices,64); // Herança do Giovanni -> Mudar
+
+		int nblock = (int)ceil( (float) nslices / blocksize );
+        int ptr = 0, subblock;
+
+        // Allocate GPU buffers for the output sinogram
+        float *dproj   = opt::allocGPU<float>((size_t)     nrays *    nangles * nslices);
+        float *dobj    = opt::allocGPU<float>((size_t)obj_size.x * obj_size.y * nslices);
+        float *dangles = opt::allocGPU<float>( nangles );
         
-//         // cudaDeviceSynchronize();
-        
-//         // Copy output vector from GPU buffer to host memory.
-//         cudaMemcpy(h_output, d_output, (size_t)nrays * nangles * blocksize * sizeof(float), cudaMemcpyDeviceToHost);
-        
-//         //cudaFree(d_input);
-//         cudaFree(d_output);
-//         cudaFree(d_input);
-//         cudaFree(d_angles);
-//         cudaDeviceReset();
+        opt::CPUToGPU<float>(angles, dangles, nangles);	
 
-//         return;
-//     }
-// }
-
-
-// //----------------------
-// // Radon RT
-// //----------------------
-
-// extern "C"{   
-
-//     void RadonGPU(float* h_output, float* h_input, float *angles, 
-//         dim3 sizeImage, int nrays, int nangles, int device, int nslices, float a)
-//     {
-//         int b;
-//         int blocksize = min(nslices,64); // Herança do Giovanni -> Mudar
-
-// 		int nblock = (int)ceil( (float) nslices / blocksize );
-//         int ptr = 0, subblock;
-
-//         for(b = 0; b < nblock; b++){
+        for(b = 0; b < nblock; b++){
             
-//             subblock   = min(nslices - ptr, blocksize);
+            subblock   = min(nslices - ptr, blocksize);
 
-//             _radonp_gpu(
-//                         h_output + (size_t)ptr *       nrays *     nangles, 
-//                         h_input  + (size_t)ptr * sizeImage.x * sizeImage.y, 
-//                         angles, 
-//                         sizeImage, nrays, nangles, device, subblock, 
-//                         a
-//                         );
+            opt::CPUToGPU<float>(obj, dobj, (size_t)obj_size.x * obj_size.y * subblock);
 
-//             /* Update pointer */
-// 			ptr = ptr + subblock;
+            getRadonRT(
+                        dproj + (size_t)ptr *       nrays *     nangles, 
+                        dobj  + (size_t)ptr * sizeImage.x * sizeImage.y, 
+                        dangles, 
+                        obj_size, 
+                        dim3(nrays, nangles, subblock), 
+                        ax, ay);
 
-//         }
+            opt::GPUToCPU<float>(   projection + (size_t)ptr * nrays * nangles, 
+                                    dproj, 
+                                    (size_t)nrays * nangles * nslices);
 
-//         cudaDeviceSynchronize();
+            /* Update pointer */
+			ptr = ptr + subblock;
+        }
 
-//     }
+        cudaDeviceSynchronize();        
 
-//     void RadonMultiGPU(int* gpus, int ngpus, float* h_output, float* h_input, float *angles, 
-//         int sizeImagex, int sizeImagey, int nrays, int nangles, int nslices, float a)
-//     {
-//         int t;
-// 		int blockgpu = (nslices + ngpus - 1) / ngpus;
-// 		int ptr = 0, subblock;
+        cudaFree(dproj);
+        cudaFree(dobj);
+        cudaFree(dangles);
+        // cudaDeviceReset();
+    }
+
+    void getRadonRTMultiGPU(int* gpus, int ngpus, 
+        float* projection, float* obj, float *angles, 
+        int sizeImagex, int sizeImagey, 
+        int nrays, int nangles, int nslices, 
+        float ax, float ay)
+    {
+        int t;
+		int blockgpu = (nslices + ngpus - 1) / ngpus;
+		int ptr = 0, subblock;
         
-//         std::vector<std::future<void>> threads;
+        std::vector<std::future<void>> threads;
 
-//         if ( ngpus == 1 ){
+        if ( ngpus == 1 ){
             
-//             RadonGPU(h_output, h_input, angles, dim3(sizeImagex,sizeImagey,nslices), nrays, nangles, gpus[0], nslices, a);
+            RadonGPU(   projection, obj, angles, 
+                        dim3(sizeImagex,sizeImagey,nslices), 
+                        dim3(nrays, nangles, nslices), 
+                        ax, ay, gpus[0]);
         
-//         }else{
+        }else{
 
-//             for(t = 0; t < ngpus; t++){ 
+            for(t = 0; t < ngpus; t++){ 
                 
-//                 subblock   = min(nslices - ptr, blockgpu);
+                subblock   = min(nslices - ptr, blockgpu);
 
-//                 threads.push_back(std::async( std::launch::async, RadonGPU, 
-//                                                 h_output + (size_t)ptr *      nrays *    nangles, 
-//                                                 h_input  + (size_t)ptr * sizeImagex * sizeImagey, 
-//                                                 angles, 
-//                                                 dim3(sizeImagex,sizeImagey,subblock), 
-//                                                 nrays, nangles, 
-//                                                 gpus[t], 
-//                                                 subblock, 
-//                                                 a
-//                                                 ));
+                threads.push_back(std::async( std::launch::async, getRadonRTGPU, 
+                                                projection + (size_t)ptr *      nrays *    nangles, 
+                                                obj        + (size_t)ptr * sizeImagex * sizeImagey, 
+                                                angles, 
+                                                dim3(sizeImagex,sizeImagey,subblock), 
+                                                dim3(nrays, nangles, subblock), 
+                                                ax,ay,
+                                                gpus[t]
+                                                ));
 
-//                 /* Update pointer */
-//                 ptr = ptr + subblock;
-//             }
+                /* Update pointer */
+                ptr = ptr + subblock;
+            }
         
-//             for(auto& t : threads)
-//                 t.get();
-//         }
-//     }
+            for(auto& t : threads)
+                t.get();
+        }
+    }
 
-// }
+}

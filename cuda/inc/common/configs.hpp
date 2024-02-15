@@ -19,6 +19,9 @@
 #define SIGN(x) ((x > 0) ? 1 : ((x < 0) ? -1 : 0))
 #define APPROXINVX(x,e) ((SIGN(x))/(sqrtf( SQR(e) + SQR(x) )))
 
+#define BYTES_TO_GB (1.0/(1024.0*1024.0*1024.0))
+#define A100_MEM 39.5 // A100 40GB device RAM memory, in GB.
+
 #include "include.hpp"
 
 
@@ -76,6 +79,7 @@ typedef struct flags
 typedef struct config
 {   
     /* Pipeline variables */
+    size_t total_req_size_mem;
 
     GEO geometry;
 
@@ -162,7 +166,9 @@ typedef struct workspace
 	float *flat, *dark, *angles; 
 }WKP;
 
-struct Process{ 
+struct Process{
+    size_t total_req_size_mem;
+     
     /* Process variables to parallelize the data z-axis by independent blocks */
 
     /* GPU */ 
@@ -211,7 +217,10 @@ extern "C"{
 
     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
     
-    int getTotalProcesses(CFG configs, GPU gpus);
+    int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft);
+
+    int compute_GPU_blocksize(float nslices, const float total_required_mem_per_slice,
+    bool using_fft, float GPU_MEMORY); 
 
 }
 

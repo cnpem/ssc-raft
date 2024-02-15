@@ -6,9 +6,6 @@
 #include <cufftXt.h>
 #include <complex.h>
 
-#define BYTES_TO_GB (1.0/(1024.0*1024.0*1024.0))
-#define A100_MEM 39.5 // A100 40GB device RAM memory, in GB.
-
 #define FT_PST_RANK_FORWARD 2 // Forward Fourier Transform rank for Fourier/projection slice theorem (F/PST).
 #define FT_PST_RANK_INVERSE 1 // Inverse Fourier Transform rank for Fourier/projection slice theorem (F/PST).
 
@@ -17,13 +14,20 @@
 typedef std::complex<float> data_type;
 typedef float real_data_type;
 
+#define BYTES_TO_GB (1.0/(1024.0*1024.0*1024.0))
+#define A100_MEM 39.5 // A100 40GB device RAM memory, in GB.
+
+
 /* Radon Ray Tracing */
 extern "C"{
 
-	void GRadon(int device, float* _frames, float* _image, int nrays, int nangles, int blocksize);
+    void getRadonRT(float* obj, float* projection, float *angles, 
+    dim3 obj_size, dim3 tomo_size, float ax, float ay);
 
-    __global__ void KRadon_RT(float* restrict frames, const float* image, int nrays, int nangles);
-
+    __global__ void Radon_RT_version_sscRadon(
+                    float *projections, float *phantom, float *angles,
+                    dim3 proj_size, dim3 phantom_size, 
+                    float ax, float ay);
 
 }
 

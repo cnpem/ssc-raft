@@ -8,11 +8,13 @@
 
 extern "C"{
 
-    void get_tEM_RT_MultiGPU(float* recon, float* count, float *flat, float* angles, 
-    float *paramf, int *parami, int* gpus, int ngpus);
+    void get_tEM_RT_MultiGPU(int* gpus, int ngpus,
+    float* recon, float* count, float *flat, float* angles, 
+    float *paramf, int *parami);
 
-    void get_eEM_RT_MultiGPU(float* recon, float* tomogram, float* angles, 
-    float *paramf, int *parami, int* gpus, int ngpus);
+    void get_eEM_RT_MultiGPU(int* gpus, int ngpus, 
+    float* recon, float* tomogram, float* angles, 
+    float *paramf, int *parami);
 
     void get_tEM_RT_GPU(CFG configs, GPU gpus, float *recon, float *count, float *flat, float *angles, 
     int sizez, int ngpu);
@@ -29,12 +31,12 @@ extern "C"{
     void iterEM( float *em, float *sino, float *sinotmp, float *backones, float *angles,
             int sizeImage, int nrays, int nangles, int blockSize, int device );
 
-    void iterTV( float *y, float *x, float *backones,
-            int sizeImage, int blockSize, int device, float reg, float epsilon);
+    // void iterTV( float *y, float *x, float *backones,
+    //         int sizeImage, int blockSize, int device, float reg, float epsilon);
 
-    void get_EMTV_RT(float *output, float *sino, float *angles, 
-        int sizeImage, int nrays, int nangles, int blockSize, int device, int niter,
-        int niter_em, int niter_tv, float reg, float epsilon);
+    // void get_EMTV_RT(float *output, float *sino, float *angles, 
+    //     int sizeImage, int nrays, int nangles, int blockSize, int device, int niter,
+    //     int niter_em, int niter_tv, float reg, float epsilon);
 
     __global__ void kernel_ones(float *output, int sizeImage, int nrays, int nangles,  int blockSize);
     __global__ void kernel_flatTimesExp(float *tmp, float *flat, int sizeImage, int nrays, int nangles,  int blockSize);

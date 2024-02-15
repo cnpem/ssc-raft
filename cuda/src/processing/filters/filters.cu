@@ -231,6 +231,62 @@ extern "C" {
 			vec[ty*sizex + tx] *= exp1j(-2*float(M_PI)/float(sizex) * center * tx) * rampfilter;
 	}
 
+    inline __global__ void SetX(complex* out, float* in, int sizex)
+    {
+        /* Float to Complex (imaginary part zero)*/
+        size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
+        size_t ty = blockIdx.y + gridDim.y * blockIdx.z;
+        
+        if(tx < sizex)
+        {
+            out[ty*sizex + tx].x = in[ty*sizex + tx];
+            out[ty*sizex + tx].y = 0;
+        }
+    }
+
+    inline __global__ void GetX(float* out, complex* in, int sizex)
+    {
+        /* Complex (real part) to Float */
+        size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
+        size_t ty = blockIdx.y + gridDim.y * blockIdx.z;
+        
+        if(tx < sizex)
+            out[ty*sizex + tx] = in[ty*sizex + tx].x;
+    }
+
+    inline __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy)
+    {
+        size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
+        size_t ty = blockIdx.y + blockDim.y * blockIdx.z;
+        
+        if(tx >= sizex)
+            return;
+        
+        float fpixel = (in[ty*sizex + tx].x)/float(sizex);
+        BasicOps::set_pixel(out, fpixel, tx, ty, sizex, threshold, raftDataType);
+    }
+
+    void BSTFilter(cufftHandle plan, 
+    complex* filtersino, float* sinoblock, 
+    size_t nrays, size_t nangles, int csino, Filter reg)
+    {
+
+        dim3 filterblock((nrays+255)/256,nangles,1);
+        dim3 filterthread(256,1,1);
+
+        SetX<<<filterblock,filterthread>>>(filtersino, sinoblock, nrays);
+            
+        HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_FORWARD));
+            
+        BandFilterC2C<<<filterblock,filterthread>>>(filtersino, nrays, csino, reg);
+            
+        HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_INVERSE));
+        
+        GetX<<<filterblock,filterthread>>>(sinoblock, filtersino, nrays);
+
+        //cudaMemset(sinoblock, 0, nrays*nangles*4);
+    }
+
 }
 
 __host__ __device__ inline float Filter::apply(float input)
