@@ -9,7 +9,7 @@ extern "C"{
         float *parameters_float, int *parameters_int, int *flags,
         int *gpus, int ngpus);
 
-    void _setReconstructionPipeline(CFG configs, Process *process, GPU gpus,
+    void _setReconstructionPipeline(CFG *configs, Process *process, GPU gpus,
         float *recon, float *data, 
         float *flats, float *darks, float *angles,
         int total_number_of_processes);

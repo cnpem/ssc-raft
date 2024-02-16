@@ -20,7 +20,7 @@
 
 void getLog(float *data, dim3 size);
 
-__global__ void setSinCosTable(float *sintable, float *costable, float *angles, int nangles)
+__global__ void setSinCosTable(float *sintable, float *costable, float *angles, int nangles);
     
 static __global__ void Klog(float* data, dim3 size);
 
@@ -32,8 +32,7 @@ extern "C"{
     dim3 size, dim3 padsize);
 }
 
-namespace opt
-{
+namespace opt{
     inline __host__ __device__ int assert_dimension(int size1, int size2){ return ( size1 == size2 ? 1 : 0 ); };
 
 	inline __host__ __device__ size_t getIndex3d(dim3 size)
@@ -105,23 +104,23 @@ namespace opt
     template<typename Type>
     void GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size);
 
-    void MPlanFFT(cufftHandle mplan, int dim, dim3 size);
+    void MPlanFFT(cufftHandle mplan, const int dim, dim3 size);
 
     __global__ void product_Real_Real(float *a, float *b, float *ans, dim3 sizea, dim3 sizeb);
     __global__ void product_Complex_Real(cufftComplex *a, float *b, cufftComplex *ans, dim3 sizea, dim3 sizeb);
     __global__ void product_Complex_Complex(cufftComplex *a, cufftComplex *b, cufftComplex *ans, dim3 sizea, dim3 sizeb);
 
      __global__ void paddR2C(float *in, cufftComplex *outpadded, 
-    dim3 size, dim3 pad, float value)
+    dim3 size, dim3 pad, float value);
 
     __global__ void paddC2C(cufftComplex *in, cufftComplex *outpadded,
-    dim3 size, dim3 pad, float value)
+    dim3 size, dim3 pad, float value);
 
     __global__ void paddC2R(cufftComplex *in, float *outpadded, 
-    dim3 size, dim3 pad, float value)
+    dim3 size, dim3 pad, float value);
 
     __global__ void paddR2R(float *in, float *outpadded, 
-    dim3 size, dim3 pad, float value)
+    dim3 size, dim3 pad, float value);
 
     __global__ void remove_paddC2R(cufftComplex *inpadded, float *out, 
     dim3 size, dim3 padsize, int dim);

@@ -1,7 +1,7 @@
 // Authors: Gilberto Martinez, Eduardo X Miqueles, Giovanni Baraldi, Paola Ferraz
 
 #include "common/configs.hpp"
-#include "common/operations.hpp"
+#include "common/opt.hpp"
 #include "geometries/parallel/radon.hpp"
 
 
@@ -69,7 +69,7 @@ extern "C" {
         if ( (i >= proj_size.x) || (j >= proj_size.y) || (k >= proj_size.z) ) return;
 
         size_t ind; int indx, indy;
-        float s, x, y, linesum, ctheta, stheta, theta, t;  
+        float s, x, y, linesum, ctheta, stheta, t;  
 
         float dx = 2.0f*ax/(phantom_size.x-1);
         float dy = 2.0f*ay/(phantom_size.y-1);
@@ -114,8 +114,7 @@ extern "C" {
         
         Radon_RT_version_sscRadon<<<gridBlock, threadsPerBlock>>>(  obj, projection, angles, 
                                                                     obj_size, 
-                                                                    nrays, nangles, 
-                                                                    nslices, 
+                                                                    dim3(nrays, nangles, nslices), 
                                                                     ax, ay);
 
     }
@@ -156,8 +155,8 @@ extern "C"{
             opt::CPUToGPU<float>(obj, dobj, (size_t)obj_size.x * obj_size.y * subblock);
 
             getRadonRT(
-                        dproj + (size_t)ptr *       nrays *     nangles, 
-                        dobj  + (size_t)ptr * sizeImage.x * sizeImage.y, 
+                        dproj + (size_t)ptr *      nrays *    nangles, 
+                        dobj  + (size_t)ptr * obj_size.x * obj_size.y, 
                         dangles, 
                         obj_size, 
                         dim3(nrays, nangles, subblock), 
@@ -193,7 +192,7 @@ extern "C"{
 
         if ( ngpus == 1 ){
             
-            RadonGPU(   projection, obj, angles, 
+            getRadonRTGPU(   projection, obj, angles, 
                         dim3(sizeImagex,sizeImagey,nslices), 
                         dim3(nrays, nangles, nslices), 
                         ax, ay, gpus[0]);

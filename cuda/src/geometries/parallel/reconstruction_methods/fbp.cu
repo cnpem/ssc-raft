@@ -1,7 +1,95 @@
 // Authors: Gilberto Martinez, Eduardo X Miqueles, Giovanni Baraldi, Paola Ferraz
 
+#include "common/opt.hpp"
 #include "processing/filters.hpp"
 #include "geometries/parallel/fbp.hpp"
+
+extern "C"{
+
+    __global__ void BackProjection_RT(float* obj, const float *tomo, 
+    const float* sintable, const float* costable,
+    dim3 obj_size, dim3 tomo_size)
+    {  
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
+        size_t ind   = obj_size.x * j + i;
+        size_t index = obj_size.y * k * obj_size.x + ind;
+
+        float sum = 0, frac; 
+        float x, y, t, norm;
+        int T, angle;
+        
+        if ( (i >= obj_size.x) || (j >= obj_size.y) || (k >= obj_size.z) ) return;
+
+        norm  = ( 0.5f * float(M_PI) ) / ( float(tomo_size.y) * float(tomo_size.x) ); 
+
+        x     = - (float)obj_size.x/2.0f + i;
+        y     = - (float)obj_size.y/2.0f + j;
+
+        for(angle = 0; angle < (tomo_size.y); angle++){
+        
+            t = ( x * costable[angle] + y * sintable[angle] + tomo_size.x/2 );
+            T = int(t);
+        
+            if ( ( T >= 0 ) && ( T < ( tomo_size.x - 1 ) ) ){
+                frac = t-T;
+
+                sum += tomo[tomo_size.y * tomo_size.x * k + angle * tomo_size.x + T] * (1.0f - frac) + tomo[angle * tomo_size.x + T + 1] * frac;
+            }
+        }        
+
+        obj[index] = sum * norm;
+
+    } 
+
+    __global__ void BackProjection_SS(float *image, float *blocksino, float *angles,
+    dim3 obj_size, dim3 tomo_size)
+    {
+        int i, j, k, T, z;
+        float t, cs, x, y, cosk, sink;
+        float xymin = -1.0;
+
+        float dx = 2.0 / (obj_size.x - 1);
+        float dy = 2.0 / (obj_size.y - 1);
+
+        int nrays   = tomo_size.x;
+        int nangles = tomo_size.y;
+
+        float dt    = 2.0 / (nrays - 1);
+        float tmin = -1.0;
+
+        float dth = angles[1] - angles[0];
+        
+        i = (blockDim.x * blockIdx.x + threadIdx.x);
+        j = (blockDim.y * blockIdx.y + threadIdx.y);
+        z = (blockDim.z * blockIdx.z + threadIdx.z);
+    
+        if ( (i<obj_size.x) && (j < obj_size.y) && (z<obj_size.z)  ){
+        
+            cs = 0;
+            
+            x = xymin + i * dx;
+            y = xymin + j * dy;
+            
+            for(k=0; k < (nangles); k++){
+                __sincosf(angles[k], &sink, &cosk);
+                
+                t = x * cosk + y * sink;
+                
+                T = (int) ((t - tmin)/dt);	     
+
+                if ( (T > -1) && (T<nrays) ){
+                    //cs = cs + blocksino[ T * nangles + k];
+                    cs += blocksino[ z * nrays * nangles  + k * nrays + T];
+                }
+            }
+        
+            image[z * obj_size.y * obj_size.x + j * obj_size.x + i]  = (cs*dth); 
+        }
+    }
+
+}
 
 extern "C"{
     void getFBP(CFG configs, GPU gpus, 
@@ -150,90 +238,3 @@ extern "C"{
 
 }
 
-extern "C"{
-
-    __global__ void BackProjection_RT(float* obj, const float *tomo, 
-    const float* sintable, const float* costable,
-    dim3 obj_size, dim3 tomo_size)
-    {  
-        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
-        size_t ind   = obj_size.x * j + i;
-        size_t index = obj_size.y * k * obj_size.x + ind;
-
-        float sum = 0, frac; 
-        float x, y, t, norm;
-        int T, angle;
-        
-        if ( (i >= obj_size.x) || (j >= obj_size.y) || (k >= obj_size.z) ) return;
-
-        norm  = ( 0.5f * float(M_PI) ) / ( float(tomo_size.y) * float(tomo_size.x) ); 
-
-        x     = - (float)obj_size.x/2.0f + i;
-        y     = - (float)obj_size.y/2.0f + j;
-
-        for(angle = 0; angle < (tomo_size.y); angle++){
-        
-            t = ( x * costable[angle] + y * sintable[angle] + tomo_size.x/2 );
-            T = int(t);
-        
-            if ( ( T >= 0 ) && ( T < ( tomo_size.x - 1 ) ) ){
-                frac = t-T;
-
-                sum += tomo[tomo_size.y * tomo_size.x * k + angle * tomo_size.x + T] * (1.0f - frac) + tomo[angle * tomo_size.x + T + 1] * frac;
-            }
-        }        
-
-        obj[index] = sum * norm;
-
-    } 
-
-    __global__ void BackProjection_SS(float *image, float *blocksino, float *angles,
-    dim3 obj_size, dim3 tomo_size)
-    {
-        int i, j, k, T, z;
-        float t, cs, x, y, cosk, sink;
-        float xymin = -1.0;
-
-        float dx = 2.0 / (obj_size.x - 1);
-        float dy = 2.0 / (obj_size.y - 1);
-
-        int nrays   = tomo_size.x;
-        int nangles = tomo_size.y;
-        int nslices = tomo_size.z;
-
-        float dt    = 2.0 / (nrays - 1);
-        float tmin = -1.0;
-
-        float dth = angles[1] - angles[0];
-        
-        i = (blockDim.x * blockIdx.x + threadIdx.x);
-        j = (blockDim.y * blockIdx.y + threadIdx.y);
-        z = (blockDim.z * blockIdx.z + threadIdx.z);
-    
-        if ( (i<obj_size.x) && (j < obj_size.y) && (z<obj_size.z)  ){
-        
-            cs = 0;
-            
-            x = xymin + i * dx;
-            y = xymin + j * dy;
-            
-            for(k=0; k < (nangles); k++){
-                __sincosf(angles[k], &sink, &cosk);
-                
-                t = x * cosk + y * sink;
-                
-                T = (int) ((t - tmin)/dt);	     
-
-                if ( (T > -1) && (T<nrays) ){
-                    //cs = cs + blocksino[ T * nangles + k];
-                    cs += blocksino[ z * nrays * nangles  + k * nrays + T];
-                }
-            }
-        
-            image[z * obj_size.y * obj_size.x + j * obj_size.x + i]  = (cs*dth); 
-        }
-    }
-
-}

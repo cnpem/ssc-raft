@@ -5,7 +5,7 @@
 #include "processing/filters.hpp"
 #include "common/complex.hpp"
 #include "common/types.hpp"
-#include "common/operations.hpp"
+#include "common/opt.hpp"
 #include "common/logerror.hpp"
 
 
@@ -61,7 +61,7 @@ __global__ void polar2cartesian_fourier(complex* cartesian, complex* polar, floa
 size_t nrays, size_t nangles, size_t sizeimage)
 {
 	int tx = blockIdx.x * blockDim.x + threadIdx.x;
-	int ty = blockIdx.y;
+	// int ty = blockIdx.y;
 	
 	if(tx < sizeimage)
 	{

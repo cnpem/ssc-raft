@@ -12,9 +12,9 @@ extern "C"{
 		/* Float */
 		HANDLE_ERROR(cudaMalloc((void **)&workspace->obj   , sizeof(float) *                             process.objptr_size )); 
 		HANDLE_ERROR(cudaMalloc((void **)&workspace->tomo  , sizeof(float) *                            process.tomoptr_size )); 
-		HANDLE_ERROR(cudaMalloc((void **)&workspace->flat  , sizeof(float) * (size_t)process.tomobatch_size * configs.tomo.x ));
-		HANDLE_ERROR(cudaMalloc((void **)&workspace->dark  , sizeof(float) * (size_t)process.tomobatch_size * configs.tomo.x ));
-        HANDLE_ERROR(cudaMalloc((void **)&workspace->angles, sizeof(float) *                                  configs.tomo.y ));
+		HANDLE_ERROR(cudaMalloc((void **)&workspace->flat  , sizeof(float) * (size_t)process.tomobatch_size * configs.tomo.size.x ));
+		HANDLE_ERROR(cudaMalloc((void **)&workspace->dark  , sizeof(float) * (size_t)process.tomobatch_size * configs.tomo.size.x ));
+        HANDLE_ERROR(cudaMalloc((void **)&workspace->angles, sizeof(float) *                                  configs.tomo.size.y ));
         
 		return workspace;
 	}

@@ -1,5 +1,5 @@
 #include <cufft.h>
-#include ".geometries/gp/fst.hpp"
+#include "geometries/parallel/radon.hpp"
 
 // in case it is compiled with host compiler instead of nvcc:
 #include <cuda.h>

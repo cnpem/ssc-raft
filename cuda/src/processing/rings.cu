@@ -1,5 +1,7 @@
 #include "common/logerror.hpp"
 #include "common/operations.hpp"
+#include "common/opt.hpp"
+#include "common/types.hpp"
 #include "processing/processing.hpp"
 
 template <bool bShared>
@@ -514,7 +516,7 @@ extern "C"{
             getRingsGPU(gpu_parameters, 
             gpus[0], 
             data, 
-            &lambda_computed, 
+            lambda_computed, 
             dim3(nrays, nangles, nslices), 
             lambda_rings, ring_blocks);
         }else{
@@ -527,7 +529,7 @@ extern "C"{
                                              gpu_parameters,
                                              gpus[i],
                                              data + (size_t)ptr * nrays * nangles,
-                                             &lambda_computed[i],
+                                             lambda_computed,
                                              dim3(nrays, nangles, subblock),
                                              lambda_rings, ring_blocks));
 

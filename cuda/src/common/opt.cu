@@ -1,5 +1,7 @@
 #include "common/configs.hpp"
+#include "common/complex.hpp"
 #include "common/opt.hpp"
+#include "common/configs.hpp"
 #include "common/logerror.hpp"
 
 /*============================================================================*/
@@ -23,35 +25,34 @@ void opt::GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size)
     HANDLE_ERROR(cudaMemcpy(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost));
 };
 
-
-
-void opt::MPlanFFT(cufftHandle mplan, int dim, dim3 size)
+void opt::MPlanFFT(cufftHandle mplan, const int dim, dim3 size)
 {	
     /* int dim = { 1, 2 }
         1: if plan 1D multiples cuffts
         2: if plan 2D multiples cuffts */
-
-    int sizeArray[dim];
-
-    if ( dim == 1 ) 
-        sizeArray[dim] = {(int)size.x};
-    else
-        sizeArray[dim] = {(int)size.x,(int)size.y};
+    std::array<int, 2> sizeArray2D = {(int)size.x,(int)size.y};
+    std::array<int, 1> sizeArray1D = {(int)size.x};
 
     int rank      = dim; /* 1D (1) or 2D (2) cufft */
-    int inembed   = sizeArray; /* dimensions of cufft */
+    int *inembed  = nullptr;
     int istride   = 1;
     int idist     = size.x;
-    int onembed   = sizeArray;
+    int *onembed  = nullptr;
     int ostride   = 1;
     int odist     = size.x;
     size_t batch  = size.z; /* batch of cuffts */
 	
-    HANDLE_FFTERROR(cufftPlanMany(  &mplan, rank, sizeArray, 
-                                    inembed, istride, idist, 
-                                    onembed, ostride, odist, 
-                                    CUFFT_C2C, batch));
-
+    if ( dim == 1 ){
+        HANDLE_FFTERROR(cufftPlanMany(  &mplan, rank, sizeArray1D.data(), 
+                                        inembed, istride, idist, 
+                                        onembed, ostride, odist, 
+                                        CUFFT_C2C, batch));
+    }else{
+        HANDLE_FFTERROR(cufftPlanMany(  &mplan, rank, sizeArray2D.data(), 
+                                        inembed, istride, idist, 
+                                        onembed, ostride, odist, 
+                                        CUFFT_C2C, batch));
+    }
 }
 
 __global__ void setSinCosTable(float *sintable, float *costable, float *angles, int nangles)

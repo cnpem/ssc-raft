@@ -9,7 +9,7 @@
 extern "C" {  
 
     void get_tEM_RT_MultiGPU(int* gpus, int ngpus,
-    float* recon, float* count, 
+    float* obj, float* count, 
     float *flat, float* angles, 
     float *paramf, int *parami)
     {
@@ -26,14 +26,14 @@ extern "C" {
 
         setEMParameters(&configs, paramf, parami);
 
-        setGPUParameters(&gpu_parameters, configs.tomo.npad, ngpus, gpus);
+        setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
         int subvolume = (configs.tomo.size.z + ngpus - 1) / ngpus;
         int subblock, ptr = 0; 
 
         if (ngpus == 1){ /* 1 device */
 
-            get_tEM_RT_GPU(configs, gpu_parameters, recon, count, flat, angles, subvolume, gpus[0]);
+            get_tEM_RT_GPU(configs, gpu_parameters, obj, count, flat, angles, subvolume, gpus[0]);
 
         }else{
         /* Launch async Threads for each device.
@@ -49,9 +49,9 @@ extern "C" {
                 threads.push_back( std::async( std::launch::async, 
                                                 get_tEM_RT_GPU, 
                                                 configs, gpu_parameters, 
-                                                recon + (size_t)configs.recon.size.x * configs.recon.size.y * ptr,
-                                                count + (size_t)configs.tomo.size.x  * configs.tomo.size.y  * ptr, 
-                                                flat  + (size_t)configs.tomo.size.x                         * ptr, 
+                                                obj   + (size_t) configs.obj.size.x *  configs.obj.size.y * ptr,
+                                                count + (size_t)configs.tomo.size.x * configs.tomo.size.y * ptr, 
+                                                flat  + (size_t)configs.tomo.size.x                       * ptr, 
                                                 angles, 
                                                 subblock,
                                                 gpus[i]
@@ -72,7 +72,7 @@ extern "C" {
     }
 
     void get_tEM_RT_GPU(CFG configs, GPU gpus, 
-    float *recon, float *count, float *flat, float *angles, 
+    float *obj, float *count, float *flat, float *angles, 
     int sizez, int ngpu)
     {
         int i; 
@@ -81,25 +81,25 @@ extern "C" {
 
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
-        float *drecon, *dcount, *dflat, *dangles;
+        float *dobj, *dcount, *dflat, *dangles;
 
         /* Allocate GPU memory for the input and output image */ 
-        HANDLE_ERROR(cudaMalloc((void **)&drecon ,sizeof(float) * (size_t)configs.recon.size.x * configs.recon.size.y * blocksize));
+        HANDLE_ERROR(cudaMalloc((void **)&dobj   ,sizeof(float) * (size_t)configs.obj.size.x * configs.obj.size.y * blocksize));
         HANDLE_ERROR(cudaMalloc((void **)&dcount ,sizeof(float) * (size_t)configs.tomo.size.x  * configs.tomo.size.y  * blocksize));
         HANDLE_ERROR(cudaMalloc((void **)&dflat  ,sizeof(float) * (size_t)configs.tomo.size.x                         * blocksize));
-        HANDLE_ERROR(cudaMalloc((void **)&dangles,sizeof(float) * configs.tomo.nangles));
+        HANDLE_ERROR(cudaMalloc((void **)&dangles,sizeof(float) * configs.tomo.size.y));
 
-        HANDLE_ERROR(cudaMemcpy(dangles, angles, sizeof(float) * configs.tomo.nangles, cudaMemcpyHostToDevice));	
+        HANDLE_ERROR(cudaMemcpy(dangles, angles, sizeof(float) * configs.tomo.size.y, cudaMemcpyHostToDevice));	
 
         /* Loop for each batch of size 'batch' in threads */
-        int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_recon = 0, ptr_block_flat = 0;
+        int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_obj = 0, ptr_block_flat = 0;
 
         for (i = 0; i < ind_block; i++){
 
             subblock        = min(sizez - ptr, blocksize);
             ptr_block_tomo  = (size_t)configs.tomo.size.x  * configs.tomo.size.y  * ptr;
-            ptr_block_recon = (size_t)configs.recon.size.x * configs.recon.size.y * ptr;
-            ptr_block_flat  = (size_t)configs.recon.size.x * configs.numflats     * ptr;
+            ptr_block_obj = (size_t)configs.obj.size.x * configs.obj.size.y * ptr;
+            ptr_block_flat  = (size_t)configs.obj.size.x * configs.numflats     * ptr;
 
             /* Update pointer */
             ptr = ptr + subblock;
@@ -107,12 +107,12 @@ extern "C" {
             HANDLE_ERROR(cudaMemcpy(dcount, count  + ptr_block_tomo, sizeof(float) * (size_t)configs.tomo.size.x * configs.tomo.size.y * subblock, cudaMemcpyHostToDevice));	
             HANDLE_ERROR(cudaMemcpy(dflat , flat   + ptr_block_flat, sizeof(float) * (size_t)configs.tomo.size.x                       * subblock, cudaMemcpyHostToDevice));	
 
-            get_tEM_RT( configs, gpus, drecon, dcount, dflat, dangles, subblock);                           
+            get_tEM_RT( configs, gpus, dobj, dcount, dflat, dangles, subblock);                           
 
-            HANDLE_ERROR(cudaMemcpy(recon + ptr_block_recon, drecon, (size_t)configs.recon.size.x * configs.recon.size.y * subblock * sizeof(float), cudaMemcpyDeviceToHost));
+            HANDLE_ERROR(cudaMemcpy(obj + ptr_block_obj, dobj, (size_t)configs.obj.size.x * configs.obj.size.y * subblock * sizeof(float), cudaMemcpyDeviceToHost));
         }
 
-        HANDLE_ERROR(cudaFree(drecon));
+        HANDLE_ERROR(cudaFree(dobj));
         HANDLE_ERROR(cudaFree(dcount));
         HANDLE_ERROR(cudaFree(dflat));
         HANDLE_ERROR(cudaFree(dangles));
@@ -126,9 +126,9 @@ extern "C" {
     {
         int k;
         int niter     = configs.em_iterations;
-        int sizeImage = configs.recon.size.x;
+        int sizeImage = configs.obj.size.x;
         int nrays     = configs.tomo.size.x;
-        int nangles   = configs.tomo.nangles;
+        int nangles   = configs.tomo.size.y;
 
         float *backcounts, *temp, *back;
 
@@ -165,7 +165,7 @@ extern "C" {
 extern "C"{   
 
     void get_eEM_RT_MultiGPU(int* gpus, int ngpus,
-    float* recon, float* tomogram, float* angles, 
+    float* obj, float* tomogram, float* angles, 
     float *paramf, int *parami)
     {
         int i, Maxgpudev;
@@ -181,14 +181,14 @@ extern "C"{
 
         setEMParameters(&configs, paramf, parami);
 
-        setGPUParameters(&gpu_parameters, configs.tomo.npad, ngpus, gpus);
+        setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
         int subvolume = (configs.tomo.size.z + ngpus - 1) / ngpus;
         int subblock, ptr = 0; 
 
         if (ngpus == 1){ /* 1 device */
 
-            get_eEM_RT_GPU(configs, gpu_parameters, recon, tomogram, angles, subvolume, gpus[0]);
+            get_eEM_RT_GPU(configs, gpu_parameters, obj, tomogram, angles, subvolume, gpus[0]);
 
         }else{
         /* Launch async Threads for each device.
@@ -204,7 +204,7 @@ extern "C"{
                 threads.push_back( std::async( std::launch::async, 
                                                 get_eEM_RT_GPU, 
                                                 configs, gpu_parameters, 
-                                                recon    + (size_t)configs.recon.size.x * configs.recon.size.y * ptr,
+                                                obj    + (size_t)configs.obj.size.x * configs.obj.size.y * ptr,
                                                 tomogram + (size_t)configs.tomo.size.x  * configs.tomo.size.y  * ptr, 
                                                 angles, 
                                                 subblock,
@@ -226,43 +226,43 @@ extern "C"{
     }
 
     void get_eEM_RT_GPU(CFG configs, GPU gpus, 
-    float *recon, float *tomogram, float *angles, 
+    float *obj, float *tomogram, float *angles, 
     int sizez, int ngpu)
     {
         int i; 
-            int blocksize = min(sizez,32);
+        int blocksize = min(sizez,32);
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
-        float *drecon, *dtomo, *dangles;
+        float *dobj, *dtomo, *dangles;
 
         /* Allocate GPU memory for the input and output image */ 
-        HANDLE_ERROR(cudaMalloc((void **)&drecon ,sizeof(float) * (size_t)configs.recon.size.x * configs.recon.size.y * blocksize));  
+        HANDLE_ERROR(cudaMalloc((void **)&dobj ,sizeof(float) * (size_t)configs.obj.size.x * configs.obj.size.y * blocksize));  
         HANDLE_ERROR(cudaMalloc((void **)&dtomo  ,sizeof(float) * (size_t)configs.tomo.size.x  * configs.tomo.size.y  * blocksize));
-        HANDLE_ERROR(cudaMalloc((void **)&dangles,sizeof(float) * configs.tomo.nangles));
+        HANDLE_ERROR(cudaMalloc((void **)&dangles,sizeof(float) * configs.tomo.size.y));
 
-        HANDLE_ERROR(cudaMemcpy(dangles, angles, sizeof(float) * configs.tomo.nangles, cudaMemcpyHostToDevice));	
+        HANDLE_ERROR(cudaMemcpy(dangles, angles, sizeof(float) * configs.tomo.size.y, cudaMemcpyHostToDevice));	
 
         /* Loop for each batch of size 'batch' in threads */
-            int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_recon = 0;
+            int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_obj = 0;
 
         for (i = 0; i < ind_block; i++){
 
             subblock        = min(sizez - ptr, blocksize);
             ptr_block_tomo  = (size_t)configs.tomo.size.x  * configs.tomo.size.y  * ptr;
-            ptr_block_recon = (size_t)configs.recon.size.x * configs.recon.size.y * ptr;
+            ptr_block_obj = (size_t)configs.obj.size.x * configs.obj.size.y * ptr;
             
             /* Update pointer */
             ptr = ptr + subblock;
 
             HANDLE_ERROR(cudaMemcpy(dtomo, tomogram + ptr_block_tomo, sizeof(float) * (size_t)configs.tomo.size.x * configs.tomo.size.y * subblock, cudaMemcpyHostToDevice));	
             
-            get_eEM_RT( configs, gpus, drecon, dtomo, dangles, subblock);                           
+            get_eEM_RT( configs, gpus, dobj, dtomo, dangles, subblock);                           
             
-            HANDLE_ERROR(cudaMemcpy(recon + ptr_block_recon, drecon, (size_t)configs.recon.size.x * configs.recon.size.y * subblock * sizeof(float), cudaMemcpyDeviceToHost));
+            HANDLE_ERROR(cudaMemcpy(obj + ptr_block_obj, dobj, (size_t)configs.obj.size.x * configs.obj.size.y * subblock * sizeof(float), cudaMemcpyDeviceToHost));
         }
-        HANDLE_ERROR(cudaFree(drecon));
+        HANDLE_ERROR(cudaFree(dobj));
         HANDLE_ERROR(cudaFree(dtomo));
         HANDLE_ERROR(cudaFree(dangles));
         HANDLE_ERROR(cudaDeviceSynchronize());
@@ -277,9 +277,9 @@ extern "C" {
     {
         int k;
         int niter     = configs.em_iterations;
-        int sizeImage = configs.recon.size.x;
+        int sizeImage = configs.obj.size.x;
         int nrays     = configs.tomo.size.x;
-        int nangles   = configs.tomo.nangles;
+        int nangles   = configs.tomo.size.y;
 
         float *backones, *temp;
 

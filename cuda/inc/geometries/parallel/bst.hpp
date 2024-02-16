@@ -2,6 +2,8 @@
 #define RAFT_BST_PAR_H
 
 #include "common/configs.hpp"
+#include "common/operations.hpp"
+#include "common/types.hpp"
 
 extern "C" {
 

@@ -1,4 +1,6 @@
 #include "geometries/conebeam/fdk.hpp"
+#include "common/logerror.hpp"
+
 #include <stdio.h>
 #include <cufft.h>
 

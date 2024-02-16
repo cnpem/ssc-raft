@@ -1,6 +1,13 @@
 #ifndef RAFT_CONFIGS_H
 #define RAFT_CONFIGS_H
 
+#define PARALLEL 0
+#define CONEBEAM 1
+#define FANBEAM  2
+
+#define FFT_RANK_2D 2 
+#define FFT_RANK_1D 1 
+
 #define IND(I,J,K,NX,NY) (long long int)( (I) + (J) * (NX) + (K) * (NX) * (NY) )
 
 #define vc 299792458           /* Velocity of Light [m/s] */ 
@@ -50,9 +57,9 @@ typedef struct dimension
 typedef struct geometry
 {   
     /* Geometry: 
-        0 -> parallel
-        1 -> conebeam
-        2 -> fanbeam 
+        0 -> parallel (PARALLEL)
+        1 -> conebeam (CONEBEAM)
+        2 -> fanbeam  (FANBEAM)
     */
     int geometry;
 
@@ -79,7 +86,7 @@ typedef struct flags
 typedef struct config
 {   
     /* Pipeline variables */
-    size_t total_req_size_mem;
+    size_t total_required_mem_per_slice;
 
     GEO geometry;
 
@@ -186,10 +193,11 @@ struct Process{
     long long int objptr_index, objptr_size;
     float obj_posz;
 
-    // int i, i_gpu, zi, z_filter, z_filter_pad;
-    // long long int n_proj, n_filter_pad;
-    // long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
-    // float z_ph;
+    long long int n_recon, n_tomo, n_filter; 
+    int i, i_gpu, zi, z_filter, z_filter_pad;
+    long long int n_proj, n_filter_pad;
+    long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
+    float z_ph, z_det;
 };
 
 
@@ -217,7 +225,7 @@ extern "C"{
 
     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
     
-    int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft);
+    int getTotalProcesses(CFG configs, const float GPU_MEMORY, int sizeZ, bool using_fft);
 
     int compute_GPU_blocksize(float nslices, const float total_required_mem_per_slice,
     bool using_fft, float GPU_MEMORY); 

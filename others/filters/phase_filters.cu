@@ -2,6 +2,66 @@
 
 extern "C" {
 
+void setPhaseFilterParameters(GEO *geometry, DIM *tomo, 
+	float *parameters_float, int *parameters_int)
+	{
+		/* Set Geometry */
+		geometry->geometry = parameters_int[0];
+		
+		/* Set Tomogram (or detector) variables (h for horizontal (nrays) and v for vertical (nslices)) */
+		tomo->size         = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
+
+		tomo->x            = parameters_float[0];
+		tomo->y            = parameters_float[1];
+		tomo->z            = parameters_float[2];
+		tomo->dx           = parameters_float[3];
+		tomo->dy           = parameters_float[4];
+		tomo->dz           = parameters_float[5];
+
+		/* Set Padding */
+		tomo->pad          = dim3(parameters_int[4],parameters_int[5],parameters_int[6]); 
+
+		int npadx          = tomo->size.x * ( 1 + 2 * tomo->pad.x ); 
+		int npady          = tomo->size.y * ( 1 + 2 * tomo->pad.y ); 
+		int npadz          = tomo->size.z * ( 1 + 2 * tomo->pad.z );
+
+		tomo->padsize         = dim3(npadx,npady,npadz); 
+
+		/* Set General reconstruction variables*/
+		geometry->energy   = parameters_float[6];
+
+		geometry->lambda   = ( plank * vc          ) / geometry->energy;
+		geometry->wave     = ( 2.0   * float(M_PI) ) / geometry->lambda;
+
+		geometry->z1x      = parameters_float[7];
+		geometry->z1y      = parameters_float[8];
+		geometry->z2x      = parameters_float[9];
+		geometry->z2y      = parameters_float[10];
+
+		/* Set magnitude [(z1+z2)/z1] according to the beam geometry */
+		switch (geometry->geometry){
+			case 0: /* Parallel */	
+				geometry->magnitude_x = 1.0;
+				geometry->magnitude_y = 1.0;
+				break;
+			case 1: /* Conebeam */
+				geometry->magnitude_x = ( geometry->z1x + geometry->z2x ) / geometry->z1x;
+				geometry->magnitude_y = ( geometry->z1y + geometry->z2y ) / geometry->z1y;
+				break;
+			case 2: /* Fanbeam */		
+				geometry->magnitude_x = ( geometry->z1x + geometry->z2x ) / geometry->z1x;
+				geometry->magnitude_y = 1.0;
+				break;
+			default:
+				printf("Parallel case as default! \n");
+				geometry->magnitude_x = 1.0;
+				geometry->magnitude_y = 1.0;
+				break;
+		}
+
+	}
+
+
 	void getPhaseFilterMultiGPU(int *gpus, int ngpus, 
     float *projections, float *paramf, int *parami, 
 	int phase_type, float phase_reg)

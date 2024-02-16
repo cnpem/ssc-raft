@@ -26,25 +26,21 @@ extern "C"{
 		configs->geometry.geometry         = parameters_int[0];
 
 		/* Set Reconstruction variables */
-		configs->recon.size                = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
+		configs->obj.size                = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
 
-		configs->recon.x                   = parameters_float[0];
-		configs->recon.y                   = parameters_float[1];
-		configs->recon.z                   = parameters_float[2];
-		configs->recon.dx                  = parameters_float[3]; 
-		configs->recon.dy                  = parameters_float[4];
-		configs->recon.dz                  = parameters_float[5];
+		configs->obj.Lx                   = parameters_float[0];
+		configs->obj.Ly                   = parameters_float[1];
+		configs->obj.Lz                   = parameters_float[2];
+		configs->obj.dx                  = parameters_float[3]; 
+		configs->obj.dy                  = parameters_float[4];
+		configs->obj.dz                  = parameters_float[5];
 		
 		/* Set Tomogram (or detector) variables (h for horizontal (nrays) and v for vertical (nslices)) */
 		configs->tomo.size                 = dim3(parameters_int[4],parameters_int[5],parameters_int[6]); 
 
-		configs->tomo.nrays                = parameters_float[6];
-		configs->tomo.nangles              = parameters_float[7];
-		configs->tomo.nslices              = parameters_float[8];
-
-		configs->tomo.x                    = parameters_float[9];
-		configs->tomo.y                    = parameters_float[10];
-		configs->tomo.z                    = parameters_float[11];
+		configs->tomo.Lx                    = parameters_float[9];
+		configs->tomo.Ly                    = parameters_float[10];
+		configs->tomo.Lz                    = parameters_float[11];
 		configs->tomo.dx                   = parameters_float[12];
 		configs->tomo.dy                   = parameters_float[13];
 		configs->tomo.dz                   = parameters_float[14];
@@ -56,7 +52,7 @@ extern "C"{
 		int npady                          = configs->tomo.size.y * ( 1 + 2 * configs->tomo.pad.y ); 
 		int npadz                          = configs->tomo.size.z * ( 1 + 2 * configs->tomo.pad.z );
 
-		configs->tomo.npad                 = dim3(npadx,npady,npadz); 
+		configs->tomo.padsize                 = dim3(npadx,npady,npadz); 
 
 		/* Set General reconstruction variables*/
 		configs->geometry.detector_pixel_x = parameters_float[15];
@@ -67,9 +63,9 @@ extern "C"{
 		configs->geometry.z2x              = parameters_float[20];
 		configs->geometry.z2y              = parameters_float[21];
 
-		/* Set wavelenght (lambda) and wavenumber (wave) */
-		configs->geometry.lambda           = ( plank * vc          ) / configs->geometry.energy;
-		configs->geometry.wave             = ( 2.0   * float(M_PI) ) / configs->geometry.lambda;
+		/* Set wavelenght and wavenumber */
+		configs->geometry.wavelenght           = ( plank * vc          ) / configs->geometry.energy;
+		configs->geometry.wavenumber           = ( 2.0   * float(M_PI) ) / configs->geometry.wavelenght;
 
 		/* Set magnitude [(z1+z2)/z1] according to the beam geometry */
 		switch (configs->geometry.geometry){
@@ -121,8 +117,7 @@ extern "C"{
 		configs->reconstruction_method          = parameters_int[14];
 		configs->reconstruction_filter_type     = parameters_int[15];   /* Reconstruction Filter type */
 
-		float paganin_reg                       = ( parameters_float[23] == 0.0 ? 0.0 : parameters_float[23] ); /* Reconstruction Filter regularization parameter */
-		configs->reconstruction_paganin_reg     = 4.0f * float(M_PI) * float(M_PI) * configs->geometry.z2x * paganin_reg * configs->geometry.lambda  / ( configs->geometry.magnitude_x );
+		configs->reconstruction_paganin_reg     = 4.0f * float(M_PI) * float(M_PI) * ( parameters_float[23] == 0.0 ? 0.0 : parameters_float[23] ); /* Reconstruction Filter regularization parameter */
 		configs->reconstruction_reg             = parameters_float[24]; /* General regularization parameter */
 
 		/* Set Slices on Reconstruction and on Tomogram */
@@ -131,11 +126,11 @@ extern "C"{
 		For Conebeam geometry, 
 		Slices on reconstrucion are DIFFERENT as the slices on tomogram. 
 		*/
-		configs->recon.start_slice              = parameters_int[16]; /* Slices: start slice on reconstruction */  
-		configs->recon.end_slice                = parameters_int[17]; /* Slices: end slice on reconstruction */ 
+		configs->obj.zslice0               = parameters_int[16]; /* Slices: start slice on reconstruction */  
+		configs->obj.zslice1               = parameters_int[17]; /* Slices: end slice on reconstruction */ 
 
-		configs->tomo.start_slice               = parameters_int[18]; /* Slices: start slice on tomogram */ 
-		configs->tomo.end_slice                 = parameters_int[19]; /* Slices: end slice on tomogram */ 
+		configs->tomo.zslice0              = parameters_int[18]; /* Slices: start slice on tomogram */ 
+		configs->tomo.zslice1              = parameters_int[19]; /* Slices: end slice on tomogram */ 
 
 		/* Paralell */
 
@@ -156,90 +151,28 @@ extern "C"{
 
 	}
 
-	void setPhaseFilterParameters(GEO *geometry, DIM *tomo, float *parameters_float, int *parameters_int)
-	{
-		/* Set Geometry */
-		geometry->geometry = parameters_int[0];
-		
-		/* Set Tomogram (or detector) variables (h for horizontal (nrays) and v for vertical (nslices)) */
-		tomo->size         = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
-
-		tomo->x            = parameters_float[0];
-		tomo->y            = parameters_float[1];
-		tomo->z            = parameters_float[2];
-		tomo->dx           = parameters_float[3];
-		tomo->dy           = parameters_float[4];
-		tomo->dz           = parameters_float[5];
-
-		/* Set Padding */
-		tomo->pad          = dim3(parameters_int[4],parameters_int[5],parameters_int[6]); 
-
-		int npadx          = tomo->size.x * ( 1 + 2 * tomo->pad.x ); 
-		int npady          = tomo->size.y * ( 1 + 2 * tomo->pad.y ); 
-		int npadz          = tomo->size.z * ( 1 + 2 * tomo->pad.z );
-
-		tomo->npad         = dim3(npadx,npady,npadz); 
-
-		/* Set General reconstruction variables*/
-		geometry->energy   = parameters_float[6];
-
-		geometry->lambda   = ( plank * vc          ) / geometry->energy;
-		geometry->wave     = ( 2.0   * float(M_PI) ) / geometry->lambda;
-
-		geometry->z1x      = parameters_float[7];
-		geometry->z1y      = parameters_float[8];
-		geometry->z2x      = parameters_float[9];
-		geometry->z2y      = parameters_float[10];
-
-		/* Set magnitude [(z1+z2)/z1] according to the beam geometry */
-		switch (geometry->geometry){
-			case 0: /* Parallel */	
-				geometry->magnitude_x = 1.0;
-				geometry->magnitude_y = 1.0;
-				break;
-			case 1: /* Conebeam */
-				geometry->magnitude_x = ( geometry->z1x + geometry->z2x ) / geometry->z1x;
-				geometry->magnitude_y = ( geometry->z1y + geometry->z2y ) / geometry->z1y;
-				break;
-			case 2: /* Fanbeam */		
-				geometry->magnitude_x = ( geometry->z1x + geometry->z2x ) / geometry->z1x;
-				geometry->magnitude_y = 1.0;
-				break;
-			default:
-				printf("Parallel case as default! \n");
-				geometry->magnitude_x = 1.0;
-				geometry->magnitude_y = 1.0;
-				break;
-		}
-
-	}
-
-
+	
 	void setFBPParameters(CFG *configs, float *parameters_float, int *parameters_int)
 	{
 		/* Set Geometry */
-		configs->geometry.geometry         = 0;
+		configs->geometry.geometry         = PARALLEL;
 
 		/* Set Reconstruction variables */
-		configs->recon.size                = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
+		configs->obj.size                = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
 
-		configs->recon.x                   = parameters_float[0];
-		configs->recon.y                   = parameters_float[1];
-		configs->recon.z                   = parameters_float[2];
-		configs->recon.dx                  = parameters_float[3]; 
-		configs->recon.dy                  = parameters_float[4];
-		configs->recon.dz                  = parameters_float[5];
+		configs->obj.Lx                   = parameters_float[0];
+		configs->obj.Ly                   = parameters_float[1];
+		configs->obj.Lz                   = parameters_float[2];
+		configs->obj.dx                  = parameters_float[3]; 
+		configs->obj.dy                  = parameters_float[4];
+		configs->obj.dz                  = parameters_float[5];
 		
 		/* Set Tomogram (or detector) variables (h for horizontal (nrays) and v for vertical (nslices)) */
 		configs->tomo.size                 = dim3(parameters_int[4],parameters_int[5],parameters_int[6]); 
 
-		configs->tomo.nrays                = parameters_float[6];
-		configs->tomo.nangles              = parameters_float[7];
-		configs->tomo.nslices              = parameters_float[8];
-
-		configs->tomo.x                    = parameters_float[9];
-		configs->tomo.y                    = parameters_float[10];
-		configs->tomo.z                    = parameters_float[11];
+		configs->tomo.Lx                    = parameters_float[9];
+		configs->tomo.Ly                    = parameters_float[10];
+		configs->tomo.Lz                    = parameters_float[11];
 		configs->tomo.dx                   = parameters_float[12];
 		configs->tomo.dy                   = parameters_float[13];
 		configs->tomo.dz                   = parameters_float[14];
@@ -252,7 +185,7 @@ extern "C"{
 		int npady                          = configs->tomo.size.y * ( 1 + 2 * configs->tomo.pad.y ); 
 		int npadz                          = configs->tomo.size.z * ( 1 + 2 * configs->tomo.pad.z );
 
-		configs->tomo.npad                 = dim3(npadx,npady,npadz); 
+		configs->tomo.padsize                 = dim3(npadx,npady,npadz); 
 
 		/* Set General reconstruction variables*/
 		configs->geometry.detector_pixel_x = parameters_float[15];
@@ -263,9 +196,9 @@ extern "C"{
 		configs->geometry.z2x              = parameters_float[20];
 		configs->geometry.z2y              = parameters_float[21];
 
-		/* Set wavelenght (lambda) and wavenumber (wave) */
-		configs->geometry.lambda           = ( plank * vc          ) / configs->geometry.energy;
-		configs->geometry.wave             = ( 2.0   * float(M_PI) ) / configs->geometry.lambda;
+		/* Set wavelenght and wavenumber */
+		configs->geometry.wavelenght           = ( plank * vc          ) / configs->geometry.energy;
+		configs->geometry.wavenumber           = ( 2.0   * float(M_PI) ) / configs->geometry.wavelenght;
 
 		/* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
 	
@@ -280,8 +213,7 @@ extern "C"{
 		configs->reconstruction_method          = parameters_int[10];
 		configs->reconstruction_filter_type     = parameters_int[11];   /* Reconstruction Filter type */
 
-		float paganin_reg                       = ( parameters_float[22] == 0.0 ? 0.0 : parameters_float[22] ); /* Reconstruction Filter regularization parameter */
-		configs->reconstruction_paganin_reg     = 4.0f * float(M_PI) * float(M_PI) * configs->geometry.z2x * paganin_reg * configs->geometry.lambda  / ( configs->geometry.magnitude_x );
+		configs->reconstruction_paganin_reg     = 4.0f * float(M_PI) * float(M_PI) * ( parameters_float[22] == 0.0 ? 0.0 : parameters_float[22] ); /* Reconstruction Filter regularization parameter */
 		configs->reconstruction_reg             = parameters_float[23]; /* General regularization parameter */
 
 		/* Set Slices on Reconstruction and on Tomogram */
@@ -290,39 +222,35 @@ extern "C"{
 		For Conebeam geometry, 
 		Slices on reconstrucion are DIFFERENT as the slices on tomogram. 
 		*/
-		configs->recon.start_slice              = parameters_int[12]; /* Slices: start slice on reconstruction */  
-		configs->recon.end_slice                = parameters_int[13]; /* Slices: end slice on reconstruction */ 
+		configs->obj.zslice0               = parameters_int[16]; /* Slices: start slice on reconstruction */  
+		configs->obj.zslice1               = parameters_int[17]; /* Slices: end slice on reconstruction */ 
 
-		configs->tomo.start_slice               = parameters_int[14]; /* Slices: start slice on tomogram */ 
-		configs->tomo.end_slice                 = parameters_int[15]; /* Slices: end slice on tomogram */ 
+		configs->tomo.zslice0              = parameters_int[18]; /* Slices: start slice on tomogram */ 
+		configs->tomo.zslice1              = parameters_int[19]; /* Slices: end slice on tomogram */ 
 
 	}
 
 	void setEMParameters(CFG *configs, float *parameters_float, int *parameters_int)
 	{
 		/* Set Geometry */
-		configs->geometry.geometry         = 0;
+		configs->geometry.geometry       = PARALLEL;
 
 		/* Set Reconstruction variables */
-		configs->recon.size                = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
+		configs->obj.size                = dim3(parameters_int[1],parameters_int[2],parameters_int[3]); 
 
-		configs->recon.x                   = parameters_float[0];
-		configs->recon.y                   = parameters_float[1];
-		configs->recon.z                   = parameters_float[2];
-		configs->recon.dx                  = parameters_float[3]; 
-		configs->recon.dy                  = parameters_float[4];
-		configs->recon.dz                  = parameters_float[5];
+		configs->obj.Lx                  = parameters_float[0];
+		configs->obj.Ly                  = parameters_float[1];
+		configs->obj.Lz                  = parameters_float[2];
+		configs->obj.dx                  = parameters_float[3]; 
+		configs->obj.dy                  = parameters_float[4];
+		configs->obj.dz                  = parameters_float[5];
 		
 		/* Set Tomogram (or detector) variables (h for horizontal (nrays) and v for vertical (nslices)) */
 		configs->tomo.size                 = dim3(parameters_int[4],parameters_int[5],parameters_int[6]); 
 
-		configs->tomo.nrays                = parameters_float[6];
-		configs->tomo.nangles              = parameters_float[7];
-		configs->tomo.nslices              = parameters_float[8];
-
-		configs->tomo.x                    = parameters_float[9];
-		configs->tomo.y                    = parameters_float[10];
-		configs->tomo.z                    = parameters_float[11];
+		configs->tomo.Lx                    = parameters_float[9];
+		configs->tomo.Ly                    = parameters_float[10];
+		configs->tomo.Lz                    = parameters_float[11];
 		configs->tomo.dx                   = parameters_float[12];
 		configs->tomo.dy                   = parameters_float[13];
 		configs->tomo.dz                   = parameters_float[14];
@@ -335,7 +263,7 @@ extern "C"{
 		int npady                          = configs->tomo.size.y * ( 1 + 2 * configs->tomo.pad.y ); 
 		int npadz                          = configs->tomo.size.z * ( 1 + 2 * configs->tomo.pad.z );
 
-		configs->tomo.npad                 = dim3(npadx,npady,npadz); 
+		configs->tomo.padsize                 = dim3(npadx,npady,npadz); 
 
 		/* Set General reconstruction variables*/
 		configs->geometry.detector_pixel_x = parameters_float[15];
@@ -346,9 +274,9 @@ extern "C"{
 		configs->geometry.z2x              = parameters_float[20];
 		configs->geometry.z2y              = parameters_float[21];
 
-		/* Set wavelenght (lambda) and wavenumber (wave) */
-		configs->geometry.lambda           = ( plank * vc          ) / configs->geometry.energy;
-		configs->geometry.wave             = ( 2.0   * float(M_PI) ) / configs->geometry.lambda;
+		/* Set wavelenght and wavenumber */
+		configs->geometry.wavelenght         = ( plank * vc          ) / configs->geometry.energy;
+		configs->geometry.wavenumber         = ( 2.0   * float(M_PI) ) / configs->geometry.wavelenght;
 
 		/* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
 	
@@ -369,11 +297,11 @@ extern "C"{
 		For Conebeam geometry, 
 		Slices on reconstrucion are DIFFERENT as the slices on tomogram. 
 		*/
-		configs->recon.start_slice              = parameters_int[11]; /* Slices: start slice on reconstruction */  
-		configs->recon.end_slice                = parameters_int[12]; /* Slices: end slice on reconstruction */ 
+		configs->obj.zslice0               = parameters_int[16]; /* Slices: start slice on reconstruction */  
+		configs->obj.zslice1               = parameters_int[17]; /* Slices: end slice on reconstruction */ 
 
-		configs->tomo.start_slice               = parameters_int[13]; /* Slices: start slice on tomogram */ 
-		configs->tomo.end_slice                 = parameters_int[14]; /* Slices: end slice on tomogram */ 
+		configs->tomo.zslice0              = parameters_int[18]; /* Slices: start slice on tomogram */ 
+		configs->tomo.zslice1              = parameters_int[19]; /* Slices: end slice on tomogram */ 
 
 	}
 }

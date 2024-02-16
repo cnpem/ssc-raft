@@ -405,6 +405,16 @@ extern "C"{
     int zpad, int interpolation, float dx, float tv_param,
     int niter)
     {
+        int i, Maxgpudev;
+		
+		/* Multiples devices */
+		HANDLE_ERROR(cudaGetDeviceCount(&Maxgpudev));
+
+		/* If devices input are larger than actual devices on GPU, exit */
+		for(i = 0; i < ngpus; i++) 
+			assert(gpus[i] < Maxgpudev && "Invalid device number.");
+            
+
         int t;
         int blockgpu = (nslices + ngpus - 1) / ngpus;
         
@@ -418,7 +428,7 @@ extern "C"{
                 count + (size_t)t * blockgpu * nrays * nangles, 
                 recon + (size_t)t * blockgpu * nrays * nrays, 
                 angles, flat + (size_t)t * blockgpu * nrays, 
-                nrays, nangles, blockgpu,  zpad, interpolation, 
+                nrays, nangles, blockgpu, zpad, interpolation, 
                 dx, tv_param, niter, gpus[t]));
         }
 
@@ -426,3 +436,80 @@ extern "C"{
             t.get();
     }
 }
+
+// extern "C"{
+
+//     void fast_tEM_FQ(int* gpus, int ngpus, 
+//     float *count, float *recon, float *angles, float *flat,
+//     float *paramf, int *parami)
+//     {
+//         // int *ishape,
+//         // char *path,
+//         // char *outputPath,
+//         // char *volOrder,
+//         // char *rank,
+//         // char *datasetName,
+//         // int ngpus,
+//         // int *gpu,
+//         // int *shape,
+//         // int Init,
+//         // int Final,
+//         // int blockSize,
+//         // int timing,
+//         // int saving,
+//         // int *ix,
+//         // int *iy,
+//         // int *xmin,
+//         // int *xmax,
+//         // int *ymin,
+//         // int *ymax,
+//         // int *center,
+//         // int roi,
+//         // float *flat,
+//         // float *empty,
+//         // float *mask,
+//         // float *daxpyimg,
+//         // float daxpycon,
+//         // int susp,
+//         // char *uuid,
+//         // float *gaps,
+//         // int fill
+//         // int nrays, int nangles, int nslices, 
+//         // int zpad, int interpolation, float dx, float tv_param,
+//         // int niter)
+//         int i, Maxgpudev;
+		
+// 		/* Multiples devices */
+// 		HANDLE_ERROR(cudaGetDeviceCount(&Maxgpudev));
+
+// 		/* If devices input are larger than actual devices on GPU, exit */
+// 		for(i = 0; i < ngpus; i++) 
+// 			assert(gpus[i] < Maxgpudev && "Invalid device number.");
+
+// 		CFG configs; GPU gpu_parameters;
+
+//         setEMParameters(&configs, paramf, parami);
+
+//         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
+
+//         int t;
+//         int blockgpu = (nslices + ngpus - 1) / ngpus;
+        
+//         std::vector<std::future<void>> threads;
+
+//         for(t = 0; t < ngpus; t++){ 
+            
+//             blockgpu = min(nslices - blockgpu * t, blockgpu);
+
+//             threads.push_back(std::async( std::launch::async, get_tEM_FQ_GPU, 
+//                 count + (size_t)t * blockgpu * nrays * nangles, 
+//                 recon + (size_t)t * blockgpu * nrays * nrays, 
+//                 angles, flat + (size_t)t * blockgpu * nrays, 
+//                 nrays, nangles, blockgpu, zpad, interpolation, 
+//                 dx, tv_param, niter, gpus[t]));
+//         }
+
+//         for(auto& t : threads)
+//             t.get();
+//     }
+// }

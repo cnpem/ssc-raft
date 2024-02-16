@@ -37,13 +37,13 @@ extern "C"{
 
 		fbp_filter_kernel<<<gpus.Grd.x,gpus.BT.x>>>(filter, filter_kernel, size_pad);
 
-		convolution_R_C2C(  gpus, tomogram, filter_kernel, 
-                            size, 
-                            pad, 
-                            size_kernel, 
-                            0.0f, dim);
+		convolution_Real_C2C(  	gpus, tomogram, filter_kernel, 
+                            	size, 
+                            	pad, 
+                            	size_kernel, 
+                            	0.0f, dim);
 
-		cufftDestroy(gpus.mplan1);
+		cufftDestroy(gpus.mplan);
 	}
 }
 
@@ -62,7 +62,7 @@ extern "C" {
         
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
         
-        opt::product_Complex_Complex<<<gpus.Grd,gpus.BT>>>(dataPadded, kernel, dataPadded, size, kernel_size, pad);	
+        opt::product_Complex_Complex<<<gpus.Grd,gpus.BT>>>(dataPadded, kernel, dataPadded, pad, kernel_size);	
         
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
         
@@ -231,7 +231,7 @@ extern "C" {
 			vec[ty*sizex + tx] *= exp1j(-2*float(M_PI)/float(sizex) * center * tx) * rampfilter;
 	}
 
-    inline __global__ void SetX(complex* out, float* in, int sizex)
+    __global__ void SetX(complex* out, float* in, int sizex)
     {
         /* Float to Complex (imaginary part zero)*/
         size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -244,7 +244,7 @@ extern "C" {
         }
     }
 
-    inline __global__ void GetX(float* out, complex* in, int sizex)
+    __global__ void GetX(float* out, complex* in, int sizex)
     {
         /* Complex (real part) to Float */
         size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -254,7 +254,7 @@ extern "C" {
             out[ty*sizex + tx] = in[ty*sizex + tx].x;
     }
 
-    inline __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy)
+    __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy)
     {
         size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
         size_t ty = blockIdx.y + blockDim.y * blockIdx.z;

@@ -3,6 +3,7 @@
 
 #include "common/logerror.hpp"
 #include "common/operations.hpp"
+#include "common/types.hpp"
 #include "processing/processing.hpp"
 
 extern "C"{
@@ -188,15 +189,15 @@ extern "C"{
     int findcentersino16(uint16_t* frame0, uint16_t* frame180, 
     uint16_t* dark, uint16_t* flat, int sizex, int sizey)
     {
-        Image2D<uint16_t> fr0(frame0,sizex,sizey), fr1(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);	
-        return getCentersino16(fr0.gpuptr, fr1.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
+        Image2D<uint16_t> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);	
+        return getCentersino16(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
     }
 
     int findcentersino(float* frame0, float* frame180, 
     float* dark, float* flat, int sizex, int sizey)
     {
         Image2D<float> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);	
-        return getCentersino(fr0.gpuptr, fr1180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
+        return getCentersino(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
     }
 
 }

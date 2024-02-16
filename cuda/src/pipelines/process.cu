@@ -141,21 +141,21 @@ extern "C"{
         n_obj     = (long long int) ( indz_max -                indz ) * configs.obj.size.x * configs.obj.size.y;
         ind_obj   = (long long int) ( indz     - configs.obj.zslice0 ) * configs.obj.size.x * configs.obj.size.y;
 
-        posz           = - configs.obj.z +     indz * configs.obj.dz;
-        posz_max       = - configs.obj.z + indz_max * configs.obj.dz;
+        posz           = - configs.obj.Lz +     indz * configs.obj.dz;
+        posz_max       = - configs.obj.Lz + indz_max * configs.obj.dz;
                 
-        lenght      = sqrtf( configs.obj.x * configs.obj.x + configs.obj.y * configs.obj.y );
+        lenght      = sqrtf( configs.obj.Lx * configs.obj.Lx + configs.obj.Ly * configs.obj.Ly );
         
         /* Tomogram (or detector) and filter (with padding) variables */
         float z12x  = configs.geometry.z1x + configs.geometry.z2x;
         float z12y  = configs.geometry.z1y + configs.geometry.z2y;
 
         /* Tomogram */
-        pos           = std::max(- configs.tomo.z, std::min( z12x * posz     / ( configs.geometry.z1x - lenght ), z12x *     posz / ( configs.geometry.z1x + lenght ) ) );
-        pos_max       = std::min(+ configs.tomo.z, std::max( z12x * posz_max / ( configs.geometry.z1x + lenght ), z12x * posz_max / ( configs.geometry.z1x - lenght ) ) ); 
+        pos           = std::max(- configs.tomo.Lz, std::min( z12x * posz     / ( configs.geometry.z1x - lenght ), z12x *     posz / ( configs.geometry.z1x + lenght ) ) );
+        pos_max       = std::min(+ configs.tomo.Lz, std::max( z12x * posz_max / ( configs.geometry.z1x + lenght ), z12x * posz_max / ( configs.geometry.z1x - lenght ) ) ); 
 
-        ind        = std::max(                        0, (int) floor( ( pos     + configs.tomo.z ) / configs.tomo.dz ) );
-        ind_max    = std::min( (int)configs.tomo.size.z, (int)  ceil( ( pos_max + configs.tomo.z ) / configs.tomo.dz ) );
+        ind        = std::max(                        0, (int) floor( ( pos     + configs.tomo.Lz ) / configs.tomo.dz ) );
+        ind_max    = std::min( (int)configs.tomo.size.z, (int)  ceil( ( pos_max + configs.tomo.Lz ) / configs.tomo.dz ) );
 
         n_tomo      = (long long int) ( ind_max -                  ind ) * ( configs.tomo.size.x * configs.tomo.size.y );
         ind_tomo    = (long long int) ( ind     - configs.tomo.zslice0 ) * ( configs.tomo.size.x * configs.tomo.size.y );
@@ -188,12 +188,12 @@ extern "C"{
         (*process).objptr_size     = n_obj;
         (*process).objptr_index    = ind_obj;
         (*process).obj_posz        = posz;
-        (*process).tomo_posz       = - configs.tomo.z + ind * configs.tomo.dz;
+        (*process).tomo_posz       = - configs.tomo.Lz + ind * configs.tomo.dz;
     }
 }
 
 extern "C"{
-    int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft)
+    int getTotalProcesses(CFG configs, const float GPU_MEMORY, int sizeZ, bool using_fft)
     {
         int blocksizeMax = compute_GPU_blocksize((float)sizeZ, 
                                                 configs.total_required_mem_per_slice,

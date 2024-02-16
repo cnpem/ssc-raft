@@ -1,5 +1,6 @@
-#include "pipeline.hpp"
-#include "processing.hpp"
+#include "common/opt.hpp"
+#include "pipelines/pipeline.hpp"
+#include "processing/processing.hpp"
 #include "geometries/parallel/em.hpp"
 #include "geometries/parallel/fbp.hpp"
 #include "geometries/parallel/bst.hpp"
@@ -31,14 +32,14 @@ extern "C"{
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
         /* Set total number of processes to be sent to the GPUs */
-        total_number_of_processes = getTotalProcesses(configs, gpu_parameters);
+        total_number_of_processes = getTotalProcesses(configs, A100_MEM, configs.tomo.size.z, true);
                 
         /* Set processes pipeline for different geometries */
         Process *process = setProcesses(configs, gpu_parameters, total_number_of_processes);
 
         // clock_t b_begin = clock();
 
-        _setReconstructionPipeline(configs, process, gpu_parameters, 
+        _setReconstructionPipeline(&configs, process, gpu_parameters, 
                                     obj, data, flats, darks, angles, 
                                     total_number_of_processes);
 
@@ -51,11 +52,15 @@ extern "C"{
 
 
 extern "C"{
-    void _setReconstructionPipeline(CFG configs, Process *process, GPU gpus,
+    void _setReconstructionPipeline(CFG *configs, Process *process, GPU gpus,
     float *obj, float *data, float *flats, float *darks, 
     float *angles, int total_number_of_processes)
     {
         int gpu_index, process_index = 0;
+
+        configs->tomo.batchsize    = dim3(   configs->tomo.size.x, configs->tomo.size.y, process->tomobatch_size);
+        configs->tomo.padbatchsize = dim3(configs->tomo.padsize.x, configs->tomo.size.y, process->tomobatch_size);
+        configs->obj.batchsize     = dim3(    configs->obj.size.x,  configs->obj.size.y,  process->objbatch_size);
 
         std::vector<thread> threads_pipeline;
 
@@ -64,7 +69,7 @@ extern "C"{
             threads_pipeline.emplace_back( 
                                             thread(
                                             _ReconstructionProcessPipeline, 
-                                            configs, process[process_index], 
+                                            (*configs), process[process_index], 
                                             gpus, obj, data, flats, darks, 
                                             angles
                                             ));		
@@ -92,10 +97,6 @@ extern "C" {
 		/* Initialize GPU device */
 		HANDLE_ERROR(cudaSetDevice(process.index_gpu));
 
-        &configs->tomo->batchsize    = dim3(   configs.tomo.size.x, configs.tomo.size.y, process.tomobatch_size);
-        &configs->tomo->padbatchsize = dim3(configs.tomo.padsize.x, configs.tomo.size.y, process.tomobatch_size);
-        &configs->obj->batchsize     = dim3(    configs.obj.size.x,  configs.obj.size.y,  process.objbatch_size);
-
         /* Local GPUs Pointers: allocation */
         WKP *workspace = allocateWorkspace(configs, process);
 
@@ -122,23 +123,20 @@ extern "C" {
 extern "C"{
     void _ReconstructionPipeline(CFG configs, WKP *workspace, Process process, GPU gpus)
     {
-        float rings_lambda_computed = 0;
-
-
         if( configs.flags.do_flat_dark_correction == 1)
             getFlatDarkCorrection(workspace->tomo, workspace->flat, workspace->dark, 
             configs.tomo.batchsize, configs.numflats, gpus);
 
         if( configs.flags.do_flat_dark_log == 1) 
-            getLog(workspace->tomo, configs.tomo.batchsize, gpus);
+            getLog(workspace->tomo, configs.tomo.batchsize);
 
-        if( configs.flags.do_phase_filter == 1) 
-            getPhaseFilter(gpus, configs.geometry, workspace->tomo, 
-            configs.phase_filter_type, configs.phase_filter_reg, 
-            configs.tomo.batchsize, configs.tomo.padsize);
+        // if( configs.flags.do_phase_filter == 1) 
+        //     getPhaseFilter(gpus, configs.geometry, workspace->tomo, 
+        //     configs.phase_filter_type, configs.phase_filter_reg, 
+        //     configs.tomo.batchsize, configs.tomo.padsize);
 
         if( configs.flags.do_rings == 1) 
-            rings_lambda_computed = getRings(workspace->tomo, 
+            float rings_lambda_computed = getRings(workspace->tomo, 
             configs.tomo.batchsize, configs.rings_lambda, 
             configs.rings_block, gpus);
         
@@ -265,7 +263,7 @@ extern "C"{
                 break;
             default:
                 printf("No reconstruction method selected. Finshing run... \n");
-                return EXIT_SUCCESS
+                exit(EXIT_SUCCESS);
                 break;
         }	
     }
