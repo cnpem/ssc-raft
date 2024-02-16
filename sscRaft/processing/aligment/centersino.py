@@ -1,4 +1,4 @@
-from ..rafttypes import *
+from ...rafttypes import *
 import numpy as np
 from time import time
 from ctypes import c_float as float32
