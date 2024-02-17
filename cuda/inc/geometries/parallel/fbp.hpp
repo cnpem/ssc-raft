@@ -6,6 +6,8 @@
 
 extern "C"{
 
+    void setFBPParameters(CFG *configs, float *parameters_float, int *parameters_int);
+
     void getFBPMultiGPU(int* gpus, int ngpus, float* recon, float* tomogram, float* angles, float *paramf, int *parami);
 
     void getFBPGPU(CFG configs, GPU gpus, float* recon, float* tomogram, float* angles, int sizez, int ngpu);

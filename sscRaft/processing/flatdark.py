@@ -2,8 +2,6 @@
 
 from ..rafttypes import *
 import numpy as np
-import gc
-from time import time
 from ctypes import c_float as float32
 from ctypes import c_int as int32
 from ctypes import c_void_p  as void_p
@@ -135,12 +133,5 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
         SetDictionary(dic,dicparams,defaut)
 
         frames = flatdarkGPU( frames, flat, dark, dic ) 
-
-        # Garbage Collector
-        # lists are cleared whenever a full collection or
-        # collection of the highest generation (2) is run
-        collected = gc.collect() # or gc.collect(2)
-        logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
-
 
         return frames

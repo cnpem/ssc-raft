@@ -210,10 +210,6 @@ extern "C"{
 
 	void setPhaseFilterParameters(GEO *geometry, DIM *tomo, float *parameters_float, int *parameters_int);
 
-    void setFBPParameters(CFG *configs, float *parameters_float, int *parameters_int);
-
-	void setEMParameters(CFG *configs, float *parameters_float, int *parameters_int);
-
 }
 
 /* Processes - parallelization */

@@ -112,7 +112,8 @@ extern "C"{
 
         setSinCosTable<<<gpus.Grd.y,gpus.BT.y>>>(sintable, costable, angles, nangles);
 
-        filterFBP(gpus, filter, tomogram, filter_kernel, tomo_size, tomo_pad);
+        if (filter.reg >= 0)
+            filterFBP(gpus, filter, tomogram, filter_kernel, tomo_size, tomo_pad);
 
         BackProjection_RT<<<gpus.Grd,gpus.BT>>>(obj, tomogram, 
                                                 sintable, costable, 

@@ -114,7 +114,7 @@ def phase_filters(tomo,dic):
     tomogram = np.ascontiguousarray(tomogram.astype(np.float32))
     tomogramptr = tomogram.ctypes.data_as(void_p)
 
-    libraft.phase_filters(tomogramptr, float_paramsptr, int_paramptr, int32(nrays), int32(nangles), int32(nslices), gpusptr, int32(ngpus))
+    # libraft.phase_filters(tomogramptr, float_paramsptr, int_paramptr, int32(nrays), int32(nangles), int32(nslices), gpusptr, int32(ngpus))
 
     return np.swapaxes(tomogram,0,1)
 

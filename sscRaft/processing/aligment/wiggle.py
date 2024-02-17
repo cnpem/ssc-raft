@@ -9,7 +9,6 @@ from ctypes import c_void_p  as void_p
 
 import numpy
 import sys
-import gc
 from ...rafttypes import *
 import uuid
 import SharedArray as sa
@@ -628,8 +627,8 @@ def _build_p_tomogram_haxis (params, ptype):
             #center of mass using Azevedo's matrix
             c = numpy.dot(pinv2, b)
             
-            cmass[k,0] = _c_[1,0]
-            cmass[k,1] = _c_[2,0]
+            cmass[k,0] = c[1,0]
+            cmass[k,1] = c[2,0]
 
     ##
     b = int( numpy.ceil( nslices/nproc )  ) 

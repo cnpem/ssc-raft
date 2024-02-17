@@ -88,10 +88,4 @@ def rings(tomogram, dic, **kwargs):
 
         tomogram, lambda_computed = RingsGPU( tomogram, dic ) 
 
-        # Garbage Collector
-        # lists are cleared whenever a full collection or
-        # collection of the highest generation (2) is run
-        collected = gc.collect() # or gc.collect(2)
-        logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
-
         return tomogram

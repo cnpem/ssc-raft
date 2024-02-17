@@ -1,4 +1,4 @@
-from ....rafttypes import *
+from ...rafttypes import *
 import numpy as np
 import ctypes
 import ctypes.util

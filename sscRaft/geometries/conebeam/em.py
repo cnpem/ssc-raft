@@ -8,7 +8,7 @@ import time
 import sys
 import inspect
 
-from ....rafttypes import *
+from ...rafttypes import *
 
 def valid_data(cone_data: dict):
     ok = True

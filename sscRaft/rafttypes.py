@@ -63,91 +63,73 @@ libraft  = load_library(_lib, ext)
 ######## Parallel Raft ##########
 
 try:
-    libraft.tEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                           c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.tEM.restype  = None
-
-    libraft.eEM.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                            c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.eEM.restype  = None
-
-    libraft.EMTV.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                             c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_int,
-                             c_float, c_float]
-    libraft.EMTV.restype  = None
-
-    # EM threads in C
-    libraft.tEMblock.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                           c_int, c_int, c_int, c_int, c_int, c_int, ctypes.c_void_p]
-    libraft.tEMblock.restype  = None
-
-    libraft.eEMblock.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                            c_int, c_int, c_int, c_int, c_int, c_int, ctypes.c_void_p]
-    libraft.eEMblock.restype  = None
-
-    libraft.tEMgpu.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                           c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.tEMgpu.restype  = None
-
-    libraft.eEMgpu.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                            c_int, c_int, c_int, c_int, c_int, c_int]
-    libraft.eEMgpu.restype  = None
-
-    libraft.emfreqgpu.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                                    ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-                                    ctypes.c_float, ctypes.c_float, ctypes.c_int, ctypes.c_int]
-    libraft.emfreqgpu.restype  = None
-
-    libraft.emfreqblock.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-                                    ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-                                    ctypes.c_float, ctypes.c_float, ctypes.c_int, ctypes.c_int, ctypes.c_void_p]
-    libraft.emfreqblock.restype  = None
-
+    # EM Ray Tracing MultiGPU without semafaro
+    libraft.get_tEM_RT_MultiGPU.argtypes = [
+        ctypes.c_void_p, c_int, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+    ]
+    
+    libraft.get_tEM_RT_MultiGPU.restype  = None
 except:
-    print('-.RAFT_PARALLEL_EM-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_eEMRT-')
     pass
 
 try:
-    libraft.ComputeTomo360Offsetgpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.ComputeTomo360Offsetgpu.restype = ctypes.c_int
+    libraft.get_eEM_RT_MultiGPU.argtypes = [
+        ctypes.c_void_p, c_int, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+    ]
 
-    libraft.ComputeTomo360Offset16.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.ComputeTomo360Offset16.restype = ctypes.c_int
-
-    libraft.Tomo360To180gpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.Tomo360To180gpu.restype  = None
-
-    libraft.Tomo360To180block.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.Tomo360To180block.restype  = None
-
-    libraft.findcentersino.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                        ctypes.c_int, ctypes.c_int]
-    libraft.findcentersino.restype = ctypes.c_int
-
-    libraft.findcentersino16.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                        ctypes.c_int, ctypes.c_int]
-    libraft.findcentersino16.restype = ctypes.c_int
-
-    libraft.fbpgpu.argtypes = [ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_void_p, ctypes.c_float, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.fbpgpu.restype  = None
-
-    libraft.fbpblock.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_float, ctypes.c_void_p, ctypes.c_float, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int]
-    libraft.fbpblock.restype  = None
-        
+    libraft.get_eEM_RT_MultiGPU.restype  = None
 except:
-    print('-.RAFT_PARALLEL-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_tEMRT-')
+    pass
+
+try:
+    # EM Frequency MultiGPU without semafaro
+    libraft.get_tEM_FQ_MultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+        ctypes.c_float, ctypes.c_float, ctypes.c_int
+    ]
+        
+    libraft.get_tEM_FQ_MultiGPU.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_tEMFQ-')
+    pass
+
+try:
+    # FBP 
+    libraft.getFBPMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_void_p
+    ]
+    
+    libraft.getFBPMultiGPU.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_FBP-')
+    pass
+
+
+try:
+    libraft.findcentersino.argtypes = [
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_int, ctypes.c_int
+    ]
+
+    libraft.findcentersino.restype = ctypes.c_int    
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_CENTERSINO-')
     pass
 
 ######## Raft - Rings ##########
 try:
-    libraft.getRingsMultiGPU.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_float, ctypes.c_int]
+    libraft.getRingsMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+        ctypes.c_float, ctypes.c_int
+    ]
     
     libraft.getRingsMultiGPU.restype  = None
     
@@ -157,26 +139,33 @@ except:
 
 ######## Raft - Flat/Dark Correction ##########
 try:
-    libraft.getFlatDarkMultiGPU.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                                ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-                                                ctypes.c_int, ctypes.c_int]
+    libraft.getFlatDarkMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+        ctypes.c_int, ctypes.c_int
+    ]
     
     libraft.getFlatDarkMultiGPU.restype  = None
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_FLAT_DARK_CORRECTION-')
     pass
 
-######## Phase Filters ##########
-try:
-    libraft.phase_filters.argtypes = [  ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-                                        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-                                        ctypes.c_void_p, ctypes.c_int]
-    libraft.phase_filters.restype  = None
-    
-except:
-    print('Cannot find C/CUDA library: -.PHASE_FILTERS-')
-    pass
 
+######## Raft - Parallel Radon ##########
+try:
+    libraft.getRadonRTMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_int, ctypes.c_int, 
+        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+        ctypes.c_float, ctypes.c_float
+    ]
+
+    libraft.getRadonRTMultiGPU.restype  = None 
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_RADON_RT-')
+    pass
 
 ######## Conical Raft ##########
 ## FDK:
@@ -267,38 +256,60 @@ def nice(f): # scientific notation + 2 decimals
     return "{:.2e}".format(f)
 
 def FilterNumber(mfilter):
-        if mfilter.lower() == 'none':
-                return 0
-        elif mfilter.lower() == 'gaussian':
-                return 1
-        elif mfilter.lower() == 'lorentz':
-                return 2
-        elif mfilter.lower() == 'cosine':
-                return 3
-        elif mfilter.lower() == 'rectangle':
-                return 4
-        elif mfilter.lower() == 'hann':
-                return 5
-        elif mfilter.lower() == 'hamming':
-                return 6
-        elif mfilter.lower() == 'ramp':
-                return 7
-        else:
-                return 6
+    if mfilter.lower() == 'none':
+            return 0
+    elif mfilter.lower() == 'gaussian':
+            return 1
+    elif mfilter.lower() == 'lorentz':
+            return 2
+    elif mfilter.lower() == 'cosine':
+            return 3
+    elif mfilter.lower() == 'rectangle':
+            return 4
+    elif mfilter.lower() == 'hann':
+            return 5
+    elif mfilter.lower() == 'hamming':
+            return 6
+    elif mfilter.lower() == 'ramp':
+            return 7
+    else:
+            return 6
 
 def PhaseFilterNumber(mfilter):
-        if mfilter.lower() == 'none':
-                return 0
-        elif mfilter.lower() == 'paganin':
-                return 1
-        elif mfilter.lower() == 'bronnikov':
-                return 2
-        elif mfilter.lower() == 'born':
-                return 3
-        elif mfilter.lower() == 'rytov':
-                return 4
-        else:
-                return 0
+    if mfilter.lower() == 'none':
+            return 0
+    elif mfilter.lower() == 'paganin':
+            return 1
+    elif mfilter.lower() == 'bronnikov':
+            return 2
+    elif mfilter.lower() == 'born':
+            return 3
+    elif mfilter.lower() == 'rytov':
+            return 4
+    else:
+            return 0
+
+def setInterpolation(name):
+    """ Set interpolation 
+
+    Args:
+        name (str): string name for the interpolation
+
+    Returns:
+        (int): Value defining the interpolation name
+
+    Options:
+        name: \'nearest\' and \'bilinear\'
+
+    """
+    if name.lower() == 'nearest':
+        return 0
+    elif name.lower() == 'bilinear':
+        return 1
+    else:
+        logger.warning(f'Interpolation invalid. Using default \'nearest\' interpolation.')
+        return 0
+        
 
 def Bin(img,n=2):
         if n <= 1:
@@ -319,89 +330,87 @@ def Bin(img,n=2):
 
 def SetDic(dic, paramname, deff):
         try:
-                dic[paramname]
-                
-                if type(dic[paramname]) == list:
-                        for i in range(len(deff)):
-                                try:
-                                        dic[paramname][i] 
-                                except:
-                                        print('Using default -', paramname,':', deff[i])
-                                        dic[paramname][i] = deff[i]
+            dic[paramname]
+            
+            if type(dic[paramname]) == list:
+                for i in range(len(deff)):
+                    try:
+                        dic[paramname][i] 
+                    except:
+                        value = deff[i]
+                        logger.info(f'Using default - {paramname}:{value}')
+                        dic[paramname][i] = value
 
         except:
-                logger.warning(f'Using default - {paramname}: {deff}.')
-                dic[paramname] = deff
-
-                
+            logger.info(f'Using default - {paramname}: {deff}.')
+            dic[paramname] = deff
 
 def SetDictionary(dic,param,default):
-        for ind in range(len(param)):
-                SetDic(dic,param[ind], default[ind])
+    for ind in range(len(param)):
+        SetDic(dic,param[ind], default[ind])
 
 def Metadata_hdf5(outputFileHDF5, dic, software, version):
-        """ Function to save metadata from a dictionary, and the name of the softare used and its version
-        on a HDF5 file. The parameters names will be save the same as the names from the dictionary.
+    """ Function to save metadata from a dictionary, and the name of the softare used and its version
+    on a HDF5 file. The parameters names will be save the same as the names from the dictionary.
 
-        Args:
-            outputFileHDF5 (h5py.File type or str): The h5py created file or the path to the HDF5 file
-            dic (dictionary): A python dictionary containing all parameters (metadata) from the experiment
-            software (string): Name of the python module 'software'  used
-            version (string): Version of python module used (can be called by: 'software.__version__'; example: 'sscRaft.__version__')
+    Args:
+        outputFileHDF5 (h5py.File type or str): The h5py created file or the path to the HDF5 file
+        dic (dictionary): A python dictionary containing all parameters (metadata) from the experiment
+        software (string): Name of the python module 'software'  used
+        version (string): Version of python module used (can be called by: 'software.__version__'; example: 'sscRaft.__version__')
 
-        """
-        dic['Software'] = software
-        dic['Version']  = version
+    """
+    dic['Software'] = software
+    dic['Version']  = version
 
-        if isinstance(outputFileHDF5, str):
+    if isinstance(outputFileHDF5, str):
 
-                if os.path.exists(outputFileHDF5):
-                        hdf5 = h5py.File(outputFileHDF5, 'a')
-                else:
-                        hdf5 = h5py.File(outputFileHDF5, 'w')
-        else:
-               hdf5 = outputFileHDF5
+            if os.path.exists(outputFileHDF5):
+                    hdf5 = h5py.File(outputFileHDF5, 'a')
+            else:
+                    hdf5 = h5py.File(outputFileHDF5, 'w')
+    else:
+            hdf5 = outputFileHDF5
 
 
-        for key, value in dic.items():
+    for key, value in dic.items():
 
-                h5_path = 'Recon Parameters' #os.path.join('Recon Parameters', key)
-                hdf5.require_group(h5_path)
-                
-                if key == 'findRotationAxis':
-                        value = str(value)
-                if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, numpy.ndarray):
-                        value = numpy.asarray(value)
-                        hdf5[h5_path].create_dataset(key, data=value, shape=value.shape)
-                else:
-                        # print(value)
-                        hdf5[h5_path].create_dataset(key, data=value, shape=())
+            h5_path = 'Recon Parameters' #os.path.join('Recon Parameters', key)
+            hdf5.require_group(h5_path)
+            
+            if key == 'findRotationAxis':
+                    value = str(value)
+            if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, numpy.ndarray):
+                    value = numpy.asarray(value)
+                    hdf5[h5_path].create_dataset(key, data=value, shape=value.shape)
+            else:
+                    # print(value)
+                    hdf5[h5_path].create_dataset(key, data=value, shape=())
 
-        if isinstance(outputFileHDF5, str):
-               hdf5.close()
+    if isinstance(outputFileHDF5, str):
+            hdf5.close()
 
 def power_of_2_padding(size,pad):
-
     return int((pow(2, numpy.ceil(numpy.log2(size + 2 * pad))) - size) * 0.5)
        
 def set_conical_slices(slice_recon_start,slice_recon_end,nslices,nx,ny,z1,z12,pixel_det):
         
-        magn       = z1/z12
-        v          = nslices * pixel_det / 2
-        dx, dy, dz = pixel_det*magn, pixel_det*magn, pixel_det*magn
-        x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
-        L          = numpy.sqrt(x*x + y*y)
+    magn       = z1/z12
+    v          = nslices * pixel_det / 2
+    dx, dy, dz = pixel_det*magn, pixel_det*magn, pixel_det*magn
+    x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
+    L          = numpy.sqrt(x*x + y*y)
 
-        z_min_recon = - z + slice_recon_start * dz
-        z_max_recon = - z + slice_recon_end   * dz
+    z_min_recon = - z + slice_recon_start * dz
+    z_max_recon = - z + slice_recon_end   * dz
 
-        Z_min_proj = max(-v, min(z12*z_min_recon/(z1 - L), z12*z_min_recon/(z1 + L)))
-        Z_max_proj = min( v, max(z12*z_max_recon/(z1 + L), z12*z_max_recon/(z1 - L)))
+    Z_min_proj = max(-v, min(z12*z_min_recon/(z1 - L), z12*z_min_recon/(z1 + L)))
+    Z_max_proj = min( v, max(z12*z_max_recon/(z1 + L), z12*z_max_recon/(z1 - L)))
 
-        slice_projection_start = max(0      , int(numpy.floor((Z_min_proj + v)/pixel_det)))
-        slice_projection_end   = min(nslices, int(numpy.ceil( (Z_max_proj + v)/pixel_det)))
+    slice_projection_start = max(0      , int(numpy.floor((Z_min_proj + v)/pixel_det)))
+    slice_projection_end   = min(nslices, int(numpy.ceil( (Z_max_proj + v)/pixel_det)))
 
-        return slice_projection_start, slice_projection_end
+    return slice_projection_start, slice_projection_end
 
 def set_conical_tomogram_slices(tomogram, dic):
 
