@@ -7,23 +7,23 @@
 /*============================================================================*/
 /* namespace opt (in 'inc/commons/opt.hpp') functions definitions */
 
-template<typename Type>
-Type* opt::allocGPU(size_t size)
-{
-    Type *ptr; HANDLE_ERROR(cudaMalloc((void **)&ptr, size * sizeof(Type) )); return ptr;
-};
+// template<typename Type>
+// Type* opt::allocGPU(size_t size)
+// {
+//     Type *ptr; HANDLE_ERROR(cudaMalloc((void **)&ptr, size * sizeof(Type) )); return ptr;
+// };
 
-template<typename Type>
-void opt::CPUToGPU(Type *cpuptr, Type *gpuptr, size_t size)
-{
-    HANDLE_ERROR(cudaMemcpy(gpuptr, cpuptr, size * sizeof(Type), cudaMemcpyHostToDevice));
-};
+// template<typename Type>
+// void opt::CPUToGPU(Type *cpuptr, Type *gpuptr, size_t size)
+// {
+//     HANDLE_ERROR(cudaMemcpy(gpuptr, cpuptr, size * sizeof(Type), cudaMemcpyHostToDevice));
+// };
 
-template<typename Type>
-void opt::GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size)
-{
-    HANDLE_ERROR(cudaMemcpy(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost));
-};
+// template<typename Type>
+// void opt::GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size)
+// {
+//     HANDLE_ERROR(cudaMemcpy(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost));
+// };
 
 void opt::MPlanFFT(cufftHandle mplan, const int dim, dim3 size)
 {	

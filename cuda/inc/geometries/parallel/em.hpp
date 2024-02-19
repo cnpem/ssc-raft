@@ -8,6 +8,7 @@
 extern "C"{
 
     void setEMParameters(CFG *configs, float *parameters_float, int *parameters_int);
+    void printEMParameters(CFG *configs);
 
     void get_tEM_RT_MultiGPU(int* gpus, int ngpus,
     float* recon, float* count, float *flat, float* angles, 
@@ -17,13 +18,16 @@ extern "C"{
     float* recon, float* tomogram, float* angles, 
     float *paramf, int *parami);
 
-    void get_tEM_RT_GPU(CFG configs, GPU gpus, float *recon, float *count, float *flat, float *angles, 
+    void get_tEM_RT_GPU(CFG configs, GPU gpus, float *obj, float *count, float *flat, float *angles, 
     int sizez, int ngpu);
 
-    void get_eEM_RT_GPU(CFG configs, GPU gpus, float *recon, float *tomogram, float *angles, 
+    void get_eEM_RT_GPU(CFG configs, GPU gpus, float *obj, float *tomogram, float *angles, 
     int sizez, int ngpu);
 
-    void get_tEM_RT(CFG configs, GPU gpus, float *output, float *count, float *flat, float *angles, int blockSize);
+    void get_tEM_RT(CFG configs, GPU gpus, 
+    float *output, float *count, float *flat, float *angles, 
+    float *backcounts, float *temp, float *back,
+    int blockSize);
 
     void get_eEM_RT(CFG configs, GPU gpus, float *output, float *tomo, float *angles, int blockSize);
 

@@ -40,11 +40,7 @@ libstdcpp = ctypes.CDLL( ctypes.util.find_library( "stdc++" ), mode=ctypes.RTLD_
 
 _lib = "lib/libraft"
 
-if sys.version_info[0] >= 3:
-    import sysconfig
-    ext = sysconfig.get_config_var('SO')
-else:
-    ext = '.so'
+ext = '.so'
 
 def load_library(lib,ext):
     _path = os.path.dirname(os.path.abspath(__file__)) + os.path.sep + lib + ext
@@ -100,6 +96,21 @@ except:
 
 try:
     # FBP 
+    libraft.getBSTMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_int, ctypes.c_int, ctypes.c_int,
+        ctypes.c_int, ctypes.c_int, ctypes.c_float,
+        ctypes.c_float, ctypes.c_int
+    ]
+    
+    libraft.getBSTMultiGPU.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_BST-')
+    pass
+
+try:
+    # BST 
     libraft.getFBPMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
@@ -110,7 +121,6 @@ try:
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_FBP-')
     pass
-
 
 try:
     libraft.findcentersino.argtypes = [

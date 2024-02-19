@@ -112,7 +112,7 @@ int niter, int gpu)
     // BST initialization finishes here. 
 
 
-    BST(backcounts_cu, sino_cu, angles, nrays, nangles, blocksize, nrays, zpad+1);
+    EMFQ_BST(backcounts_cu, sino_cu, angles, nrays, nangles, blocksize, nrays, zpad+1);
     calc_reciprocal_element_wise<<<recon_size/NUM_THREADS, NUM_THREADS>>>(
         backcounts_cu,
         recon_size);
@@ -134,7 +134,7 @@ int niter, int gpu)
             stream);
 
         // BST:
-        getBST(back_cu, sino_cu, angles_cu, 
+        EMFQ_BST_ITER(back_cu, sino_cu, angles_cu, 
 	            cartesianblock_bst, polarblock_bst, realpolar_bst,
 	            plan1d_bst, plan2d_bst,
 	            nrays, nangles, blocksize, blocksize_bst, sizeimage, pad0);

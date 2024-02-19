@@ -96,13 +96,17 @@ namespace opt{
     };
 
     template<typename Type>
-    Type* allocGPU(size_t size);
+    Type* allocGPU(size_t size)    
+    { Type *ptr; HANDLE_ERROR(cudaMalloc((void **)&ptr, size * sizeof(Type) )); return ptr; };
+
 
     template<typename Type>
-    void CPUToGPU(Type *cpuptr, Type *gpuptr, size_t size);
+    void CPUToGPU(Type *cpuptr, Type *gpuptr, size_t size)
+    { HANDLE_ERROR(cudaMemcpy(gpuptr, cpuptr, size * sizeof(Type), cudaMemcpyHostToDevice)); };
 
     template<typename Type>
-    void GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size);
+    void GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size)
+    { HANDLE_ERROR(cudaMemcpy(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost));};
 
     void MPlanFFT(cufftHandle mplan, const int dim, dim3 size);
 

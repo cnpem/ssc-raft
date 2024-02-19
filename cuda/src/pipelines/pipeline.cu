@@ -217,12 +217,12 @@ extern "C"{
                 break;
             case 3:
                 /* EM RT tEM */
-                get_tEM_RT( configs, gpus, 
-                            workspace->obj, 
-                            workspace->tomo, 
-                            workspace->flat, 
-                            workspace->angles, 
-                            process.tomobatch_size);
+                // get_tEM_RT( configs, gpus, 
+                //             workspace->obj, 
+                //             workspace->tomo, 
+                //             workspace->flat, 
+                //             workspace->angles, 
+                //             process.tomobatch_size);
                 break;
             case 4:
                 /* EM RT eEM TV */

@@ -1,3 +1,3 @@
 from .flatdark import *
-from .alignment import *
 from .rings import *
+from .alignment import *

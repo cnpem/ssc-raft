@@ -7,14 +7,15 @@
 
 extern "C" {
 
-    void BST(float* blockRecon, float *wholesinoblock, float *angles,
+    void EMFQ_BST(float* blockRecon, float *wholesinoblock, float *angles,
     int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0);
-    
-    void getBST(
+
+    void EMFQ_BST_ITER(
 	float* blockRecon, float *wholesinoblock, float *angles,
 	cImage& cartesianblock, cImage& polarblock, cImage& realpolar,
 	cufftHandle plan1d, cufftHandle plan2d,
-	int Nrays, int Nangles, int trueblocksize, int blocksize, int sizeimage, int pad0);
+	int Nrays, int Nangles, int trueblocksize, int blocksize, int sizeimage, 
+    int pad0);
 
 }
 #endif

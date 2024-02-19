@@ -28,6 +28,23 @@ extern "C" {
       {
 	      int voxel = tz * nrays * nangles + ty * nrays + tx;
 	
+       	tmp[voxel] = flat[ty * nrays + tx] * expf( - tmp[voxel]);	
+      }
+  }
+}
+
+extern "C" {
+  __global__ void kernel_flatTimesExp_3d(float *tmp, float *flat,
+				      int sizeImage, int nrays, int nangles,  int blockSize)
+  {
+    int tx = threadIdx.x + blockIdx.x*blockDim.x; 
+    int ty = threadIdx.y + blockIdx.y*blockDim.y; 
+    int tz = threadIdx.z + blockIdx.z*blockDim.z;
+  
+    if ( (tx<nrays) && (ty < nangles) && (tz<blockSize)  )
+      {
+	      int voxel = tz * nrays * nangles + ty * nrays + tx;
+	
        	tmp[voxel] = flat[voxel] * expf( - tmp[voxel]);	
       }
   }
@@ -75,7 +92,7 @@ extern "C" {
 
 extern "C" {
   __global__ void kernel_backprojection(float *image, float *blocksino, float *angles,
-					int sizeImage, int nrays, int nangles,  int blockSize)
+					int sizeImage, int nrays, int nangles, int blockSize)
   {
     int i, j, k, T, z;
     float t, cs, x, y, cosk, sink;

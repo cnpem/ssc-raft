@@ -328,6 +328,10 @@ __host__ __device__ inline float Filter::apply(float input)
 	{
 		input /= (1.0f + paganin * input * input);
 	}
+    else if (type == EType::none)
+	{
+		input = 1.0f + 0.0f * input;
+	}
 
 	return input;
 }
