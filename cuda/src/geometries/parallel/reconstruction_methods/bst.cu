@@ -98,56 +98,6 @@ size_t nrays, size_t nangles, size_t sizeimage)
     }
 }
 
-__global__ void polar2cartesian_fourier_angles(complex* cartesian, complex* polar, float *angles,
-size_t nrays, size_t nangles, size_t sizeimage)
-{
-	int tx = blockIdx.x * blockDim.x + threadIdx.x;
-	int ty = blockIdx.y;
-	
-	if(tx < nrays && ty < nangles)
-	{
-		size_t cartplane = blockIdx.z * sizeimage * sizeimage;
-		polar += blockIdx.z * nrays * nangles;
-		
-		// int posx = tx - sizeimage/2;
-		// int posy = ty - sizeimage/2;
-		
-		// float rho = nrays * hypotf(posx,posy) / sizeimage;
-		// float angle = (nangles)*(0.5f*atan2f(posy, posx)/float(M_PI)+0.5f);
-
-        // float angle = angles[tx / nrays];
-        // float rho = 0.5 + (tx % nrays) - nrays/2.0; // rho_idx - rho_max.
-        float angle = angles[ty];
-        float rho = tx - nrays/2.0; // rho_idx - rho_max.
-        float xpos = cosf(angle)*rho;
-        float ypos = sinf(angle)*rho;
-        int x_id = __float2int_rn(xpos) + (int)nrays/2;
-        int y_id = __float2int_rn(ypos) + (int)nrays/2;
-		
-		size_t irho = size_t(rho);
-		int iarc    = int(angle);
-		complex interped = 0;
-		
-		if(irho < nrays/2-1)
-		{
-			float pfrac = rho-irho;
-			float tfrac = iarc-angle;
-			
-			iarc = iarc%(nangles);
-			
-			int uarc = (iarc+1)%(nangles);
-			
-			complex interp0 = polar[iarc*nrays + irho]*(1.0f-pfrac) + polar[iarc*nrays + irho+1]*pfrac;
-			complex interp1 = polar[uarc*nrays + irho]*(1.0f-pfrac) + polar[uarc*nrays + irho+1]*pfrac;
-			
-			interped = interp0*tfrac + interp1*(1.0f-tfrac);
-		}
-		
-		// cartesian[cartplane + sizeimage*((ty+sizeimage/2)%sizeimage) + (tx+sizeimage/2)%sizeimage] = interped*(4*(tx%2-0.5f)*(ty%2-0.5f));
-        cartesian[cartplane + sizeimage*y_id + x_id] = interped*(4*x_id*y_id);
-
-    }
-}
 
 void EMFQ_BST(float* blockRecon, float *wholesinoblock, float *angles,
 int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0)
@@ -196,8 +146,6 @@ int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0)
 	 	
 		blocks = dim3((sizeimage+255)/256,sizeimage,blocksize);
 		threads = dim3(256,1,1);
-
-        // polar2cartesian_fourier_angles<<<blocks,threads>>>(cartesianblock.gpuptr, polarblock.gpuptr, dangles, Nrays, Nangles, sizeimage);
 
         HANDLE_ERROR( cudaPeekAtLastError() );
 		polar2cartesian_fourier<<<blocks,threads>>>(cartesianblock.gpuptr, polarblock.gpuptr, dangles, Nrays, Nangles, sizeimage);
@@ -251,8 +199,6 @@ void EMFQ_BST_ITER(
 	 	
 		blocks = dim3((sizeimage+255)/256,sizeimage,blocksize);
 		threads = dim3(256,1,1);
-
-        // polar2cartesian_fourier_angles<<<blocks,threads>>>(cartesianblock.gpuptr, polarblock.gpuptr, angles, Nrays, Nangles, sizeimage);
 
 		polar2cartesian_fourier<<<blocks,threads>>>(cartesianblock.gpuptr, polarblock.gpuptr, angles, Nrays, Nangles, sizeimage);
 	  
@@ -329,8 +275,6 @@ int pad0, float reg, float paganin, int filter_type, int gpu)
 	 	
 		blocks = dim3((sizeimage+255)/256,sizeimage,blocksize_bst);
 		threads = dim3(256,1,1);
-
-        // polar2cartesian_fourier_angles<<<blocks,threads>>>(cartesianblock.gpuptr, polarblock.gpuptr, angles, Nrays, Nangles, sizeimage);
 
 		polar2cartesian_fourier<<<blocks,threads>>>(cartesianblock.gpuptr, polarblock.gpuptr, angles, Nrays, Nangles, sizeimage);
 	  

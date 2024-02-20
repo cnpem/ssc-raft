@@ -30,15 +30,22 @@ extern "C" {
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
         // printGPUParameters(&gpu_parameters);
 
-        int subvolume = (configs.tomo.size.z + ngpus - 1) / ngpus;
-        int subblock, ptr = 0; 
+        /* Projection data sizes */
+        int nrays    = configs.tomo.size.x;
+        int nangles  = configs.tomo.size.y;
+        int nslices  = configs.tomo.size.z;
+        
+        /* Object (reconstruction) data sizes */
+        int nx       = configs.obj.size.x;
+        int ny       = configs.obj.size.y;
+        int nz       = configs.obj.size.z;
 
-        // for (i = 0; i < configs.tomo.size.y;i++)
-        //     printf("angles[%d] = %e \n",i,angles[i]);
+        int blockgpu = (nslices + ngpus - 1) / ngpus;
+        int subblock, ptr = 0; 
 
         if (ngpus == 1){ /* 1 device */
 
-            get_tEM_RT_GPU(configs, gpu_parameters, obj, count, flat, angles, configs.tomo.size.z, gpus[0]);
+            get_tEM_RT_GPU(configs, gpu_parameters, obj, count, flat, angles, nslices, gpus[0]);
 
         }else{
         /* Launch async Threads for each device.
@@ -49,14 +56,14 @@ extern "C" {
 
             for (i = 0; i < ngpus; i++){
                 
-                subblock   = min(configs.tomo.size.z - ptr, subvolume);
+                subblock   = min(nslices - ptr, blockgpu);
 
                 threads.push_back( std::async( std::launch::async, 
                                                 get_tEM_RT_GPU, 
                                                 configs, gpu_parameters, 
-                                                obj   + (size_t) configs.obj.size.x *  configs.obj.size.y * ptr,
-                                                count + (size_t)configs.tomo.size.x * configs.tomo.size.y * ptr, 
-                                                flat  + (size_t)configs.tomo.size.x                       * ptr, 
+                                                obj   + (size_t)   nx *      ny * ptr,
+                                                count + (size_t)nrays * nangles * ptr, 
+                                                flat  + (size_t)nrays           * ptr, 
                                                 angles, 
                                                 subblock,
                                                 gpus[i]
