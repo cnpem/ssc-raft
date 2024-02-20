@@ -108,9 +108,6 @@ int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0)
 	cImage polarblock(Nrays * pad0,Nangles*blocksize);
 	cImage realpolar(Nrays * pad0,Nangles*blocksize);
 
-    float *dangles = opt::allocGPU<float>( Nangles );
-    opt::CPUToGPU<float>(angles, dangles, Nangles);
-
 	cufftHandle plan1d;
 	cufftHandle plan2d;
   
@@ -148,7 +145,7 @@ int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0)
 		threads = dim3(256,1,1);
 
         HANDLE_ERROR( cudaPeekAtLastError() );
-		polar2cartesian_fourier<<<blocks,threads>>>(cartesianblock.gpuptr, polarblock.gpuptr, dangles, Nrays, Nangles, sizeimage);
+		polar2cartesian_fourier<<<blocks,threads>>>(cartesianblock.gpuptr, polarblock.gpuptr, angles, Nrays, Nangles, sizeimage);
 	  
 		HANDLE_FFTERROR( cufftExecC2C(plan2d, cartesianblock.gpuptr, cartesianblock.gpuptr, CUFFT_INVERSE) );
 	  
@@ -164,7 +161,6 @@ int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0)
 	}
 	cufftDestroy(plan1d);
 	cufftDestroy(plan2d);
-    cudaFree(dangles);
 }
 
 void EMFQ_BST_ITER(
