@@ -37,62 +37,56 @@ namespace opt{
 
 	inline __host__ __device__ size_t getIndex3d(dim3 size)
     { 
-        size_t I = blockIdx.x*blockDim.x + threadIdx.x; 
-        size_t J = blockIdx.y*blockDim.y + threadIdx.y; 
-        size_t K = blockIdx.z*blockDim.z + threadIdx.z; 
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x; 
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y; 
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z; 
         
-        return IND(I,J,K,size.x,size.y); 
+        return IND(i,j,k,size.x,size.y); 
     };
     
     inline __host__ __device__ size_t getIndex2d(dim3 size)    
     { 
-        int I = blockIdx.x*blockDim.x + threadIdx.x; 
-        int J = blockIdx.y*blockDim.y + threadIdx.y; 
+        int i = blockIdx.x*blockDim.x + threadIdx.x; 
+        int j = blockIdx.y*blockDim.y + threadIdx.y; 
         
-        return IND(I,J,0,size.x,size.y); 
+        return IND(i,j,0,size.x,size.y); 
     };
 
     inline __host__ __device__ int assert_dimension_xyz(dim3 size1, dim3 size2)
     { 
+        int i;
         if ( assert_dimension(size1.x, size2.x) == 1 && 
              assert_dimension(size1.y, size2.y) == 1 && 
              assert_dimension(size1.z, size2.z) == 1
-            )
-            return 1; 
-        else if (size2.z == 1)
-            return 2;
-        else 
-            return 0;
+             ){ i = 1; }else{ if (size2.z == 1){ i = 2; }else{ i = 0; } }
+        return i;
     };
 
     inline __host__ __device__ int assert_dimension_xy(dim3 size1, dim3 size2)
     { 
+        int i;
         if ( assert_dimension(size1.x, size2.x) == 1 && 
              assert_dimension(size1.y, size2.y) == 1  
-            )
-            return 1; 
-        else
-            return 0;
+            ){ i = 1; }else{ i = 0; }
+        return i;
     };
 
     inline __host__ __device__ int assert_dimension_xz(dim3 size1, dim3 size2)
     { 
+        int i;
         if ( assert_dimension(size1.x, size2.x) == 1 && 
              assert_dimension(size1.z, size2.z) == 1
-            )
-            return 1; 
-        else
-            return 0;
+            ){ i = 1; }else{ i = 0; }
+        return i;
     };
 
     inline __host__ __device__ int assert_dimension_yz(dim3 size1, dim3 size2)
     { 
+        int i;
         if ( assert_dimension(size1.y, size2.y) == 1 && 
              assert_dimension(size1.z, size2.z) == 1
-            )
-            return 1; 
-        else
-            return 0;
+            ){ i = 1; }else{ i = 0; }
+        return i;
     };
 
     template<typename Type>

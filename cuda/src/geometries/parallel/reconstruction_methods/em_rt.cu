@@ -38,7 +38,6 @@ extern "C" {
         /* Object (reconstruction) data sizes */
         int nx       = configs.obj.size.x;
         int ny       = configs.obj.size.y;
-        int nz       = configs.obj.size.z;
 
         int blockgpu = (nslices + ngpus - 1) / ngpus;
         int subblock, ptr = 0; 

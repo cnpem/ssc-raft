@@ -11,8 +11,8 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
     cudaSetDevice(process.i_gpu);
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     //cudaMalloc(c_signal, sizeof(cufftComplex)*N);
     cudaMalloc(c_signal, sizeof(cufftComplex)*Npad);
@@ -81,8 +81,8 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
     // Normalize<<<n_blocks, n_threads>>>(*W, maximum, lab.nph, 1);
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
  
     printf("GPU memory allocated...\n");
@@ -99,8 +99,8 @@ void copy_cpu_filter_fft(float* proj, float* c_proj, cufftComplex* c_signal, flo
     cudaSetDevice(process.i_gpu);
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     long long int N = process.n_filter;   
     cudaMemcpy(&proj[process.idx_filter], c_proj, N*sizeof(float), cudaMemcpyDeviceToHost);
@@ -121,8 +121,8 @@ void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Pro
     cudaSetDevice(process.i_gpu);
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     cudaMalloc(c_Q, sizeof(float)*N);
 
@@ -132,8 +132,8 @@ void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Pro
     printf("GPU memory allocated...\n");
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
 
     clock_t end = clock();
@@ -146,8 +146,8 @@ void copy_cpu_filter_conv(float* proj, float* c_proj, float* c_Q, Process proces
     cudaSetDevice(process.i_gpu);
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     long long int N = process.n_filter;   //lab.nbeta * lab.nv * lab.nh;
     cudaMemcpy(&proj[process.idx_filter], c_Q, N*sizeof(float), cudaMemcpyDeviceToHost);

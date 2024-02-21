@@ -58,12 +58,12 @@ void getLog(float *data, dim3 size)
 
 static __global__ void Klog(float* data, dim3 size)
 {  
-    int I  = threadIdx.x + blockIdx.x*blockDim.x;
-    int J  = threadIdx.y + blockIdx.y*blockDim.y;
+    int i  = threadIdx.x + blockIdx.x*blockDim.x;
+    int j  = threadIdx.y + blockIdx.y*blockDim.y;
 
-    if( (I >= size.x) || (J >= size.y) || (blockIdx.z >= size.z)) return;
+    if( (i >= size.x) || (j >= size.y) || (blockIdx.z >= size.z)) return;
     
-    size_t index = IND(I,J,blockIdx.z,size.x,size.y);    
+    size_t index = IND(i,j,blockIdx.z,size.x,size.y);    
     data[index]  = - logf( data[index] );
 }
 

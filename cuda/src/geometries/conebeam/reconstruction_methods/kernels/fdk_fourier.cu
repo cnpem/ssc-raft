@@ -8,18 +8,12 @@
 
 extern "C"{
 __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process){
-    int n = lab.nh, npad = lab.nph;
-    // long long int batch = process.z_filter*lab.nbeta;
+    int npad = lab.nph;
     long long int batch_pad = process.z_filter_pad*lab.nbeta;
-    long long int N = process.n_filter;
     long long int Npad = process.n_filter_pad;
 
     int n_threads = NUM_THREADS;
-    long long int n_blocks  = N/n_threads + (N % n_threads == 0 ? 0:1);
     long long int n_blocks_pad  = Npad/n_threads + (Npad % n_threads == 0 ? 0:1);
-
-    printf("FFT: n_threads = %d, n_blocks = %ld, n_blocks_pad = %ld \n",n_threads,n_blocks,n_blocks_pad);
-    printf("FFT: n = %d, npad = %d \n",n,npad);
 
     cudaSetDevice(process.i_gpu);
 

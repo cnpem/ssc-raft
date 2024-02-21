@@ -99,7 +99,7 @@ __global__ void total_variation_2d(
     float sum_diff, sqrt_sum_sq_diff;
     bool ok = false;
     float tv_term = 0.0;
-    float mean_abs_diff = 0.0;
+    // float mean_abs_diff = 0.0;
     int count_halve = 0, max_halve = 8; // trocar "do{} while();" por "max(epsilon, back[i]-tv);".
     long long int i = blockDim.x * blockIdx.x + threadIdx.x;
     const float TV_EPSILON = 1.0e-9;
@@ -113,7 +113,7 @@ __global__ void total_variation_2d(
         yprev = recon[i-nx];
         dnext = recon[i+nx-1]; // left "next" diagonal.
         dprev = recon[i-nx+1]; // right "previous" diagonal.
-        mean_abs_diff = (fabsf(curr-xnext) + fabsf(curr-ynext) + fabsf(curr-xprev) + fabsf(curr-yprev))/4.0;
+        float mean_abs_diff = (fabsf(curr-xnext) + fabsf(curr-ynext) + fabsf(curr-xprev) + fabsf(curr-yprev))/4.0;
         sum_diff = 2*curr - xnext - ynext;
         sqrt_sum_sq_diff = (curr-xnext)*(curr-xnext) + (curr-ynext)*(curr-ynext);
         sqrt_sum_sq_diff = sqrtf(sqrt_sum_sq_diff);

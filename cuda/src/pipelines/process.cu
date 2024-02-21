@@ -147,7 +147,7 @@ extern "C"{
         
         /* Tomogram (or detector) and filter (with padding) variables */
         float z12x  = configs.geometry.z1x + configs.geometry.z2x;
-        float z12y  = configs.geometry.z1y + configs.geometry.z2y;
+        // float z12y  = configs.geometry.z1y + configs.geometry.z2y;
 
         /* Tomogram */
         pos           = std::max(- configs.tomo.Lz, std::min( z12x * posz     / ( configs.geometry.z1x - lenght ), z12x *     posz / ( configs.geometry.z1x + lenght ) ) );

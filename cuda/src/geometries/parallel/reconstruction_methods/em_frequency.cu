@@ -355,11 +355,6 @@ extern "C"{
         int nangles  = configs.tomo.size.y;
         int nslices  = configs.tomo.size.z;
         
-        /* Object (reconstruction) data sizes */
-        int nx       = configs.obj.size.x;
-        int ny       = configs.obj.size.y;
-        int nz       = configs.obj.size.z;
-
         /* Indexes and pointers for GPUs blocks */    
         int t;
         int blockgpu = (nslices + ngpus - 1) / ngpus;

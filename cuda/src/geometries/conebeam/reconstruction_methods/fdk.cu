@@ -28,26 +28,26 @@ extern "C"
 
         if ( ( blockgpu <= 0 ) ) ndevs = 1;
 
-        printf("B: ndevs = %d, blockgpu = %d \n", ndevs, blockgpu);
+        // printf("B: ndevs = %d, blockgpu = %d \n", ndevs, blockgpu);
 
 
         n_process = memory(lab, ndevs);
         
-        printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);
-        printf("nh = %d, nv = %d, nx = %d, ny = %d, nz = %d \n",  lab.nh,  lab.nv, lab.nx, lab.ny, lab.nz);
-        printf("dh = %e, dv = %e, dx = %e, dy = %e, dz = %e \n",  lab.dh,  lab.dv, lab.dx, lab.dy, lab.dz);
-        printf("dbeta = %e, nbeta = %d, \n",  lab.dbeta,  lab.nbeta);
-        printf("D = %e, Dsd = %e, \n",  lab.D,  lab.Dsd);
+        // printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);
+        // printf("nh = %d, nv = %d, nx = %d, ny = %d, nz = %d \n",  lab.nh,  lab.nv, lab.nx, lab.ny, lab.nz);
+        // printf("dh = %e, dv = %e, dx = %e, dy = %e, dz = %e \n",  lab.dh,  lab.dv, lab.dx, lab.dy, lab.dz);
+        // printf("dbeta = %e, nbeta = %d, \n",  lab.dbeta,  lab.nbeta);
+        // printf("D = %e, Dsd = %e, \n",  lab.D,  lab.Dsd);
 
         Process *process = (Process *)malloc(sizeof(Process) * n_process);
         
         if(lab.is_slice == 1){
-            printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
+            // printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
             
             for (i = 0; i < n_process; i++)
                 set_process_slices_2(lab, i, &process[i], n_process, gpus, ndevs);
         }else{
-            printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
+            // printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
 
             for (i = 0; i < n_process; i++)
                 set_process(lab, i, &process[i], n_process, gpus, ndevs);
@@ -70,8 +70,8 @@ extern "C"
         time[0] = double(f_end - f_begin) / CLOCKS_PER_SEC;
 
         cudaDeviceSynchronize();
-        printf(cudaGetErrorString(cudaGetLastError()));
-        printf("\n");
+        // printf(cudaGetErrorString(cudaGetLastError()));
+        // printf("\n");
 
         printf("Backproject:\n");
         clock_t b_begin = clock();
@@ -82,8 +82,8 @@ extern "C"
         time[1] = double(b_end - b_begin) / CLOCKS_PER_SEC;
 
         cudaDeviceSynchronize();
-        printf(cudaGetErrorString(cudaGetLastError()));
-        printf("\n");
+        // printf(cudaGetErrorString(cudaGetLastError()));
+        // printf("\n");
 
         free(process);
     }

@@ -54,8 +54,8 @@ void filtering_conv(Lab lab, float* proj, float* Q, Process process) {
     calc_Q<<<n_blocks, n_threads>>>(Q, proj, lab, process);
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     clock_t b_end = clock();
     printf("Time filtering_conv: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);

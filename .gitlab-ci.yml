@@ -20,7 +20,6 @@ build_dgx:
 build_power:
   stage: build
   script:
-    - module load openmpi/4.1.0 hdf5/1.12.2_parallel python3 cuda/11.2
     - python3 setup.py bdist_wheel
   tags:
     - ppc64le

@@ -617,7 +617,7 @@ extern "C"{
 
 		float a_new = vala - fres;
 		float b_new = valb - 0.5f * (RFDD - fres * Rmu1);
-		float c_new = valc - stepb * GTheta;
+		// float c_new = valc - stepb * GTheta;
 
 		A[lineidx] = fminf(fmaxf(a_new, -0.2f), 0.2f);
 		B[lineidx] = fminf(fmaxf(b_new, 0.9f), 1.1f);

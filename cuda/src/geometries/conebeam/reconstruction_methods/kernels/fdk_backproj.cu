@@ -91,8 +91,8 @@ void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float**
     HANDLE_ERROR(cudaMemcpy(dangles, angles, lab.nbeta * sizeof(float), cudaMemcpyHostToDevice));
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     printf("Allocating gpu memory... c_recon N = %lld \n",N);
     HANDLE_ERROR(cudaMalloc(c_recon, N * sizeof(float)));
@@ -102,8 +102,8 @@ void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float**
     HANDLE_ERROR(cudaMemcpy(*c_proj, &proj[process.idx_proj], M * sizeof(float), cudaMemcpyHostToDevice));
  
     printf("GPU memory allocated...\n");
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     HANDLE_ERROR(cudaMalloc(c_beta, 2* lab.nbeta * sizeof(float)));
     set_beta<<< 1, 1 >>>(lab,dangles,*c_beta);
@@ -121,8 +121,8 @@ void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta
     HANDLE_ERROR(cudaSetDevice(process.i_gpu));
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
 
     long long int N = process.n_recon;    //lab.nbeta * lab.nv * lab.nh;
@@ -149,8 +149,8 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
     n_blocks  = M/n_threads + (M % n_threads == 0 ? 0:1);   
     
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     cudaSetDevice(process.i_gpu);
 
@@ -161,8 +161,8 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
     backproj<<<n_blocks, n_threads>>>(recon, proj, beta, lab, process);
 
     cudaDeviceSynchronize(); 
-    printf(cudaGetErrorString(cudaGetLastError()));
-    printf("\n");
+    // printf(cudaGetErrorString(cudaGetLastError()));
+    // printf("\n");
 
     clock_t b_end = clock();
     printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);

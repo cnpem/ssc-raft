@@ -47,11 +47,11 @@ void check_cuda(cudaError_t cudaStatus, bool is_cudaGetLastError, int line, cons
 bool all_positive(float *arr, size_t size) {
     for(size_t i = 0; i < size - 1; ++i) {
         if(arr[i] * arr[i+1] < 0) {
-            printf("Negative value encountered at index %d.\n", i);
+            printf("Negative value encountered at index %ld.\n", i);
             return false;
         }
         if(arr[i] == 0.0) {
-            printf("Zero value encountered at index %d.\n", i);
+            printf("Zero value encountered at index %ld.\n", i);
             return false;
         }
     }
