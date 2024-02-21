@@ -7,7 +7,7 @@ build_dgx:
   image: gccdockers/annotat3d:cuda-11.2
   stage: build
   script:
-    - python3 setup.py bdist_wheel --cuda
+    - python3 setup.py bdist_wheel
   tags:
     - x86_64
     - cuda11
@@ -18,17 +18,17 @@ build_dgx:
     expire_in: 1 day
 
 build_power:
-    stage: build
-    script:
-        - python3 setup.py bdist_wheel --cuda
-    tags:
-        - ppc64le
-        - cuda10
-        - shell
-    artifacts:
-        paths:
-            - ./dist/*whl
-        expire_in: 1 day
+  stage: build
+  script:
+    - python3 setup.py bdist_wheel
+  tags:
+    - ppc64le
+    - cuda10
+    - shell
+  artifacts:
+    paths:
+      - ./dist/*whl
+    expire_in: 1 day
 
 deploy_dgx:
   stage: deploy
@@ -47,19 +47,19 @@ deploy_dgx:
     - tags
 
 deploy_power:
-    stage: deploy
-    script:
-        - python3 -m pip install keyring==12.0.0 keyrings.alt
-        - python3 -m pip install twine==2.0.0 passlib
-        - python3 -m twine upload ./dist/*.whl --repository-url="$GCC_PYPI_HOST"
-    tags:
-        - ppc64le
-        - cuda10
-        - shell
-    dependencies:
-        - build_power
-    only:
-        - tags
+  stage: deploy
+  script:
+    - python3 -m pip install keyring==12.0.0 keyrings.alt
+    - python3 -m pip install twine==2.0.0 passlib
+    - python3 -m twine upload ./dist/*.whl --repository-url="$GCC_PYPI_HOST"
+  tags:
+    - ppc64le
+    - cuda10
+    - shell
+  dependencies:
+    - build_power
+  only:
+    - tags
 
 pages:
   stage: pages
@@ -70,7 +70,7 @@ pages:
     - cd ..
     - mkdir -p public
     - cd public
-    - cp -r ../docs/build/html/* .
+    - cp -r ../docs/build/* .
   tags:
     - x86_64
     - cuda11
@@ -101,7 +101,7 @@ deploy_docs:
   script:
     - mkdir -p /var/www/html/ssc/ssc-raft/
     - rm -rf /var/www/html/ssc/ssc-raft/*
-    - cp -r ./docs/build/html/* /var/www/html/ssc/ssc-raft/
+    - cp -r ./docs/build/* /var/www/html/ssc/ssc-raft/
   tags:
     - wiki
   dependencies:
