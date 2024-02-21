@@ -5,7 +5,7 @@
 #include "common/opt.hpp"
 #include "common/logerror.hpp"
 #include "geometries/parallel/em.hpp"
-#include "geometries/parallel/radon.hpp"
+#include "geometries/parallel/radon.hpp" /* FST is found here!! */
 #include "geometries/parallel/bst.hpp"
 #include "common10/cufft_utils.h"
 
@@ -86,8 +86,7 @@ int zpad, int interpolation, float dx, float tv_param, int niter)
     }
 
 }
-}    
-extern "C" {
+
 void get_tEM_FQ_GPU(CFG configs,
 float *sino, float *recon, float *angles, float *flat,
 int blocksize, int gpu)
@@ -299,7 +298,7 @@ int blocksize, int gpu)
 extern "C"{
 
     void _get_tEM_FQ_GPU(CFG configs,
-    float *count, float *recon, float *angles, float *flat, 
+    float *count, float *obj, float *angles, float *flat, 
     int blockgpu, int gpu)
     {
         /* Projection data sizes */
@@ -307,25 +306,32 @@ extern "C"{
         int nangles   = configs.tomo.size.y;
         int pad       = configs.tomo.pad.x;
         
-        size_t blocksize_aux = calc_blocksize(blockgpu, nangles, nrays, pad, true); 
-        size_t blocksize = min((size_t)blockgpu, blocksize_aux);
+        int blocksize_aux = calc_blocksize(blockgpu, nangles, nrays, pad, true); 
+        int blocksize     = min(blockgpu, blocksize_aux);
 
-        for (size_t b = 0; b < blockgpu; b += blocksize) {
+        /* Indexes and pointers for subBlocks */
+        int ind_block = (int)ceil( (float) blockgpu / blocksize );
+        int subblock, ptr = 0;
 
-            blocksize = min(size_t(blockgpu) - b, blocksize);
+        for (int i = 0; i < ind_block; i++){
+
+            subblock = min(blockgpu - ptr, blocksize);
 
             get_tEM_FQ_GPU( configs,
-                            count + (size_t)b*nrays*nangles, 
-                            recon + (size_t)b*nrays*nrays,
+                            count + (size_t)ptr*nrays*nangles, 
+                            obj   + (size_t)ptr*nrays*nrays,
                             angles, 
-                            flat + (size_t)b*nrays,
-                            blocksize, gpu);
+                            flat + (size_t)ptr*nrays,
+                            subblock, gpu);
+
+            /* Update pointer */
+            ptr = ptr + subblock;
         }
-        cudaDeviceSynchronize();
+        HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
     void get_tEM_FQ_MultiGPU(int* gpus, int ngpus, 
-    float *count, float *recon, float *angles, float *flat,
+    float *count, float *obj, float *angles, float *flat,
     float *paramf, int *parami)
     {
         int i, Maxgpudev;
@@ -337,10 +343,12 @@ extern "C"{
 		for(i = 0; i < ngpus; i++) 
 			assert(gpus[i] < Maxgpudev && "Invalid device number.");
 
-        CFG configs; GPU gpu_parameters;
+        /* General struct found on inc/common/configs.hpp */
+        CFG configs;
 
+        /* Found on src/geometries/parallel/reconstruction_methods/parameters.cu */
         setEMFQParameters(&configs, paramf, parami);
-        printEMFQParameters(&configs);
+        // printEMFQParameters(&configs);
 
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;
@@ -351,27 +359,34 @@ extern "C"{
         int nx       = configs.obj.size.x;
         int ny       = configs.obj.size.y;
         int nz       = configs.obj.size.z;
-            
+
+        /* Indexes and pointers for GPUs blocks */    
         int t;
         int blockgpu = (nslices + ngpus - 1) / ngpus;
+        int subblock, ptr = 0;
         
         std::vector<std::future<void>> threads;
+        threads.reserve(ngpus);
+
         if (ngpus == 1){
 
-            _get_tEM_FQ_GPU(configs, count, recon, angles, flat, nslices, gpus[0]);
+            _get_tEM_FQ_GPU(configs, count, obj, angles, flat, nslices, gpus[0]);
 
         }else{
             for(t = 0; t < ngpus; t++){ 
                 
-                blockgpu = min(nslices - blockgpu * t, blockgpu);
+                subblock = min(nslices - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async, _get_tEM_FQ_GPU, 
                     configs,
-                    count + (size_t)t * blockgpu * nrays * nangles, 
-                    recon + (size_t)t * blockgpu * nrays * nrays, 
+                    count + (size_t)ptr * nrays * nangles, 
+                    obj   + (size_t)ptr * nrays * nrays, 
                     angles, 
-                    flat + (size_t)t * blockgpu * nrays, 
-                    blockgpu, gpus[t]));
+                    flat + (size_t)ptr * nrays, 
+                    subblock, gpus[t]));
+
+                /* Update pointer */
+                ptr = ptr + subblock;
             }
 
             for(auto& t : threads)

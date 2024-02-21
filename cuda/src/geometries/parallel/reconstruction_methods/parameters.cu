@@ -44,7 +44,7 @@ extern "C"{
     void printEMRTParameters(CFG *configs)
     {
         printf("Tomo size: %d, %d, %d \n",configs->tomo.size.x,configs->tomo.size.y,configs->tomo.size.z);
-        printf("Tomo Pad: %d, %d, %d \n",configs->tomo.pad.x,configs->tomo.pads.y,configs->tomo.pad.z);
+        printf("Tomo Pad: %d, %d, %d \n",configs->tomo.pad.x,configs->tomo.pad.y,configs->tomo.pad.z);
         printf("Tomo Padsize: %d, %d, %d \n",configs->tomo.padsize.x,configs->tomo.padsize.y,configs->tomo.padsize.z);
         printf("Recon size: %d, %d, %d \n",configs->obj.size.x,configs->obj.size.y,configs->obj.size.z);
         printf("Nflats: %d \n", configs->numflats);
@@ -99,7 +99,7 @@ extern "C"{
     void printEMFQParameters(CFG *configs)
     {
         printf("Tomo size: %d, %d, %d \n",configs->tomo.size.x,configs->tomo.size.y,configs->tomo.size.z);
-        printf("Tomo Pad: %d, %d, %d \n",configs->tomo.pad.x,configs->tomo.pads.y,configs->tomo.pad.z);
+        printf("Tomo Pad: %d, %d, %d \n",configs->tomo.pad.x,configs->tomo.pad.y,configs->tomo.pad.z);
         printf("Tomo Padsize: %d, %d, %d \n",configs->tomo.padsize.x,configs->tomo.padsize.y,configs->tomo.padsize.z);
         printf("Recon size: %d, %d, %d \n",configs->obj.size.x,configs->obj.size.y,configs->obj.size.z);
         printf("Nflats: %d \n", configs->numflats);

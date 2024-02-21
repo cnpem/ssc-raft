@@ -69,7 +69,6 @@ extern "C"{
 	}
 }
 
-
 extern "C"{
     void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
     {   

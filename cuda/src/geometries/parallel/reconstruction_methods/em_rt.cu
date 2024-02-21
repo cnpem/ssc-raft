@@ -53,6 +53,7 @@ extern "C" {
         */
 
             std::vector<std::future<void>> threads = {};
+            threads.reserve(ngpus);
 
             for (i = 0; i < ngpus; i++){
                 
@@ -207,6 +208,7 @@ extern "C"{
         CFG configs; GPU gpu_parameters;
 
         setEMRTParameters(&configs, paramf, parami);
+        // printEMRTParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
@@ -223,6 +225,7 @@ extern "C"{
         */
 
             std::vector<std::future<void>> threads = {};
+            threads.reserve(ngpus);
 
             for (i = 0; i < ngpus; i++){
                 

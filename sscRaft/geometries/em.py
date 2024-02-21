@@ -48,7 +48,7 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
     # Set default dictionary parameters:
 
     dicparams = ('iterations','detectorPixel[m]','padding','beamgeometry')
-    defaut    = (100,0.0,2,'parallel')
+    defaut    = (10,0.0,2,'parallel')
 
     SetDictionary(dic,dicparams,defaut)
 

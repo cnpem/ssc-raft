@@ -112,6 +112,7 @@ extern "C"{
 		setGPUParameters(&gpu_parameters, dim3(nrays,nangles,nslices), ngpus, gpus);
 
 		std::vector<std::future<void>> threads;
+        threads.reserve(ngpus); 
 		
 		if ( ngpus == 1 ){
 			getFlatDarkGPU( gpu_parameters, 
