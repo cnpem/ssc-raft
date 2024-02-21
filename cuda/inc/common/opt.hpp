@@ -99,7 +99,6 @@ namespace opt{
     Type* allocGPU(size_t size)    
     { Type *ptr; HANDLE_ERROR(cudaMalloc((void **)&ptr, size * sizeof(Type) )); return ptr; };
 
-
     template<typename Type>
     void CPUToGPU(Type *cpuptr, Type *gpuptr, size_t size)
     { HANDLE_ERROR(cudaMemcpy(gpuptr, cpuptr, size * sizeof(Type), cudaMemcpyHostToDevice)); };
