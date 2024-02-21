@@ -24,8 +24,8 @@ extern "C" {
 
         CFG configs; GPU gpu_parameters;
 
-        setEMParameters(&configs, paramf, parami);
-        // printEMParameters(&configs);
+        setEMRTParameters(&configs, paramf, parami);
+        // printEMRTParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
         // printGPUParameters(&gpu_parameters);
@@ -206,7 +206,7 @@ extern "C"{
 
         CFG configs; GPU gpu_parameters;
 
-        setEMParameters(&configs, paramf, parami);
+        setEMRTParameters(&configs, paramf, parami);
 
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
@@ -265,8 +265,8 @@ extern "C"{
         float *dobj, *dtomo, *dangles;
 
         /* Allocate GPU memory for the input and output image */ 
-        HANDLE_ERROR(cudaMalloc((void **)&dobj ,sizeof(float) * (size_t)configs.obj.size.x * configs.obj.size.y * blocksize));  
-        HANDLE_ERROR(cudaMalloc((void **)&dtomo  ,sizeof(float) * (size_t)configs.tomo.size.x  * configs.tomo.size.y  * blocksize));
+        HANDLE_ERROR(cudaMalloc((void **)&dobj   ,sizeof(float) * (size_t) configs.obj.size.x *  configs.obj.size.y * blocksize));  
+        HANDLE_ERROR(cudaMalloc((void **)&dtomo  ,sizeof(float) * (size_t)configs.tomo.size.x * configs.tomo.size.y * blocksize));
         HANDLE_ERROR(cudaMalloc((void **)&dangles,sizeof(float) * configs.tomo.size.y));
 
         HANDLE_ERROR(cudaMemcpy(dangles, angles, sizeof(float) * configs.tomo.size.y, cudaMemcpyHostToDevice));	

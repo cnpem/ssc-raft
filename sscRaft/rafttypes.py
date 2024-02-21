@@ -84,9 +84,8 @@ except:
 try:
     # EM Frequency MultiGPU without semafaro
     libraft.get_tEM_FQ_MultiGPU.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-        ctypes.c_float, ctypes.c_float, ctypes.c_int
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
     ]
         
     libraft.get_tEM_FQ_MultiGPU.restype  = None

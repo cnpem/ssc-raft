@@ -117,9 +117,11 @@ typedef struct config
     int reconstruction_filter_type;   /* Reconstruction Filter type */
     float reconstruction_paganin_reg; /* Reconstruction Paganin Filter regularization parameter */
     float reconstruction_reg;         /* General regularization parameter */
+    float reconstruction_tv;         /* Total variation regularization parameter */
 
     int datatype;
-    float threshold;          
+    float threshold; 
+    int interpolation; /* interpolation type */         
 
     /* Paralell */
 

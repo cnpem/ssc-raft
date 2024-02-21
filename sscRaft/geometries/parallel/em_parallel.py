@@ -32,7 +32,11 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus):
     angles        = CNICE(angles) #angles pointer
     angles_ptr    = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    param_int     = [nrays, nangles, nslices, objsize, iterations]
+    padx, pady, padz = 0,0,0
+    nflats           = 1
+
+    param_int     = [nrays, nangles, nslices, objsize, 
+                     padx, pady, padz, nflats, iterations]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
@@ -88,7 +92,10 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus):
     angles        = CNICE(angles) #angles pointer
     angles_ptr    = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    param_int     = [nrays, nangles, nslices, objsize, iterations, nflats]
+    padx, pady, padz = 0,0,0
+
+    param_int     = [nrays, nangles, nslices, objsize, 
+                     padx, pady, padz, nflats, iterations]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
@@ -106,16 +113,24 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus):
 
 
 def tEMFQ_GPU_(count, flat, angles, 
-                     pad, interpolation, det_pixel, tv_reg, iterations, 
-                     gpus, obj=None):
+    pad, interpolation, det_pixel, 
+    tv_reg, iterations, 
+    gpus, obj=None):
 
     if len(count.shape) == 2:
         nslices = 1
     else:
         nslices = count.shape[0]
+    
+    if len(flat.shape) == 2:
+        nflats = 1
+    else:
+        nflats = flat.shape[0]
 
     nangles     = count.shape[1]
     nrays       = count.shape[2]
+
+    objsize     = nrays
     
     ngpus       = len(gpus)
     gpus        = numpy.array(gpus)
@@ -140,12 +155,24 @@ def tEMFQ_GPU_(count, flat, angles,
     angles      = CNICE(angles) 
     angles_ptr  = angles.ctypes.data_as(ctypes.c_void_p) 
 
+    padx,pady,padz         = pad
+    det_pixelx, det_pixely = det_pixel
+
+    param_int     = [nrays, nangles, nslices, objsize, 
+                     padx, pady, padz, nflats, iterations, interpolation]
+    param_int     = numpy.array(param_int)
+    param_int     = CNICE(param_int,numpy.int32)
+    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+
+    param_float     = [det_pixelx, det_pixely, tv_reg]
+    param_float     = numpy.array(param_float)
+    param_float     = CNICE(param_float,numpy.float32)
+    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+
 
     libraft.get_tEM_FQ_MultiGPU( gpus_ptr, ctypes.c_int(ngpus),
                     count_ptr, obj_ptr, angles_ptr, flat_ptr,
-                    ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices),
-                    ctypes.c_int(pad),  ctypes.c_int(interpolation), ctypes.c_float(det_pixel), 
-                    ctypes.c_float(tv_reg), ctypes.c_int(iterations))
+                    param_float_ptr, param_int_ptr)
 
     return obj
 

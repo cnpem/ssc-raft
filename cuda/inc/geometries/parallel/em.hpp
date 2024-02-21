@@ -7,8 +7,8 @@
 
 extern "C"{
 
-    void setEMParameters(CFG *configs, float *parameters_float, int *parameters_int);
-    void printEMParameters(CFG *configs);
+    void setEMRTParameters(CFG *configs, float *parameters_float, int *parameters_int);
+    void printEMRTParameters(CFG *configs);
 
     void get_tEM_RT_MultiGPU(int* gpus, int ngpus,
     float* recon, float* count, float *flat, float* angles, 
@@ -31,6 +31,8 @@ extern "C"{
 
     void get_eEM_RT(CFG configs, GPU gpus, float *output, float *tomo, float *angles, int blockSize);
 
+    void setEMFQParameters(CFG *configs, float *parameters_float, int *parameters_int);
+    void printEMFQParameters(CFG *configs);
 }
 
 /* CUDA KERNELS */

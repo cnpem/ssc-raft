@@ -14,7 +14,7 @@
 extern "C" {
 void get_tEM_FQ(
 float *sino_cu, float *recon_cu, float *angles_cu, float *flat_cu,
-float *backcounts_cu, float *back_cu, float *ft_sino_cu, float *ft_recon_cu,
+float *backcounts_cu, float *back_cu, cufftComplex *ft_sino_cu, cufftComplex *ft_recon_cu,
 int nrays, int nangles, int blocksize, size_t recon_size, size_t ft_recon_size,
 float scale, cudaStream_t stream, cufftHandle plan_2D_forward, cufftHandle plan_1D_inverse,
 cImage& cartesianblock, cImage& polarblock, cImage& realpolar,
@@ -30,8 +30,7 @@ int zpad, int interpolation, float dx, float tv_param, int niter)
     /* Compute (1.0/backcounts_cu) */
     calc_reciprocal_element_wise<<<recon_size/NUM_THREADS, NUM_THREADS>>>(backcounts_cu,recon_size);
 
-    // set_value<<<recon_size/NUM_THREADS, NUM_THREADS>>>(
-    //     recon_cu, 1.0, recon_size);
+    // set_value<<<recon_size/NUM_THREADS, NUM_THREADS>>>(recon_cu, 1.0, recon_size);
     // CUDA_RT_CALL(cudaPeekAtLastError());
     // CUDA_RT_CALL(cudaDeviceSynchronize());
 
@@ -89,45 +88,54 @@ int zpad, int interpolation, float dx, float tv_param, int niter)
 }
 }    
 extern "C" {
-void get_tEM_FQ_GPU(
+void get_tEM_FQ_GPU(CFG configs,
 float *sino, float *recon, float *angles, float *flat,
-int nrays, int nangles, int blocksize,
-int zpad, int interpolation, float dx, float tv_param,
-int niter, int gpu)
+int blocksize, int gpu)
 {
     /*
     Definition of variables:
-
-    dx: 
-        - Detector pixel size in [X] units (can be any)
-        - My preference is to always use meters 
-        - Be consistent with the units!!
-    
-    interpolation:
-        - Options: 'bilinear' and 'nearest'
-        - 'nearest'  = 0 (see Python function)
-        - 'bilinear' = 1 (see Python function)
-    
-    zpad:
-        - Padding number
-        - Integer values: 0, 1, 2, 3
-        - total padding = zpad * nrays
-
-    niter:
-        - Number of iterations for EM
-
-    gpu:
-        - Number of the GPU
-    
     blocksize:
         - Value of vertical block to be computed (fraction of nslices)
-
-    tv_param:
-        - Regularization parameter for total variation (TV) regularization
-        - If 'tv_param' =< 0.0, there is no application of TV regularization
     */
 
     CUDA_RT_CALL(cudaSetDevice(gpu));
+
+    /* Projection data sizes */
+    int nrays     = configs.tomo.size.x;
+    int nangles   = configs.tomo.size.y;
+
+    /*zpad:
+        - Padding number
+        - Integer values: 0, 1, 2, 3
+        - total padding = zpad * nrays
+    */
+    int zpad = configs.tomo.pad.x;  /* Padding value for FST (zpad) */
+
+    /*interpolation:
+        - Options: 'bilinear' and 'nearest'
+        - 'nearest'  = 0 (see Python function)
+        - 'bilinear' = 1 (see Python function)
+    */
+    int interpolation = configs.interpolation;
+
+    /*dx: 
+        - Detector pixel size in [X] units (can be any)
+        - My preference is to always use METERS 
+        - Be consistent with the units!!
+    */
+    float dx = configs.geometry.detector_pixel_x;
+
+    /* tv_param:
+        - Regularization parameter for total variation (TV) regularization
+        - If 'tv_param' =< 0.0, there is no application of TV regularization
+    */
+    float tv_param = configs.reconstruction_tv;
+
+    /* niter:
+        - Number of iterations for EM
+    */
+    int niter = configs.em_iterations;
+
 
     /* Declaration of FST variables */
 
@@ -138,7 +146,7 @@ int niter, int gpu)
     cufftHandle plan_2D_forward;
     cufftHandle plan_1D_inverse;
     cufftComplex *ft_recon_cu = nullptr; // pointer to 2D Fourier transform of recon on GPU.
-    cufftComplex *ft_sino_cu = nullptr;  // pointer to 1D Fourier transform of sino on GPU.
+    cufftComplex *ft_sino_cu  = nullptr;  // pointer to 1D Fourier transform of sino on GPU.
 
     /* cuFFT Dimensions */
     std::array<int, FT_PST_RANK_FORWARD> forward_fft_dim = {nrays*(1+zpad), nrays*(1+zpad)};
@@ -290,31 +298,35 @@ int niter, int gpu)
 
 extern "C"{
 
-    void _get_tEM_FQ_GPU(float *count, float *recon, float *angles, float *flat,
-    int nrays, int nangles, int blockgpu,
-    int zpad, int interpolation, float dx, float tv_param,
-    int niter, int gpu)
+    void _get_tEM_FQ_GPU(CFG configs,
+    float *count, float *recon, float *angles, float *flat, 
+    int blockgpu, int gpu)
     {
-        size_t blocksize_aux = calc_blocksize(blockgpu, nangles, nrays, zpad, true); 
+        /* Projection data sizes */
+        int nrays     = configs.tomo.size.x;
+        int nangles   = configs.tomo.size.y;
+        int pad       = configs.tomo.pad.x;
+        
+        size_t blocksize_aux = calc_blocksize(blockgpu, nangles, nrays, pad, true); 
         size_t blocksize = min((size_t)blockgpu, blocksize_aux);
 
         for (size_t b = 0; b < blockgpu; b += blocksize) {
+
             blocksize = min(size_t(blockgpu) - b, blocksize);
 
-            get_tEM_FQ_GPU(count + (size_t)b*nrays*nangles, 
+            get_tEM_FQ_GPU( configs,
+                            count + (size_t)b*nrays*nangles, 
                             recon + (size_t)b*nrays*nrays,
-                            angles, flat + (size_t)b*nrays,
-                            nrays, nangles, blocksize, zpad, 
-                            interpolation, dx, tv_param, niter, gpu);
+                            angles, 
+                            flat + (size_t)b*nrays,
+                            blocksize, gpu);
         }
         cudaDeviceSynchronize();
     }
 
     void get_tEM_FQ_MultiGPU(int* gpus, int ngpus, 
     float *count, float *recon, float *angles, float *flat,
-    int nrays, int nangles, int nslices, 
-    int zpad, int interpolation, float dx, float tv_param,
-    int niter)
+    float *paramf, int *parami)
     {
         int i, Maxgpudev;
 		
@@ -324,6 +336,21 @@ extern "C"{
 		/* If devices input are larger than actual devices on GPU, exit */
 		for(i = 0; i < ngpus; i++) 
 			assert(gpus[i] < Maxgpudev && "Invalid device number.");
+
+        CFG configs; GPU gpu_parameters;
+
+        setEMFQParameters(&configs, paramf, parami);
+        printEMFQParameters(&configs);
+
+        /* Projection data sizes */
+        int nrays    = configs.tomo.size.x;
+        int nangles  = configs.tomo.size.y;
+        int nslices  = configs.tomo.size.z;
+        
+        /* Object (reconstruction) data sizes */
+        int nx       = configs.obj.size.x;
+        int ny       = configs.obj.size.y;
+        int nz       = configs.obj.size.z;
             
         int t;
         int blockgpu = (nslices + ngpus - 1) / ngpus;
@@ -331,20 +358,20 @@ extern "C"{
         std::vector<std::future<void>> threads;
         if (ngpus == 1){
 
-            _get_tEM_FQ_GPU(count, recon, angles, flat, 
-                    nrays, nangles, nslices, zpad, interpolation, 
-                    dx, tv_param, niter, gpus[0]);
+            _get_tEM_FQ_GPU(configs, count, recon, angles, flat, nslices, gpus[0]);
+
         }else{
             for(t = 0; t < ngpus; t++){ 
                 
                 blockgpu = min(nslices - blockgpu * t, blockgpu);
 
                 threads.push_back(std::async( std::launch::async, _get_tEM_FQ_GPU, 
+                    configs,
                     count + (size_t)t * blockgpu * nrays * nangles, 
                     recon + (size_t)t * blockgpu * nrays * nrays, 
-                    angles, flat + (size_t)t * blockgpu * nrays, 
-                    nrays, nangles, blockgpu, zpad, interpolation, 
-                    dx, tv_param, niter, gpus[t]));
+                    angles, 
+                    flat + (size_t)t * blockgpu * nrays, 
+                    blockgpu, gpus[t]));
             }
 
             for(auto& t : threads)
@@ -353,79 +380,3 @@ extern "C"{
     }
 }
 
-// extern "C"{
-
-//     void fast_tEM_FQ(int* gpus, int ngpus, 
-//     float *count, float *recon, float *angles, float *flat,
-//     float *paramf, int *parami)
-//     {
-//         // int *ishape,
-//         // char *path,
-//         // char *outputPath,
-//         // char *volOrder,
-//         // char *rank,
-//         // char *datasetName,
-//         // int ngpus,
-//         // int *gpu,
-//         // int *shape,
-//         // int Init,
-//         // int Final,
-//         // int blockSize,
-//         // int timing,
-//         // int saving,
-//         // int *ix,
-//         // int *iy,
-//         // int *xmin,
-//         // int *xmax,
-//         // int *ymin,
-//         // int *ymax,
-//         // int *center,
-//         // int roi,
-//         // float *flat,
-//         // float *empty,
-//         // float *mask,
-//         // float *daxpyimg,
-//         // float daxpycon,
-//         // int susp,
-//         // char *uuid,
-//         // float *gaps,
-//         // int fill
-//         // int nrays, int nangles, int nslices, 
-//         // int zpad, int interpolation, float dx, float tv_param,
-//         // int niter)
-//         int i, Maxgpudev;
-		
-// 		/* Multiples devices */
-// 		HANDLE_ERROR(cudaGetDeviceCount(&Maxgpudev));
-
-// 		/* If devices input are larger than actual devices on GPU, exit */
-// 		for(i = 0; i < ngpus; i++) 
-// 			assert(gpus[i] < Maxgpudev && "Invalid device number.");
-
-// 		CFG configs; GPU gpu_parameters;
-
-//         setEMParameters(&configs, paramf, parami);
-
-//         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
-
-//         int t;
-//         int blockgpu = (nslices + ngpus - 1) / ngpus;
-        
-//         std::vector<std::future<void>> threads;
-
-//         for(t = 0; t < ngpus; t++){ 
-            
-//             blockgpu = min(nslices - blockgpu * t, blockgpu);
-
-//             threads.push_back(std::async( std::launch::async, get_tEM_FQ_GPU, 
-//                 count + (size_t)t * blockgpu * nrays * nangles, 
-//                 recon + (size_t)t * blockgpu * nrays * nrays, 
-//                 angles, flat + (size_t)t * blockgpu * nrays, 
-//                 nrays, nangles, blockgpu, zpad, interpolation, 
-//                 dx, tv_param, niter, gpus[t]));
-//         }
-
-//         for(auto& t : threads)
-//             t.get();
-//     }
-// }
