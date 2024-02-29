@@ -9,41 +9,54 @@ extern "C"{
         
 		if( (i >= size.x)) return;
 
-		float dt   =        2.0f / (float)size.x;
-		float wMax =        1.0f / ( 2.0f * dt );
-		float dw   = 2.0f * wMax / (float)size.x;
+		// float dt   =        2.0f / (float)size.x;
+		// float wMax =        1.0f / ( 2.0f * dt );
+		// float dw   = 2.0f * wMax / (float)size.x;
 
 		/* Reciprocal grid */ 
-        float w = - wMax + i * dw;
+        float w =  2.0f * fminf( i, size.x - i ) / (float)size.x; // - wMax + i * dw;
 
 		w = filter.apply( w );
 	
-		kernel[i] = exp1j(- 2.0f * float(M_PI) * filter.axis_offset * w ) * w ;
+		kernel[i] = exp1j(- 2.0f * float(M_PI)/(float)size.x * filter.axis_offset * i ) * w ;
+
+        // printf("kernel[%d] = %e, %e \n",i, kernel[i].x,kernel[i].y);
+
+        // int tx = blockIdx.x * blockDim.x + threadIdx.x;
+		// int ty = blockIdx.y * blockDim.y + threadIdx.y;
+
+		// float rampfilter = float(tx) / (float)sizex;
+		// rampfilter = mfilter.apply(rampfilter);
+
+		// float fcenter = 1.0f - (bShiftCenter ? (sintable[ty]) : 0);
+		// fcenter = -2*float(M_PI)/float(2*sizex-2) * fcenter * icenter;
+
+		// if(tx < sizex)
+		// 	vec[ty*sizex + tx] *= exp1j(fcenter * tx) * rampfilter;
 	}
 
 	void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, cufftComplex *filter_kernel, 
-    dim3 size, dim3 size_pad)
+    dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }
             1: if plan 1D multiples cuffts
             2: if plan 2D multiples cuffts */
         int dim = 1; 
 
-        dim3 pad((int)((size_pad.x - size.x) / 2 ), 0, 0);
         dim3 size_kernel(size_pad.x, 1, 1);
 
-        opt::MPlanFFT(gpus.mplan, dim, size_pad);
+        opt::MPlanFFT(&gpus.mplan, dim, size_pad);
 
-		fbp_filter_kernel<<<gpus.Grd.x,gpus.BT.x>>>(filter, filter_kernel, size_pad);
+		fbp_filter_kernel<<<gpus.Grd.x,gpus.BT.x>>>(filter, filter_kernel, size_kernel);
 
 		convolution_Real_C2C(  	gpus, tomogram, filter_kernel, 
-                            	size, 
-                            	pad, 
+                            	size,  
                             	size_kernel, 
+                                pad,
                             	0.0f, dim);
 
-		cufftDestroy(gpus.mplan);
+		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 }
 
@@ -54,21 +67,28 @@ extern "C" {
     dim3 size, dim3 kernel_size, 
     dim3 pad, float pad_value, int dim)
 	{
-        size_t npad   = (size_t)(size.x + 2 * pad.x) * (size.y + (dim - 1) * 2 * pad.y) * size.z;
+        dim3 pad_size = dim3(   size.x * ( 1 + pad.x ),
+                                size.y * ( 1 + pad.y ),
+                                size.z * ( 1 + pad.z ));
+        
+        size_t npad = (size_t)pad_size.x * size.y * size.z;
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
         opt::paddR2C<<<gpus.Grd,gpus.BT>>>(data, dataPadded, size, pad, pad_value);
-        
+
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
         
-        opt::product_Complex_Complex<<<gpus.Grd,gpus.BT>>>(dataPadded, kernel, dataPadded, pad, kernel_size);	
+        opt::product_Complex_Complex<<<gpus.Grd,gpus.BT>>>(dataPadded, kernel, dataPadded, pad_size, kernel_size);	
         
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
-        
-        opt::remove_paddC2R<<<gpus.Grd,gpus.BT>>>(dataPadded, data, size, pad, dim);
 
-		cudaFree(dataPadded);
+        opt::Normalize<<<gpus.Grd,gpus.BT>>>(dataPadded, pad_size, dim);
+
+        opt::remove_paddC2R<<<gpus.Grd,gpus.BT>>>(dataPadded, data, size, pad);
+		
+        HANDLE_ERROR(cudaFree(dataPadded));
+
 	}
 
     __global__ void fftshiftKernel(float *c, dim3 size)
@@ -101,19 +121,6 @@ extern "C" {
                 c[shift] = temp;
             }
         }
-    }
-
-    __global__ void Normalize(float *a, float b, dim3 size)
-    {
-        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
-        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
-        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
-        
-        size_t index = size.x * j + i;
-        
-        if ( (i >= size.x) || (j >= size.y) || (k >= 1) ) return;
-        
-        a[index] = a[index] / b; 
     }
 
 	void SinoFilter(float* sino, size_t nrays, size_t nangles, size_t blocksize, int csino, bool bRampFilter, Filter reg, bool bShiftCenter, float* sintable)
@@ -155,7 +162,6 @@ extern "C" {
 
 		float rampfilter = float(tx) / (float)sizex;
 		rampfilter = mfilter.apply(rampfilter);
-		// printf("band filter value: %lf \n ",rampfilter);
 
 		float fcenter = 1.0f - (bShiftCenter ? (sintable[ty]) : 0);
 		fcenter = -2*float(M_PI)/float(2*sizex-2) * fcenter * icenter;

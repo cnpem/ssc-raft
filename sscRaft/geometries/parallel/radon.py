@@ -1,7 +1,3 @@
-from ctypes import c_int as int32
-from ctypes import c_float as float32
-from ctypes import c_void_p  as void_p
-
 import numpy
 from ...rafttypes import *
 
@@ -50,14 +46,15 @@ def radon_RT(phantom, angles, gpus, *args):
     angles_ptr  = angles.ctypes.data_as(ctypes.c_void_p)  
     
     tomogram    = numpy.zeros((nslices,nangles,rays),dtype=numpy.float32)
+    tomogram      = CNICE(tomogram)
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
 
-    libraft.getRadonRTGPU(gpusptr, ctypes.c_int(ngpus), 
-                tomogram_ptr, phantom_ptr, angles_ptr, 
-                ctypes.c_int(img_sizex), ctypes.c_int(img_sizey), 
-                ctypes.c_int(rays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
-                ctypes.c_float(a), ctypes.c_float(a)) 
+    libraft.getRadonRTMultiGPU(gpusptr, ctypes.c_int(ngpus), 
+        tomogram_ptr, phantom_ptr, angles_ptr, 
+        ctypes.c_int(img_sizex), ctypes.c_int(img_sizey), 
+        ctypes.c_int(rays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
+        ctypes.c_float(a), ctypes.c_float(a)) 
     
     # dt = (2.0*a)/(rays-1)
     # itmin = ( numpy.ceil( (-1 + a)/dt) ).astype(numpy.intc) 

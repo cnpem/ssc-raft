@@ -1,3 +1,118 @@
+Version 2.2.8 - 2024-02-23
+--------------------
+Added
+~~~~~
+- Added dictionary entry ``angles[rad]`` on ``EM``
+
+Changed
+~~~~~~~
+- Fixed ``FBP`` slices bug. Change of CUDA the backprojection kernel computation.
+- Removed ``z1[m]``, ``z2[m]``, ``z1+z2[m]``, ``detectorPixel[m]`` and ``energy[eV]`` from ``FPB`` 
+- Removed ``z1[m]``, ``z2[m]``, ``z1+z2[m]``, ``detectorPixel[m]`` and ``energy[eV]`` from paganin regularization on ``FBP``
+- Changed dictionary entry  ``angles`` to ``angles[rad]`` on ``EM``
+- Changed ``radon.py`` location on folders
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+
+
+Version 2.2.7 - 2024-02-19
+--------------------
+Added
+~~~~~
+- Added sinogram alignment module (Cross Correlation and Vertical Mass Fluctuation, see paper 10.1364/oe.27.036637) that were previously part of ssc-cdi
+- Added Radon Ray Tracing Multi GPU functions with angles list as argument
+- Added Python EM Frequency function
+
+Changed
+~~~~~~~
+- Fixed Dictionary entry ``TempPath`` on ``sscRaft.pipelines.mogno.mogno.Read_TomoFlatDark()`` returning bug if missing 
+- Fixed Error return bug on``sscRaft.pipelines.mogno.mogno.Read_TomoFlatDark()`` if data cannot be found
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+- ``FBP`` bugs: repetition of slices, sum of different slices;
+
+Version 2.2.6 - 2024-01-23
+--------------------------
+Added
+~~~~~
+- Added ``numpy.flip()`` for ``FBP`` method return on Mogno pipeline for standardization.
+
+Changed
+~~~~~~~
+- Fixed dictionary default logging print on ``rafttypes.py``
+- Fixed return on reconstruction methods in the case of wrong method selected for the Mogno pipeline
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+- Dictionary entry ``TempPath`` on ``sscRaft.pipelines.mogno.mogno.Read_TomoFlatDark()`` returning bug if missing 
+- Error return bug on``sscRaft.pipelines.mogno.mogno.Read_TomoFlatDark()`` if data cannot be found
+
+Version 2.2.5 - 2024-01-04
+--------------------------
+Added
+~~~~~
+- Paganin in ``FBP`` CUDA function
+- New filters in ``FBP`` CUDA function: ``hamming``, ``hann`` and ``ramp``
+- CLI for Mogno pipeline: Added slices for ``FBP`` parallel reconstruction
+- Default dictionary values
+
+Changed
+~~~~~~~
+- Fixed documentation
+- Added correct instalation instructions
+- Compilation by CMake
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+
+
+Version 2.2.4 - 2023-12-22
+--------------------
+Added
+~~~~~
+- New functions on Mogno pipeline in ``mogno.py``
+- New python pipeline functions as input the ndarray of data, flat and dark: ``get_reconstruction()``
+- CLI for Mogno pipeline: ``get_recon`` on ``ssc_raft_cli.py`` for data, flat and dark on different hdf5 files
+- CLI for Mogno pipeline: ``mogno_recon`` on ``ssc_raft_cli.py`` for data, flat and dark on same hdf5 files
+- Mogno pipeline now has the option to use ``FBP`` parallel reconstruction
+- Mogno pipeline now has the option to automatically find the rotation axis deviation for measures in 180 degrees
+
+Changed
+~~~~~~~
+- Mogno pipeline functions now needs now to pass the ``dic['uselog'] = True or False`` parameter for Flat/Dark correction
+- Small changes in Mogno pipeline functions in ``mogno.py``
+- Function ``phase_filters()`` on ``phase_filters.py``: now receives [angles,slices,rays] ndarray (tomogram) as argument (previous [slices,angles,rays])
+- Function ``phase_filters()`` on ``phase_filters.py``: now returns [angles,slices,rays] ndarray (tomogram) (previous [slices,angles,rays])
+
+Known Bugs
+~~~~~~~~~~
+- Memory issues on ``EM`` for cone-beam geometry
+- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+- Memory issues on ``FDK``: In reconstruction by slices
+- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+
+Removed
+~~~~~~~
+- Mogno pipeline function option to use ``phase_filters()`` function on projections.
+
 Version 2.2.3 - 2023-11-09
 --------------------
 Added

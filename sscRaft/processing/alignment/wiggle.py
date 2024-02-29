@@ -1,23 +1,12 @@
-from curses import keyname
-import os
-import ctypes
-
-from ctypes import c_int as int32
-from ctypes import c_float as float32
-from ctypes import POINTER
-from ctypes import c_void_p  as void_p
+from ...rafttypes import *
 
 import numpy
-import sys
-from ...rafttypes import *
+
 import uuid
 import SharedArray as sa
 from scipy.optimize import minimize
 
-import warnings
-
-####
-#-----------------------------
+#----------------------------
 #      Shift for volume 
 #
 
@@ -152,6 +141,145 @@ def set_wiggle( volume, axis, shiftx, shifty, nproc ):
     _params_ = ( axis, volume, nproc, shiftx, shifty, output )
     
     _build_shift_volume ( _params_ )
+
+    sa.delete(name)
+    
+    return output
+
+def set_wiggle_tomogram( volume, shiftx, shifty, nproc ):
+
+    """ Set shifting values for the x,y axis at a given tomogram (considering a third axis fixed) 
+    
+    Args:
+        volume: a digital tomogram (axis=0 for frames and axis=1 for slices).
+        shiftx: shifting matrix for x.
+        shifty: shifting array for y.
+        nproc: number of processes.
+             
+    Returns:
+        (ndarray): block of sinograms with shape [nangles, size, size], with size corresponding to the
+        size of each phantom. 
+
+    * CPU function
+    * This function uses a shared array through package 'SharedArray'.
+    * The total number of images will be divided by the number of processes given as input
+    * SharedArray names are provided by uuid.uuid4() 
+    """
+    axis = 0
+    #updating y axis
+    _output_ = set_wiggle( volume, axis, numpy.zeros(shifty.shape), shifty, nproc)    
+
+    #updating x axis
+    name = str( uuid.uuid4() ) 
+
+    if len(shifty) != volume.shape[0] or shiftx.shape[0] != volume.shape[1]:
+        print('ssc-radon error: len(shift) does not match with volume.shape[{}]'.format(axis))
+        return None
+
+    shape = volume.shape
+
+    try:
+        sa.delete(name)
+    except:
+        print('ssc-radon: creating {}x{}x{} shared arrays (tomogram)'.format(shape[0],shape[1],shape[2]) )
+            
+    output  = sa.create(name,shape, dtype=numpy.float32)
+    
+    _params_ = ( _output_, nproc, shiftx, output )
+    
+    _build_shift_tomogram ( _params_ )
+
+    sa.delete(name)
+    
+    return output
+
+def _worker_shift_tomogram_(params, idx_start,idx_end):
+
+    volume = params[0]
+    output = params[3]
+    shiftx = params[2]
+    
+    nangles = volume.shape[0]
+
+    for k in range(idx_start, idx_end):
+
+        sino    = volume[:,k,:].T
+        newsino = numpy.zeros( sino.shape )
+        
+        for j in range( nangles ): 
+            newsino[:,j] = _translate( sino[:,j] , shiftx[k,j], -1, 1)
+        
+        output[:,k,:] = newsino.T
+
+
+def _build_shift_tomogram (params):
+
+    volume  = params[0]
+    nproc   = params[1]
+    nimages = volume.shape[1]
+    
+    b = int( numpy.ceil( nimages/nproc )  ) 
+    
+    processes = []
+    for k in range( nproc ):
+        begin_ = k*b
+        end_   = min( (k+1)*b, nimages )
+
+        p = multiprocessing.Process(target=_worker_shift_tomogram_, args=(params, begin_, end_ ))
+        processes.append(p)
+    
+    for p in processes:
+        p.start()
+
+    for p in processes:
+        p.join()
+ 
+
+def set_wiggle_tomogram( volume, shiftx, shifty, nproc ):
+
+    """ Set shifting values for the x,y axis at a given tomogram (considering a third axis fixed) 
+    
+    Args:
+        volume: a digital tomogram (axis=0 for frames and axis=1 for slices).
+        shiftx: shifting matrix for x.
+        shifty: shifting array for y.
+        nproc: number of processes.
+             
+    Returns:
+        (ndarray): block of sinograms with shape [nangles, size, size], with size corresponding to the
+        size of each phantom. 
+
+    * CPU function
+    * This function uses a shared array through package 'SharedArray'.
+    * The total number of images will be divided by the number of processes given as input
+    * SharedArray names are provided by uuid.uuid4() 
+    """
+    
+    #updating y axis
+    _output_ = set_wiggle( volume, 0, numpy.zeros(shifty.shape), shifty, nproc)    
+
+    #updating x axis
+    name = str( uuid.uuid4() ) 
+
+    # if len(shifty) != volume.shape[0]: 
+    #     print('ssc-radon error: len(shifty) does not match with volume.shape[0]')
+    #     return None
+    # if shiftx.shape[0] != volume.shape[1]:
+    #     print('ssc-radon error: shiftx.shape[0] does not match with volume.shape[1]')
+    #     return None
+
+    shape = volume.shape
+
+    try:
+        sa.delete(name)
+    except:
+        print('ssc-radon: creating {}x{}x{} shared arrays (tomogram)'.format(shape[0],shape[1],shape[2]) )
+            
+    output  = sa.create(name,shape, dtype=numpy.float32)
+    
+    _params_ = ( _output_, nproc, shiftx, output )
+    
+    _build_shift_tomogram ( _params_ )
 
     sa.delete(name)
     

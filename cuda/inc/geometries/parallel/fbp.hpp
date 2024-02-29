@@ -7,6 +7,7 @@
 extern "C"{
 
     void setFBPParameters(CFG *configs, float *parameters_float, int *parameters_int);
+    void printFBPParameters(CFG *configs);
 
     void getFBPMultiGPU(int* gpus, int ngpus, float* recon, float* tomogram, float* angles, float *paramf, int *parami);
 
@@ -14,7 +15,6 @@ extern "C"{
 
     void getFBP(CFG configs, GPU gpus, float *recon, float *tomogram, float *angles, dim3 tomo_size, dim3 tomo_pad, dim3 recon_size);
 
-    // __global__ void BackProjection_RT(float* recon, const float *tomo, const float* sintable, const float* costable, dim3 recon_size, dim3 tomo_size);
 
 }
 

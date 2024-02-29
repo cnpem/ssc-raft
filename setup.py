@@ -6,13 +6,7 @@ from skbuild import setup
 
 from sscRaft import __version__
 
-# install_requires = []
-
 install_requires = [
-    # 'setuptools_scm[toml]>=6',
-    # 'setuptools==64',
-#     'cmake>=3.16',
-#     'scikit-build',
     'ninja',
     'click==8.0.4',
     'colorama==0.4.5',
@@ -22,8 +16,6 @@ install_requires = [
     'shellingham==1.5.0',
     'typer==0.9.0',
     'typing_extensions==4.1.1',
-#    'setuptools_scm[toml]>=5',
-#    'setuptools==64'
 ]
 
 # Main setup configuration.
@@ -31,6 +23,7 @@ setup(
     name = "sscRaft",
     version = __version__,
     packages=find_packages(),
+
     include_package_data=True,
 
     entry_points = {
@@ -40,8 +33,8 @@ setup(
     },
 
     zip_safe=False,
-    author='Eduardo X. Miqueles / Paola Ferraz / Giovanni Baraldi / Gilberto Martinez Jr.',
-    author_email='eduardo.miqueles@lnls.br,paola.ferraz@lnls.br',
+    author='Eduardo X. Miqueles / Paola Ferraz / Larissa M. Moreno / Otávio Paiano / Giovanni Baraldi / Gilberto Martinez Jr.',
+    author_email='eduardo.miqueles@lnls.br, paola.ferraz@lnls.br',
     description='Reconstruction algorithms for tomography',
     keywords=['raft', 'tomography', 'radon', 'imaging', 'filtered backprojection', 'fdk', 'expectation-maximization','rings','tomogram alignment'],
     url='https://gcc.lnls.br/ssc/ssc-raft/index.html',

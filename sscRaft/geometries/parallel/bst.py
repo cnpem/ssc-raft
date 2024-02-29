@@ -27,9 +27,7 @@ def bstGPU(tomogram, angles, gpus, dic):
 
     # logger.info(f'FBP Paganin regularization: {paganin}')
 
-    padx           = int(nrays // 2)
-    pad            = dic['padding']
-    padx           = int(pad * padx)
+    pad            = dic['padding'] + 2
 
     # logger.info(f'Set BST pad value as {pad} x horizontal dimension ({padx}).')
 
@@ -66,21 +64,27 @@ def bst(tomogram, dic, angles = None, **kwargs):
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
 
     * One or MultiGPUs. 
-    * Call function ``bstGPU()``.
+    * Calls function ``bstGPU()``.
 
     Dictionary parameters:
 
         * ``dic['gpu']`` (ndarray): List of gpus for processing [required]
         * ``dic['angles[rad]']`` (list): list of angles in radians [required]
+        * ``dic['filter']`` (str,optional): Filter type [default: \'lorentz\']
+
+            #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
+          
         * ``dic['paganin regularization']`` (float,optional): Paganin regularization value ( value >= 0 ) [default: 0.0]
         * ``dic['regularization']`` (float,optional): Regularization value ( value >= 0 ) [default: 1.0]  
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 2]  
 
     """        
-    dicparams = ( 'padding','regularization', 'paganin regularization')
-    defaut    = (         2,             1.0,                      0.0)
+    dicparams = ( 'filter','offset','padding','regularization','paganin regularization')
+    defaut    = ('lorentz',       0,        2,             1.0,                     0.0)
     
     SetDictionary(dic,dicparams,defaut)
+
+    dic['regularization'] = 1.0
 
     gpus  = dic['gpu']
 

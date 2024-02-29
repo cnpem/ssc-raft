@@ -80,6 +80,7 @@ extern "C" {
         t = - ax + i * dx; 
         
         linesum = 0.0f;
+
         for( int indray = 0; indray < phantom_size.y; indray++ ){
             s = - ay + indray * dy;
 
@@ -100,8 +101,8 @@ extern "C" {
 }
 
 extern "C" {
-    void getRadonRT(float* obj, float* projection, float *angles, 
-    dim3 obj_size, dim3 tomo_size, float ax, float ay)
+    void getRadonRT(float* projection, float* obj, float *angles, 
+    dim3 tomo_size, dim3 obj_size, float ax, float ay)
     {
         int nrays   = tomo_size.x;
         int nangles = tomo_size.y;
@@ -112,9 +113,8 @@ extern "C" {
                        (int)ceil( nangles / threadsPerBlock.y ) + 1,
                        (int)ceil( nslices / threadsPerBlock.z ) + 1);
         
-        Radon_RT_version_sscRadon<<<gridBlock, threadsPerBlock>>>(  obj, projection, angles, 
-                                                                    obj_size, 
-                                                                    dim3(nrays, nangles, nslices), 
+        Radon_RT_version_sscRadon<<<gridBlock, threadsPerBlock>>>(  projection, obj, angles, 
+                                                                    tomo_size, obj_size, 
                                                                     ax, ay);
 
     }
@@ -126,10 +126,10 @@ extern "C" {
 
 extern "C"{   
 
-    void getRadonRTGPU(float* obj, float* projection, float *angles, 
-    dim3 obj_size, dim3 tomo_size, float ax, float ay, int ngpu)
+    void getRadonRTGPU(float* projection, float* obj, float *angles, 
+    dim3 tomo_size, dim3 obj_size, float ax, float ay, int ngpu)
     {
-        cudaSetDevice(ngpu);
+        HANDLE_ERROR(cudaSetDevice(ngpu));
 
         int nrays   = tomo_size.x;
         int nangles = tomo_size.y;
@@ -142,8 +142,8 @@ extern "C"{
         int ptr = 0, subblock;
 
         // Allocate GPU buffers for the output sinogram
-        float *dproj   = opt::allocGPU<float>((size_t)     nrays *    nangles * nslices);
-        float *dobj    = opt::allocGPU<float>((size_t)obj_size.x * obj_size.y * nslices);
+        float *dproj   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
+        float *dobj    = opt::allocGPU<float>((size_t)obj_size.x * obj_size.y * blocksize);
         float *dangles = opt::allocGPU<float>( nangles );
         
         opt::CPUToGPU<float>(angles, dangles, nangles);	
@@ -152,29 +152,25 @@ extern "C"{
             
             subblock   = min(nslices - ptr, blocksize);
 
-            opt::CPUToGPU<float>(obj, dobj, (size_t)obj_size.x * obj_size.y * subblock);
+            opt::CPUToGPU<float>(   obj + (size_t)ptr * obj_size.x * obj_size.y, 
+                                    dobj, (size_t)obj_size.x * obj_size.y * subblock);
 
-            getRadonRT(
-                        dproj + (size_t)ptr *      nrays *    nangles, 
-                        dobj  + (size_t)ptr * obj_size.x * obj_size.y, 
-                        dangles, 
-                        obj_size, 
-                        dim3(nrays, nangles, subblock), 
+            getRadonRT(dproj, dobj, dangles, 
+                        dim3(nrays, nangles, subblock), obj_size, 
                         ax, ay);
 
             opt::GPUToCPU<float>(   projection + (size_t)ptr * nrays * nangles, 
-                                    dproj, 
-                                    (size_t)nrays * nangles * nslices);
+                                    dproj, (size_t)nrays * nangles * subblock);
 
             /* Update pointer */
 			ptr = ptr + subblock;
         }
 
-        cudaDeviceSynchronize();        
+        HANDLE_ERROR(cudaDeviceSynchronize());        
 
-        cudaFree(dproj);
-        cudaFree(dobj);
-        cudaFree(dangles);
+        HANDLE_ERROR(cudaFree(dproj));
+        HANDLE_ERROR(cudaFree(dobj));
+        HANDLE_ERROR(cudaFree(dangles));
         // cudaDeviceReset();
     }
 
@@ -189,12 +185,13 @@ extern "C"{
 		int ptr = 0, subblock;
         
         std::vector<std::future<void>> threads;
+        threads.reserve(ngpus);
 
         if ( ngpus == 1 ){
             
-            getRadonRTGPU(   projection, obj, angles, 
-                        dim3(sizeImagex,sizeImagey,nslices), 
+            getRadonRTGPU( projection, obj, angles,
                         dim3(nrays, nangles, nslices), 
+                        dim3(sizeImagex,sizeImagey,nslices),  
                         ax, ay, gpus[0]);
         
         }else{
@@ -207,8 +204,8 @@ extern "C"{
                                                 projection + (size_t)ptr *      nrays *    nangles, 
                                                 obj        + (size_t)ptr * sizeImagex * sizeImagey, 
                                                 angles, 
-                                                dim3(sizeImagex,sizeImagey,subblock), 
                                                 dim3(nrays, nangles, subblock), 
+                                                dim3(sizeImagex,sizeImagey,subblock), 
                                                 ax,ay,
                                                 gpus[t]
                                                 ));

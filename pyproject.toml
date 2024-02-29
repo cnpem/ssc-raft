@@ -1,11 +1,13 @@
 [build-system]
 build-backend = "setuptools.build_meta"
 
+
 [project]
 version = "3.0.0"
 # dynamic = ["version"]
 name = "sscRaft"
 license = { text = "LGPL - 3.0" }
+
 
 # [tool.setuptools_scm]
 # version_file = "sscRaft/_version.py"

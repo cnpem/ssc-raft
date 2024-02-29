@@ -7,7 +7,7 @@
 /*============================================================================*/
 /* namespace opt (in 'inc/commons/opt.hpp') functions definitions */
 
-void opt::MPlanFFT(cufftHandle mplan, const int dim, dim3 size)
+void opt::MPlanFFT(cufftHandle *mplan, const int dim, dim3 size)
 {	
     /* int dim = { 1, 2 }
         1: if plan 1D multiples cuffts
@@ -22,15 +22,15 @@ void opt::MPlanFFT(cufftHandle mplan, const int dim, dim3 size)
     int *onembed  = nullptr;
     int ostride   = 1;
     int odist     = size.x;
-    size_t batch  = size.z; /* batch of cuffts */
+    int batch     = (2 - dim) * (size.y * size.z) +  (dim - 1)* size.z; /* batch of cuffts */
 	
     if ( dim == 1 ){
-        HANDLE_FFTERROR(cufftPlanMany(  &mplan, rank, sizeArray1D.data(), 
+        HANDLE_FFTERROR(cufftPlanMany(  mplan, rank, sizeArray1D.data(), 
                                         inembed, istride, idist, 
                                         onembed, ostride, odist, 
                                         CUFFT_C2C, batch));
     }else{
-        HANDLE_FFTERROR(cufftPlanMany(  &mplan, rank, sizeArray2D.data(), 
+        HANDLE_FFTERROR(cufftPlanMany(  mplan, rank, sizeArray2D.data(), 
                                         inembed, istride, idist, 
                                         onembed, ostride, odist, 
                                         CUFFT_C2C, batch));
@@ -67,33 +67,57 @@ static __global__ void Klog(float* data, dim3 size)
     data[index]  = - logf( data[index] );
 }
 
-__global__ void opt::product_Real_Real(float *a, float *b, float *ans, dim3 sizea, dim3 sizeb)
+__global__ void opt::product_Real_Real(float *a, 
+float *b, float *ans, 
+dim3 sizea, dim3 sizeb)
 {
     size_t indexa = opt::getIndex3d(sizea);
     size_t indexb = opt::getIndex3d(sizeb);
-    size_t nsize  = sizea.x * sizea.y * sizea.z;
+    size_t total_points_a = opt::get_total_points(sizea);
+    size_t total_points_b = opt::get_total_points(sizeb);
     
-    if ( indexa >= nsize ) return;
+    if ( indexa >= total_points_a || indexb >= total_points_b ) return;
+    
     ans[indexa] = a[indexa] * b[indexb];	
 }
 
-__global__ void opt::product_Complex_Real(cufftComplex *a, float *b, cufftComplex *ans, dim3 sizea, dim3 sizeb)
+__global__ void opt::product_Complex_Real(cufftComplex *a, 
+float *b, cufftComplex *ans, 
+dim3 sizea, dim3 sizeb)
 {
     size_t indexa = opt::getIndex3d(sizea);
     size_t indexb = opt::getIndex3d(sizeb);
-    size_t nsize  = sizea.x * sizea.y * sizea.z;
+    size_t total_points_a = opt::get_total_points(sizea);
+    size_t total_points_b = opt::get_total_points(sizeb);
     
-    if ( indexa >= nsize ) return;
+    if ( indexa >= total_points_a || indexb >= total_points_b ) return;
+
     ans[indexa].x = a[indexa].x * b[indexb];
     ans[indexa].y = a[indexa].y * b[indexb];	
 }
 
-__global__ void opt::product_Complex_Complex(cufftComplex *a, cufftComplex *b, cufftComplex *ans, dim3 sizea, dim3 sizeb)
+__global__ void opt::product_Complex_Complex(cufftComplex *a, 
+cufftComplex *b, cufftComplex *ans, 
+dim3 sizea, dim3 sizeb)
 {
     size_t indexa = opt::getIndex3d(sizea);
-    size_t indexb = opt::getIndex3d(sizeb);
-    size_t nsize  = sizea.x * sizea.y * sizea.z;
+    size_t indexb = blockIdx.x*blockDim.x + threadIdx.x;  //opt::getIndex3d(sizeb);
+    size_t total_points_a = opt::get_total_points(sizea);
+    size_t total_points_b = opt::get_total_points(sizeb);
     
-    if ( indexa >= nsize ) return;
+    if ( indexa >= total_points_a || indexb >= sizeb.x ) return;
+
     ans[indexa] = ComplexMult(a[indexa],b[indexb]);
+}
+
+__global__ void opt::Normalize(cufftComplex *data, dim3 size, int dim)
+{
+    size_t norm         = (2 - dim) * (size.x * size.y) +  (dim - 1)* size.x;
+    size_t index        = opt::getIndex3d(size);
+    size_t total_points = opt::get_total_points(size);
+
+    if ( index >= total_points ) return;
+    
+    data[index].x = data[index].x / norm; 
+    data[index].y = data[index].y / norm; 
 }

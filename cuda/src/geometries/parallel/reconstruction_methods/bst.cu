@@ -7,7 +7,7 @@
 #include "common/types.hpp"
 #include "common/opt.hpp"
 #include "common/logerror.hpp"
-
+// #include <logger.hpp>
 
 __global__ void sino2p(complex* padded, float* in, 
 size_t nrays, size_t nangles, int pad0, int csino)
@@ -113,7 +113,7 @@ int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0)
   
   	int dimms1d[] = {(int)Nrays*pad0/2};
   	int dimms2d[] = {(int)sizeimage,(int)sizeimage};
-  	int beds[] = {Nrays*pad0/2};
+  	int beds[] = {(int)Nrays*pad0/2};
   
 	HANDLE_FFTERROR( cufftPlanMany(&plan1d, 1, dimms1d, beds, 1, Nrays*pad0/2, beds, 1, Nrays*pad0/2, CUFFT_C2C, Nangles*blocksize*2) );
 	HANDLE_FFTERROR( cufftPlanMany(&plan2d, 2, dimms2d, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize) );
@@ -251,7 +251,9 @@ int pad0, float reg, float paganin, int filter_type, int gpu)
 	for(size_t zoff = 0; zoff < (size_t)trueblocksize; zoff+=blocksize_bst)
 	{
 		float* sinoblock = wholesinoblock + insize*zoff;
-        BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, 0.0, filter);
+        
+        if (filter.type != Filter::EType::none)
+            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, 0.0, filter);
 		
 		dim3 blocks((Nrays+255)/256,Nangles,blocksize_bst);
 		dim3 threads(128,1,1); 
@@ -300,10 +302,28 @@ extern "C"{
     int gpu)
     {
         HANDLE_ERROR( cudaSetDevice(gpu) );
-        
-        size_t blocksize_aux = calc_blocksize(blockgpu, nrays, nangles, pad0, true);
 
-        size_t blocksize = min((size_t)blockgpu, blocksize_aux);
+        // if (gpu == 0)
+        //     ssc_event_start("getBSTGPU", {
+        //             ssc_param_int("nrays", nrays),
+        //             ssc_param_int("nangles", nangles),
+        //             ssc_param_int("sizeimage", sizeimage),
+        //             ssc_param_int("pad0", pad0),
+        //             ssc_param_int("filter_type", filter_type),
+        //             ssc_param_int("blockgpu", blockgpu)
+        //     });
+
+        // printf("Pad0 = %d \n",pad0);
+        // printf("filter_type = %d \n",filter_type);
+        // printf("reg = %e \n",reg);
+        // printf("paganin = %e \n",paganin);
+        
+        // size_t blocksize_aux = calc_blocksize(blockgpu, nrays, nangles, pad0, true);
+        int blocksize = min(blockgpu,32);
+
+        // size_t blocksize = min((size_t)blockgpu, blocksize_aux);
+        int ind_block    = (int)ceil( (float) blockgpu / blocksize );
+        int ptr = 0, subblock;
 
         float *dtomo   = opt::allocGPU<float>((size_t)    nrays *   nangles * blocksize);
         float *dobj    = opt::allocGPU<float>((size_t)sizeimage * sizeimage * blocksize);
@@ -311,25 +331,31 @@ extern "C"{
 
         opt::CPUToGPU<float>(angles, dangles, nangles);	
 
-        for (size_t b = 0; b < blockgpu; b += blocksize) {
+        for (int i = 0; i < ind_block; i++){
 
-            blocksize = min(size_t(blockgpu) - b, blocksize);
+            subblock = min(blockgpu - ptr, (int)blocksize);
 
-            opt::CPUToGPU<float>(tomo + b*nrays*nangles, dtomo, (size_t)nrays * nangles * blocksize);
+            opt::CPUToGPU<float>(tomo + (size_t)ptr * nrays * nangles, 
+                                 dtomo, (size_t)nrays * nangles * subblock);
 
             getBST( dobj, dtomo, dangles, 
-                    nrays, nangles, blocksize, sizeimage, pad0,
+                    nrays, nangles, subblock, sizeimage, pad0,
                     reg, paganin, filter_type, gpu);
 
-            opt::GPUToCPU<float>(   obj + (size_t)sizeimage * sizeimage * b, 
-                                    dobj, 
-                                    (size_t)sizeimage * sizeimage * blocksize);
-        }
-        cudaDeviceSynchronize();
+            opt::GPUToCPU<float>(obj + (size_t)ptr * sizeimage * sizeimage, 
+                                 dobj, (size_t)sizeimage * sizeimage * subblock);
 
-        cudaFree(dobj);
-        cudaFree(dtomo);
-        cudaFree(dangles);
+            /* Update pointer */
+			ptr = ptr + subblock;
+        }
+        HANDLE_ERROR(cudaDeviceSynchronize());
+
+        HANDLE_ERROR(cudaFree(dobj));
+        HANDLE_ERROR(cudaFree(dtomo));
+        HANDLE_ERROR(cudaFree(dangles));
+
+        // if (gpu == 0)
+        //     ssc_event_stop(); /* getBSTGPU */
     }
 
     void getBSTMultiGPU(int* gpus, int ngpus, 
@@ -337,29 +363,41 @@ extern "C"{
 	int nrays, int nangles, int nslices, int sizeimage, int pad0,
     float reg, float paganin, int filter_type)
     {
-        int t;
+        // ssc_event_start("getBSTMultiGPU", {ssc_param_int("ngpus", ngpus)});
+
+        int i;
         int blockgpu = (nslices + ngpus - 1) / ngpus;
+        int subblock, ptr = 0; 
         
         std::vector<std::future<void>> threads;
+        threads.reserve(ngpus);
 
-        for(t = 0; t < ngpus; t++){ 
-            
-            blockgpu = min(nslices - blockgpu * t, blockgpu);
+        if (ngpus == 1){ /* 1 device */
+            getBSTGPU(obj, tomo, angles, nrays, nangles, nslices, 
+                sizeimage, pad0, reg, paganin, filter_type, gpus[0]);
+        }else{        
+            for(i = 0; i < ngpus; i++){ 
+                
+                subblock   = min(nslices - ptr, blockgpu);
 
-            threads.push_back(std::async( std::launch::async, getBSTGPU, 
-                                            obj  + (size_t)t * blockgpu * sizeimage * sizeimage, 
-                                            tomo + (size_t)t * blockgpu * nrays * nrays, 
-                                            angles,  
-                                            nrays, nangles, blockgpu, 
-                                            sizeimage, pad0, 
-                                            reg, paganin, filter_type,
-                                            gpus[t]));
+                threads.push_back(std::async( std::launch::async, 
+                    getBSTGPU, 
+                    obj  + (size_t)ptr * sizeimage * sizeimage, 
+                    tomo + (size_t)ptr *     nrays *   nangles, 
+                    angles,  
+                    nrays, nangles, subblock, 
+                    sizeimage, pad0, 
+                    reg, paganin, filter_type,
+                    gpus[i]));
+
+                /* Update pointer */
+				ptr = ptr + subblock;        
+            }
+            for (i = 0; i < ngpus; i++)
+				threads[i].get();
         }
-
-        for(auto& t : threads)
-            t.get();
+        // ssc_event_stop(); /* getBSTMultiGPU */
     }
-
 }
 
 

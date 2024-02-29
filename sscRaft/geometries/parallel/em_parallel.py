@@ -158,6 +158,9 @@ def tEMFQ_GPU_(count, flat, angles,
     padx,pady,padz         = pad
     det_pixelx, det_pixely = det_pixel
 
+    padd = padx * nrays
+    logger.info(f'Set EM Frequency pad value as {padx} x horizontal dimension = ({padd}).')
+
     param_int     = [nrays, nangles, nslices, objsize, 
                      padx, pady, padz, nflats, iterations, interpolation]
     param_int     = numpy.array(param_int)

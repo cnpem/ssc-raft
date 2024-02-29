@@ -59,7 +59,7 @@ extern "C"{
 
 	void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, cufftComplex *filter_kernel, 
-    dim3 size, dim3 size_pad);
+    dim3 size, dim3 size_pad, dim3 pad);
     
     void convolution_Real_C2C(GPU gpus, 
         float *data, cufftComplex *kernel, 

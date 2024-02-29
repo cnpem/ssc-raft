@@ -31,7 +31,7 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
         * ``dic['flat']`` (ndarray):  Flat 2D data. Tha axis are (slices,rays)  [required]
         * ``dic['angles[rad]']`` (floar list):  List of angles in radians [required]
         * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters [required for ``tEMFQ``]
-        * ``dic['method']`` (str): Choose EM-method [required]
+        * ``dic['method']`` (str): Choose EM-method. Options: [required]
     
             #. ``eEMRT``: Emission EM using Ray Tracing as forward and inverse operators.
 
