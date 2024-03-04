@@ -2,6 +2,7 @@ from ..rafttypes import *
 
 import numpy
 from .parallel.em_parallel import *
+from ..processing.io import *
 
 def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
     """ Expectation maximization (EM) for 3D tomographic reconstructions for parallel, 
@@ -46,11 +47,11 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
 
     """
     # Set default dictionary parameters:
+    required  = ('gpu',)
+    optional = ('iterations','detectorPixel[m]','padding','beamgeometry')
+    default    = (10,0.0,2,'parallel')
 
-    dicparams = ('iterations','detectorPixel[m]','padding','beamgeometry')
-    defaut    = (10,0.0,2,'parallel')
-
-    SetDictionary(dic,dicparams,defaut)
+    SetDictionary(dic,required,optional,default)
 
     gpus          = dic['gpu']
     method        = dic['method']
@@ -78,6 +79,7 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
         flat = dic['flat']
     except:
         if flat is None:
+            logger.warning(f'No flat provided.') 
             flat = numpy.ones((data.shape[0],data.shape[2])) 
 
     # 

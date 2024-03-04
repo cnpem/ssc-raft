@@ -49,21 +49,25 @@ __global__ void setSinCosTable(float *sintable, float *costable, float *angles, 
 
 void getLog(float *data, dim3 size)
 {
-    dim3 threadsPerBlock(64,64,size.z);
-    dim3 gridBlock( (int)ceil((size.x)/threadsPerBlock.x) + 1, 
-                    (int)ceil((size.y)/threadsPerBlock.y) + 1, 1);
+    dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+    dim3 gridBlock( (int)ceil( size.x / threadsPerBlock.x ) + 1, 
+                    (int)ceil( size.y / threadsPerBlock.y ) + 1, 
+                    (int)ceil( size.z / threadsPerBlock.z ) + 1);
 
-    Klog<<<gridBlock, threadsPerBlock>>>(data, size);
+    Klog<<<gridBlock,threadsPerBlock>>>(data, size);
 }
 
 static __global__ void Klog(float* data, dim3 size)
 {  
     int i  = threadIdx.x + blockIdx.x*blockDim.x;
     int j  = threadIdx.y + blockIdx.y*blockDim.y;
+    int k  = threadIdx.z + blockIdx.z*blockDim.z;
 
-    if( (i >= size.x) || (j >= size.y) || (blockIdx.z >= size.z)) return;
+    if( (i >= size.x) || (j >= size.y) || (k >= size.z)) return;
     
-    size_t index = IND(i,j,blockIdx.z,size.x,size.y);    
+    size_t index = IND(i,j,k,size.x,size.y);    
+    // size_t index = (size_t)(i + j * size.x + k * size.x * size.y);    
+
     data[index]  = - logf( data[index] );
 }
 

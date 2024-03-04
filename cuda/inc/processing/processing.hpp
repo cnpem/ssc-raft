@@ -6,24 +6,24 @@
 #include "common/complex.hpp"
 #include "common/configs.hpp"
 
-/* Flat/Dark Correction */
+/* Background Correction */
 extern "C"{
 
-	void getFlatDarkMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nangles, int nslices, int numflats, int is_log);
+	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nangles, int nslices, int numflats, int is_log);
 
-	void getFlatDarkGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, dim3 size, int numflats, int is_log);
+	void getBackgroundCorrectionGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, dim3 size, int numflats, int is_log);
 
-	void getFlatDarkCorrection(float* frames, float* flat, float* dark, dim3 size, int numflats, GPU gpus);
+	void getBackgroundCorrection(GPU gpus, float* frames, float* flat, float* dark, dim3 size, int numflats);
 }
 
 /* Rings */
 extern "C"{
     
-    void getRingsMultiGPU(int *gpus, int ngpus, float *data, float *lambda_computed, int nrays, int nangles, int nslices, float lambda_rings, int ring_blocks);
+    void getTitarenkoRingsMultiGPU(int *gpus, int ngpus, float *data, int nrays, int nangles, int nslices, float lambda_rings, int ring_blocks);
 
-    void getRingsGPU(GPU gpus, int gpu, float *data, float *lambda_computed, dim3 size, float lambda_rings, int ring_blocks);
+    void getTitarenkoRingsGPU(GPU gpus, int gpu, float *data, dim3 size, float lambda_rings, int ring_blocks);
 
-    float getRings(float *tomogram, dim3 size, float lambda_rings, int ring_blocks, GPU gpus);
+    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, float lambda_rings, int ring_blocks);
 }
 
 /* Rotation Axis */

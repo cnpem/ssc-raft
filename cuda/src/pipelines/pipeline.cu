@@ -63,11 +63,11 @@ extern "C"{
         configs->obj.batchsize     = dim3(    configs->obj.size.x,  configs->obj.size.y,  process->objbatch_size);
 
         std::vector<thread> threads_pipeline;
+        // threads.reserve(gpus.ngpus);
 
         while (process_index < total_number_of_processes){
 
-            threads_pipeline.emplace_back( 
-                                            thread(
+            threads_pipeline.emplace_back(  thread(
                                             _ReconstructionProcessPipeline, 
                                             (*configs), process[process_index], 
                                             gpus, obj, data, flats, darks, 
@@ -124,8 +124,8 @@ extern "C"{
     void _ReconstructionPipeline(CFG configs, WKP *workspace, Process process, GPU gpus)
     {
         if( configs.flags.do_flat_dark_correction == 1)
-            getFlatDarkCorrection(workspace->tomo, workspace->flat, workspace->dark, 
-            configs.tomo.batchsize, configs.numflats, gpus);
+            getBackgroundCorrection(gpus, workspace->tomo, workspace->flat, workspace->dark, 
+            configs.tomo.batchsize, configs.numflats);
 
         if( configs.flags.do_flat_dark_log == 1) 
             getLog(workspace->tomo, configs.tomo.batchsize);
@@ -136,9 +136,9 @@ extern "C"{
         //     configs.tomo.batchsize, configs.tomo.padsize);
 
         if( configs.flags.do_rings == 1) 
-            float rings_lambda_computed = getRings(workspace->tomo, 
+            getTitarenkoRings(gpus, workspace->tomo, 
             configs.tomo.batchsize, configs.rings_lambda, 
-            configs.rings_block, gpus);
+            configs.rings_block);
         
         // if( configs.flags.do_rotation == 1 && configs.flags.do_rotation_auto_offset == 1) 
         //     int rotation_axis_offset = getRotAxisOfsset();

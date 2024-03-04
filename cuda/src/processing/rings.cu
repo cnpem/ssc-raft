@@ -247,7 +247,7 @@ extern "C"
         }
     }
 
-    __global__ void KApplyRing(float *volume, const float *nstaravg, size_t volsizex, size_t volsizey, size_t slicesize)
+    __global__ void KApplyTitarenkoRings(float *volume, const float *nstaravg, size_t volsizex, size_t volsizey, size_t slicesize)
     {
         const size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
         const size_t plane = blockIdx.y * slicesize;
@@ -262,11 +262,11 @@ extern "C"
         }
     }
 
-    void ApplyRing(float *volume, float *nstaravg, int sizex, int sizey, int sizez, size_t slicesize)
+    void ApplyTitarenkoRings(float *volume, float *nstaravg, int sizex, int sizey, int sizez, size_t slicesize)
     {
         dim3 threads = dim3(min((int)sizex, 128), 1, 1);
         dim3 blocks = dim3((sizex + 127) / 128, sizez, 1);
-        KApplyRing<<<blocks, threads>>>(volume, nstaravg, sizex, sizey, slicesize);
+        KApplyTitarenkoRings<<<blocks, threads>>>(volume, nstaravg, sizex, sizey, slicesize);
 
         HANDLE_ERROR(cudaGetLastError());
     }
@@ -306,7 +306,7 @@ extern "C"
         }
     }
 
-    __global__ void KAverageRing(float *out, const float *nvec1, const float *nvec2, size_t size)
+    __global__ void KAverageTitarenkoRings(float *out, const float *nvec1, const float *nvec2, size_t size)
     {
         const size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
 
@@ -314,7 +314,7 @@ extern "C"
             out[idx] = nvec1[idx] * 0.5f + nvec2[idx] * 0.5f;
     }
 
-    void RingFilter(rImage &sinobar, float lambda, const float *norm2vec)
+    void TitarenkoRingsFilter(rImage &sinobar, float lambda, const float *norm2vec)
     {
         size_t msizex = sinobar.sizex;
         size_t msizey = sinobar.sizey;
@@ -343,7 +343,7 @@ extern "C"
         mvec1.CopyFrom(sinobar);
         mvec2.CopyFrom(sinobar);
         mvec1.LoadFromGPU();
-        cudaDeviceSynchronize();
+        HANDLE_ERROR(cudaDeviceSynchronize());
 
         rImage residuum2(msizey, 1);
 
@@ -362,7 +362,7 @@ extern "C"
             Convolve(xvec1, mvec1, kernel1, lambda, alpha1, 100, residuum2, momentum, beta1, intermediate);
 
             residuum2.LoadFromGPU();
-            cudaDeviceSynchronize();
+            HANDLE_ERROR(cudaDeviceSynchronize());
             maxerr = 0;
             for (size_t j = 0; j < msizey; j++)
                 maxerr = fmaxf(maxerr, residuum2.cpuptr[j] * norm2vec[j]);
@@ -376,13 +376,13 @@ extern "C"
             Convolve(xvec2, mvec2, kernel2, lambda, alpha2, 100, residuum2, momentum, beta2, intermediate);
 
             residuum2.LoadFromGPU();
-            cudaDeviceSynchronize();
+            HANDLE_ERROR(cudaDeviceSynchronize());
             maxerr = 0;
             for (size_t j = 0; j < msizey; j++)
                 maxerr = fmaxf(maxerr, residuum2.cpuptr[j] * norm2vec[j]);
         }
 
-        KAverageRing<<<(xvec1.GetSize() + 31) / 32, 32>>>(sinobar.gpuptr, xvec1.gpuptr, xvec2.gpuptr, xvec1.GetSize());
+        KAverageTitarenkoRings<<<(xvec1.GetSize() + 31) / 32, 32>>>(sinobar.gpuptr, xvec1.gpuptr, xvec2.gpuptr, xvec1.GetSize());
         HANDLE_ERROR(cudaGetLastError());
     }
 
@@ -407,7 +407,7 @@ extern "C"
 
     // }
 
-    float Rings(float *volume, int vsizex, int vsizey, int vsizez, float lambda, size_t slicesize)
+    float TitarenkoRings(float *volume, int vsizex, int vsizey, int vsizez, float lambda, size_t slicesize)
     {
         size_t msizex = vsizex;
         size_t msizey = vsizez;
@@ -418,14 +418,15 @@ extern "C"
         lambda = VolumeAverage(sinobar.gpuptr, volume, vsizex, vsizey, vsizez, lambda, slicesize);
 
         sinobar.LoadFromGPU();
-        cudaDeviceSynchronize();
+        HANDLE_ERROR(cudaDeviceSynchronize());
+
         float norm2vec[msizey];
 
         CalcNorm2(norm2vec, sinobar.cpuptr, msizex, msizey);
 
-        RingFilter(sinobar, lambda, norm2vec);
+        TitarenkoRingsFilter(sinobar, lambda, norm2vec);
 
-        ApplyRing(volume, sinobar.gpuptr, vsizex, vsizey, vsizez, slicesize);
+        ApplyTitarenkoRings(volume, sinobar.gpuptr, vsizex, vsizey, vsizez, slicesize);
         HANDLE_ERROR(cudaGetLastError());
 
         return lambda;
@@ -434,72 +435,82 @@ extern "C"
 
 extern "C"{
 
-    float getRings(float *tomogram, dim3 size, float lambda_rings, int ring_blocks, GPU gpus)
+    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, float lambda_rings, int ring_blocks)
     {
         float lambda_computed;
 
+        /* Projection data sizes */
+        int nrays        = size.x;
+        int nangles      = size.y;
+        int blockslices  = size.z;
+
+        size_t step, offset = nrays * nangles;
+
         for (int m = 0; m < ring_blocks / 2; m++){
 
-            lambda_computed = Rings(tomogram, size.x, size.y, size.z, lambda_rings, size.x * size.y);
-
-            size_t offset = size.x * size.y;
-            size_t step = (size.y / ring_blocks) * size.x;
+            lambda_computed = TitarenkoRings(tomogram, 
+                                nrays, nangles, blockslices, 
+                                lambda_rings, offset);
+            
+            step = (nangles / ring_blocks) * nrays;
             float *tomptr = tomogram;
 
             for (int n = 0; n < ring_blocks - 1; n++){
-
-                lambda_computed = Rings(tomogram, size.x, size.y, size.z, lambda_rings, size.x * size.y);
-
+                lambda_computed = TitarenkoRings(tomogram, 
+                                    nrays, nangles, blockslices, 
+                                    lambda_rings, offset);
                 tomptr += step;
             }
-
-            lambda_computed = Rings(tomptr, size.x, size.y % ring_blocks + size.y / ring_blocks, size.z, lambda_rings, offset);
+            lambda_computed = TitarenkoRings(tomptr, 
+                                nrays, nangles % ring_blocks + nangles / ring_blocks, blockslices, 
+                                lambda_rings, offset);
         }
 
         HANDLE_ERROR(cudaGetLastError());
-
-        return lambda_computed;
     }
 
-    void getRingsGPU(GPU gpus, int gpu, 
-    float *data, float *lambda_computed, 
-    dim3 size, float lambda_rings, int ring_blocks)
+    void getTitarenkoRingsGPU(GPU gpus, int gpu, 
+    float *data, dim3 size, float lambda_rings, int ring_blocks)
     {
-        cudaSetDevice(gpu);
+        HANDLE_ERROR(cudaSetDevice(gpu));
+
+        /* Projection data sizes */
+        int nrays    = size.x;
+        int nangles  = size.y;
+        int nslices  = size.z;
 
         int i;
-        int blocksize = min(size.z, 32); // Herança do Giovanni -> Mudar
+        int blocksize = min(nslices, 32); // Herança do Giovanni -> Mudar
 
-        int nblock = (int)ceil((float)size.z / blocksize);
+        int nblock = (int)ceil((float)nslices / blocksize);
         int ptr = 0, subblock;
 
-        float *tomogram = opt::allocGPU<float>((size_t) size.x * size.y * blocksize);
+        float *tomogram = opt::allocGPU<float>((size_t) nrays * nangles * blocksize);
 
         for (i = 0; i < nblock; i++){
             
-            subblock = min(size.z - ptr, blocksize);
+            subblock = min(nslices - ptr, blocksize);
 
-            opt::CPUToGPU<float>(data + (size_t)ptr * size.x * size.y, tomogram, (size_t)subblock * size.x * size.y);
+            opt::CPUToGPU<float>(data + (size_t)ptr * nrays * nangles, tomogram, (size_t)subblock * nrays * nangles);
 
-            (*lambda_computed) = getRings(tomogram, dim3(size.x, size.y, subblock), lambda_rings, ring_blocks, gpus);
+            getTitarenkoRings(gpus, tomogram, 
+                                    dim3(nrays, nangles, subblock), 
+                                    lambda_rings, ring_blocks);
             
-            opt::GPUToCPU<float>(data + (size_t)ptr * size.x * size.y, tomogram, (size_t)subblock * size.x * size.y);
+            opt::GPUToCPU<float>(data + (size_t)ptr * nrays * nangles, tomogram, (size_t)subblock * nrays * nangles);
 
             /* Update pointer */
             ptr = ptr + subblock;
         }
-        cudaFree(tomogram);
-
-        HANDLE_ERROR(cudaGetLastError());
-        cudaDeviceSynchronize();    
+        HANDLE_ERROR(cudaFree(tomogram));
+        HANDLE_ERROR(cudaDeviceSynchronize());    
     }
 }
 
 extern "C"{
 
-    void getRingsMultiGPU(int *gpus, int ngpus, 
-    float *data, float *lambda_computed, 
-    int nrays, int nangles, int nslices, 
+    void getTitarenkoRingsMultiGPU(int *gpus, int ngpus, 
+    float *data, int nrays, int nangles, int nslices, 
     float lambda_rings, int ring_blocks)
     {
         int i;
@@ -511,27 +522,26 @@ extern "C"{
         setGPUParameters(&gpu_parameters, dim3(nrays, nangles, nslices), ngpus, gpus);
 
 		std::vector<std::future<void>> threads;
+        threads.reserve(ngpus);
 
         if (ngpus == 1){
-            getRingsGPU(gpu_parameters, 
-            gpus[0], 
-            data, 
-            lambda_computed, 
-            dim3(nrays, nangles, nslices), 
-            lambda_rings, ring_blocks);
+            getTitarenkoRingsGPU(gpu_parameters, 
+                gpus[0], 
+                data, 
+                dim3(nrays, nangles, nslices), 
+                lambda_rings, ring_blocks);
         }else{
             for (i = 0; i < ngpus; i++){
 
                 subblock = min(nslices - ptr, blockgpu);
 
                 threads.push_back(std::async(std::launch::async,
-                                             getRingsGPU,
-                                             gpu_parameters,
-                                             gpus[i],
-                                             data + (size_t)ptr * nrays * nangles,
-                                             lambda_computed,
-                                             dim3(nrays, nangles, subblock),
-                                             lambda_rings, ring_blocks));
+                    getTitarenkoRingsGPU,
+                    gpu_parameters,
+                    gpus[i],
+                    data + (size_t)ptr * nrays * nangles,
+                    dim3(nrays, nangles, subblock),
+                    lambda_rings, ring_blocks));
 
                 /* Update pointer */
                 ptr = ptr + subblock;

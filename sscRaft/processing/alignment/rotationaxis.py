@@ -141,3 +141,29 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
     # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
 
     return deviation
+
+def correct_rotation_axis(data: np.ndarray, deviation: int) -> np.ndarray:
+    """Corrects the rotation axis of a data according to a deviation value defined 
+    by the number of pixels translated form the center of the data.
+
+    Args:
+        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        deviation (int): Number of pixels representing the rotation axis deviation
+
+    Returns:
+        (ndarray, int): Rotation axis corrected tomogram (3D) with axes [slices, angles, lenght] 
+
+    * CPU function
+    """
+    logger.info(f'Applying given rotation axis correction deviation value: {deviation}')
+
+    proj = np.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * np.abs(deviation)))
+
+    if(deviation < 0):
+        proj[:,:,2 * np.abs(deviation):data.shape[2] + 2 * np.abs(deviation)] = data
+    else:
+        proj[:,:,0:data.shape[2]] = data
+
+        logger.info(f'Corrected projection for rotation axis: new shape {proj.shape}')
+
+    return proj

@@ -1,6 +1,7 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
 
 from ...rafttypes import *
+from ...processing.io import *
 import numpy 
 
 def bstGPU(tomogram, angles, gpus, dic):
@@ -78,11 +79,12 @@ def bst(tomogram, dic, angles = None, **kwargs):
         * ``dic['regularization']`` (float,optional): Regularization value ( value >= 0 ) [default: 1.0]  
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 2]  
 
-    """        
-    dicparams = ( 'filter','offset','padding','regularization','paganin regularization')
-    defaut    = ('lorentz',       0,        2,             1.0,                     0.0)
+    """
+    required = ('gpu',)        
+    optional = ( 'filter','offset','padding','regularization','paganin regularization')
+    default  = ('lorentz',       0,        2,             1.0,                     0.0)
     
-    SetDictionary(dic,dicparams,defaut)
+    SetDictionary(dic,required,optional,default)
 
     dic['regularization'] = 1.0
 
@@ -94,12 +96,13 @@ def bst(tomogram, dic, angles = None, **kwargs):
     #         logger.info(f'Reconstruction size not multiple of 32. Setting to: {objsize}')
     # dic.update({'objsize': objsize})
 
-    try:
-        angles = dic['angles[rad]']
-    except:
-        if angles is None:
-            logger.error(f'Missing angles list!! Finishing run...') 
-            raise ValueError(f'Missing angles list!!')
+    angles = numpy.linspace(0.0, numpy.pi, tomogram.shape[-2], endpoint=False)
+    # try:
+    #     angles = dic['angles[rad]']
+    # except:
+    #     if angles is None:
+    #         logger.error(f'Missing angles list!! Finishing run...') 
+    #         raise ValueError(f'Missing angles list!!')
 
     output = bstGPU( tomogram, angles, gpus, dic ) 
 

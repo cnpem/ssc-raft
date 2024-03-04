@@ -9,6 +9,7 @@ import numpy
 import json
 import h5py
 
+
 '''----------------------------------------------'''
 import logging
 
@@ -134,30 +135,30 @@ except:
 
 ######## Raft - Rings ##########
 try:
-    libraft.getRingsMultiGPU.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
+    libraft.getTitarenkoRingsMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p,  
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
         ctypes.c_float, ctypes.c_int
     ]
     
-    libraft.getRingsMultiGPU.restype  = None
+    libraft.getTitarenkoRingsMultiGPU.restype  = None
     
 except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_RINGS-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_TITARENKO_RINGS-')
     pass
 
 ######## Raft - Flat/Dark Correction ##########
 try:
-    libraft.getFlatDarkMultiGPU.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, 
-        ctypes.c_void_p, ctypes.c_void_p, 
+    libraft.getBackgroundCorrectionMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
         ctypes.c_int, ctypes.c_int
     ]
     
-    libraft.getFlatDarkMultiGPU.restype  = None
+    libraft.getBackgroundCorrectionMultiGPU.restype  = None
 except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_FLAT_DARK_CORRECTION-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_BACKGROUND_CORRECTION-')
     pass
 
 
@@ -308,7 +309,7 @@ def setInterpolation(name):
         (int): Value defining the interpolation name
 
     Options:
-        name: \'nearest\' and \'bilinear\'
+        name (str): \'nearest\' and \'bilinear\'
 
     """
     if name.lower() == 'nearest':
@@ -319,151 +320,120 @@ def setInterpolation(name):
         logger.warning(f'Interpolation invalid. Using default \'nearest\' interpolation.')
         return 0
         
-
-def Bin(img,n=2):
-        if n <= 1:
-                return img
-        elif n%2 != 0:
-                if img.shape[0]%n != 0 or img.shape[1]%n != 0:
-                        print('Warning: Non divisible binning is subsampling.')
-                        return img[0::n,0::n]
-                else:
-                        img2 = numpy.zeros((img.shape[0]//n,img.shape[1]//n),dtype=img.dtype)
-                        for j in range(n):
-                                for i in range(n):
-                                        img2 += img[j::n,i::n]
-                        return img2/(n*n)
-        else:
-                return Bin(0.25*(img[0::2,0::2] + img[1::2,0::2] + img[0::2,1::2] + img[1::2,1::2]),n//2)
-
-
-def SetDic(dic, paramname, deff):
-        try:
-            dic[paramname]
-            
-            if type(dic[paramname]) == list:
-                for i in range(len(deff)):
-                    try:
-                        dic[paramname][i] 
-                    except:
-                        value = deff[i]
-                        logger.info(f'Using default - {paramname}:{value}')
-                        dic[paramname][i] = value
-
-        except:
-            logger.info(f'Using default - {paramname}: {deff}.')
-            dic[paramname] = deff
-
-def SetDictionary(dic,param,default):
-    for ind in range(len(param)):
-        SetDic(dic,param[ind], default[ind])
-
-def Metadata_hdf5(outputFileHDF5, dic, software, version):
-    """ Function to save metadata from a dictionary, and the name of the softare used and its version
-    on a HDF5 file. The parameters names will be save the same as the names from the dictionary.
+def set_precision(precision):
+    """Select datatype of numpy array.
 
     Args:
-        outputFileHDF5 (h5py.File type or str): The h5py created file or the path to the HDF5 file
-        dic (dictionary): A python dictionary containing all parameters (metadata) from the experiment
-        software (string): Name of the python module 'software'  used
-        version (string): Version of python module used (can be called by: 'software.__version__'; example: 'sscRaft.__version__')
+        precision (str): precision name
 
+    Returns:
+        (int): Integer value defining the numpy datatype
+        (type): The numpy datatype
+
+    Raises:
+        Invalid datatype
+
+    Options:
+        precision (str): \'float32\', \'uint16\', \'uint8\'
     """
-    dic['Software'] = software
-    dic['Version']  = version
-
-    if isinstance(outputFileHDF5, str):
-
-            if os.path.exists(outputFileHDF5):
-                    hdf5 = h5py.File(outputFileHDF5, 'a')
-            else:
-                    hdf5 = h5py.File(outputFileHDF5, 'w')
+    if precision == 'float32':
+        datatype = 5
+        Ndatatype = numpy.float32
+    elif precision == 'uint16':
+        datatype = 2
+        Ndatatype = numpy.uint16
+    elif precision == 'uint8':
+        datatype = 1
+        Ndatatype = numpy.uint8
     else:
-            hdf5 = outputFileHDF5
+        logger.error(f'Invalid datatype:{precision}. Options: `float32`, `uint16` and `uint8`.')
+        raise ValueError(f'Invalid datatype:{precision}. Options: `float32`, `uint16` and `uint8`.')
 
-
-    for key, value in dic.items():
-
-            h5_path = 'Recon Parameters' #os.path.join('Recon Parameters', key)
-            hdf5.require_group(h5_path)
-            
-            if key == 'findRotationAxis':
-                    value = str(value)
-            if isinstance(value, list) or isinstance(value, tuple) or isinstance(value, numpy.ndarray):
-                    value = numpy.asarray(value)
-                    hdf5[h5_path].create_dataset(key, data=value, shape=value.shape)
-            else:
-                    # print(value)
-                    hdf5[h5_path].create_dataset(key, data=value, shape=())
-
-    if isinstance(outputFileHDF5, str):
-            hdf5.close()
+    return datatype, Ndatatype
 
 def power_of_2_padding(size,pad):
     return int((pow(2, numpy.ceil(numpy.log2(size + 2 * pad))) - size) * 0.5)
        
-def set_conical_slices(slice_recon_start,slice_recon_end,nslices,nx,ny,z1,z12,pixel_det):
+def crop_circle(data, z1, zt, pixeldet, npixels = 0):
+    r"""Function to crop a circle of radius :math:`r` on the xy-plane of a 3D data.
         
-    magn       = z1/z12
-    v          = nslices * pixel_det / 2
-    dx, dy, dz = pixel_det*magn, pixel_det*magn, pixel_det*magn
-    x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
-    L          = numpy.sqrt(x*x + y*y)
+        - r = (radius - npixels * pixel_size);
+        - radius = (pixel_size * dimension) / 2;
+        - pixel_size = pixel_detector * magnitude;
+        - magnitude = z1/zt
+        - zt = z1+z2
 
-    z_min_recon = - z + slice_recon_start * dz
-    z_max_recon = - z + slice_recon_end   * dz
+    Args:
+        data (ndarray): 3D data
+        z1 (float): Sample-source distance in meters
+        zt (float): Detector-source distance in meters (z1+z2)
+        pixeldet (float): Detector pixel size in meters 
+        npixels (int, optional): How many pixels to subtract from radius to reduce cropped circle [Default: 0]
 
-    Z_min_proj = max(-v, min(z12*z_min_recon/(z1 - L), z12*z_min_recon/(z1 + L)))
-    Z_max_proj = min( v, max(z12*z_max_recon/(z1 + L), z12*z_max_recon/(z1 - L)))
+    Returns:
+        (ndarray): 3D cropped data
+    """
+    dimx = data.shape[-1]
+    dimy = data.shape[-2]
 
-    slice_projection_start = max(0      , int(numpy.floor((Z_min_proj + v)/pixel_det)))
-    slice_projection_end   = min(nslices, int(numpy.ceil( (Z_max_proj + v)/pixel_det)))
+    pixel_size = pixeldet * ( z1 / zt )
 
-    return slice_projection_start, slice_projection_end
+    diameterx = dimx * pixel_size
+    radiusx = diameterx / 2.0
 
-def set_conical_tomogram_slices(tomogram, dic):
+    diametery =  dimy * pixel_size
+    radiusy = diametery / 2.0
 
-    nrays   = tomogram.shape[-1]
-    nangles = tomogram.shape[-2]    
-    nslices = tomogram.shape[ 0]
+    x = numpy.linspace(-radiusx,radiusx,dimx)
+    y = numpy.linspace(-radiusy,radiusy,dimy)
 
-    z1, z12   = dic['z1[m]'], dic['z1+z2[m]']
-    pixel_det = dic['detectorPixel[m]']
-    
-    start_recon_slice = dic['slices'][0]
-    end_recon_slice   = dic['slices'][1] 
-    
-    blockslices = end_recon_slice - start_recon_slice
+    Xm, Ym = numpy.meshgrid(x,y)
+    radius = max(radiusx,radiusy)
+    r = radius - npixels * pixel_size
 
-    try:
-        reconsize = dic['reconSize']
+    mask = (Xm)**2 + (Ym)**2  <= r**2
 
-        if isinstance(reconsize,list) or isinstance(reconsize,tuple):
-        
-            if len(dic['reconSize']) == 1:
-                nx, ny, nz = int(reconsize[0]), int(reconsize[0]), int(blockslices)
-            else:
-                nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(blockslices)
+    for i in range(data.shape[0]):
+            data[i,:,:] = numpy.where(mask,data[i,:,:],0)
 
-        elif isinstance(reconsize,int):
-            nx, ny, nz = int(reconsize), int(reconsize), int(blockslices)
-        else:
-            logger.error(f'Dictionary entry `reconsize` wrong ({reconsize}). The entry `reconsize` is optional, but if it exists it needs to be a list = [nx,ny].')
-            logger.error(f'Finishing run...')
-            sys.exit(1)
+    return data
 
-    except:
-        nx, ny, nz = int(nrays), int(nrays), int(blockslices)
-        logger.info(f'Set default reconstruction size ({nz},{ny},{nx}) = (z,y,x).')
+def crop_ellipse(data, pixeldet, magn = 1, npixelsx = 0, npixelsy = 0):
+    r"""Function to crop an ellipse of radius :math:`a` and :math:`b` on the xy-plane of a 3D data.
 
-    
-    start_tomo_slice,end_tomo_slice = set_conical_slices(start_recon_slice,end_recon_slice,nslices,nx,ny,z1,z12,pixel_det)
+    Args:
+        data (ndarray): 3D data
+        pixeldet (float tuple): Detector pixel size (x,y) in x- and y- directions in meters 
+        magn (float): Magnification related to beam geometry (z1+z2)/z1 [Default: 1, parallel geometry]
+        npixelsx (int, optional): How many pixels to subtract from radius ``a`` (x-direction) to reduce cropped circle [Default: 0]
+        npixelsy (int, optional): How many pixels to subtract from radius ``b`` (y-direction) to reduce cropped circle [Default: 0]
 
-    _tomo_ = tomogram[start_tomo_slice:(end_tomo_slice + 1),:,:]
+    Returns:
+        (ndarray): 3D cropped data
+    """
+    dimx = data.shape[-1]
+    dimy = data.shape[-2]
 
-    dic.update({'slice tomo': [start_tomo_slice,end_tomo_slice]})
+    pixel_sizex = pixeldet[0] * ( 1 / magn )
+    pixel_sizey = pixeldet[1] * ( 1 / magn )
 
-    return _tomo_, start_tomo_slice, end_tomo_slice
+    diameterx = dimx * pixel_sizex
+    a = diameterx / 2.0 - npixelsy * pixel_sizey
+
+    diametery =  dimy * pixel_sizey
+    b = diametery / 2.0 - npixelsx * pixel_sizex
+
+    x = numpy.linspace(-a,a,dimx)
+    y = numpy.linspace(-b,b,dimy)
+
+    Xm, Ym = numpy.meshgrid(x,y)
+
+    mask = (Xm/a)**2 + (Ym/b)**2  <= 1
+
+    for i in range(data.shape[0]):
+            data[i,:,:] = numpy.where(mask,data[i,:,:],0)
+            
+    return data
 
 if __name__ == "__main__":
    pass

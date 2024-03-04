@@ -1,91 +1,91 @@
 from ...rafttypes import *
 import numpy as np
-from time import time
 from ctypes import c_float as float32
 from ctypes import c_int as int32
 from ctypes import c_void_p  as void_p
 from ctypes import c_size_t as size_t
+from ...processing.io import *
 
-def RingsGPU(tomogram, dic):
-        """Apply rings correction on tomogram by blocks of rings in MULTIGPU
+def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
+    """ Rings artifacts reduction by Generalized Titarenko's algorithm.  
 
-        Args:
-                tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
-                dic (dictionary): Dictionary with the parameters.
-                gpu (int): GPU to use. Defaults to 0.
+    Args:
+        tomogram (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
+        gpus (int list): List of GPUs
+        rings_lambda (float): Titarenko\'s regularization value. Values between [0,1]. The value -1 compute this parameter automatically
+        rings_block (int): Blocks of sinograms to be used. Even values between [1,20]
 
-        Returns:
-                ndarray: tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
-        
-        Dictionary parameters:
-                *``dic['lambda rings']`` (float): Lambda regularization of rings. Value 0 is automatic.
-                *``dic['rings block']`` (int): Blocks of rings to be used.    
-                *``dic['gpu']`` (int list): List of GPUs to use. 
-        """   
+    Returns:
+        (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
 
-        gpus = dic['gpu']     
-        ngpus = len(gpus)
+    References:
+        .. [1] Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermúdez, J.S.V. (2014). Generalized Titarenko's algorithm for ring artefacts reduction. J. Synchrotron Rad, 21, 1333-1346 `DOI<https://doi.org/10.1107/S1600577514016919>`_
+    """
+    ngpus = len(gpus)
 
-        gpus = numpy.array(gpus)
-        gpus = np.ascontiguousarray(gpus.astype(np.intc))
-        gpusptr = gpus.ctypes.data_as(void_p)
+    gpus = numpy.array(gpus)
+    gpus = np.ascontiguousarray(gpus.astype(np.intc))
+    gpusptr = gpus.ctypes.data_as(void_p)
 
-        nrays   = tomogram.shape[-1]
-        nangles = tomogram.shape[-2]
+    nrays   = tomogram.shape[-1]
+    nangles = tomogram.shape[-2]
 
-        if len(tomogram.shape) == 2:
-                nslices = 1
-        elif len(tomogram.shape) == 3:
-                nslices = tomogram.shape[0]
-        else:
-                logger.error(f'Incorrect tomogram dimension! It accepts only 2- or 3-dimension array. ')
-                logger.error(f'Tomogram dimension is ({tomogram.shape}).')
-                logger.error(f'Finishing run...')
-                sys.exit(1)
+    if len(tomogram.shape) == 2:
+        nslices = 1
+    elif len(tomogram.shape) == 3:
+        nslices = tomogram.shape[0]
+    else:
+        message_error = f'Incorrect tomogram dimension:{tomogram.shape}! It accepts 2D or 3D arrays only.'
+        logger.error(message_error)
+        raise ValueError(message_error)
 
-        lambdarings = dic['lambda rings']
-        ringsblock  = dic['rings block']
+    if rings_lambda == 0:
+        logger.warning(f'No Titarenko\'s regularization: set to {rings_lambda}.')
+        return tomogram
+    elif rings_lambda < 0:
+        logger.info(f'Computing automatic Titarenko\'s regularization parameter.')
+    else:
+        logger.info(f'Titarenko\'s regularization set to {rings_lambda}.')  
 
-        if lambdarings == 0:
-                logger.warning(f'No Rings regularization: Lambda regularization is set to {lambdarings}.')
-                return tomogram
-        elif lambdarings < 0:
-                logger.info(f'Using automatic Rings removal')
-        else:
-                logger.info(f'Rings removal with Lambda regularization of {lambdarings}')  
+    tomogram            = np.ascontiguousarray(tomogram.astype(np.float32))
+    tomogram_ptr         = tomogram.ctypes.data_as(void_p)
 
-        lambda_computed     = np.zeros(ngpus)
-        lambda_computed     = np.ascontiguousarray(lambda_computed.astype(np.float32))
-        lambda_computed_ptr = lambda_computed.ctypes.data_as(void_p)
+    libraft.getTitarenkoRingsMultiGPU(gpusptr, ctypes.c_int(ngpus), tomogram_ptr, 
+            ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
+            ctypes.c_float(rings_lambda), ctypes.c_int(rings_block))
 
-        tomogram            = np.ascontiguousarray(tomogram.astype(np.float32))
-        tomogramptr         = tomogram.ctypes.data_as(void_p)
-
-        libraft.getRingsMultiGPU(gpusptr, int32(ngpus), tomogramptr, lambda_computed_ptr, int32(nrays), int32(nangles), int32(nslices), float32(lambdarings), int32(ringsblock))
-
-        return tomogram, lambda_computed
+    return tomogram
 
 def rings(tomogram, dic, **kwargs):
-        """Apply rings correction on tomogram by blocks of rings in MultiGPU
+    """Apply rings correction on tomogram.
 
-        Args:
-                tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
-                dic   (dictionary): Dictionary with the parameters.
+    Args:
+        tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
+        dic   (dictionary): Dictionary with the parameters.
 
-        Returns:
-                ndarray: tomogram (3D) or sinogram (2D). The axes are [slices, angles, nrays] (3D) or [angles, nrays] (2D).
-        
-        Dictionary parameters:
-                *``dic['lambda rings']`` (float): Lambda regularization of rings. Defaults to -1 (automatic).
-                *``dic['rings block']`` (int): Blocks of rings to be used. Defaults to 1.    
-                *``dic['gpu']`` (int list): List of GPUs to use. Defaults to [0].
-        """
+    Returns:
+        (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
+    
+    * One or MultiGPUs. 
+    * Calls function ``TitarenkoRingsGPU()``.
 
-        dicparams = ('gpu','lambda rings','rings block')
-        defaut = ([0],-1,1)
+    Dictionary parameters:
 
-        SetDictionary(dic,dicparams,defaut)
+        *``dic['gpu']`` (int list): List of GPUs to use [required]
+        *``dic['lambda rings']`` (float,optional): Lambda regularization of rings. Values between [0,1] [default: -1 (automatic computation)]
+        *``dic['rings block']`` (int,optional): Blocks of rings to be used. Even values between [1,20] [default: 1]   
+    """
+    required = ('gpu',)
+    optional = ('lambda rings','rings block')
+    default  = (-1,1)
 
-        tomogram, lambda_computed = RingsGPU( tomogram, dic ) 
+    SetDictionary(dic,required,optional,default)
 
-        return tomogram
+    gpus = dic['gpu']
+
+    rings_lambda = dic['lambda rings']
+    rings_block  = dic['rings block']
+
+    tomogram = TitarenkoRingsGPU( tomogram, gpus, rings_lambda, rings_block ) 
+
+    return tomogram

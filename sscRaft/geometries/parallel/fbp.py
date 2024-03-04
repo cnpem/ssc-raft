@@ -1,6 +1,7 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
 
 from ...rafttypes import *
+from ...processing.io import *
 import numpy as np
 from time import time
 
@@ -30,8 +31,8 @@ def fbpGPU(tomogram, angles, gpus, dic):
 
     padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
-    pad = padx * nrays
-    logger.info(f'Set FBP pad value as {padx} x horizontal dimension = ({pad}).')
+    # pad = padx * nrays
+    # logger.info(f'Set FBP pad value as {padx} x horizontal dimension = ({pad}).')
 
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
@@ -91,10 +92,11 @@ def fbp(tomogram, dic, angles = None, **kwargs):
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 2]  
 
     """      
-    dicparams = ( 'filter','offset','padding','regularization','paganin regularization')
-    defaut    = ('lorentz',       0,        2,             1.0,                     0.0)
+    required = ('gpu',)
+    optional = ( 'filter','offset','padding','regularization','paganin regularization')
+    default  = ('lorentz',       0,        2,             1.0,                     0.0)
     
-    SetDictionary(dic,dicparams,defaut)
+    SetDictionary(dic,required,optional,default)
 
     gpus  = dic['gpu']
 
