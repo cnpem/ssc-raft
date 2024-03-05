@@ -55,7 +55,7 @@ def bstGPU(tomogram, angles, gpus, dic):
 def bst(tomogram, dic, angles = None, **kwargs):
     """Computes the Reconstruction of a Parallel Tomogram using the 
     Backprojection Slice Theorem (BST) method.
-    GPU function.
+    
 
     Args:
         tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
