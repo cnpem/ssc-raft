@@ -1,15 +1,5 @@
 from ...rafttypes import *
 
-import numpy as np
-import matplotlib.pyplot as plt
-import h5py
-import scipy
-
-from skimage.registration import phase_cross_correlation
-from skimage.transform import pyramid_gaussian
-from skimage.transform import pyramid_reduce
-from scipy.ndimage import center_of_mass
-
 ### Cross Correlation ### 
 def alignment_cross_correlation(data, downscaling_factor=0, fft_upsampling=10, return_common_valid_region=True, remove_null_borders = True, use_gradient = True,downscaling_method='skip_pixels'):
     """ Performs alignment of the variance fild of a block images by registering neighboor slices. See https://doi.org/10.1364/OE.27.036637

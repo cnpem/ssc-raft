@@ -1,10 +1,22 @@
 from ...rafttypes import *
 
-import numpy
-import time
-
 def eEMRT_GPU_(tomo, angles, iterations, gpus):
-    # MultiGPU withou semafaros
+    """ Wrapper for MultiGPU/CUDA function of the 
+    Emission Expectation maximization (EM) method for 3D tomographic reconstructions in 
+    parallel beam geometry. 
+
+    This EM method uses Ray Tracing as forward and inverse operators.
+
+    Args:
+        tomo (ndarray): Tomographic 3D data with shape (slices,angles,lenght) 
+        angles (float list): List of angles in radians
+        iterations (int): EM iterations
+        gpus (int list): List of gpus
+        
+    Returns:
+        (ndarray): stacking 3D reconstructed volume (z,y,x) or 2D reconstructed sinograms (y,x)
+    """
+    # MultiGPU without semafaros
 
     if len(tomo.shape) == 2:
         nslices = 1
@@ -53,6 +65,23 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus):
     return obj
 
 def tEMRT_GPU_(counts, flat, angles, iterations, gpus):
+    """ Wrapper for MultiGPU/CUDA function of the 
+    Transmission Expectation maximization (EM) method for 3D tomographic reconstructions in 
+    parallel beam geometry. Flat (or empty) here is defined by a measurement without
+    a sample, to measure the background.
+
+    This EM method uses Ray Tracing as forward and inverse operators.
+
+    Args:
+        counts (ndarray): Photon counts 3D data with shape (slices,angles,lenght) 
+        flat (ndarray): Flat (or background) data with shape (slices,1,lenght) 
+        angles (float list): List of angles in radians
+        iterations (int): EM iterations
+        gpus (int list): List of gpus
+        
+    Returns:
+        (ndarray): stacking 3D reconstructed volume (z,y,x) or 2D reconstructed sinograms (y,x)
+    """
     # MultiGPU withou semafaros
 
     if len(counts.shape) == 2:
@@ -112,11 +141,31 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus):
     return obj
 
 
-def tEMFQ_GPU_(count, flat, angles, 
-    pad, interpolation, det_pixel, 
-    tv_reg, iterations, 
-    gpus, obj=None):
+def tEMFQ_GPU_(count, flat, angles, pad, interpolation, 
+               det_pixel, tv_reg, iterations, gpus, obj=None):
+    """ Wrapper for MultiGPU/CUDA function of the 
+    Transmission Expectation maximization (EM) method for 3D tomographic reconstructions in 
+    parallel beam geometry. Flat (or empty) here is defined by a measurement without
+    a sample, to measure the background.
 
+    This EM method uses the Fourier Slice Theorem (FST) for the forward operator and 
+    Backprojection Slice Theorem (BST) for the inverse operator.
+
+    Args:
+        counts (ndarray): Photon counts 3D data with shape (slices,angles,lenght) 
+        flat (ndarray): Flat (or background) data with shape (slices,1,lenght) 
+        angles (float list): List of angles in radians
+        pad (int): Data padding - Integer multiple of the data size (0,1,2, etc...)
+        interpolation (str): Type of interpolation. Options: \'nearest\' or \'bilinear\'
+        det_pixel (float): Detector pixel size in meters
+        tv_reg (float): Total variation regularization parameter
+        iterations (int): EM iterations
+        gpus (int list): List of gpus
+        obj (ndarray,optional): Initial guess for the EM iterations with same shape as counts [default: zeros array]
+        
+    Returns:
+        (ndarray): stacking 3D reconstructed volume (z,y,x) or 2D reconstructed sinograms (y,x)
+    """
     if len(count.shape) == 2:
         nslices = 1
     else:
@@ -158,8 +207,8 @@ def tEMFQ_GPU_(count, flat, angles,
     padx,pady,padz         = pad
     det_pixelx, det_pixely = det_pixel
 
-    padd = padx * nrays
-    logger.info(f'Set EM Frequency pad value as {padx} x horizontal dimension = ({padd}).')
+    # padd = padx * nrays
+    # logger.info(f'Set EM Frequency pad value as {padx} x horizontal dimension = ({padd}).')
 
     param_int     = [nrays, nangles, nslices, objsize, 
                      padx, pady, padz, nflats, iterations, interpolation]

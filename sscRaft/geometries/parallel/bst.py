@@ -1,11 +1,32 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
-
 from ...rafttypes import *
+
 from ...processing.io import *
-import numpy 
 
 def bstGPU(tomogram, angles, gpus, dic):
-           
+    """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
+    tomogram using the Backprojection Slice Theorem (BST) method.
+
+    Args:
+        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
+        angles (float list): List of angles in radians
+        gpus (int list): List of gpus
+        dic (dict): Dictionary with parameters info
+
+    Returns:
+        (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
+
+    Dictionary parameters:
+
+        * ``dic['filter']`` (str): Filter type [required]
+
+            #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
+            
+        * ``dic['paganin regularization']`` (float): Paganin regularization value ( value >= 0 ) [required]
+        * ``dic['regularization']`` (float): Regularization value ( value >= 0 ) [required]
+        * ``dic['padding']`` (int): Data padding - Integer multiple of the data size (0,1,2, etc...) [required]
+
+    """         
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
     gpus     = numpy.ascontiguousarray(gpus.astype(numpy.intc))
@@ -21,12 +42,11 @@ def bstGPU(tomogram, angles, gpus, dic):
     
     objsize        = nrays
 
+    filter_type    = FilterNumber(dic['filter'])
     paganin        = dic['paganin regularization']
     regularization = dic['regularization']
 
-    filter_type    = FilterNumber(dic['filter'])
-
-    # logger.info(f'FBP Paganin regularization: {paganin}')
+    # logger.info(f'BST Paganin regularization: {paganin}')
 
     pad            = dic['padding'] + 2
 
@@ -53,7 +73,7 @@ def bstGPU(tomogram, angles, gpus, dic):
 
 
 def bst(tomogram, dic, angles = None, **kwargs):
-    """Computes the Reconstruction of a Parallel Tomogram using the 
+    """Computes the reconstruction of a parallel beam tomogram using the 
     Backprojection Slice Theorem (BST) method.
     
 
@@ -69,8 +89,8 @@ def bst(tomogram, dic, angles = None, **kwargs):
 
     Dictionary parameters:
 
-        * ``dic['gpu']`` (ndarray): List of gpus for processing [required]
-        * ``dic['angles[rad]']`` (list): list of angles in radians [required]
+        * ``dic['gpu']`` (ndarray): List of gpus  [required]
+        * ``dic['angles[rad]']`` (list): List of angles in radians [required]
         * ``dic['filter']`` (str,optional): Filter type [default: \'lorentz\']
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
@@ -84,7 +104,7 @@ def bst(tomogram, dic, angles = None, **kwargs):
     optional = ( 'filter','offset','padding','regularization','paganin regularization')
     default  = ('lorentz',       0,        2,             1.0,                     0.0)
     
-    SetDictionary(dic,required,optional,default)
+    dic = SetDictionary(dic,required,optional,default)
 
     dic['regularization'] = 1.0
 

@@ -1,11 +1,4 @@
 from ...rafttypes import *
-import numpy as np
-import ctypes
-import ctypes.util
-from ctypes import c_float as float32
-from ctypes import c_int as int32
-from ctypes import c_void_p  as void_p
-from ctypes import c_size_t as size_t
 
 
 def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
@@ -14,7 +7,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
 
     Args:
         data (ndarray): Cone beam projection tomogram. The axes are [slices, angles, lenght].
-        dic (dictionary): Dictionary with the experiment info.
+        dic (dictionary): Dictionary with the parameters.
 
     Returns:
         (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [z, y, x].
@@ -189,6 +182,7 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
     recon = np.ascontiguousarray(recon.astype(np.float32))
     recon_p = recon.ctypes.data_as(ctypes.c_void_p)
 
-    libraft.gpu_fdk(lab, recon_p, proj_p, angles_p, gpus_p, int(ndev), time_p)
+    libraft.gpu_fdk(lab, recon_p, proj_p, angles_p, gpus_p, 
+                    ctypes.c_int(ndev), time_p)
 
     return recon

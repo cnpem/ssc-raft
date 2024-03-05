@@ -1,12 +1,32 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
-
 from ...rafttypes import *
+
 from ...processing.io import *
-import numpy as np
-from time import time
 
 def fbpGPU(tomogram, angles, gpus, dic):
-           
+    """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
+    tomogram using the Filtered Backprojection (FBP) method.
+
+    Args:
+        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
+        angles (float list): List of angles in radians
+        gpus (int list): List of gpus
+        dic (dict): Dictionary with parameters info
+
+    Returns:
+        (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
+
+    Dictionary parameters:
+
+        * ``dic['filter']`` (str): Filter type [required]
+
+            #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
+            
+        * ``dic['paganin regularization']`` (float): Paganin regularization value ( value >= 0 ) [required]
+        * ``dic['regularization']`` (float): Regularization value ( value >= 0 ) [required]
+        * ``dic['padding']`` (int): Data padding - Integer multiple of the data size (0,1,2, etc...) [required]
+
+    """        
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
     gpus     = np.ascontiguousarray(gpus.astype(np.intc))
@@ -65,24 +85,23 @@ def fbpGPU(tomogram, angles, gpus, dic):
     return obj
 
 def fbp(tomogram, dic, angles = None, **kwargs):
-    """Computes the Reconstruction of a Parallel Tomogram using the 
-    Filtered Backprojection method (FBP).
-    GPU function.
+    """Computes the reconstruction of a parallel beam tomogram using the 
+    Filtered Backprojection (FBP) method.
 
     Args:
-        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
-        dic (dict): Dictionary with the experiment info.
+        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght]
+        dic (dict): Dictionary with the parameters
 
     Returns:
-        (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
+        (ndarray): Reconstructed sample 3D object. The axes are [z, y, x]
 
-    * One or MultiGPUs. 
-    * Calls function ``fbpGPU()``.
+    * One or MultiGPUs
+    * Calls function ``fbpGPU()``
 
     Dictionary parameters:
 
-        * ``dic['gpu']`` (ndarray): List of gpus for processing [required]
-        * ``dic['angles[rad]']`` (list): list of angles in radians [required]
+        * ``dic['gpu']`` (int list): List of gpus [required]
+        * ``dic['angles[rad]']`` (float list): List of angles in radians [required]
         * ``dic['filter']`` (str,optional): Filter type [default: \'lorentz\']
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
@@ -96,7 +115,7 @@ def fbp(tomogram, dic, angles = None, **kwargs):
     optional = ( 'filter','offset','padding','regularization','paganin regularization')
     default  = ('lorentz',       0,        2,             1.0,                     0.0)
     
-    SetDictionary(dic,required,optional,default)
+    dic = SetDictionary(dic,required,optional,default)
 
     gpus  = dic['gpu']
 

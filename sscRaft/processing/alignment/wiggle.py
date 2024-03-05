@@ -1,11 +1,5 @@
 from ...rafttypes import *
 
-import numpy
-
-import uuid
-import SharedArray as sa
-from scipy.optimize import minimize
-
 #----------------------------
 #      Shift for volume 
 #
@@ -103,19 +97,18 @@ def _build_shift_volume (params):
    
 
 def set_wiggle( volume, axis, shiftx, shifty, nproc ):
-
-    """ Set shifting values for the x,y axis at a given volume (considering a third axis fixed) 
+    """ Set shifting values for the x,y axis at a given volume 
+    (considering a third axis fixed) 
     
     Args:
-        volume: a digital volume squared matrices.
-        axis: 0, 1 or 2 (axis to be fixed).
-        shiftx: shifting array for x.
-        shifty: shifting array for y.
-        nproc: number of processes.
+        volume (ndarray): a digital volume squared matrices. The axis are [angles,slices,lenght]
+        axis (int): 0, 1 or 2 (axis to be fixed)
+        shiftx (int): shifting array for x
+        shifty (int): shifting array for y
+        nproc (int): number of processes
              
     Returns:
-        (ndarray): block of sinograms with shape [nangles, size, size], with size corresponding to the
-        size of each phantom. 
+        (ndarray): block of sinograms with shape [angles,slices,lenght]
 
     * CPU function
     * This function uses a shared array through package 'SharedArray'.
@@ -148,17 +141,17 @@ def set_wiggle( volume, axis, shiftx, shifty, nproc ):
 
 def set_wiggle_tomogram( volume, shiftx, shifty, nproc ):
 
-    """ Set shifting values for the x,y axis at a given tomogram (considering a third axis fixed) 
+    """ Set shifting values for the x,y axis at a given tomogram 
+    (considering a third axis fixed) 
     
     Args:
-        volume: a digital tomogram (axis=0 for frames and axis=1 for slices).
-        shiftx: shifting matrix for x.
-        shifty: shifting array for y.
-        nproc: number of processes.
+        volume (ndarray): a digital tomogram (axis=0 for frames and axis=1 for slices). The axis are [angles,slices,lenght]
+        shiftx (int): shifting matrix for x
+        shifty (int): shifting array for y
+        nproc (int): number of processes
              
     Returns:
-        (ndarray): block of sinograms with shape [nangles, size, size], with size corresponding to the
-        size of each phantom. 
+        (ndarray): block of sinograms with shape [angles,slices,lenght]
 
     * CPU function
     * This function uses a shared array through package 'SharedArray'.
@@ -240,14 +233,13 @@ def set_wiggle_tomogram( volume, shiftx, shifty, nproc ):
     """ Set shifting values for the x,y axis at a given tomogram (considering a third axis fixed) 
     
     Args:
-        volume: a digital tomogram (axis=0 for frames and axis=1 for slices).
-        shiftx: shifting matrix for x.
-        shifty: shifting array for y.
-        nproc: number of processes.
+        volume (ndarray): a digital tomogram (axis=0 for frames and axis=1 for slices). The axis are [angles,slices,lenght]
+        shiftx (int): shifting matrix for x
+        shifty (int): shifting array for y
+        nproc (int): number of processes
              
     Returns:
-        (ndarray): block of sinograms with shape [nangles, size, size], with size corresponding to the
-        size of each phantom. 
+        (ndarray): block of sinograms with shape [nangles,slices,lenght]
 
     * CPU function
     * This function uses a shared array through package 'SharedArray'.
@@ -293,7 +285,7 @@ def set_wiggle_tomogram( volume, shiftx, shifty, nproc ):
 #
 #
 
-def azevedo_matrix(n):
+def _azevedo_matrix(n):
 
     H = numpy.zeros([3,3])
 
@@ -349,7 +341,7 @@ def _get_alignment_params( tomogram ):
 
     Ah = numpy.hstack([a1, a2, a3])
 
-    H = azevedo_matrix(nangles)
+    H = _azevedo_matrix(nangles)
   
     pinv2 = numpy.dot( H, numpy.transpose( Ah ) )
     
@@ -590,7 +582,7 @@ def _build_p_tomogram_vaxis (params):
    
 
 
-def get_wiggle_p_vertical( tomogram, idx, nproc ):
+def _get_wiggle_p_vertical( tomogram, idx, nproc ):
 
     '''
     name = str( uuid.uuid4() )
@@ -776,7 +768,7 @@ def _build_p_tomogram_haxis (params, ptype):
         p.join()
 
 
-def get_wiggle_p_horizontal_slices( tomogram , nproc):
+def _get_wiggle_p_horizontal_slices( tomogram , nproc):
 
     name = str( uuid.uuid4() )
     name2= str( uuid.uuid4() )
@@ -809,7 +801,7 @@ def get_wiggle_p_horizontal_slices( tomogram , nproc):
     return output, shift, cmass
     
     
-def get_wiggle_p_horizontal_mean( tomogram, nproc ):
+def _get_wiggle_p_horizontal_mean( tomogram, nproc ):
 
     name = str( uuid.uuid4() )
     name2= str( uuid.uuid4() )
@@ -846,15 +838,14 @@ def get_wiggle( tomogram, direction, nproc, idx, *args ):
     """ Get horizontal shifting values for the x,y axis at a given tomogram volume obtained from parallel geometry
     
     Args:
-        tomogram: a digital tomogram with shape [nangles, size, size] with size, the detector width/heigth.
-        direction: string ``horizontal`` or ``vertical``
-        nproc: number of processes.
-        idx: a given index (from angle axis), to be used as a reference.
+        tomogram (ndarray): a digital tomogram with shape [angles,slices,lenght] the detector height/lenght (slices/lenght).
+        direction (str): string ``horizontal`` or ``vertical``
+        nproc (int): number of processes.
+        idx (int): a given index (from angle axis), to be used as a reference.
 
     Returns:
-        (ndarray): tomogram with shape [nangles, size, size], with size corresponding to the
-        size of each phantom. 
-
+        (ndarray): tomogram with shape [nangles,slices,lenght]
+        
     * CPU function
     * This function uses a shared array through package 'SharedArray'.
     * The total number of images will be divided by the number of processes given as input
@@ -863,13 +854,13 @@ def get_wiggle( tomogram, direction, nproc, idx, *args ):
     """
 
     if not args:
-        function_horizontal = get_wiggle_p_horizontal_slices
+        function_horizontal = _get_wiggle_p_horizontal_slices
     else:
         g = args[0]
         if g == "mean":
-            function_horizontal = get_wiggle_p_horizontal_mean
+            function_horizontal = _get_wiggle_p_horizontal_mean
         elif g=="slices":
-            function_horizontal = get_wiggle_p_horizontal_slices
+            function_horizontal = _get_wiggle_p_horizontal_slices
         else:
             print('ssc-radon: Error! Check extra arguments ... "mean"?')
 
@@ -878,7 +869,7 @@ def get_wiggle( tomogram, direction, nproc, idx, *args ):
          
     elif direction=="vertical":
 
-        return get_wiggle_p_vertical( tomogram, idx, nproc )
+        return _get_wiggle_p_vertical( tomogram, idx, nproc )
         
     else:
         print('ssc-radon: Error wrong movement direction string!')

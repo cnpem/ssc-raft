@@ -1,1 +1,1 @@
-from .mogno import *
+from .beamlines import *

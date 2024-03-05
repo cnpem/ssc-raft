@@ -1,9 +1,4 @@
 from ...rafttypes import *
-import numpy as np
-from ctypes import c_float as float32
-from ctypes import c_int as int32
-from ctypes import c_void_p  as void_p
-from ctypes import c_size_t as size_t
 from ...processing.io import *
 
 def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
@@ -25,7 +20,7 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
 
     gpus = numpy.array(gpus)
     gpus = np.ascontiguousarray(gpus.astype(np.intc))
-    gpusptr = gpus.ctypes.data_as(void_p)
+    gpusptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     nrays   = tomogram.shape[-1]
     nangles = tomogram.shape[-2]
@@ -48,7 +43,7 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
         logger.info(f'Titarenko\'s regularization set to {rings_lambda}.')  
 
     tomogram            = np.ascontiguousarray(tomogram.astype(np.float32))
-    tomogram_ptr         = tomogram.ctypes.data_as(void_p)
+    tomogram_ptr         = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     libraft.getTitarenkoRingsMultiGPU(gpusptr, ctypes.c_int(ngpus), tomogram_ptr, 
             ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
@@ -66,8 +61,8 @@ def rings(tomogram, dic, **kwargs):
     Returns:
         (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
     
-    * One or MultiGPUs. 
-    * Calls function ``TitarenkoRingsGPU()``.
+    * One or MultiGPUs
+    * Calls function ``TitarenkoRingsGPU()``
 
     Dictionary parameters:
 
@@ -79,7 +74,7 @@ def rings(tomogram, dic, **kwargs):
     optional = ('lambda rings','rings block')
     default  = (-1,1)
 
-    SetDictionary(dic,required,optional,default)
+    dic = SetDictionary(dic,required,optional,default)
 
     gpus = dic['gpu']
 

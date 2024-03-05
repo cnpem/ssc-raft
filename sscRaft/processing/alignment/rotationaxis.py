@@ -1,7 +1,43 @@
 from ...rafttypes import *
-import numpy as np
 
-def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
+def Centersino(frame0, frame1, flat, dark):
+        """ Find the offset of a 180 tomogam to correctly align it, computed by cross correlation.
+        It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
+        on the intensity data :math:`I` inside function
+
+        .. math:: -\log(\frac{I - d_{0}}{I_{0}})
+
+        Args:
+            frame0 (ndarray): First frame of intensity data obtained by detector
+            frame1 (ndarray): Last frame of intensity data obtained by detector
+            flat (ndarray): Flat
+            dark (ndarray): Dark
+
+        Returns:
+            int: offset
+        """        
+
+        nrays = frame0.shape[-1]
+        nslices = frame0.shape[-2]
+
+        frame0 = np.ascontiguousarray(frame0.astype(np.float32))
+        frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
+
+        frame1 = np.ascontiguousarray(frame1.astype(np.float32))
+        frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
+
+        dark = np.ascontiguousarray(dark.astype(np.float32))
+        darkptr = dark.ctypes.data_as(ctypes.c_void_p)
+
+        flat = np.ascontiguousarray(flat.astype(np.float32))
+        flatptr = flat.ctypes.data_as(ctypes.c_void_p)
+
+        offset = libraft.findcentersino(frame0ptr, frame1ptr, darkptr, flatptr, 
+                                        ctypes.c_int(nrays), ctypes.c_int(nslices))
+        
+        return int(offset)
+
+def correct_rotation_axis360(data: np.ndarray, dic: dict) -> np.ndarray:
     """CPU (python) function: Corrects the rotation axis of a sample measured on more then 180 degrees.
     Searches for the rotation axis index in axis 2 (x variable) if necessary, or corrects over a given rotation axis index value.
     Returns the projections with rotation axis corrected.
@@ -9,7 +45,7 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
 
     Args:
         data (ndarray): Projection tomogram. The axes are [slices, angles, lenght].
-        experiment (dictionary): Dictionary with the experiment info.
+        dic (dictionary): Dictionary with the parameters info.
 
     Returns:
         (ndarray, int): Rotation axis corrected tomogram (3D) with axes [slices, angles, lenght] 
@@ -19,38 +55,40 @@ def correct_rotation_axis360(data: np.ndarray, experiment: dict) -> np.ndarray:
         ValueError: If the number of angles/projections is not an even number.
 
     Dictionary parameters:
-        *``experiment['shift']`` (Tuple, optional): (bool,int) Rotation axis automatic corrrection (is_autoRot) (`is_autoRot = True`, `value = 0`).
-        *``experiment['findRotationAxis']`` (Tuple, optional): (int,int,int) For rotation axis function. Tuple (`nx_search=500`, `nx_window=500`, `nsinos=None`).
-        *``experiment['padding']`` (int, optional): Number of elements for horizontal zero-padding. Defaults to 0.
+
+        *``dic['shift']`` (Tuple, optional): (bool,int) Rotation axis automatic corrrection (is_autoRot) (``is_autoRot = True``, ``value = 0``).
+        *``dic['findRotationAxis']`` (Tuple, optional): (int,int,int) For rotation axis function. Tuple (``nx_search=500``, ``nx_window=500``, ``nsinos=None``).
+        *``dic['padding']`` (int, optional): Number of elements for horizontal zero-padding. Defaults to ``0``.
 
     Options:
-        * `nx_search` (int, optional): Width of the search. 
-        If the center of rotation is not in the interval `[nx_search-nx//2; nx_search+nx//2]` this function will return a wrong result.
-        Default is `nx_search=500`.
-        * `nx_window` (int, optional): How much of the sinogram will be used in the axis 2.
-        Default is `nx_window=500`.
-        * `nsinos` (int or None, optional): Number of sinograms to average over.
-        Default is None, which results in `nsinos = nslices//2`, where `nslices = tomo.shape[1]`.
-        * `is_autoRot` (bool,optional): Apply the automatic rotation axis correction.
-        Default is `True`.
-        * `value`(int,optional): Value of the rotation axis shift for correction.
-        Default is `0`.
+
+        * ``nx_search`` (int, optional): Width of the search. 
+        If the center of rotation is not in the interval ``[nx_search-nx//2; nx_search+nx//2]`` this function will return a wrong result.
+        Default is ``nx_search=500``.
+        * ``nx_window`` (int, optional): How much of the sinogram will be used in the axis 2.
+        Default is ``nx_window=500``.
+        * ``nsinos`` (int or None, optional): Number of sinograms to average over.
+        Default is None, which results in ``nsinos = nslices//2``, where ``nslices = tomo.shape[1]``.
+        * ``is_autoRot`` (bool,optional): Apply the automatic rotation axis correction.
+        Default is ``True``.
+        * ``value`` (int,optional): Value of the rotation axis shift for correction.
+        Default is ``0``.
 
     """
 
-    is_autoRot   = experiment['shift'][0]
-    shift        = experiment['shift'][1]
+    is_autoRot   = dic['shift'][0]
+    shift        = dic['shift'][1]
 
     if is_autoRot:
         logger.info('Applying automatic rotation axis correction')
 
-        nx_search  = experiment['findRotationAxis'][0]
-        nx_window  = experiment['findRotationAxis'][1]
-        nsinos     = experiment['findRotationAxis'][2]
+        nx_search  = dic['findRotationAxis'][0]
+        nx_window  = dic['findRotationAxis'][1]
+        nsinos     = dic['findRotationAxis'][2]
         
         shift      = find_rotation_axis_360(np.swapaxes(data,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
 
-        experiment.update({'shift':[is_autoRot,shift]})
+        dic.update({'shift':[is_autoRot,shift]})
 
     else:
         logger.info(f'Applying given rotation axis correction deviation value: {shift}')
@@ -82,7 +120,7 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
     Parameters
     ----------
     tomo : 3 dimensional array_like object
-        Raw tomogram.
+        Raw tomogram in [angles,slice,lenght] axis.
         tomo[m, i, j] selects the value of the pixel at the i-row and j-column in the projection m.
     nx_search : int, optional
         Width of the search. 
@@ -131,14 +169,7 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
     
     deviation = np.argmin(diff_symmetry) - nx_search
 
-    # print('Shift :', deviation)
     logger.info(f'Automatic rotation axis correction deviation: {deviation}')
-
-    # Garbage Collector
-    # lists are cleared whenever a full collection or
-    # collection of the highest generation (2) is run
-    # collected = gc.collect() # or gc.collect(2)
-    # logger.log(DEBUG,f'Garbage collector: collected {collected} objects.')
 
     return deviation
 
@@ -146,12 +177,14 @@ def correct_rotation_axis(data: np.ndarray, deviation: int) -> np.ndarray:
     """Corrects the rotation axis of a data according to a deviation value defined 
     by the number of pixels translated form the center of the data.
 
+    The deviation value, with sign, is computed through the sscRaft function ``Centersino()``.
+
     Args:
         data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
         deviation (int): Number of pixels representing the rotation axis deviation
 
     Returns:
-        (ndarray, int): Rotation axis corrected tomogram (3D) with axes [slices, angles, lenght] 
+        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, 2 * deviation + lenght] 
 
     * CPU function
     """

@@ -1,11 +1,4 @@
 from ..rafttypes import *
-import numpy as np
-import gc
-from time import time
-from ctypes import c_float as float32
-from ctypes import c_int as int32
-from ctypes import c_void_p  as void_p
-from ctypes import c_size_t as size_t
 
 def phase_filters(tomo,dic):
 
@@ -17,7 +10,7 @@ def phase_filters(tomo,dic):
 
     gpus = np.array(gpus)
     gpus = np.ascontiguousarray(gpus.astype(np.intc))
-    gpusptr = gpus.ctypes.data_as(void_p)
+    gpusptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     nrays   = tomogram.shape[-1]
     nslices = tomogram.shape[-2]
@@ -112,9 +105,11 @@ def phase_filters(tomo,dic):
     int_paramptr    = int_param.ctypes.data_as(ctypes.c_void_p)
    
     tomogram = np.ascontiguousarray(tomogram.astype(np.float32))
-    tomogramptr = tomogram.ctypes.data_as(void_p)
+    tomogramptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
-    # libraft.phase_filters(tomogramptr, float_paramsptr, int_paramptr, int32(nrays), int32(nangles), int32(nslices), gpusptr, int32(ngpus))
+    # libraft.phase_filters(tomogramptr, float_paramsptr, int_paramptr, 
+                        # ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
+                        # gpusptr, ctypes.c_int(ngpus))
 
     return np.swapaxes(tomogram,0,1)
 

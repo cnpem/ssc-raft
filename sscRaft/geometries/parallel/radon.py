@@ -1,21 +1,19 @@
-import numpy
 from ...rafttypes import *
 
-
 def radon_RT(phantom, angles, gpus, *args):
-    """ Radon transform using Ray Tracing for a given input phantom.
+    """ Radon transform using Ray Tracing for a given input phantom 
+    on a parallel beam geometry.
     
     Args:
-        phantom (ndarray): digital squared input phantom. Axis are (slices, y, x) [required]
+        phantom (ndarray): digital squared input phantom. Axis are (slices, width, lenght) [required]
         angles (float list): list of angles in radians [required]
         gpus (int list): list of GPUs [required]
-        args (float, optional): support domain at the x-axis, default value is 1. 
+        args (float, optional): support domain at the x-axis [default: 1.0] 
              
     Returns:
-        (ndarray): Radon transform 2D or 3D. Axis are (slices, angles, rays).
+        (ndarray): Radon transform 2D or 3D. Axis are (slices, angles, lenght)
 
     * MultiGPU function 
-
     """
     if not args:
         a = 1.0

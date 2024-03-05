@@ -1,15 +1,38 @@
 # Authors: Paola Ferraz, Giovanni L. Baraldi, Gilberto Martinez
 
 from ..rafttypes import *
-import numpy as np
-from ctypes import c_float as float32
-from ctypes import c_int as int32
-from ctypes import c_void_p  as void_p
-from ctypes import c_size_t as size_t
-
 from .io import *
 
 def background_correctionGPU(frames, flat, dark, gpus, is_log):
+    """ GPU function to correct tomography projections (or frames) background 
+    with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
+    a sample, to measure the background.
+    
+    Can be computed in two ways.
+
+    .. math::
+    T = \log{- \frac{D - D_d}{D_f - D_d}}
+
+    for transmission tomography, and
+
+    .. math::
+    T = \frac{D - D_d}{D_f - D_d}
+
+    for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the projection volume, 
+    :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
+
+    Args:
+        frames (ndarray): Frames (or projections) of size [slices, angles, lenght]
+        flat   (ndarray): Flat of size [slices, number of flats, lenght]
+        dark   (ndarray): Dark of size [slices, lenght]
+        gpus  (int list): List of GPUs 
+        is_log (bool): Apply ``- logarithm()`` or not 
+
+    Returns:
+        (ndarray): Corrected frames (or projections) of dimension [slices, angles, lenght]
+
+    * One or MultiGPUs. 
+    """ 
         
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
@@ -74,13 +97,13 @@ def background_correctionGPU(frames, flat, dark, gpus, is_log):
     logger.info(f'Dark dimension is ({dark.shape[0]},1,{dark.shape[-1]}) = (slices,number of darks,rays).')
 
     flat       = CNICE(flat)
-    flat_ptr   = flat.ctypes.data_as(void_p)
+    flat_ptr   = flat.ctypes.data_as(ctypes.c_void_p)
 
     dark       = CNICE(dark)
-    dark_ptr   = dark.ctypes.data_as(void_p)
+    dark_ptr   = dark.ctypes.data_as(ctypes.c_void_p)
     
     frames     = CNICE(frames)
-    frames_ptr = frames.ctypes.data_as(void_p)
+    frames_ptr = frames.ctypes.data_as(ctypes.c_void_p)
 
     libraft.getBackgroundCorrectionMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
             frames_ptr, flat_ptr, dark_ptr, 
@@ -91,6 +114,7 @@ def background_correctionGPU(frames, flat, dark, gpus, is_log):
 
 def correct_projections(frames, flat, dark, dic, **kwargs):
     """ Function to correct tomography projections (or frames) with flat and dark. 
+    Flat (or empty) here is defined by a measurement without a sample, to measure the background.
     
     Can be computed in two ways.
 
@@ -109,7 +133,7 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
         frames (ndarray): Frames (or projections) of size [angles, slices, lenght]
         flat   (ndarray): Flat of size [number of flats, slices, lenght]
         dark   (ndarray): Dark of size [slices, lenght]
-        dic (dictionary, optional): Dictionary with the parameters info.
+        dic (dictionary): Dictionary with the parameters info.
 
     Returns:
         (ndarray): Corrected frames (or projections) of dimension [slices, angles, lenght]
@@ -128,7 +152,7 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
     optional = ('uselog')
     defaut   = (False)
     
-    SetDictionary(dic,required,optional,defaut)
+    dic = SetDictionary(dic,required,optional,defaut)
 
     gpus   = dic['gpu']
     is_log = dic['uselog']
@@ -142,8 +166,9 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
     return frames
 
 def correct_background(frames, flat, dark, gpus = [0], is_log = False, **kwargs):
-    """ Function to correct tomography projections (or frames) backgorund 
-    with flat (or empty) and dark. 
+    """ Function to correct tomography projections (or frames) background 
+    with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
+    a sample, to measure the background.
     
     Can be computed in two ways.
 

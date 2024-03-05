@@ -1,6 +1,5 @@
 from ..rafttypes import *
 
-import numpy
 from .parallel.em_parallel import *
 from ..processing.io import *
 
@@ -51,7 +50,7 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
     optional = ('iterations','detectorPixel[m]','padding','beamgeometry')
     default    = (10,0.0,2,'parallel')
 
-    SetDictionary(dic,required,optional,default)
+    dic = SetDictionary(dic,required,optional,default)
 
     gpus          = dic['gpu']
     method        = dic['method']

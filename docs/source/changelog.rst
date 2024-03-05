@@ -1,47 +1,12 @@
-Version 3.0.0 - 2024-03-05
---------------------
-Added
-~~~~~
-- ``EM`` on Frequency
-- ``BST`` reconstruction with new filters and paganin filter
-- ``FBP`` with padding
-- Radon ray tracing 
-- Wiggle and other methods of alignment
-- C/C++/CUDA pipeline
-- ``io.py`` file for io related functions
-- ``correct_background()`` function that corrects the background (flat/dark) with data axis as ``[slices,angles,lenght]`` as input
-- ``correct_rotation_axis()`` function to correct axis deviation
- 
-Changed
-~~~~~~~
-- Source code re-factored
-- Dictionary entries 
-- Changed dictionary all function entries from ``angles`` to ``angles[rad]`` on ``EM``
-- ``em()`` function to support all ``EM`` related methods.
-- Rings and flat/dark correction functions
+Changelog
+=========
 
-Known Bugs
-~~~~~~~~~~
-- ``BST`` works for 180 degrees only on a regular angle mesh
-- ``BST`` angles are hardcoded and not as input
-- Memory issues on ``EM`` for cone-beam geometry
-- Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
-- Memory issues on ``FDK``: In reconstruction by slices
-- ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+All notable changes to this project will be documented in this file.
 
-Removed
-~~~~~~~
-- ``em_cone()`` function
-
-To be done
-~~~~~~~~~~
-- Refactoring ``FDK``
-- Refactoring ``EM`` conebeam ray tracing
-- Add ``FST`` frequency forward method for parallel beam
-- Add ``RadonCONE`` ray tracing forward method for conebeam
+The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
 
-Version 2.2.8 - 2024-02-23
+[2.2.8] - 2024-02-23
 --------------------
 Added
 ~~~~~
@@ -49,9 +14,10 @@ Added
 
 Changed
 ~~~~~~~
-- Fixed ``FBP`` slices bug. Change of CUDA the backprojection kernel computation.
+- Fixed ``FBP`` slices bug!
 - Removed ``z1[m]``, ``z2[m]``, ``z1+z2[m]``, ``detectorPixel[m]`` and ``energy[eV]`` from ``FPB`` 
 - Removed ``z1[m]``, ``z2[m]``, ``z1+z2[m]``, ``detectorPixel[m]`` and ``energy[eV]`` from paganin regularization on ``FBP``
+- Changed dictionary entry  ``angles`` to ``angles[rad]`` on ``EM``
 - Changed dictionary entry  ``angles`` to ``angles[rad]`` on ``EM``
 - Changed ``radon.py`` location on folders
 
@@ -63,7 +29,7 @@ Known Bugs
 - ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
 
 
-Version 2.2.7 - 2024-02-19
+[2.2.7] - 2024-02-19
 --------------------
 Added
 ~~~~~
@@ -82,10 +48,10 @@ Known Bugs
 - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
 - Memory issues on ``FDK``: In reconstruction by slices
 - ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
-- ``FBP`` bugs: repetition of slices, sum of different slices;
+- ``FBP`` bugs: repetition of slices, sum of different slices
 
-Version 2.2.6 - 2024-01-23
---------------------------
+[2.2.6] - 2024-01-23
+--------------------
 Added
 ~~~~~
 - Added ``numpy.flip()`` for ``FBP`` method return on Mogno pipeline for standardization.
@@ -101,11 +67,10 @@ Known Bugs
 - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
 - Memory issues on ``FDK``: In reconstruction by slices
 - ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
-- Dictionary entry ``TempPath`` on ``sscRaft.pipelines.mogno.mogno.Read_TomoFlatDark()`` returning bug if missing 
-- Error return bug on``sscRaft.pipelines.mogno.mogno.Read_TomoFlatDark()`` if data cannot be found
 
-Version 2.2.5 - 2024-01-04
---------------------------
+
+[2.2.5] - 2024-01-04
+--------------------
 Added
 ~~~~~
 - Paganin in ``FBP`` CUDA function
@@ -119,10 +84,6 @@ Changed
 - Added correct instalation instructions
 - Compilation by CMake
 
-Corretions
-~~~~~~~~~~
-- Memory issues on ``FDK``: illegal memmory access on backprojection
-
 Known Bugs
 ~~~~~~~~~~
 - Memory issues on ``EM`` for cone-beam geometry
@@ -131,7 +92,7 @@ Known Bugs
 - ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
 
 
-Version 2.2.4 - 2023-12-22
+[2.2.4] - 2023-12-22
 --------------------
 Added
 ~~~~~
@@ -158,9 +119,10 @@ Known Bugs
 
 Removed
 ~~~~~~~
-- Mogno pipeline function option to use ``phase_filters()`` function on projections.
+- Mogno pipeline function option to use ``phase_filters()`` function on projections - Paganin is done inside ``FDK`` as in version 2.2.3
 
-Version 2.2.3 - 2023-11-09
+
+[2.2.3] - 2023-11-09
 --------------------
 Added
 ~~~~~
@@ -188,11 +150,11 @@ Removed
 ~~~~~~~
 - Mogno pipeline function ``preprocessing_mogno()`` in ``mogno.py``
 
-Version 2.2.2 - 2023-10-20
+[2.2.2] - 2023-10-20
 --------------------
 Added
 ~~~~~
-- New function in Python for a reconstruction pipeline for Mogno beamline 
+- New function in Python for a reconstruction pipeline for Mogno beamline
 - New function in Python for a compute rotation axis deviation ONLY
 - New dictionary entries 
 
@@ -210,11 +172,10 @@ Known Bugs
 ~~~~~~~~~~
 - Memory issues on ``EM`` for cone-beam geometry
 - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
-- Memory issues on ``FDK``: illegal memmory access on backprojection
 - Memory issues on ``FDK``: In reconstruction by slices
 - ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
 
-Version 2.2.1 - 2023-09-21
+[2.2.1] - 2023-09-21
 --------------------
 Added
 ~~~~~
@@ -244,13 +205,13 @@ Known Bugs
 - Rotation Axis function with bug for negative deviations
 - Phase filter with bug on CUDA Padding
 
-Version 2.2.0 - 2023-07-17
+[2.2.0] - 2023-07-17
 --------------------
 Added
 ~~~~~
 - Function for Mogno beamline reconstruction in cone-beam geometry
 - New dictionary entries 
-- Added ``EM`` for cone-beam geometry.
+- Added ``EM`` for cone-beam geometry
 - Parallel ``EM`` now accepts a list of nonregular angles as input
 - Documentation page updated! New examples of usage in documentation page
 
@@ -264,13 +225,13 @@ Corretions
 ~~~~~~~~~~
 - Reconstruction parallel method ``EM`` bug with use of multiprocessing (python) together with other GPU functions.
 
-Known Bugs
+Bugs
 ~~~~~~~~~~
 - Memory issues on ``EM`` for cone-beam geometry
 - The ``FDK`` resconstruction is returning a multiplication factor of ``2`` related to filtering computed by Fourier Transform. This factor changes a little when the filtering is computed by direct convolution
 - ``Tomo360`` (Mogninho - parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
 
-Version 2.1.4 - 2023-02-24
+[2.1.4] - 2023-02-24
 --------------------
 Added
 ~~~~~
@@ -288,27 +249,25 @@ Corretions
 - Reconstruction parallel method ``EM`` bug in blocksize = (1 or data.shape) and ngpus = 1
 
 
-Version 2.1.3 - 2023-02-15
+[2.1.3] - 2023-02-15
 --------------------
 Corretions
 ~~~~~~~~~~
 - Temporary correction in a bug in frame corrections to detect outlier values in sinogram
 
-Version 2.1.2 - 2023-02-09
+[2.1.2] - 2023-02-09
 --------------------
 Corretions
 ~~~~~~~~~~
 - Fixed rings bug  in ``filtering.cu`` on ``cuda.src.geometries.gc.fdk``
 
-
-Version 2.1.1 - 2023-02-06
+[2.1.1] - 2023-02-06
 --------------------
 Corretions
 ~~~~~~~~~~
 - Fixed minor bug in ``__init__.py`` on ``cuda.src.geometries.gp.reconstruction``
 
-
-Version 2.1.0 - 2023-02-02
+[2.1.0] - 2023-02-02
 --------------------
 Added
 ~~~~~
@@ -326,18 +285,14 @@ Corretions
 ~~~~~~~~~~
 - Fixed minor bug in normalization - now parallelize over angles
 
-
-Version 2.0.1 - 2023-01-24
+[2.0.1] - 2023-01-24
 --------------------
 Added
 ~~~~~
 - Automatic correction of rotation shift for conical rays
 
-
-Version 2.0.0 - 2023-01-24
+[2.0.0] - 2023-01-24
 --------------------
-Initial release
-
 Added
 ~~~~~
 - FDK for conical rays
@@ -350,15 +305,12 @@ Changed
 ~~~~~~~
 - Internal organization folders
 
-
-Version 1.0.3 to Version 1.0.0 
+[1.0.3] to [1.0.0] - previous releases
 --------------------------------------
-Previous releases
-
 Added
-~~~~~
-- Raft for parallel rays 
+~~~~~~~
+- Raft for parallel rays
 
 Changed
-~~~~~
+~~~~~~~
 - Internal structure

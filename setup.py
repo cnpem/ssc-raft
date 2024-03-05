@@ -33,7 +33,7 @@ setup(
     },
 
     zip_safe=False,
-    author='Eduardo X. Miqueles / Paola Ferraz / Larissa M. Moreno / Otávio Paiano / Giovanni Baraldi / Gilberto Martinez Jr.',
+    author='Eduardo X. Miqueles / Paola Ferraz / Larissa M. Moreno / Otávio Paiano / Alan Zanoni Peixinho / João Oliveira / Giovanni Baraldi / Gilberto Martinez Jr.',
     author_email='eduardo.miqueles@lnls.br, paola.ferraz@lnls.br',
     description='Reconstruction algorithms for tomography',
     keywords=['raft', 'tomography', 'radon', 'imaging', 'filtered backprojection', 'fdk', 'expectation-maximization','rings','tomogram alignment'],

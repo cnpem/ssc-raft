@@ -99,12 +99,12 @@ deploy_docs:
   stage: deploy
   image: ubuntu:latest
   script:
-    - mkdir -p /var/www/html/ssc/ssc-raft/
-    - rm -rf /var/www/html/ssc/ssc-raft/*
-    - cp -r ./docs/build/* /var/www/html/ssc/ssc-raft/
+    - mkdir -p /var/www/html/ssc/ssc-raft-300/
+    - rm -rf /var/www/html/ssc/ssc-raft-300/*
+    - cp -r ./docs/build/* /var/www/html/ssc/ssc-raft-300/
   tags:
     - wiki
   dependencies:
     - build_docs
-  only:
-    - tags
+  # only:
+  #   - tags
