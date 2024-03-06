@@ -27,7 +27,9 @@ version = '3.0.0'
 
 # -- General configuration ---------------------------------------------------
 
-autodoc_mock_imports = ["cupy", "h5py", "SharedArray", "sscRaft.rafttypes"] # list all modules to be ignored during compilation of the html
+autodoc_mock_imports = ["cupy", "h5py", "SharedArray", 
+                        "sscRaft.rafttypes","numpy",
+                        "scipy","skimage"] # list all modules to be ignored during compilation of the html
 
 
 # Add any Sphinx extension module names here, as strings. They can be

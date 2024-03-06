@@ -1,7 +1,7 @@
 from ...rafttypes import *
+import numpy
 
-
-def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
+def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
     GPU function.
 
@@ -158,28 +158,28 @@ def fdk(tomogram: np.ndarray, dic: dict = {}) -> np.ndarray:
                 nph = nph, padh = padh,
                 energy = energy)
 
-    time = np.zeros(2)
-    time = np.ascontiguousarray(time.astype(np.float64))
+    time = numpy.zeros(2)
+    time = numpy.ascontiguousarray(time.astype(numpy.float64))
     time_p = time.ctypes.data_as(ctypes.c_void_p)
 
-    gpus = np.array(dic['gpu'])
+    gpus = numpy.array(dic['gpu'])
     ndev = len(gpus)
-    gpus = np.ascontiguousarray(gpus.astype(np.intc))
+    gpus = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_p = gpus.ctypes.data_as(ctypes.c_void_p)
 
-    angles = np.ascontiguousarray(angles.astype(np.float32))
+    angles = numpy.ascontiguousarray(angles.astype(numpy.float32))
     angles_p = angles.ctypes.data_as(ctypes.c_void_p)
 
     logger.info(f'Tomogram data shape: {tomogram.shape} = (slices,angles,rays).')
 
-    proj = np.ascontiguousarray(tomogram.astype(np.float32))
+    proj = numpy.ascontiguousarray(tomogram.astype(numpy.float32))
     proj_p = proj.ctypes.data_as(ctypes.c_void_p)
 
-    recon = np.zeros((lab.nz, lab.ny, lab.nx))
+    recon = numpy.zeros((lab.nz, lab.ny, lab.nx))
 
     logger.info(f'Recon shape: ({lab.nx}, {lab.ny}, {lab.nz}) = (nx,ny,nz).')
 
-    recon = np.ascontiguousarray(recon.astype(np.float32))
+    recon = numpy.ascontiguousarray(recon.astype(numpy.float32))
     recon_p = recon.ctypes.data_as(ctypes.c_void_p)
 
     libraft.gpu_fdk(lab, recon_p, proj_p, angles_p, gpus_p, 

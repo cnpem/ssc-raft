@@ -20,16 +20,16 @@ def Centersino(frame0, frame1, flat, dark):
         nrays = frame0.shape[-1]
         nslices = frame0.shape[-2]
 
-        frame0 = np.ascontiguousarray(frame0.astype(np.float32))
+        frame0 = numpy.ascontiguousarray(frame0.astype(numpy.float32))
         frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
 
-        frame1 = np.ascontiguousarray(frame1.astype(np.float32))
+        frame1 = numpy.ascontiguousarray(frame1.astype(numpy.float32))
         frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
 
-        dark = np.ascontiguousarray(dark.astype(np.float32))
+        dark = numpy.ascontiguousarray(dark.astype(numpy.float32))
         darkptr = dark.ctypes.data_as(ctypes.c_void_p)
 
-        flat = np.ascontiguousarray(flat.astype(np.float32))
+        flat = numpy.ascontiguousarray(flat.astype(numpy.float32))
         flatptr = flat.ctypes.data_as(ctypes.c_void_p)
 
         offset = libraft.findcentersino(frame0ptr, frame1ptr, darkptr, flatptr, 
@@ -37,7 +37,7 @@ def Centersino(frame0, frame1, flat, dark):
         
         return int(offset)
 
-def correct_rotation_axis360(data: np.ndarray, dic: dict) -> np.ndarray:
+def correct_rotation_axis360(data: numpy.ndarray, dic: dict) -> numpy.ndarray:
     """CPU (python) function: Corrects the rotation axis of a sample measured on more then 180 degrees.
     Searches for the rotation axis index in axis 2 (x variable) if necessary, or corrects over a given rotation axis index value.
     Returns the projections with rotation axis corrected.
@@ -86,17 +86,17 @@ def correct_rotation_axis360(data: np.ndarray, dic: dict) -> np.ndarray:
         nx_window  = dic['findRotationAxis'][1]
         nsinos     = dic['findRotationAxis'][2]
         
-        shift      = find_rotation_axis_360(np.swapaxes(data,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
+        shift      = find_rotation_axis_360(numpy.swapaxes(data,0,1), nx_search = nx_search, nx_window = nx_window, nsinos = nsinos)
 
         dic.update({'shift':[is_autoRot,shift]})
 
     else:
         logger.info(f'Applying given rotation axis correction deviation value: {shift}')
 
-    proj = np.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * np.abs(shift)))
+    proj = numpy.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * numpy.abs(shift)))
 
     if(shift < 0):
-        proj[:,:,2 * np.abs(shift):data.shape[2] + 2 * np.abs(shift)] = data
+        proj[:,:,2 * numpy.abs(shift):data.shape[2] + 2 * numpy.abs(shift)] = data
     else:
         proj[:,:,0:data.shape[2]] = data
 
@@ -146,7 +146,7 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
     """
     ntheta, nz, nx = tomo.shape
 
-    diff_symmetry = np.ones(2*nx_search) # começando em zero para podermos fazer um gráfico de semilogy.
+    diff_symmetry = numpy.ones(2*nx_search) # começando em zero para podermos fazer um gráfico de semilogy.
 
     if nsinos is None:
         nsinos = nz//20
@@ -159,21 +159,21 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
 
             if (ntheta%2 == 0):
                 sino_esq = tomo[:ntheta//2, k+(nz//2), center_idx-nx_window : center_idx]
-                sino_dir = np.flip(tomo[ntheta//2:, k+(nz//2), center_idx : center_idx+nx_window], axis=1)
+                sino_dir = numpy.flip(tomo[ntheta//2:, k+(nz//2), center_idx : center_idx+nx_window], axis=1)
             else:
                 sino_esq = tomo[:ntheta//2, k+(nz//2), center_idx-nx_window : center_idx]
-                sino_dir = np.flip(tomo[ntheta//2:ntheta-1, k+(nz//2), center_idx : center_idx+nx_window], axis=1)
+                sino_dir = numpy.flip(tomo[ntheta//2:ntheta-1, k+(nz//2), center_idx : center_idx+nx_window], axis=1)
             
-            mean_sinos = np.linalg.norm(sino_esq + sino_dir)/2
-            diff_symmetry[i] += np.linalg.norm(sino_esq - sino_dir) / mean_sinos
+            mean_sinos = numpy.linalg.norm(sino_esq + sino_dir)/2
+            diff_symmetry[i] += numpy.linalg.norm(sino_esq - sino_dir) / mean_sinos
     
-    deviation = np.argmin(diff_symmetry) - nx_search
+    deviation = numpy.argmin(diff_symmetry) - nx_search
 
     logger.info(f'Automatic rotation axis correction deviation: {deviation}')
 
     return deviation
 
-def correct_rotation_axis(data: np.ndarray, deviation: int) -> np.ndarray:
+def correct_rotation_axis(data: numpy.ndarray, deviation: int) -> numpy.ndarray:
     """Corrects the rotation axis of a data according to a deviation value defined 
     by the number of pixels translated form the center of the data.
 
@@ -188,12 +188,14 @@ def correct_rotation_axis(data: np.ndarray, deviation: int) -> np.ndarray:
 
     * CPU function
     """
+    deviation = - deviation # Fix centersino value
+    
     logger.info(f'Applying given rotation axis correction deviation value: {deviation}')
 
-    proj = np.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * np.abs(deviation)))
+    proj = numpy.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * numpy.abs(deviation)))
 
     if(deviation < 0):
-        proj[:,:,2 * np.abs(deviation):data.shape[2] + 2 * np.abs(deviation)] = data
+        proj[:,:,2 * numpy.abs(deviation):data.shape[2] + 2 * numpy.abs(deviation)] = data
     else:
         proj[:,:,0:data.shape[2]] = data
 

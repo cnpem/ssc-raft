@@ -23,10 +23,10 @@ def alignment_cross_correlation(data, downscaling_factor=0, fft_upsampling=10, r
     aligned_volume = shift_volume_slices(data,total_shift)
     
     if return_common_valid_region:
-        masked_volume = np.where(aligned_volume==0,0,1)
-        product = np.prod(np.abs(masked_volume),axis=0)
-        where_null = np.where(np.abs(product) == 0,0,1)
-        aligned_volume[:] = np.where(where_null==1,aligned_volume,0) 
+        masked_volume = numpy.where(aligned_volume==0,0,1)
+        product = numpy.prod(numpy.abs(masked_volume),axis=0)
+        where_null = numpy.where(numpy.abs(product) == 0,0,1)
+        aligned_volume[:] = numpy.where(where_null==1,aligned_volume,0) 
     
     if remove_null_borders:
         aligned_volume = remove_black_borders(aligned_volume)
@@ -49,13 +49,13 @@ def get_shifts_of_local_variance(data,fft_upsampling,downscaling_factor, use_gra
     if downscaling_factor > 1:
         print("Downscaling images for alignment...")
         if downscaling_method == 'pyramid_reduce': # slow method! how to speed it up?
-            data = pyramid_reduce(np.real(data), downscale=downscaling_factor,order=1,channel_axis=0) + 1j*pyramid_reduce(np.imag(data), downscale=downscaling_factor,order=1,channel_axis=0)
+            data = pyramid_reduce(numpy.real(data), downscale=downscaling_factor,order=1,channel_axis=0) + 1j*pyramid_reduce(numpy.imag(data), downscale=downscaling_factor,order=1,channel_axis=0)
         elif downscaling_method == 'skip_pixels':
             data = data[:,0::downscaling_factor,0::downscaling_factor]
         else:
             sys.exit('Select a proper downscaling method: pyramid_reduce or skip_pixels')
     
-    neighbor_shifts = np.empty((data.shape[0],2))
+    neighbor_shifts = numpy.empty((data.shape[0],2))
     
     print('Finding shift between neighboor slices...')
     for i in range(0,data.shape[0]-1):
@@ -73,7 +73,7 @@ def get_shifts_of_local_variance(data,fft_upsampling,downscaling_factor, use_gra
         neighbor_shifts[i][0] = shift[0]
         neighbor_shifts[i][1] = shift[1]
         
-    total_shift = np.cumsum(neighbor_shifts,axis=0)
+    total_shift = numpy.cumsum(neighbor_shifts,axis=0)
     
     return neighbor_shifts, total_shift
 
@@ -82,7 +82,7 @@ def shift_volume_slices(data,total_shift):
     """ Shifts each image in the block "data" according to the values in total_shift
     """
 
-    aligned_volume = np.zeros_like(data)
+    aligned_volume = numpy.zeros_like(data)
     aligned_volume[0] = data[0]
 
     for i in range(0,data.shape[0]-1):
@@ -96,11 +96,11 @@ def calculate_local_variance_field(matrix):
     
     """
     
-    gradient = np.gradient(matrix)
+    gradient = numpy.gradient(matrix)
     del_x = gradient[1]
     del_y = gradient[0]
         
-    return np.sqrt(np.abs(del_x)**2 + np.abs(del_y)**2)
+    return numpy.sqrt(numpy.abs(del_x)**2 + numpy.abs(del_y)**2)
 
 
 
@@ -124,17 +124,17 @@ def alignment_vertical_mass_fluctuation(misaligned_volume, filter_sigma = 0, cur
     curves, aligned_curves, total_shift = align_1D_curves(misaligned_volume,use_phase_gradient,filter_sigma,curve_portion,plot)
     
     print('Aligning volume...')
-    aligned_volume = np.zeros_like(misaligned_volume)
+    aligned_volume = numpy.zeros_like(misaligned_volume)
     aligned_volume[0] = misaligned_volume[0]
     for i in range(0,misaligned_volume.shape[0]-1):
         if i%50==0: print(f"Aligning slice #{i}/{misaligned_volume.shape[0]}")
         aligned_volume[i+1] = scipy.ndimage.shift(misaligned_volume[i+1],[total_shift[i,0],0])
 
     if return_common_valid_region:
-        masked_volume = np.where(aligned_volume==0,0,1)
-        product = np.prod(np.abs(masked_volume),axis=0)
-        where_null = np.where(np.abs(product) == 0,0,1)
-        aligned_volume[:] = np.where(where_null==1,aligned_volume,0) 
+        masked_volume = numpy.where(aligned_volume==0,0,1)
+        product = numpy.prod(numpy.abs(masked_volume),axis=0)
+        where_null = numpy.where(numpy.abs(product) == 0,0,1)
+        aligned_volume[:] = numpy.where(where_null==1,aligned_volume,0) 
 
     if remove_null_borders:
         aligned_volume = remove_black_borders(aligned_volume)    
@@ -179,7 +179,7 @@ def get_VMF_curves(misaligned_volume,use_phase_gradient,filter_sigma,curve_porti
 
         curves.append(curve)
 
-    curves = np.asarray(curves)
+    curves = numpy.asarray(curves)
     return curves
 
 def vertical_phase_gradient(frame):
@@ -188,16 +188,16 @@ def vertical_phase_gradient(frame):
     See equation (6) in https://doi.org/10.1364/OE.27.036637 
     """
 
-    gradient = np.gradient(frame)
-    phase_gradient_y = np.imag( frame.conj() * gradient[0] / np.abs(frame)**2  )
-    phase_gradient_y = np.sum(phase_gradient_y,axis=1)
+    gradient = numpy.gradient(frame)
+    phase_gradient_y = numpy.imag( frame.conj() * gradient[0] / numpy.abs(frame)**2  )
+    phase_gradient_y = numpy.sum(phase_gradient_y,axis=1)
     return phase_gradient_y
 
 def vertical_mass_distribution(frame):
     """
     Calculate vertical mass distrbution of image 
     """
-    return np.sum(frame,axis=1)
+    return numpy.sum(frame,axis=1)
     
 
 def shift_2d_replace(data, dx, dy, constant=False):
@@ -209,13 +209,13 @@ def shift_2d_replace(data, dx, dy, constant=False):
     :param constant: The constant to replace rolled values with
     :return: The shifted array with "constant" where roll occurs
     """
-    shifted_data = np.roll(data, dx, axis=1)
+    shifted_data = numpy.roll(data, dx, axis=1)
     if dx < 0:
         shifted_data[:, dx:] = constant
     elif dx > 0:
         shifted_data[:, 0:dx] = constant
 
-    shifted_data = np.roll(shifted_data, dy, axis=0)
+    shifted_data = numpy.roll(shifted_data, dy, axis=0)
     if dy < 0:
         shifted_data[dy:, :] = constant
     elif dy > 0:
@@ -228,7 +228,7 @@ def remove_black_borders(volume):
     Remove the null borders of a volume of images 
     """
 
-    not_null = np.argwhere(np.abs(volume[0]))
+    not_null = numpy.argwhere(numpy.abs(volume[0]))
 
     # Bounding box of non-black pixels.
     x0, y0 = not_null.min(axis=0)
@@ -243,7 +243,7 @@ def calculate_curve_ctr_of_mass(curve,positions):
     """
     Calculate the center of mass of a 2D curve
     """
-    ctr_mass = np.dot(curve,positions)/np.sum(curve)
+    ctr_mass = numpy.dot(curve,positions)/numpy.sum(curve)
     return ctr_mass
 
 
@@ -253,7 +253,7 @@ def overlap_curves(data):
     See https://doi.org/10.1364/OL.33.000156
     """
 
-    neighbor_shifts = np.empty((data.shape[0],1))
+    neighbor_shifts = numpy.empty((data.shape[0],1))
 
     print('Finding shift between neighboor slices...')
     for i in range(0,data.shape[0]-1):
@@ -261,8 +261,8 @@ def overlap_curves(data):
         shift, error, diffphase = phase_cross_correlation(data[i], data[i+1], upsample_factor=10,normalization=None) # if normalzaition = phase, shifts are barely > 0
         neighbor_shifts[i][0] = shift[0]
 
-    total_shift = np.cumsum(neighbor_shifts,axis=0)
-    aligned_curves = np.zeros_like(data)
+    total_shift = numpy.cumsum(neighbor_shifts,axis=0)
+    aligned_curves = numpy.zeros_like(data)
     aligned_curves[0] = data[0]
 
     print('Shifting slices...')

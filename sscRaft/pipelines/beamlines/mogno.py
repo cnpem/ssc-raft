@@ -212,7 +212,7 @@ def recon_(tomogram,dic):
         
     savepath = outpath + 'RaftRecon_' + id_sample + '_' + name   
 
-    dic['angles'] = np.linspace(0.0, dic['end_angle[degrees]'] * np.pi / 180, tomogram.shape[1], endpoint=False)
+    dic['angles'] = numpy.linspace(0.0, dic['end_angle[degrees]'] * numpy.pi / 180, tomogram.shape[1], endpoint=False)
 
     if dic['method'] == 'fdk':
         recon = fdk(tomogram, dic)
@@ -441,7 +441,7 @@ def reconstruction_mogno_cli(dic:dict):
         flat_  = numpy.ones((tomogram.shape[1],tomogram.shape[-1]))
         dark_  = numpy.zeros((tomogram.shape[1],tomogram.shape[-1]))
 
-        tomogram = np.swapaxes(tomogram,0,1)
+        tomogram = numpy.swapaxes(tomogram,0,1)
 
     if dic['rotation axis'] and dic['shift'][0] == True:
         if dic['end_angle[degrees]'] == 180:
@@ -449,7 +449,7 @@ def reconstruction_mogno_cli(dic:dict):
             dic['shift'][1]  = -Centersino(frame0, frame1, flat_, dark_) # The minus sign here is to adjust the computed value for the rotationAxis() function
         elif dic['end_angle[degrees]'] > 180:
             logger.info(f'Applying automatic function for rotation axis deviation more than 180 degrees.')
-            dic['shift'][1]  = DeviationAxis(np.swapaxes(tomogram,0,1), dic)
+            dic['shift'][1]  = DeviationAxis(numpy.swapaxes(tomogram,0,1), dic)
         else:
             dic['shift'][1]  = 0
             logger.warning(f'The automatic function to find the rotation axis deviation does not work for measurements acquired with less than 180 degrees.')
@@ -474,7 +474,7 @@ def reconstruction_mogno_cli(dic:dict):
 
     return recon
 
-def get_reconstruction(tomogram: np.ndarray, flat: np.ndarray, dark: np.ndarray, dic: dict):
+def get_reconstruction(tomogram: numpy.ndarray, flat: numpy.ndarray, dark: numpy.ndarray, dic: dict):
     """Computes Tomography Reconstruction (Conical and Parallel)
 
     Args:
@@ -548,7 +548,7 @@ def get_reconstruction(tomogram: np.ndarray, flat: np.ndarray, dark: np.ndarray,
     if dic['norm']:
         tomogram = FlatDarkCorrection(tomogram, flat, dark, dic)
     else:
-        tomogram = np.swapaxes(tomogram, 0, 1)
+        tomogram = numpy.swapaxes(tomogram, 0, 1)
 
     if dic['rotation axis'] and dic['shift'][0] == True:
         if dic['end_angle[degrees]'] == 180:
@@ -556,7 +556,7 @@ def get_reconstruction(tomogram: np.ndarray, flat: np.ndarray, dark: np.ndarray,
             dic['shift'][1]  = -Centersino(frame0, frame1, flat, dark) # The minus sign here is to adjust the computed value for the rotationAxis() function
         elif dic['end_angle[degrees]'] > 180:
             logger.info(f'Applying automatic function for rotation axis deviation more than 180 degrees.')
-            dic['shift'][1]  = DeviationAxis(np.swapaxes(tomogram,0,1), dic)
+            dic['shift'][1]  = DeviationAxis(numpy.swapaxes(tomogram,0,1), dic)
         else:
             dic['shift'][1]  = 0
             logger.warning(f'The automatic function to find the rotation axis deviation does not work for measurements acquired with less than 180 degrees.')
@@ -582,7 +582,7 @@ def get_reconstruction(tomogram: np.ndarray, flat: np.ndarray, dark: np.ndarray,
     return recon
 
 
-def DeviationAxis(tomogram: np.ndarray, dic: dict):
+def DeviationAxis(tomogram: numpy.ndarray, dic: dict):
    """Computes the deviation of the Rotation Axis of a Tomogram measured in 360 degrees rotation.
 
    Args:

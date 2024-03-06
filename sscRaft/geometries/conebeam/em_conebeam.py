@@ -1,4 +1,6 @@
 from ...rafttypes import *
+import numpy
+import pathlib
 
 def valid_data(cone_data: dict):
     ok = True
@@ -6,7 +8,7 @@ def valid_data(cone_data: dict):
         size = cone_data["size"]
         if isinstance(size, int):
             if size > 0:
-                size = np.array([size, size, size])
+                size = numpy.array([size, size, size])
             else:
                 ok = False
                 warnings.warn(
@@ -46,33 +48,33 @@ def _process_cone_data(tomo, flat, dark):
     if (flat < 0).any():
         raise ValueError("Negative value found in flat after dark subtraction.")
     
-    return tomo.astype(np.float32), flat.astype(np.float32), dark.astype(np.float32)
+    return tomo.astype(numpy.float32), flat.astype(numpy.float32), dark.astype(numpy.float32)
 
 def _make_angs_pointer(cone_data, tomo_shape):
     try:
-        angs = cone_data["angs"].astype(np.float32)
+        angs = cone_data["angs"].astype(numpy.float32)
     except:
-        angs = np.linspace(0, 2*np.pi, tomo_shape[0], dtype=np.float32)
-    angs = np.ascontiguousarray(angs)
+        angs = numpy.linspace(0, 2*numpy.pi, tomo_shape[0], dtype=numpy.float32)
+    angs = numpy.ascontiguousarray(angs)
     angs_p = angs.ctypes.data_as(ctypes.c_void_p)
     return angs_p
 
 def _make_detector_arrays(z2, nh, nv, H, V):
     dh = 2*H/nh
     dv = 2*V/nv
-    h = np.linspace(-H+dh/2, H-dh/2, nh)
-    v = np.linspace(-V+dv/2, V-dv/2, nv)
-    hh, vv = np.meshgrid(h, v)
+    h = numpy.linspace(-H+dh/2, H-dh/2, nh)
+    v = numpy.linspace(-V+dv/2, V-dv/2, nv)
+    hh, vv = numpy.meshgrid(h, v)
     hh = hh.flatten()
     vv = vv.flatten()
-    yy = np.linspace(z2, z2, nh*nv)
+    yy = numpy.linspace(z2, z2, nh*nv)
     return hh, yy, vv
 
 def _make_detector_pointer(cone_data, tomo_shape):
     try:
-        px = cone_data["px"].astype(np.float32)
-        py = cone_data["py"].astype(np.float32)
-        pz = cone_data["pz"].astype(np.float32)
+        px = cone_data["px"].astype(numpy.float32)
+        py = cone_data["py"].astype(numpy.float32)
+        pz = cone_data["pz"].astype(numpy.float32)
     except:
         z2 = cone_data["z2"]
         pixel_size = cone_data["pixel_size"]
@@ -84,9 +86,9 @@ def _make_detector_pointer(cone_data, tomo_shape):
             z2, 
             nx_detc, nz_detc, 
             H, V)
-    px = np.ascontiguousarray(px.astype(np.float32))
-    py = np.ascontiguousarray(py.astype(np.float32))
-    pz = np.ascontiguousarray(pz.astype(np.float32))
+    px = numpy.ascontiguousarray(px.astype(numpy.float32))
+    py = numpy.ascontiguousarray(py.astype(numpy.float32))
+    pz = numpy.ascontiguousarray(pz.astype(numpy.float32))
     cone_data["px"] = px
     cone_data["py"] = py
     cone_data["pz"] = pz
@@ -112,22 +114,22 @@ def _make_struct_lab_pointer(cone_data, tomo_shape):
     """
     try:
         source = cone_data["source"]
-        z1 = np.linalg.norm(source)
-        z2 = np.mean(cone_data["py"].flatten()) # rever isso para um caso mais geral.
+        z1 = numpy.linalg.norm(source)
+        z2 = numpy.mean(cone_data["py"].flatten()) # rever isso para um caso mais geral.
     except:
         z1, z2 = cone_data["z1"], cone_data["z2"]
-        source = np.array([0, -z1, 0], dtype=np.float32)
+        source = numpy.array([0, -z1, 0], dtype=numpy.float32)
         cone_data["source"] = source
     try:
         p0 = cone_data["p0"]
     except:
-        p0 = np.zeros(3, dtype=np.float32)
+        p0 = numpy.zeros(3, dtype=numpy.float32)
 
     mag = (z1 + z2) / z1 # magnificação.
     eps = cone_data["pixel_size"]/mag # effective pixel size.
     cone_data["mag"] = mag
     cone_data["eps"] = eps
-    # Lxy = (1/2)*tomo_shape[2]*eps # / np.sqrt(2)
+    # Lxy = (1/2)*tomo_shape[2]*eps # / numpy.sqrt(2)
     # Lz  = (1/2)*tomo_shape[1]*eps
     # Lz = (1/2)*nz*eps
     # Lx = (1/2)*nx*eps
@@ -136,12 +138,12 @@ def _make_struct_lab_pointer(cone_data, tomo_shape):
     if "size" in cone_data:
         size = cone_data["size"]
         if isinstance(size, int):
-            size = np.array([size, size, size])
+            size = numpy.array([size, size, size])
         elif len(size) != 3:
             raise ValueError(
                 "Invalid reconstruction size encountered: it must be an int or a list of ints of length 3.")
     else:
-        size = np.array([tomo_shape[2], tomo_shape[2], tomo_shape[1]])
+        size = numpy.array([tomo_shape[2], tomo_shape[2], tomo_shape[1]])
 
     if size[0] == size[1]:
         Lxy = (1/2)*size[0]*eps
@@ -194,7 +196,7 @@ def _make_struct_lab_pointer(cone_data, tomo_shape):
 
 def _make_recon_pointer(cone_data, recon_max, lab):
     try:
-        recon = cone_data["recon"].astype(np.float32)
+        recon = cone_data["recon"].astype(numpy.float32)
         neg_idxs = recon < 0
         if neg_idxs.any():
             recon[neg_idxs] = 1
@@ -204,22 +206,22 @@ def _make_recon_pointer(cone_data, recon_max, lab):
             recon[higher_than_max_idxs] = recon_max
             warnings.warn("Higher than recon_max value encountered in initial-value-recon.")
     except:
-        recon = np.ones([lab.nz, lab.ny, lab.nx], dtype=np.float32, order="C")
-    recon = np.ascontiguousarray(recon)
+        recon = numpy.ones([lab.nz, lab.ny, lab.nx], dtype=numpy.float32, order="C")
+    recon = numpy.ascontiguousarray(recon)
     recon_p = recon.ctypes.data_as(ctypes.c_void_p)
     return recon_p, recon
 
 
 def tEM_cone(
-    tomo: np.ndarray,
-    flat: np.ndarray,
-    dark: np.ndarray,
+    tomo: numpy.ndarray,
+    flat: numpy.ndarray,
+    dark: numpy.ndarray,
     cone_data: dict,
     niter: int,
     gpus: list,
     tv: float = 0.0,
-    recon_max: float = np.inf,
-    save_path: str = "") -> np.ndarray:
+    recon_max: float = numpy.inf,
+    save_path: str = "") -> numpy.ndarray:
     """Statistical iterative reconstruction method for transmission tomography: seeks Expectation Maximization (EM).
 
     It is designed to solve cone-beam (i.e., point source) generated tomograms.
@@ -247,13 +249,13 @@ variables describing length should use the same unit of measurement).
 
     Parameters
     ----------
-    tomo: np.ndarray
+    tomo: numpy.ndarray
         Stack of projections for different angles. Each projection pixel represents a photon count.
         3-dimensional numpy array.
-    flat: np.ndarray
+    flat: numpy.ndarray
         Stack of flat-field projections. Each projection pixel represents a photon count.
         3-dimensional numpy array.
-    dark: np.ndarray
+    dark: numpy.ndarray
         Stack of dark-field projections. Each projection pixel represents a photon count.
         3-dimensional numpy array.
     cone_data: dict
@@ -272,14 +274,14 @@ variables describing length should use the same unit of measurement).
                 pixel width (it is assumed it is a square).
                 dimension: LENGTH.
         It may also have:
-            "angs": np.ndarray
+            "angs": numpy.ndarray
                 Must correspond to the tomography projection angles.
                 The angles may NOT be equally spaced.
                 dimension: RADIANS.
-                Default is np.linspace(0, 2*np.pi, nangs, endpoint=False).
-            "recon": np.ndarray
+                Default is numpy.linspace(0, 2*numpy.pi, nangs, endpoint=False).
+            "recon": numpy.ndarray
                 dimension: LENGTH^-1.  
-                Default is np.ones([nz, ny, nx]).
+                Default is numpy.ones([nz, ny, nx]).
             "meio_sup_comp": bool
                 If the data has half compact support for extended field of view.
                 If set to True, the index of the "rotation axis position" must be provided (index on tomogram axis 2).
@@ -299,7 +301,7 @@ variables describing length should use the same unit of measurement).
         Default is 0.0 (zero).
     recon_max: float
         Maximum -physically acceptable- value admitted in the reconstruction.
-        Default is np.inf (positive infinite).
+        Default is numpy.inf (positive infinite).
         dimension: LENGTH^-1.
     nintegration: int
         Number of integration points on the ray path.
@@ -310,7 +312,7 @@ variables describing length should use the same unit of measurement).
         
     Returns
     -------
-    recon: np.ndarray
+    recon: numpy.ndarray
         Returns a 3-dimensional numpy array representing the sample reconstruction.
         dimension: LENGTH^-1.
 
@@ -348,12 +350,12 @@ variables describing length should use the same unit of measurement).
     cone_data["unit of measurement (attenuation coefficient)"] = legth_unit + "^-1"
     cone_data["tomo.shape"] = tomo.shape
     tomo, flat, dark = _process_cone_data(
-        tomo.astype(np.float32),
-        flat.astype(np.float32),
-        dark.astype(np.float32))
-    tomo_p = np.ascontiguousarray(tomo).ctypes.data_as(ctypes.c_void_p)
-    flat_p = np.ascontiguousarray(flat).ctypes.data_as(ctypes.c_void_p)
-    # dark_p = np.ascontiguousarray(dark).ctypes.data_as(ctypes.c_void_p) # to do: sum dark after ray integral.
+        tomo.astype(numpy.float32),
+        flat.astype(numpy.float32),
+        dark.astype(numpy.float32))
+    tomo_p = numpy.ascontiguousarray(tomo).ctypes.data_as(ctypes.c_void_p)
+    flat_p = numpy.ascontiguousarray(flat).ctypes.data_as(ctypes.c_void_p)
+    # dark_p = numpy.ascontiguousarray(dark).ctypes.data_as(ctypes.c_void_p) # to do: sum dark after ray integral.
     angs_p = _make_angs_pointer(cone_data, tomo.shape)
     pz_p, py_p, px_p = _make_detector_pointer(cone_data, tomo.shape)
     lab = _make_struct_lab_pointer(cone_data, tomo.shape)
@@ -386,11 +388,11 @@ variables describing length should use the same unit of measurement).
 
     return recon
 
-def _save_recon(path: pathlib.Path, recon: np.ndarray, cone_dict: dict, method_dict: dict):
+def _save_recon(path: pathlib.Path, recon: numpy.ndarray, cone_dict: dict, method_dict: dict):
     ok = True
     if path.exists():
         ok = False
-        path = "./recon_tEM_{}.h5".format(np.random.randint(0, np.iinfo(np.int64).max))
+        path = "./recon_tEM_{}.h5".format(numpy.random.randint(0, numpy.iinfo(numpy.int64).max))
         warnings.warn(
             "Path to save reconstruction already exists as a path for another file.\n"
             + "\tSaving to path '{}' instead.".format(path))
@@ -398,7 +400,7 @@ def _save_recon(path: pathlib.Path, recon: np.ndarray, cone_dict: dict, method_d
         _save_recon(path, recon, cone_dict, method_dict)
     else:
         with h5py.File(path, "w") as ff:
-            dset = ff.create_dataset("attenuation coefficient", data=recon.astype(np.float16))
+            dset = ff.create_dataset("attenuation coefficient", data=recon.astype(numpy.float16))
             for key, val in cone_dict.items():
                 try:
                     dset.attrs.create(key, val)
@@ -426,7 +428,7 @@ def _create_method_dict(
     dic["python entry script"] = script_name
     return dic
 
-def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
+def em_cone(tomogram, flat, dark, dic, **kwargs) -> numpy.ndarray:
     """ Expectation maximization for 3D tomographic parallel sinograms
 
     Args:
@@ -451,7 +453,7 @@ def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
       Number of integration points.
     *``dic['regularization']`` (float):  Regularization parameter for EM/TV
     *``dic['max tolerance']`` (float):  Maximum -physically acceptable- value admitted in the reconstruction.
-        Default is np.inf (positive infinite).
+        Default is numpy.inf (positive infinite).
     *``dic['shift']`` (int): Tuple (value = 0). Rotation axis deviation value.
     *``dic['Energy[keV]']`` (float or list of floats): photon energy in keV.
     *``dic['save path']`` (str,optional): Path to save reconstruction
@@ -473,7 +475,7 @@ def em_cone(tomogram, flat, dark, dic, **kwargs) -> np.ndarray:
     try:
         recon_max           = dic['max tolerance']
     except:
-        recon_max           = np.inf
+        recon_max           = numpy.inf
 
     cone_data               = {}
 

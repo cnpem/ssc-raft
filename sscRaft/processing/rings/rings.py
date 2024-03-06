@@ -2,7 +2,7 @@ from ...rafttypes import *
 from ...processing.io import *
 
 def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
-    """ Rings artifacts reduction by Generalized Titarenko's algorithm.  
+    """ Rings artifacts reduction by Generalized Titarenko\'s algorithm.  
 
     Args:
         tomogram (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
@@ -14,12 +14,14 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
         (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
 
     References:
-        .. [1] Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermúdez, J.S.V. (2014). Generalized Titarenko's algorithm for ring artefacts reduction. J. Synchrotron Rad, 21, 1333-1346 `DOI<https://doi.org/10.1107/S1600577514016919>`_
+
+        .. [1] Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermudez, J.S.V. (2014). Generalized Titarenko\'s algorithm for ring artefacts reduction. J. Synchrotron Rad, 21, 1333-1346. DOI: https://doi.org/10.1107/S1600577514016919
+    
     """
     ngpus = len(gpus)
 
     gpus = numpy.array(gpus)
-    gpus = np.ascontiguousarray(gpus.astype(np.intc))
+    gpus = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpusptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     nrays   = tomogram.shape[-1]
@@ -42,7 +44,7 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
     else:
         logger.info(f'Titarenko\'s regularization set to {rings_lambda}.')  
 
-    tomogram            = np.ascontiguousarray(tomogram.astype(np.float32))
+    tomogram            = numpy.ascontiguousarray(tomogram.astype(numpy.float32))
     tomogram_ptr         = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     libraft.getTitarenkoRingsMultiGPU(gpusptr, ctypes.c_int(ngpus), tomogram_ptr, 
@@ -67,8 +69,8 @@ def rings(tomogram, dic, **kwargs):
     Dictionary parameters:
 
         *``dic['gpu']`` (int list): List of GPUs to use [required]
-        *``dic['lambda rings']`` (float,optional): Lambda regularization of rings. Values between [0,1] [default: -1 (automatic computation)]
-        *``dic['rings block']`` (int,optional): Blocks of rings to be used. Even values between [1,20] [default: 1]   
+        *``dic['lambda rings']`` (float,optional): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
+        *``dic['rings block']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1]   
     """
     required = ('gpu',)
     optional = ('lambda rings','rings block')

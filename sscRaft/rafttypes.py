@@ -8,7 +8,6 @@ import sys
 import numpy
 import json
 import h5py
-import numpy as np
 import time
 from time import time
 import warnings

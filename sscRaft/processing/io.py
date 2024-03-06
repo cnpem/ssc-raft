@@ -1,4 +1,5 @@
 from ..rafttypes import *
+import numpy
 
 from sscRaft import __version__
 

@@ -1,6 +1,5 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
 from ...rafttypes import *
-
 from ...processing.io import *
 
 def bstGPU(tomogram, angles, gpus, dic):

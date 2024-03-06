@@ -81,6 +81,7 @@ struct complex: public cuComplex
 
 inline __device__ void atomicAdd(complex* ptr, const complex& val){ atomicAdd((float*)ptr, val.x); atomicAdd(1+(float*)ptr, val.y); }; 
 inline __device__ cufftComplex ComplexMult(cufftComplex a, cufftComplex b){ cufftComplex ans; ans.x = a.x * b.x - a.y * b.y; ans.y = a.x * b.y + a.y * b.x; return ans; };
+inline __device__ cufftComplex FloatMult(cufftComplex a, float b){ cufftComplex ans; ans.x = a.x * b; ans.y = a.y * b; return ans; };
 
 
 #if __CUDA_ARCH__ >= 530

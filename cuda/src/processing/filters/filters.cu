@@ -17,9 +17,18 @@ extern "C"{
         float w =  2.0f * fminf( i, size.x - i ) / (float)size.x; // - wMax + i * dw;
 
 		w = filter.apply( w );
-	
-		kernel[i] = exp1j(- 2.0f * float(M_PI)/(float)size.x * filter.axis_offset * i ) * w ;
 
+        kernel[i] = exp1j(- 2.0f * float(M_PI)/(float)size.x * filter.axis_offset * i );
+
+        float aux_real = kernel[i].x;
+        float aux_imag = kernel[i].y;
+
+        if ( filter.type == Filter::EType::differential){ 
+            kernel[i].x =   aux_imag;
+            kernel[i].y = - aux_real;
+        }
+
+        kernel[i] = FloatMult(kernel[i],w);
         // printf("kernel[%d] = %e, %e \n",i, kernel[i].x,kernel[i].y);
 
         // int tx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -301,38 +310,36 @@ __host__ __device__ inline float Filter::apply(float input)
 
 	if (type == EType::gaussian)
 	{
-		input *= exp(-0.693f * reg * input * input);
-		input /= (1.0f + paganin * input * input);
+		input *= exp(-0.693f * reg * input * input) / (1.0f + paganin * input * input);
 	}
 	else if (type == EType::lorentz)
 	{
-		input /= 1.0f + reg * input * input;
-		input /= (1.0f + paganin * input * input);
+		input /= ( 1.0f + reg * input * input ) * (1.0f + paganin * input * input);
 	}
 	else if (type == EType::cosine)
 	{
-		input *= cosf(float(M_PI) * 0.5f * input);
-		input /= (1.0f + paganin * input * input);
+		input *= cosf(float(M_PI) * 0.5f * input) / (1.0f + paganin * input * input);
 	}
 	else if (type == EType::rectangle)
 	{
 		param = fmaxf(input * reg * float(M_PI) * 0.5f, 1E-4f);
-		input *= sinf(param) / param;
-		input /= (1.0f + paganin * input * input);
+		input *= ( sinf(param) / param ) / (1.0f + paganin * input * input);
 	}
 	else if (type == EType::hann)
 	{
-		input *= 0.5f + 0.5f * cosf(2.0f * float(M_PI) * input);
-		input /= (1.0f + paganin * input * input);
+		input *= 0.5f + 0.5f * cosf(2.0f * float(M_PI) * input) / (1.0f + paganin * input * input);
 	}
 	else if (type == EType::hamming)
 	{
-		input *= (0.54f + 0.46f * cosf(2.0f * float(M_PI) * input));
-		input /= (1.0f + paganin * input * input);
+		input *= (0.54f + 0.46f * cosf(2.0f * float(M_PI) * input)) / (1.0f + paganin * input * input);
 	}
 	else if (type == EType::ramp)
 	{
 		input /= (1.0f + paganin * input * input);
+	}
+    else if (type == EType::differential)
+	{
+		input = 1.0f / ( 2.0f * float(M_PI) * SIGN(input) );
 	}
     else if (type == EType::none)
 	{

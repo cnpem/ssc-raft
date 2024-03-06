@@ -36,7 +36,7 @@ def background_correctionGPU(frames, flat, dark, gpus, is_log):
         
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
-    gpus     = np.ascontiguousarray(gpus.astype(np.intc))
+    gpus     = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     nrays    = frames.shape[-1]

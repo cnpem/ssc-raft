@@ -3,13 +3,13 @@ from ..rafttypes import *
 def phase_filters(tomo,dic):
 
     tomogram = numpy.copy(tomo)
-    tomogram = np.swapaxes(tomogram,0,1)
+    tomogram = numpy.swapaxes(tomogram,0,1)
 
     gpus = dic['gpu']     
     ngpus = len(gpus)
 
-    gpus = np.array(gpus)
-    gpus = np.ascontiguousarray(gpus.astype(np.intc))
+    gpus = numpy.array(gpus)
+    gpus = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpusptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     nrays   = tomogram.shape[-1]
@@ -104,12 +104,12 @@ def phase_filters(tomo,dic):
     int_param       = numpy.ascontiguousarray(int_param.astype(numpy.int64))
     int_paramptr    = int_param.ctypes.data_as(ctypes.c_void_p)
    
-    tomogram = np.ascontiguousarray(tomogram.astype(np.float32))
+    tomogram = numpy.ascontiguousarray(tomogram.astype(numpy.float32))
     tomogramptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     # libraft.phase_filters(tomogramptr, float_paramsptr, int_paramptr, 
                         # ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
                         # gpusptr, ctypes.c_int(ngpus))
 
-    return np.swapaxes(tomogram,0,1)
+    return numpy.swapaxes(tomogram,0,1)
 

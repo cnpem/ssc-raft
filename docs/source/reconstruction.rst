@@ -19,8 +19,8 @@ Reconstruction Functions
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: sscRaft.geometries.conebeam.fdk
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. .. automodule:: sscRaft.geometries.conebeam.fdk
+..     :members:
+..     :undoc-members:
+..     :show-inheritance:
 

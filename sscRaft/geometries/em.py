@@ -47,8 +47,8 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
     """
     # Set default dictionary parameters:
     required  = ('gpu',)
-    optional = ('iterations','detectorPixel[m]','padding','beamgeometry')
-    default    = (10,0.0,2,'parallel')
+    optional = ('iterations','detectorPixel[m]','padding','beamgeometry','interpolation')
+    default    = (10,0.0,2,'parallel','bilinear')
 
     dic = SetDictionary(dic,required,optional,default)
 

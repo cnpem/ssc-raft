@@ -16,14 +16,15 @@ struct Filter{
 
 	enum EType
 	{
-		none      = 0,
-		gaussian  = 1,
-		lorentz   = 2,
-		cosine    = 3,
-		rectangle = 4,
-		hann      = 5,
-		hamming   = 6,
-		ramp      = 7
+		none         = 0,
+		gaussian     = 1,
+		lorentz      = 2,
+		cosine       = 3,
+		rectangle    = 4,
+		hann         = 5,
+		hamming      = 6,
+		ramp         = 7,
+        differential = 8
 	};
 
 	EType type      = EType::none;

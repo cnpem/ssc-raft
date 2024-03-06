@@ -29,7 +29,7 @@ def fbpGPU(tomogram, angles, gpus, dic):
     """        
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
-    gpus     = np.ascontiguousarray(gpus.astype(np.intc))
+    gpus     = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     nrays    = tomogram.shape[-1]
