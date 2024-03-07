@@ -207,7 +207,6 @@ struct Process{
 extern "C"{
 
     void setReconstructionParameters(CFG *configs, float *parameters_float, int *parameters_int, int *flags);
-
     void printGPUParameters(GPU *gpus_parameters);
 	void setGPUParameters(GPU *gpus_parameters, dim3 size_pad, int ngpus, int *gpus);
     void setGPUs(GPU *gpus_parameters, int sizex, int sizey, int sizez);

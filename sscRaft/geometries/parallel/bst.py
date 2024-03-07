@@ -44,6 +44,7 @@ def bstGPU(tomogram, angles, gpus, dic):
     filter_type    = FilterNumber(dic['filter'])
     paganin        = dic['paganin regularization']
     regularization = dic['regularization']
+    offset         = dic['offset']
 
     # logger.info(f'BST Paganin regularization: {paganin}')
 
@@ -66,7 +67,7 @@ def bstGPU(tomogram, angles, gpus, dic):
             obj_ptr, tomogram_ptr, angles_ptr, 
             ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
             ctypes.c_int(objsize), ctypes.c_int(pad), ctypes.c_float(regularization),
-            ctypes.c_float(paganin), ctypes.c_int(filter_type))
+            ctypes.c_float(paganin), ctypes.c_int(filter_type), ctypes.c_int(offset))
 
     return obj
 
@@ -100,8 +101,8 @@ def bst(tomogram, dic, angles = None, **kwargs):
 
     """
     required = ('gpu',)        
-    optional = ( 'filter','offset','padding','regularization','paganin regularization')
-    default  = ('lorentz',       0,        2,             1.0,                     0.0)
+    optional = ( 'filter','offset','padding','regularization','paganin regularization', 'offset')
+    default  = ('lorentz',       0,        2,             1.0,                     0.0,        0)
     
     dic = SetDictionary(dic,required,optional,default)
 

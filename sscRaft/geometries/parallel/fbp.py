@@ -36,9 +36,9 @@ def fbpGPU(tomogram, angles, gpus, dic):
     nangles  = tomogram.shape[-2]
     
     if len(tomogram.shape) == 2:
-            nslices = 1
+        nslices = 1
     else:
-            nslices = tomogram.shape[0]
+        nslices = tomogram.shape[0]
     
     objsize        = nrays
 

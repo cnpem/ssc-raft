@@ -116,7 +116,7 @@ extern "C"{
         configs->geometry.geometry = PARALLEL;
 
         /* Set Tomogram (or detector) variables */
-        configs->tomo.size         = dim3(parameters_int[0],parameters_int[1],parameters_int[2]);  
+        configs->tomo.size     = dim3(parameters_int[0],parameters_int[1],parameters_int[2]);  
 
         /* Set padding */
         
@@ -137,7 +137,7 @@ extern "C"{
         configs->tomo.padsize  = dim3(configs->tomo.size.x * ( 1 + configs->tomo.pad.x),configs->tomo.size.y,configs->tomo.size.z);
         
         /* Set Reconstruction variables */
-        configs->obj.size          = dim3(parameters_int[3],parameters_int[3],configs->tomo.size.z); 
+        configs->obj.size      = dim3(parameters_int[3],parameters_int[3],configs->tomo.size.z); 
  
         /* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
         configs->geometry.magnitude_x        = 1.0;

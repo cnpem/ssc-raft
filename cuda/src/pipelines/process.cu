@@ -11,13 +11,14 @@ extern "C"{
         int raw_blocksize; // biggest blocksize feasible, although not necessarily: 
             // 1) a power of two; and 
             // 2) not a divisor of nslices (i.e., nslices % raw_blocksize != 0).
+
         int blocksize_exp = 1; // to store which power of 2 will be used. 
         int blocksize;
 
         std::cout << "Calculating blocksize..." << std::endl;
 
-        raw_blocksize = static_cast<int>(
-            -epsilon + (GPU_MEMORY)/(BYTES_TO_GB*total_required_mem_per_slice) );
+        raw_blocksize = static_cast<int>(-epsilon + 
+                            (GPU_MEMORY)/(BYTES_TO_GB*total_required_mem_per_slice) );
         raw_blocksize = raw_blocksize/empiric_const;
         
         std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
@@ -32,6 +33,7 @@ extern "C"{
             blocksize = 1 << blocksize_exp;
         }
         std::cout << "\t  Blocksize: " << blocksize << std::endl;
+        
         return blocksize;
     }
 }

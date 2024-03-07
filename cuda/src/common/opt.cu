@@ -43,8 +43,8 @@ __global__ void setSinCosTable(float *sintable, float *costable, float *angles, 
 
     if ( (k >= nangles) ) return;
 
-    sintable[k] = asinf(angles[k]);
-    costable[k] = acosf(angles[k]);
+    sintable[k] = __sinf(angles[k]);
+    costable[k] = __cosf(angles[k]);
 }
 
 void getLog(float *data, dim3 size)

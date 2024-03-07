@@ -215,7 +215,7 @@ void EMFQ_BST_ITER(
 void getBST(
 float* blockRecon, float *wholesinoblock, float *angles,
 int Nrays, int Nangles, int trueblocksize, int sizeimage, 
-int pad0, float reg, float paganin, int filter_type, int gpu)
+int pad0, float reg, float paganin, int filter_type, int offset, int gpu)
 {
     HANDLE_ERROR( cudaSetDevice(gpu) );
 
@@ -224,7 +224,7 @@ int pad0, float reg, float paganin, int filter_type, int gpu)
 	size_t insize = Nrays*Nangles;
 	size_t outsize = sizeimage*sizeimage;
 
-    Filter filter(filter_type, reg, paganin, 0);
+    Filter filter(filter_type, reg, paganin, offset);
 
     cImage filtersino(Nrays, Nangles*blocksize_bst);
 
@@ -298,7 +298,7 @@ extern "C"{
 
     void getBSTGPU(	float* obj, float *tomo, float *angles,
 	int nrays, int nangles, int blockgpu, int sizeimage, int pad0,
-    float reg, float paganin, int filter_type,
+    float reg, float paganin, int filter_type, int offset,
     int gpu)
     {
         HANDLE_ERROR( cudaSetDevice(gpu) );
@@ -340,7 +340,7 @@ extern "C"{
 
             getBST( dobj, dtomo, dangles, 
                     nrays, nangles, subblock, sizeimage, pad0,
-                    reg, paganin, filter_type, gpu);
+                    reg, paganin, filter_type, offset, gpu);
 
             opt::GPUToCPU<float>(obj + (size_t)ptr * sizeimage * sizeimage, 
                                  dobj, (size_t)sizeimage * sizeimage * subblock);
@@ -361,7 +361,7 @@ extern "C"{
     void getBSTMultiGPU(int* gpus, int ngpus, 
     float* obj, float *tomo, float *angles,
 	int nrays, int nangles, int nslices, int sizeimage, int pad0,
-    float reg, float paganin, int filter_type)
+    float reg, float paganin, int filter_type, int offset)
     {
         // ssc_event_start("getBSTMultiGPU", {ssc_param_int("ngpus", ngpus)});
 
@@ -374,7 +374,7 @@ extern "C"{
 
         if (ngpus == 1){ /* 1 device */
             getBSTGPU(obj, tomo, angles, nrays, nangles, nslices, 
-                sizeimage, pad0, reg, paganin, filter_type, gpus[0]);
+                sizeimage, pad0, reg, paganin, filter_type, offset, gpus[0]);
         }else{        
             for(i = 0; i < ngpus; i++){ 
                 
@@ -387,7 +387,7 @@ extern "C"{
                     angles,  
                     nrays, nangles, subblock, 
                     sizeimage, pad0, 
-                    reg, paganin, filter_type,
+                    reg, paganin, filter_type, offset,
                     gpus[i]));
 
                 /* Update pointer */

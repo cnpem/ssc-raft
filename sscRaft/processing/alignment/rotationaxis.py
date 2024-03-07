@@ -187,10 +187,11 @@ def correct_rotation_axis(data: numpy.ndarray, deviation: int) -> numpy.ndarray:
         (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, 2 * deviation + lenght] 
 
     * CPU function
-    """
-    deviation = - deviation # Fix centersino value
-    
+    """    
     logger.info(f'Applying given rotation axis correction deviation value: {deviation}')
+
+    deviation = - deviation # Fix centersino value
+
 
     proj = numpy.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * numpy.abs(deviation)))
 

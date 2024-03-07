@@ -14,7 +14,7 @@ extern "C"{
         float x, y;
         int t_index, angle_index;
         float t, sum;  
-        float cosk, sink;
+        // float cosk, sink;
   
         float xmin = -1.0;
         float ymin = -1.0;
@@ -40,23 +40,26 @@ extern "C"{
             x = xmin + i * dx;
             y = ymin + j * dy;
             
-            for(angle_index = 0; angle_index < (nangles); angle_index++){
+            for(angle_index = 0; angle_index < nangles; angle_index++){
 
-                __sincosf(angles[angle_index], &sink, &cosk);
+                // __sincosf(angles[angle_index], &sink, &cosk);
 
                 /* Compute angle step size (dangle)*/
                 if ( angle_index == (nangles - 1) )
-                    dangle = angles[angle_index] - angles[angle_index-1];
+
+                    dangle = angles[angle_index    ] - angles[angle_index - 1];
+
                 else
-                    dangle = angles[angle_index+1] - angles[angle_index];
+
+                    dangle = angles[angle_index + 1] - angles[angle_index    ];
                 
-                // t = x * cosine[angle_index] + y * sine[angle_index];
+                t = x * cosine[angle_index] + y * sine[angle_index];
                 
-                t = x * cosk + y * sink;
+                // t = x * cosk + y * sink;
                 
                 t_index = (int) ( ( t - tmin ) / dt);	     
 
-                if ( ( t_index > -1) && ( t_index < nrays) )
+                if ( ( t_index > -1 ) && ( t_index < nrays) )
                     sum += tomogram[ k * nrays * nangles  + angle_index * nrays + t_index];
                 
             }
@@ -83,10 +86,10 @@ extern "C"{
         
         cufftComplex *filter_kernel = opt::allocGPU<cufftComplex>(tomo_pad.x);
 
-        float *sintable; // = opt::allocGPU<float>(nangles);
-        float *costable; // = opt::allocGPU<float>(nangles);
+        float *sintable = opt::allocGPU<float>(nangles);
+        float *costable = opt::allocGPU<float>(nangles);
 
-        // setSinCosTable<<<gpus.Grd.y,gpus.BT.y>>>(sintable, costable, angles, nangles);
+        setSinCosTable<<<nangles,1>>>(sintable, costable, angles, nangles);
 
         if (filter.type != Filter::EType::none)
             filterFBP(gpus, filter, tomogram, filter_kernel, tomo_size, tomo_pad, configs.tomo.pad);
