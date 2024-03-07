@@ -3,7 +3,8 @@
 
 extern "C"{
 	
-    __global__ void fbp_filter_kernel(Filter filter, cufftComplex *kernel, dim3 size)
+    __global__ void fbp_filter_kernel(Filter filter, 
+    cufftComplex *kernel, dim3 size)
 	{
         int i = blockIdx.x*blockDim.x + threadIdx.x;
         
@@ -15,10 +16,14 @@ extern "C"{
 
 		/* Reciprocal grid */ 
         float w =  2.0f * fminf( i, size.x - i ) / (float)size.x; // - wMax + i * dw;
+        // float w =  i / (float)size.x; // - wMax + i * dw;
 
 		w = filter.apply( w );
 
-        kernel[i] = exp1j(- 2.0f * float(M_PI)/(float)size.x * filter.axis_offset * i );
+        float expoent = 2.0f * float(M_PI)/(float)(size.x) * filter.axis_offset * i;
+        // float expoent = 2.0f * float(M_PI)/(float)(2*size.x-2) * filter.axis_offset * i;
+        
+        kernel[i] = exp1j(- expoent ) * w;
 
         float aux_real = kernel[i].x;
         float aux_imag = kernel[i].y;
@@ -27,26 +32,10 @@ extern "C"{
             kernel[i].x =   aux_imag;
             kernel[i].y = - aux_real;
         }
-
-        kernel[i] = FloatMult(kernel[i],w);
-        // printf("kernel[%d] = %e, %e \n",i, kernel[i].x,kernel[i].y);
-
-        // int tx = blockIdx.x * blockDim.x + threadIdx.x;
-		// int ty = blockIdx.y * blockDim.y + threadIdx.y;
-
-		// float rampfilter = float(tx) / (float)sizex;
-		// rampfilter = mfilter.apply(rampfilter);
-
-		// float fcenter = 1.0f - (bShiftCenter ? (sintable[ty]) : 0);
-		// fcenter = -2*float(M_PI)/float(2*sizex-2) * fcenter * icenter;
-
-		// if(tx < sizex)
-		// 	vec[ty*sizex + tx] *= exp1j(fcenter * tx) * rampfilter;
 	}
 
 	void filterFBP(GPU gpus, Filter filter, 
-    float *tomogram, cufftComplex *filter_kernel, 
-    dim3 size, dim3 size_pad, dim3 pad)
+    float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }
             1: if plan 1D multiples cuffts
@@ -54,10 +43,12 @@ extern "C"{
         int dim = 1; 
 
         dim3 size_kernel(size_pad.x, 1, 1);
+        cufftComplex *filter_kernel = opt::allocGPU<cufftComplex>(size_kernel.x);
 
         opt::MPlanFFT(&gpus.mplan, dim, size_pad);
 
-		fbp_filter_kernel<<<gpus.Grd.x,gpus.BT.x>>>(filter, filter_kernel, size_kernel);
+        int gridBlock = (int)ceil( size_pad.x / TPBX ) + 1;
+		fbp_filter_kernel<<<gridBlock,TPBX>>>(filter, filter_kernel, size_kernel);
 
 		convolution_Real_C2C(  	gpus, tomogram, filter_kernel, 
                             	size,  
@@ -65,6 +56,7 @@ extern "C"{
                                 pad,
                             	0.0f, dim);
 
+        HANDLE_ERROR(cudaFree(filter_kernel));
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 }

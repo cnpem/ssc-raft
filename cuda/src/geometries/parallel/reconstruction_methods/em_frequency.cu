@@ -162,8 +162,8 @@ int blocksize, int gpu)
     /* Datas Dimensions */
     size_t recon_size    = static_cast<size_t>(blocksize * nrays) * nrays;
 	size_t sino_size     = static_cast<size_t>(blocksize * nrays) * nangles;
-    size_t ft_sino_size  = static_cast<size_t>(blocksize*nangles)*nrays*(1+zpad);
-    size_t ft_recon_size = static_cast<size_t>(blocksize*nrays*(1+zpad))*nrays*(1+zpad);
+    size_t ft_sino_size  = static_cast<size_t>(blocksize * nangles) * nrays * (1 + zpad);
+    size_t ft_recon_size = static_cast<size_t>(blocksize * nrays * (1 + zpad)) * nrays * (1 + zpad);
 
     float scale = (0 < dx)? dx/(float)inverse_fft_dim[0] : 1.0/(float)inverse_fft_dim[0];
 
@@ -316,6 +316,7 @@ extern "C"{
         for (int i = 0; i < ind_block; i++){
 
             subblock = min(blockgpu - ptr, blocksize);
+            printf("Subblock of get_tEM_FQ_GPU on block %d: %d \n",i,subblock);
 
             get_tEM_FQ_GPU( configs,
                             count + (size_t)ptr*nrays*nangles, 

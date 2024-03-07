@@ -116,7 +116,7 @@ dim3 sizea, dim3 sizeb)
 
 __global__ void opt::Normalize(cufftComplex *data, dim3 size, int dim)
 {
-    size_t norm         = (2 - dim) * (size.x * size.y) +  (dim - 1)* size.x;
+    size_t norm         = (2 - dim) * size.x +  (dim - 1) * (size.x * size.y);
     size_t index        = opt::getIndex3d(size);
     size_t total_points = opt::get_total_points(size);
 

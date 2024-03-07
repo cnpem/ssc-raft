@@ -64,7 +64,7 @@ extern "C" {
         int j = blockIdx.y*blockDim.y + threadIdx.y; /* angles */
         int k = blockIdx.z*blockDim.z + threadIdx.z; /* slices */
         
-        const size_t index = IND(i,j,k,proj_size.x,proj_size.y);
+        size_t index = IND(i,j,k,proj_size.x,proj_size.y);
         
         if ( (i >= proj_size.x) || (j >= proj_size.y) || (k >= proj_size.z) ) return;
 
@@ -91,9 +91,8 @@ extern "C" {
             indy = (int) ((y + 1)/dy);	 
 
             if ((indx >= 0) & (indx < phantom_size.x) & (indy >= 0) & (indy < phantom_size.y) ){
-                
-                ind      = IND(indx,indy,k,phantom_size.x,phantom_size.y);
-                linesum += phantom[ind];
+            
+                linesum += phantom[IND(indx,indy,k,phantom_size.x,phantom_size.y)];
             }
         } 
         projections[index] = linesum * dy;	    
@@ -156,7 +155,8 @@ extern "C"{
                                     dobj, (size_t)obj_size.x * obj_size.y * subblock);
 
             getRadonRT(dproj, dobj, dangles, 
-                        dim3(nrays, nangles, subblock), obj_size, 
+                        dim3(nrays, nangles, subblock), 
+                        dim3(obj_size.x, obj_size.y, subblock), 
                         ax, ay);
 
             opt::GPUToCPU<float>(   projection + (size_t)ptr * nrays * nangles, 

@@ -84,15 +84,16 @@ extern "C"{
 
         Filter filter(filter_type, regularization, paganin_reg, axis_offset);
         
-        cufftComplex *filter_kernel = opt::allocGPU<cufftComplex>(tomo_pad.x);
+        // cufftComplex *filter_kernel = opt::allocGPU<cufftComplex>(tomo_pad.x);
 
         float *sintable = opt::allocGPU<float>(nangles);
         float *costable = opt::allocGPU<float>(nangles);
 
-        setSinCosTable<<<nangles,1>>>(sintable, costable, angles, nangles);
+        int gridBlock = (int)ceil( nangles / TPBY ) + 1;
+        setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
 
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, filter_kernel, tomo_size, tomo_pad, configs.tomo.pad);
+            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         /* Old version - Gio */
         // if (filter.type != Filter::EType::none)
@@ -108,7 +109,7 @@ extern "C"{
         
         HANDLE_ERROR(cudaFree(sintable));
         HANDLE_ERROR(cudaFree(costable));
-        HANDLE_ERROR(cudaFree(filter_kernel));
+        // HANDLE_ERROR(cudaFree(filter_kernel));
     }
 }
 

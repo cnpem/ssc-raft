@@ -52,6 +52,11 @@ typedef struct dimension
     dim3 batchsize;
     dim3 padbatchsize;
 
+    float width_memory_bytes;
+    float lenght_memory_bytes;
+    float slice_memory_bytes;
+    float slice_padd_memory_bytes;
+
 }DIM; /* Data dimensions */
 
 typedef struct geometry

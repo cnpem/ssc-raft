@@ -136,9 +136,19 @@ extern "C"{
         */
         configs->tomo.padsize  = dim3(configs->tomo.size.x * ( 1 + configs->tomo.pad.x),configs->tomo.size.y,configs->tomo.size.z);
         
+        /* Compute memory in bytes of a single slice for Tomogram and its padded version for FFT */
+        configs->tomo.lenght_memory_bytes    = static_cast<float>(sizeof(float)) *    configs->tomo.size.x;
+        configs->tomo.width_memory_bytes      = static_cast<float>(sizeof(float)) *    configs->tomo.size.y;
+
+        configs->tomo.slice_memory_bytes      = configs->tomo.lenght_memory_bytes * configs->tomo.width_memory_bytes;
+        configs->tomo.slice_padd_memory_bytes = static_cast<float>(sizeof(float)) * configs->tomo.padsize.x * configs->tomo.padsize.y;
+
         /* Set Reconstruction variables */
         configs->obj.size      = dim3(parameters_int[3],parameters_int[3],configs->tomo.size.z); 
- 
+
+        /* Compute memory in bytes of a single slice for Tomogram */
+        configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->obj.size.x * configs->obj.size.y;
+
         /* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
         configs->geometry.magnitude_x        = 1.0;
         configs->geometry.magnitude_y        = 1.0;
@@ -149,6 +159,16 @@ extern "C"{
         
         configs->reconstruction_paganin_reg  = 4.0f * float(M_PI) * float(M_PI) * parameters_float[0]; /* Reconstruction Filter regularization parameter */
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
+    
+        /* Compute total memory used of FBP method on a singles slice */
+        configs->total_required_mem_per_slice = (size_t) (
+                configs->tomo.slice_memory_bytes      + // Tomo slice
+                configs->obj.slice_memory_bytes       + // Reconstructed object slice
+                configs->tomo.slice_padd_memory_bytes + // FFT slice
+                configs->tomo.lenght_memory_bytes     + // FBP filter kernel
+                configs->tomo.width_memory_bytes        // angles
+                );      
+    
     }
     
     void printFBPParameters(CFG *configs)
