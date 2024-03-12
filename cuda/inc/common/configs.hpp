@@ -91,7 +91,8 @@ typedef struct flags
 typedef struct config
 {   
     /* Pipeline variables */
-    size_t total_required_mem_per_slice;
+    float total_required_mem_per_slice_bytes;
+    int blocksize;
 
     GEO geometry;
 
@@ -152,11 +153,12 @@ struct GPU
     int ngpus, *gpus;
     cudaStream_t *streams;
     int num_streams;  
-    dim3 BT, Grd;  
+    dim3 BT, Grd;
 
     /* Fourier Transforms */
     /* Plan FFTs*/
     cufftHandle mplan;
+    cufftHandle mplanI;
 };
 
 
@@ -213,10 +215,7 @@ extern "C"{
 
     void setReconstructionParameters(CFG *configs, float *parameters_float, int *parameters_int, int *flags);
     void printGPUParameters(GPU *gpus_parameters);
-	void setGPUParameters(GPU *gpus_parameters, dim3 size_pad, int ngpus, int *gpus);
-    void setGPUs(GPU *gpus_parameters, int sizex, int sizey, int sizez);
-
-	// void setPhaseFilterParameters(GEO *geometry, DIM *tomo, float *parameters_float, int *parameters_int);
+	void setGPUParameters(GPU *gpus_parameters, dim3 size, int ngpus, int *gpus);
 
 }
 
@@ -229,9 +228,9 @@ extern "C"{
 
     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
     
-    int getTotalProcesses(CFG configs, const float GPU_MEMORY, int sizeZ, bool using_fft);
+    int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft);
 
-    int compute_GPU_blocksize(float nslices, const float total_required_mem_per_slice,
+    int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
     bool using_fft, float GPU_MEMORY); 
 
 }

@@ -44,11 +44,12 @@ def bstGPU(tomogram, angles, gpus, dic):
     filter_type    = FilterNumber(dic['filter'])
     paganin        = dic['paganin regularization']
     regularization = dic['regularization']
-    offset         = dic['offset']
+    offset         = int(dic['offset'])
+    blocksize      = dic['blocksize']
 
     # logger.info(f'BST Paganin regularization: {paganin}')
 
-    pad            = dic['padding'] + 2
+    padx, pady, padz  = dic['padding'] + 1,0,0 # (padx, pady, padz)
 
     # logger.info(f'Set BST pad value as {pad} x horizontal dimension ({padx}).')
 
@@ -62,12 +63,21 @@ def bstGPU(tomogram, angles, gpus, dic):
     angles       = CNICE(angles) 
     angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    libraft.getBSTMultiGPU(
-            gpus_ptr, ctypes.c_int(ngpus), 
-            obj_ptr, tomogram_ptr, angles_ptr, 
-            ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
-            ctypes.c_int(objsize), ctypes.c_int(pad), ctypes.c_float(regularization),
-            ctypes.c_float(paganin), ctypes.c_int(filter_type), ctypes.c_int(offset))
+    param_int     = [nrays, nangles, nslices, objsize, 
+                     padx, pady, padz, filter_type, offset, blocksize]
+    param_int     = numpy.array(param_int)
+    param_int     = CNICE(param_int,numpy.int32)
+    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+
+    param_float     = [paganin, regularization]
+    param_float     = numpy.array(param_float)
+    param_float     = CNICE(param_float,numpy.float32)
+    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+
+
+    libraft.getBSTMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
+        obj_ptr, tomogram_ptr, angles_ptr, 
+        param_float_ptr, param_int_ptr)
 
     return obj
 
@@ -101,8 +111,8 @@ def bst(tomogram, dic, angles = None, **kwargs):
 
     """
     required = ('gpu',)        
-    optional = ( 'filter','offset','padding','regularization','paganin regularization', 'offset')
-    default  = ('lorentz',       0,        2,             1.0,                     0.0,        0)
+    optional = ('filter' ,'offset','padding','regularization','paganin regularization', 'offset', 'blocksize')
+    default  = ('lorentz',       0,        2,             1.0,                     0.0,        0,          0 )
     
     dic = SetDictionary(dic,required,optional,default)
 

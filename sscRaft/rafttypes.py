@@ -119,9 +119,7 @@ try:
     libraft.getBSTMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-        ctypes.c_int, ctypes.c_int, ctypes.c_int,
-        ctypes.c_int, ctypes.c_int, ctypes.c_float,
-        ctypes.c_float, ctypes.c_int, ctypes.c_int
+        ctypes.c_void_p, ctypes.c_void_p
     ]
     
     libraft.getBSTMultiGPU.restype  = None

@@ -7,6 +7,9 @@
 
 extern "C" {
 
+    void setBSTParameters(CFG *configs, float *parameters_float, int *parameters_int);
+    void printBSTParameters(CFG *configs);
+
     void EMFQ_BST(float* blockRecon, float *wholesinoblock, float *angles,
     int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0);
 

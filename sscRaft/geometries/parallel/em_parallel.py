@@ -1,6 +1,6 @@
 from ...rafttypes import *
 
-def eEMRT_GPU_(tomo, angles, iterations, gpus):
+def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize):
     """ Wrapper for MultiGPU/CUDA function of the 
     Emission Expectation maximization (EM) method for 3D tomographic reconstructions in 
     parallel beam geometry. 
@@ -23,10 +23,10 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus):
     else:
         nslices = tomo.shape[0]
 
-    nangles       = tomo.shape[1]
-    nrays         = tomo.shape[2]
+    nangles       = tomo.shape[-2]
+    nrays         = tomo.shape[-1]
 
-    objsize       = tomo.shape[2]
+    objsize       = tomo.shape[-1]
     
     ngpus         = len(gpus)
     gpus          = numpy.array(gpus)
@@ -48,7 +48,7 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus):
     nflats           = 1
 
     param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, nflats, iterations]
+                     padx, pady, padz, nflats, iterations, blocksize]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
@@ -64,7 +64,7 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus):
 
     return obj
 
-def tEMRT_GPU_(counts, flat, angles, iterations, gpus):
+def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize):
     """ Wrapper for MultiGPU/CUDA function of the 
     Transmission Expectation maximization (EM) method for 3D tomographic reconstructions in 
     parallel beam geometry. Flat (or empty) here is defined by a measurement without
@@ -94,10 +94,10 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus):
     else:
         nflats = flat.shape[0]
 
-    nangles       = counts.shape[1]
-    nrays         = counts.shape[2]
+    nangles       = counts.shape[-2]
+    nrays         = counts.shape[-1]
 
-    objsize       = counts.shape[2]
+    objsize       = counts.shape[-1]
 
     # counts        = numpy.exp(-counts)
     # flat          = numpy.ones(counts.shape)
@@ -124,7 +124,7 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus):
     padx, pady, padz = 0,0,0
 
     param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, nflats, iterations]
+                     padx, pady, padz, nflats, iterations, blocksize]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
@@ -142,7 +142,7 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus):
 
 
 def tEMFQ_GPU_(count, flat, angles, pad, interpolation, 
-               det_pixel, tv_reg, iterations, gpus, obj=None):
+               det_pixel, tv_reg, iterations, gpus, blocksize, obj=None):
     """ Wrapper for MultiGPU/CUDA function of the 
     Transmission Expectation maximization (EM) method for 3D tomographic reconstructions in 
     parallel beam geometry. Flat (or empty) here is defined by a measurement without
@@ -176,8 +176,8 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
     else:
         nflats = flat.shape[0]
 
-    nangles     = count.shape[1]
-    nrays       = count.shape[2]
+    nangles     = count.shape[-2]
+    nrays       = count.shape[-1]
 
     objsize     = nrays
     
@@ -211,7 +211,7 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
     # logger.info(f'Set EM Frequency pad value as {padx} x horizontal dimension = ({padd}).')
 
     param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, nflats, iterations, interpolation]
+                     padx, pady, padz, nflats, iterations, interpolation, blocksize]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)

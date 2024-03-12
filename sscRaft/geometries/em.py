@@ -46,11 +46,13 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
 
     """
     # Set default dictionary parameters:
-    required  = ('gpu',)
-    optional = ('iterations','detectorPixel[m]','padding','beamgeometry','interpolation')
-    default    = (10,0.0,2,'parallel','bilinear')
+    required = ('gpu',)
+    optional = ('iterations','detectorPixel[m]','padding','beamgeometry','interpolation','blocksize')
+    default  = (10,0.0,2,'parallel','bilinear',0)
 
-    dic = SetDictionary(dic,required,optional,default)
+    dic      = SetDictionary(dic,required,optional,default)
+
+    blocksize     = dic['blocksize']
 
     gpus          = dic['gpu']
     method        = dic['method']
@@ -81,7 +83,7 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
             logger.warning(f'No flat provided.') 
             flat = numpy.ones((data.shape[0],data.shape[2])) 
 
-    # 
+    # Initial guess for EM Frequency
     try:
         guess = dic['guess']
     except:
@@ -89,17 +91,17 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
 
     if method == 'eEMRT':
 
-        output = eEMRT_GPU_(data, angles, iterations, gpus) 
+        output = eEMRT_GPU_(data, angles, iterations, gpus, blocksize) 
     
     elif method == 'tEMRT':
 
-        output = tEMRT_GPU_(data, flat, angles, iterations, gpus)
+        output = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize)
 
     elif method == 'tEMFQ':
 
         output = tEMFQ_GPU_(data, flat, angles, 
                             pad, interpolation, det_pixel, 
-                            tv_reg, iterations, gpus, guess)  
+                            tv_reg, iterations, gpus, blocksize, guess)  
     else:
         logger.error(f'Invalid EM method:{method}')
         raise ValueError(f'Invalid EM method:{method}')

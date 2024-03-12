@@ -41,7 +41,7 @@ extern "C"{
         float radon = 0;
         for(int s=0; s<d2; s++)
         {
-            radon += phantom[(int(y+0.5f)*proj_size.x + int(x+0.5f))%(proj_size.x*proj_size.x) + blockIdx.z*(proj_size.x*proj_size.x)];
+            radon += phantom[(int(y+0.5f)*phantom_size.x + int(x+0.5f))%(phantom_size.x*phantom_size.y) + blockIdx.z*(phantom_size.x*phantom_size.y)];
 
             x += cos_t;
             y += sin_t;
@@ -53,6 +53,82 @@ extern "C"{
 }
 
 extern "C" {
+    __global__ void kernel_radon_ss_block(float *projections, 
+    float *phantom, float *angles,
+    dim3 proj_size, dim3 phantom_size, 
+    float ax, float ay)
+    {
+        int tx = blockIdx.x * blockDim.x + threadIdx.x;
+        int ty = blockIdx.y * blockDim.y + threadIdx.y;
+        int tz = blockIdx.z * blockDim.z + threadIdx.z;
+
+        float cos, sin, tan, cond, t, x, y, sum;
+        int Y, X;
+
+        /* Projection data sizes */
+        int nrays    = proj_size.x;
+        int nangles  = proj_size.y;
+        int nslices  = proj_size.z;
+        
+        /* Phantom data sizes */
+        int sizeImagex  = phantom_size.x;
+        int sizeImagey  = phantom_size.y;
+        int sizeImagez  = phantom_size.z;
+
+        float tmin = sqrtf(ax * ax + ay * ay);
+        float dt   = 2.0f*tmin/(nrays-1);
+
+        float dx = 2.0f*ax/(sizeImagex-1);
+        float dy = 2.0f*ay/(sizeImagey-1);
+
+        if ( (tx < nrays) && (ty < nangles) && (tz < nslices) )
+            {
+            cond = sqrtf(2.0)/2.0;
+    
+            __sincosf(angles[ty], &sin, &cos);
+                    
+            if( sin < cond ){
+                tan = sin/cos;
+                sum = 0;
+            
+                for(Y = 0; Y < sizeImagey; Y++){
+                    y = - ay + Y * dy;
+                    t = - tmin + tx * dt;
+                    
+                    x = (t/cos - y*tan); 
+                    X = (float)((x + ax)/dx);
+
+                    // sum += tex2D<float>(texImg, X + 0.5f, Y + 0.5f + (tz*Nangles));
+                    sum += phantom[IND((int)(X + 0.5f),(int)(Y + 0.5f + tz * nangles),tz,sizeImagex,sizeImagey)];
+                }
+            
+                // output[ tz*nrays*Nangles + ty*Nrays + tx] = dxy*sum/fabsf(cos);
+                projections[ IND(tx,ty,tz,nrays,nangles) ] = dy * sum / fabsf(cos);
+
+
+            }else{
+
+                tan = sin/cos;
+                sum = 0;
+
+                for(X = 0; X < sizeImagex; X++){
+                    x = - ax + X * dx;
+                    
+                    t = - tmin + tx * dt;
+                    y = (t/sin - x/tan);
+                    Y = (float)((y + ay)/dy);
+                    
+                    // sum += tex2D<float>(texImg, X + 0.5f, Y + 0.5f + (tz*Nangles));
+                    sum += phantom[ IND((int)(X + 0.5f),(int)(Y + 0.5f + tz * nangles),tz,sizeImagex,sizeImagey) ];
+
+                }
+
+                // output[ tz*Nrays*Nangles + ty*Nrays + tx] = dxy*sum/fabsf(sin);
+                projections[ IND(tx,ty,tz,nrays,nangles) ] = dx * sum / fabsf(sin);
+            }
+        }
+    }		
+
     __global__ void Radon_RT_version_sscRadon(
                     float *projections, float *phantom, float *angles,
                     dim3 proj_size, dim3 phantom_size, 
@@ -68,7 +144,7 @@ extern "C" {
         
         if ( (i >= proj_size.x) || (j >= proj_size.y) || (k >= proj_size.z) ) return;
 
-        size_t ind; int indx, indy;
+        int indx, indy;
         float s, x, y, linesum, ctheta, stheta, t;  
 
         float dx = 2.0f*ax/(phantom_size.x-1);

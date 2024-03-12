@@ -61,14 +61,14 @@ extern "C"{
 	void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad);
     
-    void convolution_Real_C2C(GPU gpus, 
-        float *data, cufftComplex *kernel, 
-        dim3 size, dim3 kernel_size, 
-        dim3 pad, float pad_value, int dim);
+    // void convolution_Real_C2C(GPU gpus, 
+    //     float *data, cufftComplex *kernel, 
+    //     dim3 size, dim3 kernel_size, 
+    //     dim3 pad, float pad_value, int dim);
 
 	__global__ void fbp_filter_kernel(Filter filter, cufftComplex *kernel, dim3 size);
 
-    __global__ void fftshiftKernel(float *c, dim3 size);
+    // __global__ void fftshiftKernel(float *c, dim3 size);
     // __global__ void Normalize(float *a, float b, dim3 size);
 
 }

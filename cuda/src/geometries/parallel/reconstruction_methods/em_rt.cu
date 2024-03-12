@@ -25,7 +25,7 @@ extern "C" {
         CFG configs; GPU gpu_parameters;
 
         setEMRTParameters(&configs, paramf, parami);
-        // printEMRTParameters(&configs);
+        printEMRTParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
         // printGPUParameters(&gpu_parameters);
@@ -91,7 +91,11 @@ extern "C" {
         int nangles   = configs.tomo.size.y;
 
         int i; 
-        int blocksize = min(sizez,32);
+        int blocksize        = configs.blocksize;
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            blocksize          = min(sizez, blocksize_aux);
+        }
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
         HANDLE_ERROR(cudaSetDevice(ngpu));
@@ -207,7 +211,7 @@ extern "C"{
         CFG configs; GPU gpu_parameters;
 
         setEMRTParameters(&configs, paramf, parami);
-        // printEMRTParameters(&configs);
+        printEMRTParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
@@ -259,7 +263,11 @@ extern "C"{
     int sizez, int ngpu)
     {
         int i; 
-        int blocksize = min(sizez,32);
+        int blocksize        = configs.blocksize;
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            blocksize          = min(sizez, blocksize_aux);
+        }
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
         HANDLE_ERROR(cudaSetDevice(ngpu));

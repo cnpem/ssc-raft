@@ -103,19 +103,16 @@ namespace opt{
     { size_t total_points = size.x * size.y * size.z; return total_points; };
 
     template<typename Type>
-    __global__ void Normalize(Type *data, dim3 size, int dim)
+    __global__ void scale(Type *data, dim3 size, float scale)
     {
-        size_t norm         = (dim - 1) * (size.x * size.y) + (2 - dim) * size.x;
         size_t index        = opt::getIndex3d(size);
         size_t total_points = opt::get_total_points(size);
 
         if ( index >= total_points ) return;
         
-        data[index] /= (float)norm; 
+        data[index] *= scale; 
     };
     
-    __global__ void Normalize(cufftComplex *data, dim3 size, int dim);
-
     template<typename Type>
     Type* allocGPU(size_t size)    
     { Type *ptr; HANDLE_ERROR(cudaMalloc((void **)&ptr, size * sizeof(Type) )); return ptr; };
@@ -128,7 +125,68 @@ namespace opt{
     void GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size)
     {HANDLE_ERROR(cudaMemcpy(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost));};
 
-    void MPlanFFT(cufftHandle *mplan, const int dim, dim3 size);
+    void MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE);
+
+    dim3 setGridBlock(dim3 size);
+    
+    template<typename Type>
+    __global__ void fftshift2D(Type *c, dim3 size)
+    {
+        Type temp; size_t shift;
+        
+        size_t N = ( (size.x * size.y) + size.x ) / 2 ;	
+        size_t M = ( (size.x * size.y) - size.x ) / 2 ;	
+        
+        int i = blockIdx.x*blockDim.x + threadIdx.x;
+        int j = blockIdx.x*blockDim.x + threadIdx.x; 
+        int k = blockIdx.x*blockDim.x + threadIdx.x; 
+
+        size_t index = IND(i,j,k,size.x,size.y);
+
+        if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
+        
+        if ( i < ( size.x / 2 ) ){	
+
+            if ( j < ( size.y / 2 ) ){	
+                shift = index + N;
+                temp 	 = c[index];	
+                c[index] = c[shift];	
+                c[shift] = temp;
+            }
+        }else{
+            if ( j < ( size.y / 2 ) ){
+                shift = index + M;
+                temp 	 = c[index];	
+                c[index] = c[shift];	
+                c[shift] = temp;
+            }
+        }
+    };
+
+    template<typename Type>
+    __global__ void fftshift1D(Type *data, dim3 size)
+    {
+        Type temp;
+
+        int i = blockIdx.x*blockDim.x + threadIdx.x;
+        int j = blockIdx.x*blockDim.x + threadIdx.x; 
+        int k = blockIdx.x*blockDim.x + threadIdx.x; 
+
+        size_t index = IND(i,j,k,size.x,size.y);
+
+        if (index < ( size.x * size.y * size.z / 2 )){
+            if ( size.x / 2 <= i) {
+                index += -size.x/2 + size.x * size.y * size.z/2;
+                temp = data[index];
+                data[index] = data[index + size.x/2];
+                data[index + size.x/2] = temp;
+            } else {
+                temp = data[index];
+                data[index] = data[index + size.x/2];
+                data[index + size.x/2] = temp;
+            }
+        }
+    };
 
     __global__ void product_Real_Real(float *a, float *b, float *ans, dim3 sizea, dim3 sizeb);
     __global__ void product_Complex_Real(cufftComplex *a, float *b, cufftComplex *ans, dim3 sizea, dim3 sizeb);

@@ -84,22 +84,20 @@ extern "C"{
 
         Filter filter(filter_type, regularization, paganin_reg, axis_offset);
         
-        // cufftComplex *filter_kernel = opt::allocGPU<cufftComplex>(tomo_pad.x);
-
         float *sintable = opt::allocGPU<float>(nangles);
         float *costable = opt::allocGPU<float>(nangles);
 
         int gridBlock = (int)ceil( nangles / TPBY ) + 1;
         setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
 
-        if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+        // if (filter.type != Filter::EType::none)
+        //     filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         /* Old version - Gio */
-        // if (filter.type != Filter::EType::none)
-        //     SinoFilter(tomogram, 
-        //         (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
-        //         0, true, filter, false, sintable);
+        if (filter.type != Filter::EType::none)
+            SinoFilter(tomogram, 
+                (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
+                0, true, filter, false, sintable);
 
         BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, tomogram, angles,
                                                 sintable, costable, 
@@ -108,8 +106,7 @@ extern "C"{
         HANDLE_ERROR(cudaDeviceSynchronize());
         
         HANDLE_ERROR(cudaFree(sintable));
-        HANDLE_ERROR(cudaFree(costable));
-        // HANDLE_ERROR(cudaFree(filter_kernel));
+        HANDLE_ERROR(cudaFree(costable));    
     }
 }
 
@@ -148,7 +145,11 @@ extern "C"{
         int sizeImagey = configs.obj.size.y;
 
         int i; 
-		int blocksize = min(sizez,32);
+		// int blocksize = min(sizez,32);
+
+        int blocksize = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+        blocksize     = min(sizez,blocksize);
+
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
         float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
@@ -212,7 +213,7 @@ extern "C"{
         setFBPParameters(&configs, paramf, parami);
         // printFBPParameters(&configs);
 
-        setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
+        setGPUParameters(&gpu_parameters, configs.tomo.size, ngpus, gpus);
 
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;

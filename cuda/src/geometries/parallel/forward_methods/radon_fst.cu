@@ -716,9 +716,9 @@ int calc_blocksize(float nslices, float nangles, float nrays, float zpad, bool c
     const float total_required_mem_per_slice = complex_or_real * ( // in bytes.
         slice_size     +
         sino_size      +
-        fft_slice_size +
-        fft_sino_size);
-    const float empiric_const = 2.0; // the GPU needs some free memory to perform the FFTs.
+        2 * fft_slice_size +
+        2 * fft_sino_size);
+    const float empiric_const = 4.0; // the GPU needs some free memory to perform the FFTs.
     const float epsilon = 0.0;       // how much free memory we want to leave, in GB.
     
     // the values permitted for blocksize are powers of two.

@@ -296,10 +296,9 @@ int pad0, float reg, float paganin, int filter_type, int offset, int gpu)
 
 extern "C"{
 
-    void getBSTGPU(	float* obj, float *tomo, float *angles,
-	int nrays, int nangles, int blockgpu, int sizeimage, int pad0,
-    float reg, float paganin, int filter_type, int offset,
-    int gpu)
+    void getBSTGPU(	CFG configs, 
+    float* obj, float *tomo, float *angles,
+	int blockgpu, int gpu)
     {
         HANDLE_ERROR( cudaSetDevice(gpu) );
 
@@ -312,21 +311,33 @@ extern "C"{
         //             ssc_param_int("filter_type", filter_type),
         //             ssc_param_int("blockgpu", blockgpu)
         //     });
-
-        // printf("Pad0 = %d \n",pad0);
-        // printf("filter_type = %d \n",filter_type);
-        // printf("reg = %e \n",reg);
-        // printf("paganin = %e \n",paganin);
         
-        // size_t blocksize_aux = calc_blocksize(blockgpu, nrays, nangles, pad0, true);
-        int blocksize = min(blockgpu,32);
+        /* Projection data sizes */
+        int nrays    = configs.tomo.size.x;
+        int nangles  = configs.tomo.size.y;
+
+        /* Reconstruction sizes */
+        int sizeImagex = configs.obj.size.x;
+
+        int padding          = configs.tomo.pad.x;
+        int filter_type      = configs.reconstruction_filter_type;
+        float paganin_reg    = configs.reconstruction_paganin_reg;
+        float regularization = configs.reconstruction_reg;
+        int axis_offset      = configs.rotation_axis_offset;
+
+        int blocksize        = configs.blocksize;
+
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(blockgpu, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            blocksize          = min(blockgpu, blocksize_aux);
+        }
 
         // size_t blocksize = min((size_t)blockgpu, blocksize_aux);
         int ind_block    = (int)ceil( (float) blockgpu / blocksize );
         int ptr = 0, subblock;
 
-        float *dtomo   = opt::allocGPU<float>((size_t)    nrays *   nangles * blocksize);
-        float *dobj    = opt::allocGPU<float>((size_t)sizeimage * sizeimage * blocksize);
+        float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
+        float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize);
         float *dangles = opt::allocGPU<float>( nangles );
 
         opt::CPUToGPU<float>(angles, dangles, nangles);	
@@ -339,11 +350,11 @@ extern "C"{
                                  dtomo, (size_t)nrays * nangles * subblock);
 
             getBST( dobj, dtomo, dangles, 
-                    nrays, nangles, subblock, sizeimage, pad0,
-                    reg, paganin, filter_type, offset, gpu);
+                    nrays, nangles, subblock, sizeImagex, padding,
+                    regularization, paganin_reg, filter_type, axis_offset, gpu);
 
-            opt::GPUToCPU<float>(obj + (size_t)ptr * sizeimage * sizeimage, 
-                                 dobj, (size_t)sizeimage * sizeimage * subblock);
+            opt::GPUToCPU<float>(obj + (size_t)ptr * sizeImagex * sizeImagex, 
+                                 dobj, (size_t)sizeImagex * sizeImagex * subblock);
 
             /* Update pointer */
 			ptr = ptr + subblock;
@@ -359,13 +370,32 @@ extern "C"{
     }
 
     void getBSTMultiGPU(int* gpus, int ngpus, 
-    float* obj, float *tomo, float *angles,
-	int nrays, int nangles, int nslices, int sizeimage, int pad0,
-    float reg, float paganin, int filter_type, int offset)
+    float* obj, float* tomogram, float* angles, 
+    float *paramf, int *parami)
     {
         // ssc_event_start("getBSTMultiGPU", {ssc_param_int("ngpus", ngpus)});
 
-        int i;
+        int i, Maxgpudev;
+
+		/* Multiples devices */
+		HANDLE_ERROR(cudaGetDeviceCount(&Maxgpudev));
+
+		/* If devices input are larger than actual devices on GPU, exit */
+		for(i = 0; i < ngpus; i++) 
+			assert(gpus[i] < Maxgpudev && "Invalid device number.");
+        CFG configs; GPU gpu_parameters;
+
+        setBSTParameters(&configs, paramf, parami);
+        // printBSTParameters(&configs);
+
+        /* Projection data sizes */
+        int nrays    = configs.tomo.size.x;
+        int nangles  = configs.tomo.size.y;
+        int nslices  = configs.tomo.size.z;
+
+        /* Reconstruction sizes */
+        int sizeImagex = configs.obj.size.x;
+
         int blockgpu = (nslices + ngpus - 1) / ngpus;
         int subblock, ptr = 0; 
         
@@ -373,22 +403,20 @@ extern "C"{
         threads.reserve(ngpus);
 
         if (ngpus == 1){ /* 1 device */
-            getBSTGPU(obj, tomo, angles, nrays, nangles, nslices, 
-                sizeimage, pad0, reg, paganin, filter_type, offset, gpus[0]);
+
+            getBSTGPU(configs, obj, tomogram, angles, nslices, gpus[0]);
+
         }else{        
+
             for(i = 0; i < ngpus; i++){ 
                 
                 subblock   = min(nslices - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async, 
-                    getBSTGPU, 
-                    obj  + (size_t)ptr * sizeimage * sizeimage, 
-                    tomo + (size_t)ptr *     nrays *   nangles, 
-                    angles,  
-                    nrays, nangles, subblock, 
-                    sizeimage, pad0, 
-                    reg, paganin, filter_type, offset,
-                    gpus[i]));
+                    getBSTGPU, configs,
+                    obj      + (size_t)ptr * sizeImagex * sizeImagex, 
+                    tomogram + (size_t)ptr *     nrays *   nangles, 
+                    angles,  subblock, gpus[i]));
 
                 /* Update pointer */
 				ptr = ptr + subblock;        

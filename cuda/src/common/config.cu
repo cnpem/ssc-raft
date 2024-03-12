@@ -8,33 +8,21 @@ extern "C"{
 		printf("GD: %d, %d, %d \n", gpus_parameters->Grd.x, gpus_parameters->Grd.y, gpus_parameters->Grd.z);
 	}
 
-	void setGPUParameters(GPU *gpus_parameters, dim3 size_pad, int ngpus, int *gpus)
+	void setGPUParameters(GPU *gpus_parameters, dim3 size, int ngpus, int *gpus)
 	{
 		/* Initialize Device sizes variables */
-		int Nsx                = 16;
-		int Nsy                = 16; 
-		int Nsz                = 4;
+		int Nsx                = TPBX;
+		int Nsy                = TPBY; 
+		int Nsz                = TPBZ;
 
 		gpus_parameters->BT    = dim3(Nsx,Nsy,Nsz);
-		const int bx           = ( size_pad.x + Nsx - 1 ) / Nsx;	
-		const int by           = ( size_pad.y + Nsy - 1 ) / Nsy;
-		const int bz           = ( size_pad.z + Nsz - 1 ) / Nsz;
+		const int bx           = ( size.x + Nsx - 1 ) / Nsx;	
+		const int by           = ( size.y + Nsy - 1 ) / Nsy;
+		const int bz           = ( size.z + Nsz - 1 ) / Nsz;
 		gpus_parameters->Grd   = dim3(bx,by,bz);
 	}
 
-	void setGPUs(GPU *gpus_parameters, int sizex, int sizey, int sizez)
-	{
-		/* Initialize Device sizes variables */
-		int Nsx                = 16;
-		int Nsy                = 16; 
-		int Nsz                = 4;
-
-		gpus_parameters->BT    = dim3(Nsx,Nsy,Nsz);
-		const int bx           = ( sizex + Nsx - 1 ) / Nsx;	
-		const int by           = ( sizey + Nsy - 1 ) / Nsy;
-		const int bz           = ( sizez + Nsz - 1 ) / Nsz;
-		gpus_parameters->Grd   = dim3(bx,by,bz);
-	}
+	
 
     void setReconstructionParameters(CFG *configs, float *parameters_float, int *parameters_int, int *flags)
 	{

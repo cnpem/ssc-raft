@@ -169,6 +169,7 @@ int blocksize, int gpu)
 
     /* Begin of FST initialization */ 
 
+    printf("Blocksize = %d \n",blocksize);
     /* cuFFT parameters */
     CUFFT_CALL(cufftCreate(&plan_2D_forward));
     CUFFT_CALL(cufftPlanMany(
@@ -176,13 +177,13 @@ int blocksize, int gpu)
 		nullptr, 1, forward_fft_dim[0] * forward_fft_dim[1],    		// *inembed, istride, idist,
         nullptr, 1, forward_fft_dim[0] * forward_fft_dim[1],    		// *onembed, ostride, odist,
         CUFFT_C2C, blocksize));							                // type, batch.
-    
+
     CUFFT_CALL(cufftCreate(&plan_1D_inverse));
     CUFFT_CALL(cufftPlanMany( 
         &plan_1D_inverse, FT_PST_RANK_INVERSE, inverse_fft_dim.data(), 	// *plan, rank, *n,
         nullptr, 1, inverse_fft_dim[0],  			                    // *inembed, istride, idist,
         nullptr, 1, inverse_fft_dim[0],  			                    // *onembed, ostride, odist,
-        CUFFT_C2C, nangles * blocksize));	                            // type, batch.
+        CUFFT_C2C, nangles * blocksize));	                            // type, batch. 
     
     /* Cuda kernels parameters - too advanced for me right now */
     CUDA_RT_CALL(cudaStreamCreate(&stream_H2D));
@@ -305,9 +306,13 @@ extern "C"{
         int nrays     = configs.tomo.size.x;
         int nangles   = configs.tomo.size.y;
         int pad       = configs.tomo.pad.x;
-        
-        int blocksize_aux = calc_blocksize(blockgpu, nangles, nrays, pad, true); 
-        int blocksize     = min(blockgpu, blocksize_aux);
+
+        int blocksize = configs.blocksize;
+
+        if ( blocksize == 0 ){
+            int blocksize_aux = calc_blocksize(blockgpu, nangles, nrays, pad, true); 
+            blocksize     = min(blockgpu, blocksize_aux);
+        }
 
         /* Indexes and pointers for subBlocks */
         int ind_block = (int)ceil( (float) blockgpu / blocksize );
@@ -316,7 +321,7 @@ extern "C"{
         for (int i = 0; i < ind_block; i++){
 
             subblock = min(blockgpu - ptr, blocksize);
-            printf("Subblock of get_tEM_FQ_GPU on block %d: %d \n",i,subblock);
+            // printf("Subblock of get_tEM_FQ_GPU on block %d: %d \n",i,subblock);
 
             get_tEM_FQ_GPU( configs,
                             count + (size_t)ptr*nrays*nangles, 

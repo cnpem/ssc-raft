@@ -10,22 +10,26 @@ dim3 size, dim3 pad, float value)
     int Npadx = ( 1 + pad.x ) * size.x;
     int Npady = ( 1 + pad.y ) * size.y;
 
-    int i      = blockIdx.x*blockDim.x + threadIdx.x;
-    int j      = blockIdx.y*blockDim.y + threadIdx.y;
-    int k      = blockIdx.z*blockDim.z + threadIdx.z;
+    int padx  = pad.x * size.x;
+    int pady  = pad.y * size.y;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int i     = blockIdx.x*blockDim.x + threadIdx.x;
+    int j     = blockIdx.y*blockDim.y + threadIdx.y;
+    int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    long long int index  = size.x * k * size.y + size.x * jj + ii;
-    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
+    long long int index  = IND(i,j,k,size.x,size.y);
 
-    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
+    int ipad     = (int)( i + padx / 2 );
+    int jpad     = (int)( j + pady / 2 );
+
+    long long int indpad =  Npadx * k * Npady + Npadx * jpad + ipad;
+
+    if ( (ipad >= Npadx) || (jpad >= Npady) || (k >= size.z) ) return;
 
     outpadded[indpad].x = value;
     outpadded[indpad].y = 0.0;
 
-    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+    if ( (i < 0) || (i >= size.x) || (j < 0) || (j >= size.y)) return;
 
     outpadded[indpad].x = in[index];
 }
@@ -40,8 +44,8 @@ dim3 size, dim3 pad, float value)
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int ii     = (int)( i + pad.x * size.x / 2 );
+    int jj     = (int)( j + pad.y * size.y / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
@@ -88,19 +92,23 @@ dim3 size, dim3 pad, float value)
     int Npadx = ( 1 + pad.x ) * size.x;
     int Npady = ( 1 + pad.y ) * size.y;
 
-    int i      = blockIdx.x*blockDim.x + threadIdx.x;
-    int j      = blockIdx.y*blockDim.y + threadIdx.y;
-    int k      = blockIdx.z*blockDim.z + threadIdx.z;
+    int padx  = pad.x * size.x;
+    int pady  = pad.y * size.y;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int i     = blockIdx.x*blockDim.x + threadIdx.x;
+    int j     = blockIdx.y*blockDim.y + threadIdx.y;
+    int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    long long int index  = size.x * k * size.y + size.x * jj + ii;
-    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
+    long long int index  = IND(i,j,k,size.x,size.y);
 
-    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
+    int ipad     = (int)( i + padx / 2 );
+    int jpad     = (int)( j + pady / 2 );
 
-    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+    long long int indpad =  Npadx * k *  Npady +  Npadx * jpad +  ipad;
+
+    if ( (ipad >= Npadx) || (jpad >= Npady) || (k >= size.z) ) return;
+
+    if ( (i < 0) || (i >= size.x) || (j < 0) || (j >= size.y) ) return;
 
     outpadded[indpad] = in[index];
 }
@@ -111,17 +119,21 @@ dim3 size, dim3 pad)
     int Npadx = ( 1 + pad.x ) * size.x;
     int Npady = ( 1 + pad.y ) * size.y;
 
-    int i      = blockIdx.x*blockDim.x + threadIdx.x;
-    int j      = blockIdx.y*blockDim.y + threadIdx.y;
-    int k      = blockIdx.z*blockDim.z + threadIdx.z;
+    int padx  = pad.x * size.x;
+    int pady  = pad.y * size.y;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int i     = blockIdx.x*blockDim.x + threadIdx.x;
+    int j     = blockIdx.y*blockDim.y + threadIdx.y;
+    int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    long long int index  = size.x * k * size.y + size.x * jj + ii;
-    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
+    long long int index  = IND(i,j,k,size.x,size.y);
 
-    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+    int ipad     = (int)( i + padx / 2 );
+    int jpad     = (int)( j + pady / 2 );
+
+    long long int indpad =  Npadx * k *  Npady +  Npadx * jpad +  ipad;
+
+    if ( (i < 0) || (i >= size.x) || (j < 0) || (j >= size.y) || (k >= size.z) ) return;
 
     out[index] = inpadded[indpad].x;
 }
@@ -175,17 +187,21 @@ dim3 size, dim3 pad)
     int Npadx = ( 1 + pad.x ) * size.x;
     int Npady = ( 1 + pad.y ) * size.y;
 
-    int i      = blockIdx.x*blockDim.x + threadIdx.x;
-    int j      = blockIdx.y*blockDim.y + threadIdx.y;
-    int k      = blockIdx.z*blockDim.z + threadIdx.z;
+    int padx  = pad.x * size.x;
+    int pady  = pad.y * size.y;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int i     = blockIdx.x*blockDim.x + threadIdx.x;
+    int j     = blockIdx.y*blockDim.y + threadIdx.y;
+    int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    long long int index  = size.x * k * size.y + size.x * jj + ii;
-    long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
+    long long int index  = IND(i,j,k,size.x,size.y);
 
-    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+    int ipad     = (int)( i + padx / 2 );
+    int jpad     = (int)( j + pady / 2 );
+
+    long long int indpad =  Npadx * k *  Npady +  Npadx * jpad +  ipad;
+
+    if ( (i < 0) || (i >= size.x) || (j < 0) || (j >= size.y) || (k >= size.z) ) return;
 
     out[index] = inpadded[indpad];   
 }

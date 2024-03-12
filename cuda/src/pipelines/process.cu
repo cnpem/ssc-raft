@@ -1,11 +1,11 @@
 #include "common/configs.hpp"
 
 extern "C"{
-    int compute_GPU_blocksize(float nslices, const float total_required_mem_per_slice,
+    int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
     bool using_fft, float GPU_MEMORY) 
     {
-        const float empiric_const = using_fft? 2.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
-        const float epsilon = 0.0;       // how much free memory we want to leave, in GB.
+        const float empiric_const = using_fft? 4.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
+        const float epsilon = 4.0;       // how much free memory we want to leave, in GB.
         
         // the values permitted for blocksize are powers of two.
         int raw_blocksize; // biggest blocksize feasible, although not necessarily: 
@@ -194,14 +194,14 @@ extern "C"{
 }
 
 extern "C"{
-    int getTotalProcesses(CFG configs, const float GPU_MEMORY, int sizeZ, bool using_fft)
+    int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft)
     {
-        int blocksizeMax = compute_GPU_blocksize((float)sizeZ, 
-                                                configs.total_required_mem_per_slice,
+        int blocksizeMax = compute_GPU_blocksize(sizeZ, 
+                                                configs.total_required_mem_per_slice_bytes,
                                                 using_fft,
                                                 GPU_MEMORY);   
 
-        int n_total_processes = (int)( sizeZ / blocksizeMax );
+        int n_total_processes = (int)ceil( (float) sizeZ / blocksizeMax );
 
         return n_total_processes;
     }
