@@ -37,7 +37,7 @@ The library sscRaft can be installed with either `pip` or `git`.
 One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install with the following steps
 
 ```bash
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
+    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
     cd ssc-raft 
     make clean && make
 ```
@@ -45,7 +45,7 @@ One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install with
 The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 2.2.84
 
 ```bash
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v2.2.8 --single-branch
+    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v2.2.8 --single-branch
     cd ssc-raft 
     make clean && make
 ```
@@ -73,7 +73,10 @@ Be careful using GPU functions due to memory allocation.
 
 The prerequisite for installing `ssc-raft` module `sscRaft` is `C`, `C++`, `CUDA` and `Python 3`.  
 
-The following `CUDA` modules are used:
+The following `SSC` modules are used:
+    - `ssc-commons`
+
+The following modules are used:
     - `CUBLAS`
     - `CUFFT`
     - `PTHREADS`

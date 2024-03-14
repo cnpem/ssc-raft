@@ -109,7 +109,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
         HANDLE_ERROR(cudaFree(fft));
 	}
 
-    void filterFBP_2(GPU gpus, Filter filter, 
+    void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }
@@ -141,7 +141,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 
-	void filterFBP(GPU gpus, Filter filter, 
+	void filterFBP_2(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }

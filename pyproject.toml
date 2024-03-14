@@ -1,12 +1,56 @@
 [build-system]
 build-backend = "setuptools.build_meta"
+requires = [
+    "setuptools>=60.0",
+    "setuptools_scm[toml]>=8.0",
+    "scikit-build>=0.17",
+    "cmake>=3.11",
+    "wheel",
+    'ninja',
+    'click==8.0.4',
+    'colorama==0.4.5',
+    'rich==12.6.0',
+    'mdurl==0.1.0',
+    'Pygments==2.14.0',
+    'shellingham==1.5.0',
+    'typer==0.9.0',
+    'typing_extensions==4.1.1'
+]
 
 [project]
-version = "3.0.0"
-# dynamic = ["version"]
+# version = "3.0.0"
+dynamic = ["version"]
 name = "sscRaft"
 license = { text = "LGPL - 3.0" }
 
-# [tool.setuptools_scm]
+classifiers=[
+    'Development Status :: 4 - Beta', 'License :: OSI Approved :: LGPL-3.0 License',
+    'Intended Audience :: Science/Research', 'Intended Audience :: Education', 'Intended Audience :: Developers',
+    'Natural Language :: English', 'Operating System :: OS Independent', 'Programming Language :: Python',
+    'Programming Language :: Python :: 3.0', 'Programming Language :: C', 'Programming Language :: C++'
+]
+authors = [
+    {name = "Eduardo X. Miqueles", email = "eduardo.miqueles@lnls.br"},
+    {name = "Paola Ferraz", email = "paola.ferraz@lnls.br"},
+    {name = "Larissa M. Moreno", email = "larissa.moreno@lnls.br"},
+    {name = "Alan Peixinho", email = "alan.peixinho@lnls.br"},
+    {name = "João Oliveira", email = "joao.oliveira@lnls.br"},
+    {name = "Yuri Rossi Tonin", email = "yuri.tonin@lnls.br"},
+    {name = "Otávio Paiano"},
+    {name = "Gilberto Martinez Jr"},
+    {name = "Giovanni Baraldi"}
+]
+maintainers = [
+    {name = "Paola Ferraz", email = "paola.ferraz@lnls.br"},
+    {name = "Eduardo X. Miqueles", email = "eduardo.miqueles@lnls.br"},
+    {name = "Alan Peixinho", email = "alan.peixinho@lnls.br"}
+]
+description = "Reconstruction algorithms for tomography"
+keywords = ["raft", "tomography", "radon", "imaging", "filtered backprojection", "fdk", "expectation-maximization","rings","tomogram alignment"]
+
+[tool.setuptools]
+platforms = ["Linux"]
+
+[tool.setuptools_scm]
 # version_file = "sscRaft/_version.py"
 # version_scheme = "python-simplified-semver"
