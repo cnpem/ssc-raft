@@ -7,7 +7,7 @@
 #include "common/types.hpp"
 #include "common/opt.hpp"
 #include "common/logerror.hpp"
-// #include <logger.hpp>
+#include <logger.hpp>
 
 __global__ void sino2p(complex* padded, float* in, 
 size_t nrays, size_t nangles, int pad0, int csino)
@@ -219,6 +219,11 @@ int pad0, float reg, float paganin, int filter_type, int offset, int gpu)
 {
     HANDLE_ERROR( cudaSetDevice(gpu) );
 
+    ssc_event_start("getBST()", {
+        ssc_param_int("GPU device number", gpu),
+        ssc_param_int("Sub blocksize", trueblocksize)
+    });
+
     int blocksize_bst = 1;
 
 	size_t insize = Nrays*Nangles;
@@ -252,12 +257,18 @@ int pad0, float reg, float paganin, int filter_type, int offset, int gpu)
 	{
 		float* sinoblock = wholesinoblock + insize*zoff;
         
+        ssc_trace_start("BST_Filter");
+
         if (filter.type != Filter::EType::none)
             BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, 0.0, filter);
+
+        ssc_trace_stop(); /* BST_Filter */
 		
 		dim3 blocks((Nrays+255)/256,Nangles,blocksize_bst);
 		dim3 threads(128,1,1); 
 		
+        ssc_trace_start("BST_Core");
+
 		sino2p<<<blocks,threads>>>(realpolar.gpuptr, sinoblock, Nrays, Nangles, pad0, 0);
 		
 		Nangles *= 2;
@@ -282,6 +293,8 @@ int pad0, float reg, float paganin, int filter_type, int offset, int gpu)
 
 		GetX<<<dim3((sizeimage+127)/128,sizeimage),128>>>(blockRecon + outsize*zoff, cartesianblock.gpuptr, sizeimage);
 
+        ssc_trace_stop(); /* BST_Core */
+
 	 	HANDLE_ERROR( cudaPeekAtLastError() );
 	 	
 		Nangles /= 2;
@@ -291,6 +304,8 @@ int pad0, float reg, float paganin, int filter_type, int offset, int gpu)
     cufftDestroy(filterplan);
     cufftDestroy(plan1d);
     cufftDestroy(plan2d);
+
+    ssc_event_stop(); /* getBST */
 
 }
 
@@ -302,16 +317,6 @@ extern "C"{
     {
         HANDLE_ERROR( cudaSetDevice(gpu) );
 
-        // if (gpu == 0)
-        //     ssc_event_start("getBSTGPU", {
-        //             ssc_param_int("nrays", nrays),
-        //             ssc_param_int("nangles", nangles),
-        //             ssc_param_int("sizeimage", sizeimage),
-        //             ssc_param_int("pad0", pad0),
-        //             ssc_param_int("filter_type", filter_type),
-        //             ssc_param_int("blockgpu", blockgpu)
-        //     });
-        
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;
         int nangles  = configs.tomo.size.y;
@@ -331,11 +336,21 @@ extern "C"{
             int blocksize_aux  = compute_GPU_blocksize(blockgpu, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
             blocksize          = min(blockgpu, blocksize_aux);
         }
-
-        // size_t blocksize = min((size_t)blockgpu, blocksize_aux);
-        int ind_block    = (int)ceil( (float) blockgpu / blocksize );
+        int ind_block = (int)ceil( (float) blockgpu / blocksize );
         int ptr = 0, subblock;
 
+        ssc_event_start("getBSTGPU()", {
+            ssc_param_int("GPU device number", gpu),
+            ssc_param_int("nrays", nrays),
+            ssc_param_int("nangles", nangles),
+            ssc_param_int("sizeImagex", sizeImagex),
+            ssc_param_int("Axis offset", axis_offset),
+            ssc_param_int("Filter type", filter_type),
+            ssc_param_int("GPU blocksize", blockgpu),
+            ssc_param_int("Computed sub blocks", blocksize),
+            ssc_param_int("Number of sub blocks", ind_block)
+        });
+        
         float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
         float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize);
         float *dangles = opt::allocGPU<float>( nangles );
@@ -365,15 +380,14 @@ extern "C"{
         HANDLE_ERROR(cudaFree(dtomo));
         HANDLE_ERROR(cudaFree(dangles));
 
-        // if (gpu == 0)
-        //     ssc_event_stop(); /* getBSTGPU */
+        ssc_event_stop(); /* getBSTGPU() */
     }
 
     void getBSTMultiGPU(int* gpus, int ngpus, 
     float* obj, float* tomogram, float* angles, 
     float *paramf, int *parami)
     {
-        // ssc_event_start("getBSTMultiGPU", {ssc_param_int("ngpus", ngpus)});
+        ssc_event_start("getBSTMultiGPU()", {ssc_param_int("ngpus", ngpus)});
 
         int i, Maxgpudev;
 
@@ -424,7 +438,7 @@ extern "C"{
             for (i = 0; i < ngpus; i++)
 				threads[i].get();
         }
-        // ssc_event_stop(); /* getBSTMultiGPU */
+        ssc_event_stop(); /* getBSTMultiGPU */
     }
 }
 

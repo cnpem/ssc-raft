@@ -169,7 +169,15 @@ int blocksize, int gpu)
 
     /* Begin of FST initialization */ 
 
-    printf("Blocksize = %d \n",blocksize);
+    ssc_event_start("get_tEM_FQ_GPU()", {
+            ssc_param_int("GPU device number", gpu),
+            ssc_param_int("nrays", nrays),
+            ssc_param_int("nangles", nangles),
+            ssc_param_int("Padding", ( 1 + zpad )),
+            ssc_param_int("Computed sub blocks", blocksize),
+            ssc_param_float("Detector pixel in meters", dx)
+    });
+
     /* cuFFT parameters */
     CUFFT_CALL(cufftCreate(&plan_2D_forward));
     CUFFT_CALL(cufftPlanMany(
@@ -289,6 +297,8 @@ int blocksize, int gpu)
     // realpolar_bst.~cImage();
     // Apagar (não deveria ser necessário):
     // CUDA_RT_CALL(cudaDeviceReset());
+
+    ssc_event_stop(); /* get_tEM_FQ_GPU() */
 }
 }
 
@@ -340,6 +350,8 @@ extern "C"{
     float *count, float *obj, float *angles, float *flat,
     float *paramf, int *parami)
     {
+        ssc_event_start("get_tEM_FQ_MultiGPU()", {ssc_param_int("ngpus", ngpus)});
+
         int i, Maxgpudev;
 		
 		/* Multiples devices */
@@ -393,6 +405,7 @@ extern "C"{
             for(auto& t : threads)
                 t.get();
         }
+        ssc_event_stop(); /* get_tEM_FQ_MultiGPU */
     }
 }
 
