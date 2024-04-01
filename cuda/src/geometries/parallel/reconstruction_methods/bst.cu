@@ -104,6 +104,15 @@ int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0)
 {
 	int blocksize = 1;
 
+    Filter filter(Filter::EType::none, 1, 0.0, 0);
+
+    int blocksize_bst = 1;
+    cImage filtersino(Nrays, Nangles*blocksize_bst);
+
+    cufftHandle filterplan;
+    int dimmsfilter[] = {Nrays};
+    HANDLE_FFTERROR( cufftPlanMany(&filterplan, 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, Nangles*blocksize_bst) );
+
 	cImage cartesianblock(sizeimage, sizeimage*blocksize);
 	cImage polarblock(Nrays * pad0,Nangles*blocksize);
 	cImage realpolar(Nrays * pad0,Nangles*blocksize);
@@ -124,6 +133,9 @@ int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0)
 	for(size_t zoff = 0; zoff < (size_t)trueblocksize; zoff+=blocksize)
 	{
 		float* sinoblock = wholesinoblock + insize*zoff;
+
+        if (filter.type != Filter::EType::none)
+            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, 0.0, filter);
 		
 		dim3 blocks((Nrays+255)/256,Nangles,blocksize);
 		dim3 threads(128,1,1); 
@@ -173,10 +185,22 @@ void EMFQ_BST_ITER(
 	size_t insize = Nrays*Nangles;
 	size_t outsize = sizeimage*sizeimage;
 
+    Filter filter(Filter::EType::none, 1, 0.0, 0);
+
+    int blocksize_bst = 1;
+    cImage filtersino(Nrays, Nangles*blocksize_bst);
+
+    cufftHandle filterplan;
+    int dimmsfilter[] = {Nrays};
+    HANDLE_FFTERROR( cufftPlanMany(&filterplan, 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, Nangles*blocksize_bst) );
+
 	for(size_t zoff = 0; zoff < (size_t)trueblocksize; zoff+=blocksize)
 	{
 		float* sinoblock = wholesinoblock + insize*zoff;
 		
+        if (filter.type != Filter::EType::none)
+            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, 0.0, filter);
+
 		dim3 blocks((Nrays+255)/256,Nangles,blocksize);
 		dim3 threads(128,1,1); 
 		

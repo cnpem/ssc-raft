@@ -8,6 +8,7 @@
 #include "geometries/parallel/radon.hpp" /* FST is found here!! */
 #include "geometries/parallel/bst.hpp"
 #include "common10/cufft_utils.h"
+#include <logger.hpp>
 
 #define NITER_MIN_REG 20 // must be greater than 1 so back_cu and recon_cu are all meaningful.
 
@@ -80,6 +81,8 @@ int zpad, int interpolation, float dx, float tv_param, int niter)
         /* End call for Total variation (TV) */
 
         multiply_element_wise<<<recon_size/NUM_THREADS, NUM_THREADS>>>(recon_cu, back_cu, recon_size);
+
+        // norm = opt::norm2_max(recon_cu, dim3 (nrays,nangles,blocksize));
         
         CUDA_RT_CALL(cudaPeekAtLastError());
         CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -175,7 +178,7 @@ int blocksize, int gpu)
             ssc_param_int("nangles", nangles),
             ssc_param_int("Padding", ( 1 + zpad )),
             ssc_param_int("Computed sub blocks", blocksize),
-            ssc_param_float("Detector pixel in meters", dx)
+            ssc_param_double("Detector pixel in meters", dx)
     });
 
     /* cuFFT parameters */

@@ -133,10 +133,11 @@ dim3 sizea, dim3 sizeb)
     ans[indexa] = ComplexMult(a[indexa],b[indexb]);
 }
 
-dim3 setGridBlock(dim3 size){
+dim3 opt::setGridBlock(dim3 size){
     dim3 gridBlock( (int)ceil( size.x / TPBX ) + 1, 
                     (int)ceil( size.y / TPBY ) + 1, 
                     (int)ceil( size.z / TPBZ ) + 1);
 
     return gridBlock;
 }
+

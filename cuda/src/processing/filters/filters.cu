@@ -91,10 +91,10 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         cufftComplex *fft = opt::allocGPU<cufftComplex>(nfft);
 
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 threadsPerBlock(TPBX,TPBY,1);
         dim3 gridBlock( (int)ceil( size.x / threadsPerBlock.x ) + 1, 
                         (int)ceil( size.y / threadsPerBlock.y ) + 1, 
-                        (int)ceil( size.z / threadsPerBlock.z ) + 1);
+                        1);
               
         HANDLE_FFTERROR(cufftExecR2C(gpus.mplan, data, fft));
 
@@ -104,12 +104,15 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         HANDLE_FFTERROR(cufftExecC2R(gpus.mplanI, fft, data));
 
+        // float scale = (float)( 1.0f / size.x );
+        // opt::scale<<<gridBlock,threadsPerBlock>>>(data, size, scale);
+
         // opt::fftshift1D<<<gridBlock,threadsPerBlock>>>(data,size);
 
         HANDLE_ERROR(cudaFree(fft));
 	}
 
-    void filterFBP(GPU gpus, Filter filter, 
+    void filterFBP_1(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }
@@ -117,9 +120,9 @@ __global__ void fbp_filtering_C2C(Filter filter,
             2: if plan 2D multiples cuffts */
         int dim = 1; 
 
-        dim3 gridBlock( (int)ceil( size.x / gpus.BT.x ) + 1, 
-                        (int)ceil( size.y / gpus.BT.y ) + 1, 
-                        (int)ceil( size.z / gpus.BT.z ) + 1);
+        dim3 gridBlock( (int)ceil( size_pad.x / gpus.BT.x ) + 1, 
+                        (int)ceil( size_pad.y / gpus.BT.y ) + 1, 
+                        (int)ceil( size_pad.z / gpus.BT.z ) + 1);
 
 
         opt::MPlanFFT(&gpus.mplan, dim, size_pad, CUFFT_C2C);
@@ -141,7 +144,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 
-	void filterFBP_2(GPU gpus, Filter filter, 
+	void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }
@@ -149,9 +152,10 @@ __global__ void fbp_filtering_C2C(Filter filter,
             2: if plan 2D multiples cuffts */
         int dim = 1; 
 
-        dim3 gridBlock( (int)ceil( size.x / gpus.BT.x ) + 1, 
-                        (int)ceil( size.y / gpus.BT.y ) + 1, 
-                        (int)ceil( size.z / gpus.BT.z ) + 1);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1, 
+                        (int)ceil( size_pad.y / TPBY ) + 1, 
+                        (int)ceil( size_pad.z / TPBZ ) + 1);
 
         dim3 fft_size = dim3( size_pad.x / 2 + 1, size.y, 1 );
 
@@ -166,7 +170,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         float *dataPadded = opt::allocGPU<float>(npad);
 
-        opt::paddR2R<<<gridBlock,gpus.BT>>>(tomogram, dataPadded, size, pad, 0.0f);
+        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, size, pad, 0.0f);
 
         size_t offset; 
         for( int k = 0; k < size.z; k++){  
@@ -176,9 +180,9 @@ __global__ void fbp_filtering_C2C(Filter filter,
             convolution_R2C_C2R_1D( gpus, dataPadded + offset, fft_size, filter);
         }
         
-        opt::remove_paddR2R<<<gridBlock,gpus.BT>>>(dataPadded, tomogram, size, pad);
+        opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
 
-        // opt::scale<<<gridBlock,gpus.BT>>>(tomogram, size, scale);
+        // opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
 
         HANDLE_ERROR(cudaFree(dataPadded));
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));

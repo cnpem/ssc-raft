@@ -15,6 +15,8 @@
 #include <cuda.h>
 #include <cufft.h>
 
+// #include <cublas.h>
+
 #include "common/configs.hpp"
 #include "common/logerror.hpp"
 
@@ -215,6 +217,51 @@ namespace opt{
 
     __global__ void remove_paddR2R(float *inpadded, float *out, 
     dim3 size, dim3 pad);
+
+    // template<typename Type>
+    // __global__ void InnerProduct(Type *a, Type *b, float *norm, dim3 size)
+    // {
+    //     int i = blockIdx.x*blockDim.x + threadIdx.x;
+    //     int j = blockIdx.y*blockDim.y + threadIdx.y;
+    //     int k = blockIdx.z*blockDim.z + threadIdx.z;
+    //     size_t index = IND(i,j,k,size.x,size.y);
+
+    //     if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
+    //     extern __shared__ float temp[];
+    //     // if sizex not multiple of 128 (e.g. gnomio), then fill temp with zeros,
+    //     // beacuse threads will pass the image limits
+    //     if (size.x < blockDim.x || size.y < blockDim.y || size.z < blockDim.z) {
+    //         for (int ii = 0; ii < blockDim.x*blockDim.y*blockDim.z; ii++)
+    //             temp[ii] = 0.0;
+    //     }
+    //     temp[blockDim.x*(threadIdx.z*blockDim.y + threadIdx.y) + threadIdx.x] = a[index] * b[index];
+    //     __syncthreads();
+    //     if (threadIdx.x == 0 && threadIdx.y == 0) { // for each slice in z, only one thread/block runs
+    //         float sum = 0.0;
+    //         for (int ii = 0; ii < blockDim.x*blockDim.y; ii++)
+    //             sum += temp[ii + threadIdx.z*blockDim.x*blockDim.y];
+    //         atomicAdd(norm + k, sum);
+    //     }
+    // }
+
+
+    // template<typename Type>
+    // float norm2_max(Type *data, dim3 size)
+    // {
+    //     float norm_calc;
+    //     float *norm = opt::allocGPU<float>((size_t)size.z);
+
+    //     dim3 threadsBlock = dim3(TPBX,TPBY,TPBZ);
+    //     dim3 gridBlock    = opt::setGridBlock(size);
+
+    //     opt::InnerProduct<<<gridBlock,threadsBlock>>>(data, data, norm, size);
+    //     int max = cublasIsamax((int)size.z, norm, 1);
+    //     HANDLE_ERROR(cudaMemcpy(&norm_calc, norm+max, sizeof(float), cudaMemcpyDeviceToHost));
+
+    //     cudaFree(norm);
+    //     return norm_calc;
+    // }
+
 
 }
 
