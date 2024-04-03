@@ -26,7 +26,7 @@ int zpad, int interpolation, float dx, float tv_param, int niter)
     int pad0      = zpad+1; /* Padding value for FST (zpad) and BST (pad0)*/
 
     /* Initialize variables with BST */
-    EMFQ_BST(backcounts_cu, sino_cu, angles_cu, nrays, nangles, blocksize, nrays, zpad+1);
+    EMFQ_BST(backcounts_cu, sino_cu, angles_cu, nrays, nangles, blocksize, nrays, pad0); //zpad+1
 
     /* Compute (1.0/backcounts_cu) */
     calc_reciprocal_element_wise<<<recon_size/NUM_THREADS, NUM_THREADS>>>(backcounts_cu,recon_size);

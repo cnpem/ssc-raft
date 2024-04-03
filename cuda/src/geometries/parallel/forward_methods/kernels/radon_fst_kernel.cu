@@ -61,7 +61,9 @@ __global__ void calc_reciprocal_element_wise(
 {
 	size_t idx = blockIdx.x*blockDim.x + threadIdx.x;
 	if (idx < size) {
-		arr[idx] = 1.0/arr[idx];
+        float aux = arr[idx];
+        
+		arr[idx] = 1.0/(arr[idx]);
 	}
 }
 

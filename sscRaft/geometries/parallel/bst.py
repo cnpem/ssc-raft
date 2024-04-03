@@ -49,7 +49,7 @@ def bstGPU(tomogram, angles, gpus, dic):
 
     # logger.info(f'BST Paganin regularization: {paganin}')
 
-    padx, pady, padz  = dic['padding'] + 1,0,0 # (padx, pady, padz)
+    padx, pady, padz  = dic['padding'] + 2,0,0 # (padx, pady, padz)
 
     # logger.info(f'Set BST pad value as {pad} x horizontal dimension ({padx}).')
 
@@ -111,8 +111,8 @@ def bst(tomogram, dic, angles = None, **kwargs):
 
     """
     required = ('gpu',)        
-    optional = ('filter' ,'offset','padding','regularization','paganin regularization', 'offset', 'blocksize')
-    default  = ('lorentz',       0,        2,             1.0,                     0.0,        0,          0 )
+    optional = ('filter' ,'offset','padding','regularization','paganin regularization','blocksize')
+    default  = ('lorentz',       0,        2,             1.0,                     0.0,         0 )
     
     dic = SetDictionary(dic,required,optional,default)
 
