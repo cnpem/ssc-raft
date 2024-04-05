@@ -1,4 +1,7 @@
 #include "processing/processing.hpp"
+#include "common/operations.hpp"
+#include "common/opt.hpp"
+#include "common/types.hpp"
 
 extern "C"{
 	__global__ void KPhaseCorrelation(complex* ph1, complex* ph2, size_t sizex)
@@ -457,11 +460,12 @@ extern "C"{
 }
 
 
-
 extern "C"{
-	int ComputeTomo360Offsetgpu(int gpu, float* cpusinograms, int sizex, int sizey, int sizez)
+
+	int getOffsetStitch360GPU(float* cpusinograms, 
+    int sizex, int sizey, int sizez, int ngpu)
 	{
-		cudaSetDevice(gpu);
+		HANDLE_ERROR(cudaSetDevice(ngpu));
 		rImage sinograms(cpusinograms, sizex, sizey*sizez);
 		
 		int offset = Tomo360_PhaseCorrelation(sinograms.gpuptr, sizex, sizey, sizez);
@@ -471,9 +475,11 @@ extern "C"{
 		return offset;
 	}
 	
-	void Tomo360To180gpu(int gpu, float* data, int nrays, int nangles, int nslices, int offset)
+	void stitch360To180GPU(float* data, 
+    int nrays, int nangles, int nslices, 
+    int offset, int ngpu)
 	{
-		cudaSetDevice(gpu);
+		HANDLE_ERROR(cudaSetDevice(ngpu));
 		// printf("tomo360 gpou block: %d %d %d\n",nslices,nrays,nangles);
 
 		rImage sinograms(nrays, (size_t)nangles*nslices);
@@ -485,45 +491,30 @@ extern "C"{
 		cudaDeviceSynchronize();
 	}
 
-	void Tomo360To180block(int* gpus, int ngpus, float* data, int nrays, int nangles, int nslices, int offset)
+	void stitch360To180MultiGPU(int* gpus, int ngpus, 
+    float* data, int nrays, int nangles, int nslices, int offset)
 	{
 		 int t;
 		 int blockgpu = (nslices + ngpus - 1) / ngpus;
 		 
 		 std::vector<std::future<void>> threads;
+         threads.reserve(ngpus);
 
 		 for(t = 0; t < ngpus; t++){ 
 			  
 			blockgpu = min(nslices - blockgpu * t, blockgpu);
 			// printf("tomo360 block: %d %d %d %ld \n",blockgpu,t, nslices, (size_t)t * blockgpu * nrays * nangles);
 
-			threads.push_back(std::async( std::launch::async, Tomo360To180gpu, gpus[t], data + (size_t)t * blockgpu * nrays * nangles, nrays, nangles, blockgpu, offset));
+			threads.push_back(std::async( std::launch::async, 
+                stitch360To180GPU, 
+                data + (size_t)t * blockgpu * nrays * nangles, 
+                nrays, nangles, blockgpu, 
+                offset, gpus[t]));
 		 }
 	
 		 for(auto& t : threads)
 			  t.get();
 	}
 
-	int ComputeTomo360Offset16(int gpu, uint16_t* frames, uint16_t* cflat, uint16_t* cdark, int sizex, int sizey, int sizez, int numflats)
-   {
-		cudaSetDevice(gpu);
-
-		size_t memframe = 16*sizex*sizey;
-		size_t maxusage = 1ul<<32;
-		size_t block = min(max(maxusage/memframe,size_t(1)),size_t(sizey));
-
-		rImage avgsino(sizex,block,sizez);
-		// Image2D<uint16_t> FLAT(cflat,sizex,sizey,numflats);
-		// Image2D<uint16_t> DARK(cdark,sizex,sizey,1);
-	
-		// CPUReduceBLock16(avgsino.cpuptr, frames, cflat, cdark, sizex, sizey, sizez, block, numflats);
-		// avgsino.LoadToGPU();
-
-		int offset = Tomo360_PhaseCorrelation(avgsino.gpuptr, sizex, sizez, block);
-
-		cudaDeviceSynchronize();
-
-		return offset;
-	}
 
 }
