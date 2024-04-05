@@ -99,8 +99,8 @@ dim3 size, dim3 pad, float value)
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
     int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx / 2 );
-    int jj     = (int)( j - pady / 2 );
+    int ii     = (int)( i - (int)padx / 2 );
+    int jj     = (int)( j - (int)pady / 2 );
 
     long long int index  = IND(ii,jj,k,size.x,size.y);
 
@@ -196,8 +196,8 @@ dim3 size, dim3 pad)
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
     int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx / 2 );
-    int jj     = (int)( j - pady / 2 );
+    int ii     = (int)( i - (int)padx / 2 );
+    int jj     = (int)( j - (int)pady / 2 );
 
     long long int index  = IND(ii,jj,k,size.x,size.y);
 

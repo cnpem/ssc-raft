@@ -46,6 +46,7 @@ def fbpGPU(tomogram, angles, gpus, dic):
     paganin        = dic['paganin regularization']
     regularization = dic['regularization']
     offset         = dic['offset']
+    blocksize      = dic['blocksize']
 
     # logger.info(f'FBP Paganin regularization: {paganin}')
 
@@ -65,7 +66,7 @@ def fbpGPU(tomogram, angles, gpus, dic):
     angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
 
     param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, filter_type, offset]
+                     padx, pady, padz, filter_type, offset, blocksize]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)

@@ -1,6 +1,6 @@
 // Authors: Gilberto Martinez, Eduardo X Miqueles, Giovanni Baraldi, Paola Ferraz
 
-// #include <logger.hpp>
+#include <logger.hpp>
 #include "common/opt.hpp"
 #include "processing/filters.hpp"
 #include "geometries/parallel/fbp.hpp"
@@ -47,11 +47,11 @@ extern "C"{
                 /* Compute angle step size (dangle)*/
                 if ( angle_index == (nangles - 1) )
 
-                    dangle = angles[angle_index    ] - angles[angle_index - 1];
+                    dangle = angles[angle_index] - angles[angle_index - 1];
 
                 else
 
-                    dangle = angles[angle_index + 1] - angles[angle_index    ];
+                    dangle = angles[angle_index + 1] - angles[angle_index];
                 
                 t = x * cosine[angle_index] + y * sine[angle_index];
                 
@@ -90,14 +90,14 @@ extern "C"{
         int gridBlock = (int)ceil( nangles / TPBY ) + 1;
         setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
 
-        if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+        // if (filter.type != Filter::EType::none)
+        //     filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         /* Old version - Gio */
-        // if (filter.type != Filter::EType::none)
-        //     SinoFilter(tomogram, 
-        //         (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
-        //         0, true, filter, false, sintable);
+        if (filter.type != Filter::EType::none)
+            SinoFilter(tomogram, 
+                (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
+                0, true, filter, false, sintable);
 
         BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, tomogram, angles,
                                                 sintable, costable, 
@@ -118,23 +118,6 @@ extern "C"{
     {
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
-        // if (ngpu == 0)
-        //     ssc_event_start("getFBPGPU", {
-        //             ssc_param_int("configs.tomo.size.x", configs.tomo.size.x),
-        //             ssc_param_int("configs.tomo.size.y", configs.tomo.size.y),
-        //             ssc_param_int("configs.tomo.size.z", configs.tomo.size.z),
-        //             ssc_param_int("configs.obj.size.x", configs.obj.size.x),
-        //             ssc_param_int("configs.obj.size.y", configs.obj.size.y),
-        //             ssc_param_int("configs.tomo.pad.x", configs.tomo.pad.x),
-        //             ssc_param_int("configs.tomo.pad.y", configs.tomo.pad.y),
-        //             ssc_param_int("configs.tomo.pad.z", configs.tomo.pad.z),
-        //             ssc_param_int("configs.tomo.padsize.x", configs.tomo.padsize.x),
-        //             ssc_param_int("configs.tomo.padsize.y", configs.tomo.padsize.y),
-        //             ssc_param_int("configs.tomo.padsize.z", configs.tomo.padsize.z),
-        //             ssc_param_int("sizez (block)", sizez),
-        //             ssc_param_int("ngpu", ngpu)
-        //     });
-
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;
         int nangles  = configs.tomo.size.y;
@@ -144,13 +127,35 @@ extern "C"{
         int sizeImagex = configs.obj.size.x;
         int sizeImagey = configs.obj.size.y;
 
+        int padding          = configs.tomo.pad.x;
+        int filter_type      = configs.reconstruction_filter_type;
+        float paganin_reg    = configs.reconstruction_paganin_reg;
+        float regularization = configs.reconstruction_reg;
+        int axis_offset      = configs.rotation_axis_offset;
         int i; 
-		// int blocksize = min(sizez,32);
 
-        int blocksize = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
-        blocksize     = min(sizez,blocksize);
+        int blocksize = configs.blocksize;
+
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            blocksize          = min(sizez, blocksize_aux);
+        }
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
+
+        ssc_event_start("getFBPGPU()", {
+            ssc_param_int("GPU device number", ngpu),
+            ssc_param_int("nrays", nrays),
+            ssc_param_int("nangles", nangles),
+            ssc_param_int("sizeImagex", sizeImagex),
+            ssc_param_int("sizeImagey", sizeImagey),
+            ssc_param_int("Axis offset", axis_offset),
+            ssc_param_int("Filter type", filter_type),
+            ssc_param_int("GPU blocksize", sizez),
+            ssc_param_int("Computed sub blocks", blocksize),
+            ssc_param_int("Number of sub blocks", ind_block)
+        });
+        
 
         float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
         float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagey * blocksize);
@@ -189,15 +194,14 @@ extern "C"{
         HANDLE_ERROR(cudaFree(dtomo));
         HANDLE_ERROR(cudaFree(dobj));
 
-        // if (ngpu == 0)
-        //     ssc_event_stop(); /* getFBPGPU */
+        ssc_event_stop(); /* getFBPGPU */
     }
 
     void getFBPMultiGPU(int* gpus, int ngpus, 
     float* obj, float* tomogram, float* angles, 
     float *paramf, int *parami)
     {
-        // ssc_event_start("getFBPMultiGPU", {ssc_param_int("ngpus", ngpus)});
+        ssc_event_start("getFBPMultiGPU", {ssc_param_int("ngpus", ngpus)});
 
         int i, Maxgpudev;
 
@@ -259,7 +263,7 @@ extern "C"{
 			for (i = 0; i < ngpus; i++)
 				threads[i].get();
 		}	
-        // ssc_event_stop(); /* getFBPMultiGPU */
+        ssc_event_stop(); /* getFBPMultiGPU */
     }
 
 }

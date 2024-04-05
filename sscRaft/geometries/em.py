@@ -76,12 +76,14 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
         if angles is None:
             logger.error(f'Missing angles list!! Finishing run...') 
             raise ValueError(f'Missing angles list!!')
-    try:
-        flat = dic['flat']
-    except:
-        if flat is None:
-            logger.warning(f'No flat provided.') 
-            flat = numpy.ones((data.shape[0],data.shape[2])) 
+        
+    if method != 'eEMRT':
+        try:
+            flat = dic['flat']
+        except:
+            if flat is None:
+                logger.warning(f'No flat provided.') 
+                flat = numpy.ones((data.shape[0],data.shape[-1])) 
 
     # Initial guess for EM Frequency
     try:
