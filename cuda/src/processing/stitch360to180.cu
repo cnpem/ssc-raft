@@ -319,158 +319,170 @@ __global__ void TransferMemory(const float* sinos, Type* restrict img1, Type* re
 	}
 }
 
-extern "C"{
-	int Tomo360_PhaseCorrelation(float* sinograms, size_t sizex, size_t sizey, size_t sizez)
-	{
-		const size_t inputplanesize = sizey*sizex;
-		sizey /= 2;
+int Tomo360_PhaseCorrelation(float* sinograms, size_t sizex, size_t sizey, size_t sizez)
+{
+    const size_t inputplanesize = sizey*sizex;
+    sizey /= 2;
 
-		cImage img1(sizex,sizey,sizez);
-		cImage img2(sizex,sizey,sizez);
+    cImage img1(sizex,sizey,sizez);
+    cImage img2(sizex,sizey,sizez);
 
-		size_t sxy = sizex*sizey;
-		TransferMemory<<<(sxy+127)/128,128>>>(sinograms, img1.gpuptr, img2.gpuptr, sxy, inputplanesize, sizez);
+    size_t sxy = sizex*sizey;
+    TransferMemory<<<(sxy+127)/128,128>>>(sinograms, img1.gpuptr, img2.gpuptr, sxy, inputplanesize, sizez);
 
-		cufftHandle plan1,plan2;
-		HANDLE_FFTERROR( cufftPlan1d(&plan1, sizex, CUFFT_C2C, sizey) );
+    cufftHandle plan1,plan2;
+    HANDLE_FFTERROR( cufftPlan1d(&plan1, sizex, CUFFT_C2C, sizey) );
 
-		int n[] = {(int)sizey};
-		int inembed[] = {(int)sizey};
+    int n[] = {(int)sizey};
+    int inembed[] = {(int)sizey};
 
-		cufftPlanMany(&plan2, 1, n, inembed, sizex, 1, inembed, sizex, 1, CUFFT_C2C, sizex);
+    cufftPlanMany(&plan2, 1, n, inembed, sizex, 1, inembed, sizex, 1, CUFFT_C2C, sizex);
 
-		for(size_t i=0; i<sizez; i++)
-		{
-			size_t zoff = i*sizex*sizey;
-			complex* img1ptr = img1.gpuptr + zoff;
-			complex* img2ptr = img2.gpuptr + zoff;
+    for(size_t i=0; i<sizez; i++)
+    {
+        size_t zoff = i*sizex*sizey;
+        complex* img1ptr = img1.gpuptr + zoff;
+        complex* img2ptr = img2.gpuptr + zoff;
 
-			HANDLE_FFTERROR( cufftExecC2C(plan1, img1ptr, img1ptr, CUFFT_FORWARD) );
-			HANDLE_FFTERROR( cufftExecC2C(plan1, img2ptr, img2ptr, CUFFT_INVERSE) ); // Flip sinogram2 in x direction
-			HANDLE_FFTERROR( cufftExecC2C(plan2, img1ptr, img1ptr, CUFFT_FORWARD) );
-			HANDLE_FFTERROR( cufftExecC2C(plan2, img2ptr, img2ptr, CUFFT_FORWARD) );
-		}
+        HANDLE_FFTERROR( cufftExecC2C(plan1, img1ptr, img1ptr, CUFFT_FORWARD) );
+        HANDLE_FFTERROR( cufftExecC2C(plan1, img2ptr, img2ptr, CUFFT_INVERSE) ); // Flip sinogram2 in x direction
+        HANDLE_FFTERROR( cufftExecC2C(plan2, img1ptr, img1ptr, CUFFT_FORWARD) );
+        HANDLE_FFTERROR( cufftExecC2C(plan2, img2ptr, img2ptr, CUFFT_FORWARD) );
+    }
 
-		FFTZ_PhaseCorrelation(img1, img2);
-		
-		for(size_t i=0; i<sizez; i++)
-		{
-			size_t zoff = i*sizex*sizey;
-			complex* img1ptr = img1.gpuptr + zoff;
+    FFTZ_PhaseCorrelation(img1, img2);
+    
+    for(size_t i=0; i<sizez; i++)
+    {
+        size_t zoff = i*sizex*sizey;
+        complex* img1ptr = img1.gpuptr + zoff;
 
-			HANDLE_FFTERROR( cufftExecC2C(plan1, img1ptr, img1ptr, CUFFT_INVERSE) );
-			HANDLE_FFTERROR( cufftExecC2C(plan2, img1ptr, img1ptr, CUFFT_INVERSE) );
-		}
+        HANDLE_FFTERROR( cufftExecC2C(plan1, img1ptr, img1ptr, CUFFT_INVERSE) );
+        HANDLE_FFTERROR( cufftExecC2C(plan2, img1ptr, img1ptr, CUFFT_INVERSE) );
+    }
 
-		img1.LoadFromGPU();
+    img1.LoadFromGPU();
 
-		cudaDeviceSynchronize();
-		HANDLE_ERROR(cudaGetLastError());
+    cudaDeviceSynchronize();
+    HANDLE_ERROR(cudaGetLastError());
 
-		cufftDestroy(plan1);
-		cufftDestroy(plan2);
+    cufftDestroy(plan1);
+    cufftDestroy(plan2);
 
-		int posx = 0;
-		float maxx = 0;
-		for(int k=-int(sizez/4); k<int(sizez+3)/4; k++) for(int j=-int(sizez/4); j<int(sizez+3)/2; j++) for(size_t i = 0; i<sizex; i++)
-		{
-			size_t idx = (((k+sizez)%sizez)*sizey+(j+sizey)%sizey)*sizex + i;
-			float abss = img1.cpuptr[idx].abs2();
-			if(abss > maxx)
-			{
-				maxx = abss;
-				posx = i;
-			}
-		}
-		
-		/*
-		rImage maxvec(sizey,sizez);
-		Image2D<size_t> posvec(sizey,sizez);
+    int posx = 0;
+    float maxx = 0;
+    for(int k=-int(sizez/4); k<int(sizez+3)/4; k++) for(int j=-int(sizez/4); j<int(sizez+3)/2; j++) for(size_t i = 0; i<sizex; i++)
+    {
+        size_t idx = (((k+sizez)%sizez)*sizey+(j+sizey)%sizey)*sizex + i;
+        float abss = img1.cpuptr[idx].abs2();
+        if(abss > maxx)
+        {
+            maxx = abss;
+            posx = i;
+        }
+    }
+    
+    /*
+    rImage maxvec(sizey,sizez);
+    Image2D<size_t> posvec(sizey,sizez);
 
-		KMaxReduction<<<(sizex+31)/32,32>>>(img1.gpuptr, maxvec.gpuptr, posvec.gpuptr, sizex, sizex*sizey*sizez);
-		HANDLE_ERROR(cudaGetLastError());
+    KMaxReduction<<<(sizex+31)/32,32>>>(img1.gpuptr, maxvec.gpuptr, posvec.gpuptr, sizex, sizex*sizey*sizez);
+    HANDLE_ERROR(cudaGetLastError());
 
-		maxvec.LoadFromGPU();
-		posvec.LoadFromGPU();
+    maxvec.LoadFromGPU();
+    posvec.LoadFromGPU();
 
-		cudaDeviceSynchronize();
+    cudaDeviceSynchronize();
 
-		size_t imax = 0;
-		float maxx = -1;
+    size_t imax = 0;
+    float maxx = -1;
 
-		for(size_t k=0; k<16; k++) for(size_t j=0; j<16; j++)
-		{
-			size_t i = sizey*((k+sizez-8)%sizez) + ((j+sizey-8)%sizey);
-			if(maxvec.cpuptr[i] > maxx)
-			{
-				maxx = maxvec.cpuptr[i];
-				imax = posvec.cpuptr[i];
-			}
-		} 
+    for(size_t k=0; k<16; k++) for(size_t j=0; j<16; j++)
+    {
+        size_t i = sizey*((k+sizez-8)%sizez) + ((j+sizey-8)%sizey);
+        if(maxvec.cpuptr[i] > maxx)
+        {
+            maxx = maxvec.cpuptr[i];
+            imax = posvec.cpuptr[i];
+        }
+    } 
 
-		int posx = int(imax%sizex); */
+    int posx = int(imax%sizex); */
 
-		//if(posx > (int)sizex/2)
-		posx -= sizex;
-		return posx/2;
-	}
-
-	__global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, size_t sizex, int offset)
-	{
-		size_t outdx = threadIdx.x + blockDim.x*blockIdx.x;
-
-		if(outdx < sizex)
-		{
-			size_t indx = offset > 0 ? outdx : (sizex-1-outdx);
-			offset = abs(offset);
-
-			float coef = fminf(0.5f+((int)outdx-offset)*0.5f/(offset+1E-3f),1.0f);
-
-			atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef*temp1[blockIdx.y*sizex + indx]);
-			atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
-
-			if(outdx <= offset)
-			{
-				sinogram[blockIdx.y*sizex*2 + outdx] = temp2[blockIdx.y*sizex + 0];
-				sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp1[blockIdx.y*sizex + 0];
-			}
-		}
-	}
-
-	void Tomo360_To_180(float* sinograms, size_t sizex, size_t sizey, size_t sizez, int offset)
-	{
-		rImage temp(sizex,sizey);
-		const size_t ips = sizey*sizex; // input place size
-
-		sizey /= 2;
-
-		const size_t sxy = sizey*sizex; // output place size. Note that sxy != ips/2 if sizey%2 == 1
-
-		for(size_t z=0; z<sizez; z++)
-		{
-			// printf("for z: %ld %ld %ld %ld %ld\n",z,sizez,ips,sxy,sizey);
-			float* temp1 = temp.gpuptr;
-			float* temp2 = temp1 + ips/2;
-
-			TransferMemory<<<(sxy+127)/128,128>>>(sinograms + z*ips, temp1, temp2, sxy, 0, 1);
-			cudaMemset(sinograms + z*2*sxy, 0, ips*sizeof(float));
-			KJoinX<<<dim3((sizex+127)/128,sizey,1),128>>>(sinograms + z*2*sxy, temp1, temp2, sizex, offset); // careful with odd sizey
-		}
-	}
+    //if(posx > (int)sizex/2)
+    posx -= sizex;
+    return posx/2;
 }
 
+__global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, size_t sizex, int offset)
+{
+    size_t outdx = threadIdx.x + blockDim.x*blockIdx.x;
+
+    if(outdx < sizex)
+    {
+        size_t indx = offset > 0 ? outdx : (sizex-1-outdx);
+        offset = abs(offset);
+
+        float coef = fminf(0.5f+((int)outdx-offset)*0.5f/(offset+1E-3f),1.0f);
+
+        atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef*temp1[blockIdx.y*sizex + indx]);
+        atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
+
+        if(outdx <= offset)
+        {
+            sinogram[blockIdx.y*sizex*2 + outdx] = temp2[blockIdx.y*sizex + 0];
+            sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp1[blockIdx.y*sizex + 0];
+        }
+    }
+}
+
+// void Tomo360_To_180(float* sinograms, 
+// size_t sizex, size_t sizey, size_t sizez, int offset)
+// {
+//     rImage temp(sizex,sizey);
+//     const size_t ips = sizey*sizex; // input place size
+
+//     sizey /= 2;
+
+//     const size_t sxy = sizey*sizex; // output place size. Note that sxy != ips/2 if sizey%2 == 1
+
+//     for(size_t z=0; z<sizez; z++)
+//     {
+//         // printf("for z: %ld %ld %ld %ld %ld\n",z,sizez,ips,sxy,sizey);
+//         float* temp1 = temp.gpuptr;
+//         float* temp2 = temp1 + ips/2;
+
+//         TransferMemory<<<(sxy+127)/128,128>>>(sinograms + z*ips, temp1, temp2, sxy, 0, 1);
+//         cudaMemset(sinograms + z*2*sxy, 0, ips*sizeof(float));
+//         KJoinX<<<dim3((sizex+127)/128,sizey,1),128>>>(sinograms + z*2*sxy, temp1, temp2, sizex, offset); // careful with odd sizey
+//     }
+// }
+// void CPUTomo360_To_180(int devv, float* cpusinograms, int sizex, int sizey, int sizez, int offset)
+// {
+//     cudaSetDevice(devv);
+//     rImage sinograms(cpusinograms, sizex, sizey*sizez);
+//     Tomo360_To_180(sinograms.gpuptr, sizex, sizey, sizez, offset);
+//     sinograms.CopyTo(cpusinograms);
+// }
 
 extern "C"{
 
-	int getOffsetStitch360GPU(float* cpusinograms, 
-    int sizex, int sizey, int sizez, int ngpu)
+	int getOffsetStitch360GPU(int ngpu, float* sinogram, 
+    int sizex, int sizey, int sizez)
 	{
 		HANDLE_ERROR(cudaSetDevice(ngpu));
-		rImage sinograms(cpusinograms, sizex, sizey*sizez);
+
+        size_t nsize = (size_t) sizex * sizey * sizez;
+
+        float *d_sino = opt::allocGPU<float>(nsize);
+
+        opt::CPUToGPU<float>(sinogram, d_sino, nsize);
+
+		// rImage sinograms(cpusinograms, sizex, sizey*sizez);
 		
-		int offset = Tomo360_PhaseCorrelation(sinograms.gpuptr, sizex, sizey, sizez);
+		int offset = Tomo360_PhaseCorrelation(d_sino, sizex, sizey, sizez);
 		
-		cudaDeviceSynchronize();		
+		HANDLE_ERROR(cudaDeviceSynchronize());		
 		
 		return offset;
 	}
@@ -482,38 +494,64 @@ extern "C"{
 		HANDLE_ERROR(cudaSetDevice(ngpu));
 		// printf("tomo360 gpou block: %d %d %d\n",nslices,nrays,nangles);
 
-		rImage sinograms(nrays, (size_t)nangles*nslices);
-		
-		sinograms.CopyFrom(data, 0, (size_t)nrays*nangles*nslices);
-		Tomo360_To_180(sinograms.gpuptr, (size_t)nrays, (size_t)nangles, (size_t)nslices, offset);
-		sinograms.CopyTo(data, 0, (size_t)nrays*nangles*nslices);
+        size_t y_size = (size_t)nangles / 2;
 
-		cudaDeviceSynchronize();
+        const size_t ips = (size_t)nangles * nrays; // input place size
+        const size_t sxy = (size_t)y_size  * nrays; // output place size. Note that sxy != ips/2 if sizey%2 == 1
+
+        float *d_sino = opt::allocGPU<float>(ips);
+        float *temp   = opt::allocGPU<float>(ips);
+
+        for(int i = 0; i < nslices; i++){
+            float* temp1 = temp;
+            float* temp2 = temp1 + ips/2;
+
+            opt::CPUToGPU<float>(data + (size_t)i * ips, d_sino, ips);
+
+            TransferMemory<<<(sxy+127)/128,128>>>(d_sino, temp1, temp2, sxy, 0, 1);
+            cudaMemset(d_sino, 0, ips*sizeof(float));
+            KJoinX<<<dim3((nrays+127)/128,y_size,1),128>>>(d_sino, temp1, temp2, nrays, offset); // careful with odd sizey
+
+            opt::GPUToCPU<float>(data + (size_t)i * ips, d_sino, ips);
+
+        }
+		
+        HANDLE_ERROR(cudaDeviceSynchronize());
 	}
 
 	void stitch360To180MultiGPU(int* gpus, int ngpus, 
     float* data, int nrays, int nangles, int nslices, int offset)
 	{
-		 int t;
-		 int blockgpu = (nslices + ngpus - 1) / ngpus;
-		 
-		 std::vector<std::future<void>> threads;
-         threads.reserve(ngpus);
+        // Before called CPUTomo360_To_180()
+        int t;
+        int blockgpu = (nslices + ngpus - 1) / ngpus;
+        int ptr = 0, subblock;
+        
+        std::vector<std::future<void>> threads;
+        threads.reserve(ngpus);
 
-		 for(t = 0; t < ngpus; t++){ 
-			  
-			blockgpu = min(nslices - blockgpu * t, blockgpu);
-			// printf("tomo360 block: %d %d %d %ld \n",blockgpu,t, nslices, (size_t)t * blockgpu * nrays * nangles);
+        if ( ngpus == 1 ){
+            stitch360To180GPU(data, nrays, nangles, blockgpu, offset, gpus[0]);
+        }else{
+            for(t = 0; t < ngpus; t++){ 
+                
+                subblock = min(nslices - ptr, blockgpu);
+                // blockgpu = min(nslices - blockgpu * t, blockgpu);
+                // printf("tomo360 block: %d %d %d %ld \n",blockgpu,t, nslices, (size_t)t * blockgpu * nrays * nangles);
 
-			threads.push_back(std::async( std::launch::async, 
-                stitch360To180GPU, 
-                data + (size_t)t * blockgpu * nrays * nangles, 
-                nrays, nangles, blockgpu, 
-                offset, gpus[t]));
-		 }
-	
-		 for(auto& t : threads)
-			  t.get();
+                threads.push_back(std::async( std::launch::async, 
+                    stitch360To180GPU, 
+                    data + (size_t)ptr * nrays * nangles, 
+                    nrays, nangles, subblock, 
+                    offset, gpus[t]));
+
+                /* Update pointer */
+				ptr = ptr + subblock;
+            }
+
+            for(auto& t : threads)
+                t.get();
+        }
 	}
 
 

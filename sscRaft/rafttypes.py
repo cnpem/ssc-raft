@@ -182,9 +182,8 @@ except:
 ######## Raft - Stitching Offset 360 ##########
 try:
     libraft.getOffsetStitch360GPU.argtypes = [
-        ctypes.c_void_p,  
-        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-        ctypes.c_int
+        ctypes.c_int, ctypes.c_void_p,  
+        ctypes.c_int, ctypes.c_int, ctypes.c_int
     ]
     
     libraft.getOffsetStitch360GPU.restype  = ctypes.c_int
