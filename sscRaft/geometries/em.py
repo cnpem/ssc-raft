@@ -50,7 +50,7 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
     optional = ('iterations','detectorPixel[m]','padding','beamgeometry','interpolation','blocksize')
     default  = (10,0.0,2,'parallel','bilinear',0)
 
-    dic      = SetDictionary(dic,required,optional,default)
+    dic          = SetDictionary(dic,required,optional,default)
 
     blocksize     = dic['blocksize']
 

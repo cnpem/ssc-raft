@@ -99,8 +99,8 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize):
 
     objsize       = counts.shape[-1]
 
-    # counts        = numpy.exp(-counts)
-    # flat          = numpy.ones(counts.shape)
+    counts        = numpy.exp(-counts)
+    flat          = numpy.ones(counts.shape)
     
     ngpus         = len(gpus)
     gpus          = numpy.array(gpus)
