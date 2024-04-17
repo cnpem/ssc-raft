@@ -3,7 +3,7 @@
 from ..rafttypes import *
 from .io import *
 
-def background_correctionGPU(frames, flat, dark, gpus, is_log):
+def _background_correctionGPU(frames, flat, dark, gpus, is_log):
     """ GPU function to correct tomography projections (or frames) background 
     with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
     a sample, to measure the background.
@@ -11,12 +11,12 @@ def background_correctionGPU(frames, flat, dark, gpus, is_log):
     Can be computed in two ways.
 
     .. math::
-    T = \log{- \frac{D - D_d}{D_f - D_d}}
+        T = \log{- \\frac{D - D_d}{D_f - D_d}}
 
     for transmission tomography, and
 
     .. math::
-    T = \frac{D - D_d}{D_f - D_d}
+        T = \\frac{D - D_d}{D_f - D_d}
 
     for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the projection volume, 
     :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
@@ -119,12 +119,12 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
     Can be computed in two ways.
 
     .. math::
-    T = \log{- \frac{D - D_d}{D_f - D_d}}
+        T = \log{- \\frac{D - D_d}{D_f - D_d}}
 
     for transmission tomography, and
 
     .. math::
-    T = \frac{D - D_d}{D_f - D_d}
+        T = \\frac{D - D_d}{D_f - D_d}
 
     for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the projection volume, 
     :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
@@ -140,8 +140,8 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
     
     Dictionary parameters:
     
-        *``experiment['gpu']`` (int list): List of GPUs [Default: [0]]
-        *``experiment['uselog']`` (bool, optional): Apply ``- logarithm()`` or not [Default: False]
+        * ``experiment['gpu']`` (int list): List of GPUs [Default: [0]]
+        * ``experiment['uselog']`` (bool, optional): Apply ``- logarithm()`` or not [Default: False]
 
     * One or MultiGPUs. 
     * Calls function ``background_correctionGPU()``.
@@ -161,7 +161,7 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
     flat   = numpy.swapaxes(flat,0,1)
     dark   = numpy.swapaxes(dark,0,1)
 
-    frames = background_correctionGPU( frames, flat, dark, gpus, is_log ) 
+    frames = _background_correctionGPU( frames, flat, dark, gpus, is_log ) 
 
     return frames
 
@@ -173,12 +173,12 @@ def correct_background(frames, flat, dark, gpus = [0], is_log = False, **kwargs)
     Can be computed in two ways.
 
     .. math::
-    T = \log{- \frac{D - D_d}{D_f - D_d}}
+        T = \log{- \\frac{D - D_d}{D_f - D_d}}
 
     for transmission tomography, and
 
     .. math::
-    T = \frac{D - D_d}{D_f - D_d}
+        T = \\frac{D - D_d}{D_f - D_d}
 
     for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the projection volume, 
     :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
@@ -197,6 +197,6 @@ def correct_background(frames, flat, dark, gpus = [0], is_log = False, **kwargs)
     * Calls function ``background_correctionGPU()``.
     """        
     
-    frames = background_correctionGPU( frames, flat, dark, gpus, is_log ) 
+    frames = _background_correctionGPU( frames, flat, dark, gpus, is_log ) 
 
     return frames

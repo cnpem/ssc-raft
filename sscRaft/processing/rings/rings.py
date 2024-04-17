@@ -68,9 +68,9 @@ def rings(tomogram, dic, **kwargs):
 
     Dictionary parameters:
 
-        *``dic['gpu']`` (int list): List of GPUs to use [required]
-        *``dic['lambda rings']`` (float,optional): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
-        *``dic['rings block']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1]   
+        * ``dic['gpu']`` (int list): List of GPUs to use [required]
+        * ``dic['lambda rings']`` (float,optional): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
+        * ``dic['rings block']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1]   
     """
     required = ('gpu',)
     optional = ('lambda rings','rings block')

@@ -1,18 +1,52 @@
-Installation
-============
+Install
+=======
 
-This package uses ``C``, ``C++``, ``CUDA`` and ``PYTHON3``. See bellow for full requirements.
+This package uses ``C``, ``C++``, ``CUDA`` and ``Python3``. 
+Before installation, you will need the following packages installed:
 
-The library sscRaft can be installed with either ``pip`` or ``git``.
+* ``CUDA >= 10.0.0``
+* ``C``
+* ``C++`` 
+* ``Python >= 3.8.0``
+* ``PIP``
+* ``libcurl4-openssl-dev``
+
+See bellow for build requirements and dependencies.
+
+The library sscRaft can be installed with form the source code at `zenodo website <https://zenodo.org/>`_ or by ``pip``/ ``git``
+if inside the CNPEM network. More information on the ``sscRaft`` package on 
+`sscRaft website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_
+available inside the CNPEM network.
+
+
+Source code from Zenodo
+***********************
+
+The source code can be downloaded from `zenodo website <https://zenodo.org/>`_ under the 
+DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
+
+After download the ``ssc-raft-v<version>.tar.gz`` with the source files, one can decompress by
+
+.. code-block:: bash
+
+    tar -xvf ssc-raft-v<version>.tar.gz
+
+
+To compile the source files, enter the follwing command inside the folder
+
+.. code-block:: bash
+
+    make clean && make
+
 
 GIT
 ***
 
-One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install with the following steps
+One can clone our `gitlab <https://gitlab.cnpem.br/>`_ repository inside the CNPEM network and install with the following steps
 
 .. code-block:: bash
 
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
+    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
     cd ssc-raft 
     make clean && make
 
@@ -21,7 +55,7 @@ The ``<version>`` is the version of the ``sscRaft`` to be installed. Example, to
 
 .. code-block:: bash
 
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v2.2.8 --single-branch
+    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v2.2.8 --single-branch
     cd ssc-raft 
     make clean && make
 
@@ -29,7 +63,7 @@ The ``<version>`` is the version of the ``sscRaft`` to be installed. Example, to
 PIP
 ***
 
-One can install the latest version of sscRaft directly from our ``pip server``
+One can install the latest version of sscRaft directly from our ``pip server`` inside the CNPEM network
 
 .. code-block:: bash
 
@@ -43,7 +77,7 @@ Where ``version`` is the version number of the ``sscRaft``
     pip install sscRaft==2.2.8 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 
 
-MEMORY
+Memory
 ******
 
 Be careful using GPU functions due to memory allocation.
@@ -51,52 +85,45 @@ Be careful using GPU functions due to memory allocation.
 Requirements
 ************
 
-The prerequisite for installing ``ssc-raft`` module ``sscRaft`` is ``C``, ``C++``, 
-``CUDA`` and ``Python 3``.  
+Before installation, you will need to have the following packages installed:
 
-The following ``CUDA`` modules are used:
+* ``CUDA >= 10.0.0``
+* ``C``
+* ``C++`` 
+* ``Python >= 3.8.0``
+* ``PIP``
+* ``libcurl4-openssl-dev``
 
-- ``CUBLAS``
-- ``CUFFT``
-- ``PTHREADS``
-- ``CMAKE>=3.11``
+The build requirements are:
 
-The following ``Python3`` modules are used:
+* ``CUBLAS``
+* ``CUFFT``
+* ``PTHREADS``
+* ``CMAKE>=3.18``
+* ``scikit-build>=0.17.0``
+* ``setuptools>=64.0.0``
+* ``cython>=3.0.0``
 
-- ``skbuild>=0.17.0``
-- ``setuptools>=64.0.0``
-- ``numpy>=3.8.0``
-- ``skimage >=0.19.3``
-- ``scipy``
-- ``matplotlib``
-- ``logging``
-- ``warning``
-- ``sys``
-- ``os``
-- ``pathlib``
-- ``inspect``
-- ``SharredArray``
-- ``ctypes``
-- ``uuid``
-- ``time``
-- ``h5py``
-- ``json``
-- ``multiprocessing``
-- ``click==8.0.4``
-- ``colorama==0.4.5``
-- ``rich==12.6.0``
-- ``mdurl==0.1.0``
-- ``Pygments==2.14.0``
-- ``shellingham==1.5.0``
-- ``typer==0.9.0``
-- ``typing_extensions==4.1.1``
+The ``Python3`` dependencies are:
 
-UNINSTALL
+* ``numpy``
+* ``scikit-image >=0.19.3``
+* ``scipy``
+* ``matplotlib``
+* ``SharedArray``
+* ``uuid``
+* ``h5py``
+
+The following ``SSC`` modules are used:
+
+* ``ssc-commons``
+
+Uninstall
 *********
 
 To uninstall ``sscRaft`` use the command
 
 .. code-block:: bash
 
-    pip uninstall sscRaft -y
+    pip uninstall sscRaft
     

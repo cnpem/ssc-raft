@@ -1,11 +1,14 @@
 from ...rafttypes import *
+import numpy
+import ctypes
 
 def Centersino(frame0, frame1, flat, dark):
         """ Find the offset of a 180 tomogam to correctly align it, computed by cross correlation.
         It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
         on the intensity data :math:`I` inside function
 
-        .. math:: -\log(\frac{I - d_{0}}{I_{0}})
+        .. math:: 
+            -\log( \\frac{I - d_{0}}{I_{0}} ) 
 
         Args:
             frame0 (ndarray): First frame of intensity data obtained by detector
@@ -14,7 +17,7 @@ def Centersino(frame0, frame1, flat, dark):
             dark (ndarray): Dark
 
         Returns:
-            int: offset
+            (int): offset
         """        
 
         nrays = frame0.shape[-1]
@@ -44,35 +47,29 @@ def correct_rotation_axis360(data: numpy.ndarray, dic: dict) -> numpy.ndarray:
     Works with parallel, fan and cone beam sinograms for 360 degrees projections.
 
     Args:
-        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght].
-        dic (dictionary): Dictionary with the parameters info.
+        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        dic (dictionary): Dictionary with the parameters info
 
     Returns:
         (ndarray, int): Rotation axis corrected tomogram (3D) with axes [slices, angles, lenght] 
-        and Number of pixels representing the deviation of the center of rotation. 
+        and Number of pixels representing the deviation of the center of rotation
 
     Raises:
         ValueError: If the number of angles/projections is not an even number.
 
     Dictionary parameters:
 
-        *``dic['shift']`` (Tuple, optional): (bool,int) Rotation axis automatic corrrection (is_autoRot) (``is_autoRot = True``, ``value = 0``).
-        *``dic['findRotationAxis']`` (Tuple, optional): (int,int,int) For rotation axis function. Tuple (``nx_search=500``, ``nx_window=500``, ``nsinos=None``).
-        *``dic['padding']`` (int, optional): Number of elements for horizontal zero-padding. Defaults to ``0``.
+        * ``dic['shift']`` (Tuple, optional): (bool,int) Rotation axis automatic corrrection (is_autoRot) (``is_autoRot = True``, ``value = 0``)
+        * ``dic['findRotationAxis']`` (Tuple, optional): (int,int,int) For rotation axis function. Tuple (``nx_search=500``, ``nx_window=500``, ``nsinos=None``)
+        * ``dic['padding']`` (int, optional): Number of elements for horizontal zero-padding. Defaults to ``0``
 
     Options:
 
-        * ``nx_search`` (int, optional): Width of the search. 
-        If the center of rotation is not in the interval ``[nx_search-nx//2; nx_search+nx//2]`` this function will return a wrong result.
-        Default is ``nx_search=500``.
-        * ``nx_window`` (int, optional): How much of the sinogram will be used in the axis 2.
-        Default is ``nx_window=500``.
-        * ``nsinos`` (int or None, optional): Number of sinograms to average over.
-        Default is None, which results in ``nsinos = nslices//2``, where ``nslices = tomo.shape[1]``.
-        * ``is_autoRot`` (bool,optional): Apply the automatic rotation axis correction.
-        Default is ``True``.
-        * ``value`` (int,optional): Value of the rotation axis shift for correction.
-        Default is ``0``.
+        * ``nx_search`` (int, optional): Width of the search. If the center of rotation is not in the interval ``[nx_search-nx//2; nx_search+nx//2]`` this function will return a wrong result. Default is ``nx_search=500``.
+        * ``nx_window`` (int, optional): How much of the sinogram will be used in the axis 2. Default is ``nx_window=500``.
+        * ``nsinos`` (int or None, optional): Number of sinograms to average over.Default is None, which results in ``nsinos = nslices//2``, where ``nslices = tomo.shape[1]``.
+        * ``is_autoRot`` (bool,optional): Apply the automatic rotation axis correction. Default is ``True``.
+        * ``value`` (int,optional): Value of the rotation axis shift for correction. Default is ``0``.
 
     """
 

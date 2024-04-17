@@ -3,6 +3,9 @@ RUNDIR=	sscRaft sscRaft/ cuda/
 all: install
 
 install:
+	pip install . 
+
+dev:
 	python3 setup.py install --user
 
 clean:

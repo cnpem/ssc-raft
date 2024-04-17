@@ -22,12 +22,12 @@ copyright = '2022, GCC'
 author = 'GCC'
 
 # The full version, including alpha/beta/rc tags
-release = '3.0.0'
-version = '3.0.0'
+release = '3.0.0-dev'
+version = '3.0.0-dev'
 
 # -- General configuration ---------------------------------------------------
 
-autodoc_mock_imports = ["cupy", "h5py", "SharedArray", 
+autodoc_mock_imports = ["h5py", "SharedArray", 
                         "sscRaft.rafttypes","numpy",
                         "scipy","skimage"] # list all modules to be ignored during compilation of the html
 
@@ -53,11 +53,11 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.mathjax',
     'sphinx_rtd_theme',
-    'breathe',
+    # 'breathe',
     # 'exhale'
 ]
-breathe_projects = { "proj": "xml/" }
-breathe_default_project = "proj"
+# breathe_projects = { "proj": "xml/" }
+# breathe_default_project = "proj"
 
 """
 Breathe does not support cuda C++, then cuda special words used in function
@@ -66,7 +66,7 @@ C++.
 """
 # cpp_index_common_prefix = ['_Complex', 'cufftComplex']
 # cpp_id_attributes = ['__global__', '__device__', '_Complex', 'cufftComplex', '__restrict__', 'restrict']
-cpp_id_attributes = ['_Complex', '__global__', 'restrict', '__device__', '__host__', '__hevice']
+# cpp_id_attributes = ['_Complex', '__global__', 'restrict', '__device__', '__host__', '__hevice']
 # cpp_paren_attributes = ['restrict', '__restrict__']
 
 # Setup the exhale extension
@@ -91,12 +91,12 @@ cpp_id_attributes = ['_Complex', '__global__', 'restrict', '__device__', '__host
 # highlight_language = 'cpp'
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+# templates_path = ['_templates']
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+# exclude_patterns = []
 
 
 # -- Options for HTML output -------------------------------------------------

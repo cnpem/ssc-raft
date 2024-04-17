@@ -1,4 +1,6 @@
 from ...rafttypes import *
+import numpy
+import ctypes
 
 def getOffsetStitching360(tomogram, gpus = [0]):
         """Computes the offset of the 360 tomogram fullview to merge the two aquisitions.
