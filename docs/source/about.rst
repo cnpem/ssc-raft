@@ -38,10 +38,10 @@ Authors and Contributors
     :header-rows: 0    
 
     * - Eduardo X. Miqueles
-      - Contributor
+      - Author
       - LNLS/CNPEM
     * - Paola Ferraz
-      - Contributor
+      - Author
       - LNLS/CNPEM
     * - Larissa M. Moreno
       - Contributor
