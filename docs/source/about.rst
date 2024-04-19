@@ -11,6 +11,12 @@ among others.
 Codes and public prototypes are being increasingly included within this project,
 as long as they are tested and developed by the Scientific Computing Group.  
 
+The ``sscRaft`` package source code is available in `zenodo website <https://zenodo.org/>`_ under the 
+DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
+
+For more information on the ``sscRaft`` package, visit the `website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ 
+(needs to be inside the CNPEM network to access the website).
+
 Publications
 *************
 
@@ -24,12 +30,6 @@ Acknowledgements
 We would like to acknowledge the Brazilian Ministry of Science, Technology, and Innovation MCTI for supporting this work through the Brazilian Center for Research in Energy and Materials (CNPEM). 
 We want to thank Petrobras (Manhattan Project) - ID 2021/00018-3 for funding part of this project - and Mogno beamline from Sirius, for many fruitful discussion about the reconstruction strategies. 
 We also thank FAPESP/CEPID 2013/07375-0 for funding Nikolay Koshev, and FAPESP 2016/16238-4 for funding Gilberto Martinez Jr.
-
-The ``sscRaft`` package source code is available in `zenodo website <https://zenodo.org/>`_ under the 
-DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
-
-For more information on the ``sscRaft`` package, visit the `website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ 
-(needs to be inside the CNPEM network to access the website).
 
 Authors and Contributors
 ************************
