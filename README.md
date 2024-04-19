@@ -2,15 +2,32 @@
 
 ## Authors
 
-* Eduardo X. Miqueles, Scientific Computing Group/LNLS/CNPEM
-* Paola Ferraz, Scientific Computing Group/LNLS/CNPEM
-* Larissa M. Moreno, Scientific Computing Group/LNLS/CNPEM
-* João F. G. de Albuquerque Oliveira, Scientific Computing Group/LNLS/CNPEM
-* Alan Zanoni Peixinho, Scientific Computing Group/LNLS/CNPEM
-* Yuri Rossi Tonin, Scientific Computing Group/LNLS/CNPEM
-* Otávio M. Paiano, Scientific Computing Group/LNLS/CNPEM
-* Gilberto Martinez Jr., former Scientific Computing Group/LNLS/CNPEM
-* Giovanni Baraldi, former Scientific Computing Group/LNLS/CNPEM
+* Eduardo X. Miqueles, LNLS/CNPEM
+* Paola Ferraz, LNLS/CNPEM
+
+## Contributors
+
+* Larissa M. Moreno, LNLS/CNPEM
+* João F. G. de Albuquerque Oliveira, LNLS/CNPEM
+* Alan Zanoni Peixinho, LNLS/CNPEM
+* Yuri Rossi Tonin, LNLS/CNPEM
+
+## Past contributors
+
+* Otávio M. Paiano
+* Gilberto Martinez Jr.
+* Giovanni Baraldi
+* Janito Vaqueiro Ferreira Filho
+* Fernando S. Furusato
+* Matheus F. Sarmento, LNLS/CNPEM
+* Nikoley Koshev
+* Elias Helou
+
+## Acknowledgements
+
+We would like to acknowledge the Brazilian Ministry of Science, Technology, and Innovation MCTI for supporting this work through the Brazilian Center for Research in Energy and Materials (CNPEM).
+We want to thank Petrobras (Manhattan Project) - ID 2021/00018-3 for funding part of this project - and Mogno beamline from Sirius, for many fruitful discussion about the reconstruction strategies.
+We also thank FAPESP/CEPID 2013/07375-0 for funding Nikolay Koshev, and FAPESP 2016/16238-4 for funding Gilberto Martinez Jr.
 
 ### Contact
 

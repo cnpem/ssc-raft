@@ -18,6 +18,12 @@ Publications
 * Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermudez, J.S.V. (2014). *Generalized Titarenko\'s algorithm for ring artefacts reduction*. J. Synchrotron Rad, 21, 1333-1346. DOI: `10.1107/S1600577514016919 <https://doi.org/10.1107/S1600577514016919>`_.
 * Miqueles, Eduardo and Koshev, Nikolay and Helou, Elias S. (2018). *A Backprojection Slice Theorem for Tomographic Reconstruction*. IEEE Transactions on Image Processing, 27(2), p. 894-906. DOI: `10.1109/TIP.2017.2766785 <https://doi.org/10.1109/TIP.2017.2766785>`_.
 
+Acknowledgements
+****************
+
+We would like to acknowledge the Brazilian Ministry of Science, Technology, and Innovation MCTI for supporting this work through the Brazilian Center for Research in Energy and Materials (CNPEM). 
+We want to thank Petrobras (Manhattan Project) - ID 2021/00018-3 for funding part of this project - and Mogno beamline from Sirius, for many fruitful discussion about the reconstruction strategies. 
+We also thank FAPESP/CEPID 2013/07375-0 for funding Nikolay Koshev, and FAPESP 2016/16238-4 for funding Gilberto Martinez Jr.
 
 The ``sscRaft`` package source code is available in `zenodo website <https://zenodo.org/>`_ under the 
 DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
@@ -25,30 +31,54 @@ DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
 For more information on the ``sscRaft`` package, visit the `website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ 
 (needs to be inside the CNPEM network to access the website).
 
-Authors
-*******
+Authors and Contributors
+************************
 
-.. list-table:: All RAFT authors over the years
+.. list-table:: All RAFT contributors over the years
     :header-rows: 0    
 
     * - Eduardo X. Miqueles
-      - Scientific Computing Group/LNLS/CNPEM
+      - Contributor
+      - LNLS/CNPEM
     * - Paola Ferraz
-      - Scientific Computing Group/LNLS/CNPEM
+      - Contributor
+      - LNLS/CNPEM
     * - Larissa M. Moreno
-      - Scientific Computing Group/LNLS/CNPEM
+      - Contributor
+      - LNLS/CNPEM
     * - João F. G. de Albuquerque Oliveira
-      - Scientific Computing Group/LNLS/CNPEM
+      - Contributor
+      - LNLS/CNPEM
     * - Alan Zanoni Peixinho
-      - Scientific Computing Group/LNLS/CNPEM
+      - Contributor
+      - LNLS/CNPEM
     * - Yuri Rossi Tonin
-      - Scientific Computing Group/LNLS/CNPEM
+      - Contributor
+      - LNLS/CNPEM
     * - Otávio M. Paiano
-      - Former Scientific Computing Group/LNLS/CNPEM
+      - Past contributor
+      - 
     * - Gilberto Martinez Jr.
-      - Former Scientific Computing Group/LNLS/CNPEM
+      - Past contributor
+      - 
     * - Giovanni Baraldi
-      - Former Scientific Computing Group/LNLS/CNPEM
+      - Past contributor
+      -
+    * - Janito Vaqueiro Ferreira Filho
+      - Past contributor
+      -
+    * - Fernando S. Furusato
+      - Past contributor
+      -
+    * - Matheus F. Sarmento
+      - Past contributor
+      - LNLS/CNPEM
+    * - Elias Helou
+      - Past contributor
+      -
+    * - Nikolay Koshev
+      - Past contributor
+      - 
 
 
 **Contact:** `gcc@lnls.br <malito:gcc@lnls.br>`_
