@@ -1,9 +1,6 @@
 _skbuild/
 __pycache__/
 docs/build/
-docs/html/
-docs/source/xml/
-docs/source/api/
 build/
 dist/
 *.egg-info/
