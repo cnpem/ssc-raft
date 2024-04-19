@@ -1,15 +1,17 @@
 Welcome to sscRaft documentation!
 =================================
-
+.. math::
+    
 .. include:: source/about.rst
 
 .. toctree::
     :maxdepth: 1
     :numbered:
-    :caption: Contents:
+    :caption: Contents
 
     source/install
-    source/public
+    source/tutorial
+    source/api
     source/changelog
     
    

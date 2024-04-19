@@ -8,7 +8,7 @@
 * João F. G. de Albuquerque Oliveira, Scientific Computing Group/LNLS/CNPEM
 * Alan Zanoni Peixinho, Scientific Computing Group/LNLS/CNPEM
 * Yuri Rossi Tonin, Scientific Computing Group/LNLS/CNPEM
-* Otávio M. Paiano, former Mogno Beamline/LNLS/CNPE
+* Otávio M. Paiano, Scientific Computing Group/LNLS/CNPEM
 * Gilberto Martinez Jr., former Scientific Computing Group/LNLS/CNPEM
 * Giovanni Baraldi, former Scientific Computing Group/LNLS/CNPEM
 
@@ -91,7 +91,7 @@ Before installation, you will need the following packages installed:
 * `C++`
 * `Python >= 3.8.0`
 * `PIP`
-* `libcurl4-openssl-dev`
+* `libcurl4-openssl-dev`- Former Scientific Computing Group/LNLS/CNPEM
 
 The following `SSC` modules are used:
 

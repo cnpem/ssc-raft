@@ -2,7 +2,7 @@
 from ...rafttypes import *
 from ...processing.io import *
 
-def bstGPU(tomogram, angles, gpus, dic):
+def _bstGPU(tomogram, angles, gpus, dic):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
     tomogram using the Backprojection Slice Theorem (BST) method.
 
@@ -25,6 +25,10 @@ def bstGPU(tomogram, angles, gpus, dic):
         * ``dic['regularization']`` (float): Regularization value ( value >= 0 ) [required]
         * ``dic['padding']`` (int): Data padding - Integer multiple of the data size (0,1,2, etc...) [required]
 
+    References:
+
+        .. [1] Miqueles, X. E. and Koshev, N. and Helou, E. S. (2018). A Backprojection Slice Theorem for Tomographic Reconstruction. IEEE Transactions on Image Processing, 27(2), p. 894-906. DOI: https://doi.org/10.1109/TIP.2017.2766785.
+    
     """         
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
@@ -109,6 +113,11 @@ def bst(tomogram, dic, angles = None, **kwargs):
         * ``dic['regularization']`` (float,optional): Regularization value ( value >= 0 ) [default: 1.0]  
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 2]  
 
+    References:
+
+        .. [1] Miqueles, X. E. and Koshev, N. and Helou, E. S. (2018). A Backprojection Slice Theorem for Tomographic Reconstruction. IEEE Transactions on Image Processing, 27(2), p. 894-906. DOI: https://doi.org/10.1109/TIP.2017.2766785.
+    
+
     """
     required = ('gpu',)        
     optional = ('filter' ,'offset','padding','regularization','paganin regularization','blocksize')
@@ -134,6 +143,6 @@ def bst(tomogram, dic, angles = None, **kwargs):
     #         logger.error(f'Missing angles list!! Finishing run...') 
     #         raise ValueError(f'Missing angles list!!')
 
-    output = bstGPU( tomogram, angles, gpus, dic ) 
+    output = _bstGPU( tomogram, angles, gpus, dic ) 
 
     return output

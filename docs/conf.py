@@ -53,6 +53,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.mathjax',
     'sphinx_rtd_theme',
+    'myst_parser'
     # 'breathe',
     # 'exhale'
 ]

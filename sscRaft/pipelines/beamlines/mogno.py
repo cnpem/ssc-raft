@@ -3,7 +3,7 @@ from ...rafttypes import *
 from ...processing.io import *
 from ...filters.phase_filters import *
 from ...processing.alignment.rotationaxis import *
-from ...processing.rings.rings import *
+from ...processing.rings import *
 from ...geometries.conebeam.fdk import *
 from ...geometries.parallel.fbp import *
 from ...processing.background_correction import *

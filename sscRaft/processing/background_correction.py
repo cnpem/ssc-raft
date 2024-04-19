@@ -11,7 +11,7 @@ def _background_correctionGPU(frames, flat, dark, gpus, is_log):
     Can be computed in two ways.
 
     .. math::
-        T = \log{- \\frac{D - D_d}{D_f - D_d}}
+        T = - \log{ ( \\frac{D - D_d}{D_f - D_d} ) }
 
     for transmission tomography, and
 
@@ -119,7 +119,7 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
     Can be computed in two ways.
 
     .. math::
-        T = \log{- \\frac{D - D_d}{D_f - D_d}}
+        T = - \log{ ( \\frac{D - D_d}{D_f - D_d} ) }
 
     for transmission tomography, and
 
@@ -165,7 +165,7 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
 
     return frames
 
-def correct_background(frames, flat, dark, gpus = [0], is_log = False, **kwargs):
+def correct_background(frames, flat, dark, gpus = [0], is_log = False):
     """ Function to correct tomography projections (or frames) background 
     with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
     a sample, to measure the background.
@@ -173,7 +173,7 @@ def correct_background(frames, flat, dark, gpus = [0], is_log = False, **kwargs)
     Can be computed in two ways.
 
     .. math::
-        T = \log{- \\frac{D - D_d}{D_f - D_d}}
+        T = - \log{ ( \\frac{D - D_d}{D_f - D_d} ) }
 
     for transmission tomography, and
 

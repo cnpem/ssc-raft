@@ -3,7 +3,7 @@ from ...rafttypes import *
 
 from ...processing.io import *
 
-def fbpGPU(tomogram, angles, gpus, dic):
+def _fbpGPU(tomogram, angles, gpus, dic):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
     tomogram using the Filtered Backprojection (FBP) method.
 
@@ -133,6 +133,6 @@ def fbp(tomogram, dic, angles = None, **kwargs):
             logger.error(f'Missing angles list!! Finishing run...') 
             raise ValueError(f'Missing angles list!!')
 
-    output = fbpGPU( tomogram, angles, gpus, dic ) 
+    output = _fbpGPU( tomogram, angles, gpus, dic ) 
 
     return output
