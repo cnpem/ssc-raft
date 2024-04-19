@@ -13,7 +13,7 @@ Before installation, you will need the following packages installed:
 
 See bellow for build requirements and dependencies.
 
-The library sscRaft can be installed with form the source code at `zenodo website <https://zenodo.org/>`_ or by ``pip``/ ``git``
+The library sscRaft can be installed from the source code at `zenodo website <https://zenodo.org/>`_ or by ``pip``/ ``git``
 if inside the CNPEM network. More information on the ``sscRaft`` package on 
 `sscRaft website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_
 available inside the CNPEM network.

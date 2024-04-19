@@ -91,7 +91,7 @@ Before installation, you will need the following packages installed:
 * `C++`
 * `Python >= 3.8.0`
 * `PIP`
-* `libcurl4-openssl-dev`- Former Scientific Computing Group/LNLS/CNPEM
+* `libcurl4-openssl-dev`
 
 The following `SSC` modules are used:
 
@@ -113,19 +113,8 @@ The following `Python3` modules are used:
 * `scikit-image >=0.19.3`
 * `scipy`
 * `matplotlib`
-* `logging`
-* `warning`
-* `sys`
-* `os`
-* `pathlib`
-* `inspect`
 * `SharedArray`
-* `ctypes`
-* `uuid`
-* `time`
 * `h5py`
-* `json`
-* `multiprocessing`
 
 ## Uninstall
 

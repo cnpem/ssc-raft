@@ -13,7 +13,7 @@ requires = [
 [project]
 dynamic = ["version"]
 name = "sscRaft"
-license = { text = "GPL - 3.0" }
+license = { file = "LICENSE.txt" }
 
 dependencies = [
     "numpy",
