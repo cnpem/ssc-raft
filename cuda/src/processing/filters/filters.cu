@@ -1,5 +1,6 @@
 #include "common/opt.hpp"
 #include "processing/filters.hpp"
+#include "common/complex.hpp"
 
 extern "C"{
 	

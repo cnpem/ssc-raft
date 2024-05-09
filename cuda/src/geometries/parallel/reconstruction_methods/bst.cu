@@ -9,19 +9,17 @@
 #include "common/logerror.hpp"
 #include <logger.hpp>
 
-__global__ void sino2p(complex* padded, float* in, 
-size_t nrays, size_t nangles, int pad0, int csino)
+__global__ void sino2p(complex* padded, float* in,
+        size_t nrays, size_t nangles, int pad0, int csino)
 {
 	int center = nrays/2 - csino;
 	int idx = blockIdx.x*blockDim.x + threadIdx.x;
-	
+
 	if(idx < nrays/2)
 	{
 		size_t fory = blockIdx.y;
 		size_t revy = blockIdx.y + nangles;
-		
 		size_t slicez = blockIdx.z * nrays * nangles;
-		
 		//float Arg2 = (2.0f*idx - pad0*nrays/2 + 1.0f)/(pad0*nrays/2 - 1.0f);
 		//double b1 = cyl_bessel_i0f(sqrtf(fmaxf(1.0f - Arg2 * Arg2,0.0f)));
 		//double b2 = cyl_bessel_i0f(1.0f);
@@ -30,16 +28,15 @@ size_t nrays, size_t nangles, int pad0, int csino)
 			w_bessel *= 0.5f;
 
 		w_bessel *= sq(pad0);
-		
+
 		if(center - 1 - idx >= 0)
-			padded[pad0*slicez + pad0*fory*nrays/2 + idx] = w_bessel * in[slicez + fory*nrays + center - 1 - idx];
+			padded[pad0*slicez + pad0*fory*nrays/2 + idx] = complex(w_bessel * in[slicez + fory*nrays + center - 1 - idx]);
 		else
-			padded[pad0*slicez + pad0*fory*nrays/2 + idx] = w_bessel * in[slicez + fory*nrays];
-			
+			padded[pad0*slicez + pad0*fory*nrays/2 + idx] = complex(w_bessel * in[slicez + fory*nrays]);
 		if(center + 0 + idx >= 0)
-			padded[pad0*slicez + pad0*revy*nrays/2 + idx] = w_bessel * in[slicez + fory*nrays + center + 0 + idx];
+			padded[pad0*slicez + pad0*revy*nrays/2 + idx] = complex(w_bessel * in[slicez + fory*nrays + center + 0 + idx]);
 		else
-			padded[pad0*slicez + pad0*revy*nrays/2 + idx] = w_bessel * in[slicez + fory*nrays];
+			padded[pad0*slicez + pad0*revy*nrays/2 + idx] = complex(w_bessel * in[slicez + fory*nrays]);
 	}
 }
 
@@ -76,7 +73,7 @@ size_t nrays, size_t nangles, size_t sizeimage)
 		
 		size_t irho = size_t(rho);
 		int iarc    = int(angle);
-		complex interped = 0;
+		complex interped = complex(0.0f);
 		
 		if(irho < nrays/2-1)
 		{

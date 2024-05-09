@@ -2,6 +2,7 @@
 #include "common/operations.hpp"
 #include "common/opt.hpp"
 #include "common/types.hpp"
+#include "common/complex.hpp"
 
 extern "C"{
 	__global__ void KPhaseCorrelation(complex* ph1, complex* ph2, size_t sizex)
@@ -25,16 +26,16 @@ extern "C"{
 			
 	__forceinline__ __device__ void HALFDirectDFT(complex* __restrict__ vec, float sign, int prime, int totalsize, complex* __restrict__ accums)
 	{
-		complex acc=0;
+		complex acc = complex(0.0f);
 		int step = totalsize/prime;
 
 		if(threadIdx.x < step)
 		{
 			for(int j=0; j<prime; j++)
 			{
-				complex acc = 0;
+				complex acc = complex(0.0f);
 				complex w1 = exp1j(sign*2.0f*float(M_PI)/prime * j);
-				complex wc = 1.0f;
+				complex wc = complex(1.0f);
 				
 				for(int i=0; i<prime; i++)
 				{
@@ -44,7 +45,7 @@ extern "C"{
 				accums[threadIdx.x + step*j] = acc;
 			}
 			complex w1 = exp1j(sign*2.0f*float(M_PI)/totalsize * threadIdx.x);
-			complex wc = 1.0f;
+			complex wc = complex(1.0f);
 
 			for(int j=0; j<prime; j++)
 			{
@@ -208,7 +209,7 @@ __global__ void PhaseCorrZ(complex* __restrict__ data1, complex* __restrict__ da
 extern "C"{
 	__device__ void FULLDirectDFT(complex* vec, float sign, int size)
 	{
-		complex acc = 0;
+		complex acc = complex(0.0f);
 		for(int i=0; i<size; i++)
 			acc += vec[i] * exp1j(sign*2.0f*float(M_PI)/size * i * threadIdx.x);
 
@@ -313,8 +314,8 @@ __global__ void TransferMemory(const float* sinos, Type* restrict img1, Type* re
 	{
 		for(size_t idz = 0; idz < sz; idz ++)
 		{
-			img1[gindex + idz*sxy] = sinos[gindex + idz*ips];
-			img2[gindex + idz*sxy] = sinos[gindex + idz*ips + sxy];
+			img1[gindex + idz*sxy] = Type(sinos[gindex + idz*ips]);
+			img2[gindex + idz*sxy] = Type(sinos[gindex + idz*ips + sxy]);
 		}
 	}
 }

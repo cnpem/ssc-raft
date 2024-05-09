@@ -20,8 +20,8 @@ extern "C"{
             float dk = (float) dark[index];
             float ft = (float) flat[index];
             
-            f[forw] = -logf(fmaxf(frame0[index]-dk,0.5f)/fmaxf(ft-dk,0.5f));
-            g[invs] = -logf(fmaxf(frame1[index]-dk,0.5f)/fmaxf(ft-dk,0.5f));
+            f[forw] = complex(-logf(fmaxf(frame0[index]-dk,0.5f)/fmaxf(ft-dk,0.5f)));
+            g[invs] = complex(-logf(fmaxf(frame1[index]-dk,0.5f)/fmaxf(ft-dk,0.5f)));
         }
     }
 
@@ -116,8 +116,8 @@ extern "C"{
             float dk = (float) dark[index];
             float ft = (float) flat[index];
             
-            f[forw] = -logf(fmaxf(frame0[index]-dk,0.5f)/fmaxf(ft-dk,0.5f));
-            g[invs] = -logf(fmaxf(frame1[index]-dk,0.5f)/fmaxf(ft-dk,0.5f));
+            f[forw] = complex(-logf(fmaxf(frame0[index]-dk,0.5f)/fmaxf(ft-dk,0.5f)));
+            g[invs] = complex(-logf(fmaxf(frame1[index]-dk,0.5f)/fmaxf(ft-dk,0.5f)));
         }
     }
 
