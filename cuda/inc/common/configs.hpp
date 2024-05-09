@@ -29,8 +29,14 @@
 #define BYTES_TO_GB (1.0/(1024.0*1024.0*1024.0))
 #define A100_MEM 39.5 // A100 40GB device RAM memory, in GB.
 
-#include "include.hpp"
+#include "cufft.h"
+#include <stdio.h>
+#include <cuda_runtime_api.h>
 
+// following includes not directly used here,
+// should we move to specific files?
+#include <iostream>
+#include <future>
 
 typedef struct dimension
 {   
@@ -167,7 +173,7 @@ extern "C" {
 	inline void getDeviceProperties()
 	{	/* Get Device Properties */
 		int gpudevices; 
-		cudaDeviceProp prop; 
+		cudaDeviceProp prop;
 		cudaGetDeviceCount(&gpudevices); /* Total Number of GPUs */ 
 		printf("GPUs number: %d\n",gpudevices); 
 		cudaGetDeviceProperties(&prop,0); /* Name of GPU */ 
