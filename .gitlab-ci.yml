@@ -8,14 +8,13 @@ stages:
 
 build_dgx:
   stage: build
+  image: gccdockers/python-builder
   script:
-    - module load python3 cuda/11.2
-    - python3 -m pip install --upgrade cmake ninja wheel
     - python3 setup.py bdist_wheel
   tags:
     - x86_64
     - cuda11
-    - shell
+    - docker
   artifacts:
     paths:
       - ./dist/*whl
@@ -36,15 +35,13 @@ build_dgx:
 
 deploy_dgx:
   stage: deploy
+  image: gccdockers/python-builder
   script:
-    - module load python3
-    - python3 -m pip install keyring==12.0.0 keyrings.alt
-    - python3 -m pip install twine==2.0.0 passlib
     - twine upload ./dist/*.whl  --repository-url="$GCC_PYPI_HOST"
   tags:
     - x86_64
     - cuda11
-    - shell
+    - docker
   dependencies:
     - build_dgx
   only:
@@ -67,6 +64,7 @@ deploy_dgx:
 
 pages:
   stage: pages
+  image: gccdockers/python-builder
   script:
     - python3 -m pip install setuptools_scm
     - cd docs
@@ -78,7 +76,7 @@ pages:
   tags:
     - x86_64
     - cuda11
-    - shell
+    - docker
   artifacts:
     paths:
       - public
@@ -87,13 +85,14 @@ pages:
 
 build_docs:
   stage: build
+  image: gccdockers/python-builder
   script:
     - python3 -m pip install setuptools_scm
     - cd docs
     - make
   tags:
     - x86_64
-    - shell
+    - docker
   artifacts:
     paths:
       - ./docs/build/
