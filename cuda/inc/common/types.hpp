@@ -10,8 +10,6 @@
 #define restrict
 #endif
 
-#include "include.hpp"
-
 #include "common/complex.hpp"
 #include "common/operations.hpp"
 #include "common/logerror.hpp"
