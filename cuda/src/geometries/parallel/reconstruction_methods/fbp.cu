@@ -217,7 +217,7 @@ extern "C"{
         setFBPParameters(&configs, paramf, parami);
         // printFBPParameters(&configs);
 
-        setGPUParameters(&gpu_parameters, configs.tomo.size, ngpus, gpus);
+        setGPUParameters(&gpu_parameters, configs.obj.size, ngpus, gpus);
 
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;

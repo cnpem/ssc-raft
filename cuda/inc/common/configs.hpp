@@ -149,16 +149,16 @@ typedef struct config
     /* FDK */
 
     /* EM Conical */
-    
+
 }CFG;
 
 
 struct GPU
-{   
+{
     /* GPU variables */
     int ngpus, *gpus;
     cudaStream_t *streams;
-    int num_streams;  
+    int num_streams;
     dim3 BT, Grd;
 
     /* Fourier Transforms */
