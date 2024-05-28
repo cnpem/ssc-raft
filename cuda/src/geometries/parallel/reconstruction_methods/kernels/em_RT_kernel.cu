@@ -20,16 +20,14 @@ extern "C" {
   __global__ void kernel_flatTimesExp(float *tmp, float *flat,
 				      int sizeImage, int nrays, int nangles,  int blockSize)
   {
-    int tx = threadIdx.x + blockIdx.x*blockDim.x; 
-    int ty = threadIdx.y + blockIdx.y*blockDim.y; 
-    int tz = threadIdx.z + blockIdx.z*blockDim.z;
-  
-    if ( (tx<nrays) && (ty < nangles) && (tz<blockSize)  )
-      {
-	      int voxel = tz * nrays * nangles + ty * nrays + tx;
-	
-       	tmp[voxel] = flat[ty * nrays + tx] * expf( - tmp[voxel]);	
-      }
+    const int tx = threadIdx.x + blockIdx.x*blockDim.x;
+    const int ty = threadIdx.y + blockIdx.y*blockDim.y;
+    const int tz = threadIdx.z + blockIdx.z*blockDim.z;
+
+    if ( (tx<nrays) && (ty < nangles) && (tz<blockSize)  ) {
+	    const int voxel = tz * nrays * nangles + ty * nrays + tx;
+        tmp[voxel] = flat[ty * nrays + tx] * expf( - tmp[voxel]);
+    }
   }
 }
 

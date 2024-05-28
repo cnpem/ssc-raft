@@ -1,3 +1,4 @@
+#include <cstddef>
 #include "common/configs.hpp"
 #include "common/opt.hpp"
 #include "geometries/parallel/em.hpp"
@@ -99,11 +100,11 @@ extern "C" {
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
         HANDLE_ERROR(cudaSetDevice(ngpu));
-        
-        /* Allocate GPU memory for the input and output image */ 
+
+        /* Allocate GPU memory for the input and output image */
 
         float *dcount  = opt::allocGPU<float>((size_t)nrays * nangles * blocksize);
-        float *dflat   = opt::allocGPU<float>((size_t)nrays * blocksize);
+        float *dflat   = opt::allocGPU<float>((size_t)nrays * nangles);
         float *dobj    = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
 
         float *back    = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
@@ -116,7 +117,7 @@ extern "C" {
         HANDLE_ERROR( cudaPeekAtLastError() );
 
         /* Loop for each batch of size 'batch' in threads */
-        int ptr = 0, subblock = 0; 
+        int ptr = 0, subblock = 0;
         size_t ptr_block_tomo = 0, ptr_block_obj = 0, ptr_block_flat = 0;
 
         for (i = 0; i < ind_block; i++){
@@ -132,8 +133,8 @@ extern "C" {
             opt::CPUToGPU<float>(count + ptr_block_tomo, dcount, (size_t)nrays * nangles * subblock);
             opt::CPUToGPU<float>(flat + ptr_block_flat, dflat, (size_t)nrays *subblock);
 
-            get_tEM_RT( configs, gpus, dobj, dcount, dflat, dangles, 
-                        backcounts, temp, back, subblock);                           
+            get_tEM_RT( configs, gpus, dobj, dcount, dflat, dangles,
+                        backcounts, temp, back, subblock);
 
             printf(cudaGetErrorString(cudaGetLastError()));
 
