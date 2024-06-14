@@ -1,3 +1,6 @@
+#include <cuda_runtime_api.h>
+#include <driver_types.h>
+#include <cstddef>
 #include "common/logerror.hpp"
 #include "common/operations.hpp"
 #include "common/opt.hpp"
@@ -33,20 +36,20 @@ __global__ void KConvolve0(float *restrict image0, const float *kernel, size_t s
 
 extern "C"
 {
-    void Convolve0(rImage &img, rImage &kernel, rImage &globalmem)
+    void Convolve0(GArray<float> img, GArray<float> kernel, GArray<float> globalmem, cudaStream_t stream = 0)
     {
-        int khsize = kernel.GetSize() / 2;
-        size_t sizex = img.sizex;
+        int khsize = (kernel.shape.x * kernel.shape.y * kernel.shape.z) / 2;
+        size_t sizex = img.shape.x;
 
-        dim3 threads = dim3(img.sizex > 1024 ? 1024 : img.sizex, 1, 1);
-        dim3 blocks = dim3(img.sizey, 1, 1);
+        dim3 threads = dim3(img.shape.x > 1024 ? 1024 : img.shape.x, 1, 1);
+        dim3 blocks = dim3(img.shape.y, 1, 1);
 
-        size_t shbytes = (img.sizex + 2 * PADDING) * sizeof(float);
+        size_t shbytes = (img.shape.x + 2 * PADDING) * sizeof(float);
 
         if (shbytes > 18000)
-            KConvolve0<false><<<blocks, threads, 0>>>(img.gpuptr, kernel.gpuptr, sizex, khsize, globalmem.gpuptr);
+            KConvolve0<false><<<blocks, threads, 0, stream>>>(img.ptr, kernel.ptr, sizex, khsize, globalmem.ptr);
         else
-            KConvolve0<true><<<blocks, threads, shbytes>>>(img.gpuptr, kernel.gpuptr, sizex, khsize, nullptr);
+            KConvolve0<true><<<blocks, threads, shbytes, stream>>>(img.ptr, kernel.ptr, sizex, khsize, nullptr);
 
         HANDLE_ERROR(cudaGetLastError());
     }
@@ -121,20 +124,20 @@ __global__ void KConvolve(float *restrict x, float *restrict p, const float *ker
 
 extern "C"
 {
-    void Convolve(rImage &x, rImage &p, rImage &kernel, float lambda, float alpha, int iter, rImage &res2, rImage &momentum, float beta, rImage &globalmem)
+    void Convolve(GArray<float> x, GArray<float> p, GArray<float> kernel, float lambda, float alpha, int iter, GArray<float> res2, GArray<float> momentum, float beta, GArray<float> globalmem, cudaStream_t stream = 0)
     {
-        int khsize = kernel.GetSize() / 2;
+        int khsize = (kernel.shape.x * kernel.shape.y * kernel.shape.z) / 2;
 
-        dim3 threads = dim3(x.sizex > 1024 ? 1024 : x.sizex, 1, 1);
-        dim3 blocks = dim3(x.sizey, 1, 1);
+        dim3 threads = dim3(x.shape.x > 1024 ? 1024 : x.shape.x, 1, 1);
+        dim3 blocks = dim3(x.shape.y, 1, 1);
 
-        float *kern = kernel.gpuptr;
-        size_t shbytes = (x.sizex + 2 * PADDING) * sizeof(float);
+        float *kern = kernel.ptr;
+        size_t shbytes = (x.shape.x + 2 * PADDING) * sizeof(float);
 
         if (shbytes > 18000)
-            KConvolve<false><<<blocks, threads, 0>>>(x.gpuptr, p.gpuptr, kern, x.sizex, khsize, lambda, alpha, iter, res2.gpuptr, momentum.gpuptr, beta, globalmem.gpuptr);
+            KConvolve<false><<<blocks, threads, 0, stream>>>(x.ptr, p.ptr, kern, x.shape.x, khsize, lambda, alpha, iter, res2.ptr, momentum.ptr, beta, globalmem.ptr);
         else
-            KConvolve<true><<<blocks, threads, shbytes>>>(x.gpuptr, p.gpuptr, kern, x.sizex, khsize, lambda, alpha, iter, res2.gpuptr, momentum.gpuptr, beta, nullptr);
+            KConvolve<true><<<blocks, threads, shbytes, stream>>>(x.ptr, p.ptr, kern, x.shape.x, khsize, lambda, alpha, iter, res2.ptr, momentum.ptr, beta, nullptr);
 
         HANDLE_ERROR(cudaGetLastError());
     }
@@ -211,20 +214,24 @@ extern "C"
             fminmax[blockIdx.x + gridDim.x * blockIdx.y] = complex(int_to_float(smin[0]), int_to_float(smax[0]));
     }
 
-    float VolumeAverage(float *mbar, float *volume, size_t sizex, size_t sizey, size_t sizez, float lambda, size_t slicesize)
+    float VolumeAverage(float *mbar, float *volume,
+            size_t sizex, size_t sizey, size_t sizez,
+            float lambda, size_t slicesize, cudaStream_t stream = 0)
     {
         dim3 threads = dim3(min((int)sizex, 256), 1, 1);
         dim3 blocks = dim3((sizex + 255) / 256, sizez, 1);
 
         if (lambda < 0)
         {
-            cImage minmax(blocks.x * blocks.y, 1);
+            cImage minmax(blocks.x * blocks.y, 1, 1, EAllocCPUGPU, stream);
 
-            KRedVolumeMM<<<blocks, threads>>>(mbar, minmax.gpuptr, volume, sizex, sizey, slicesize);
+            KRedVolumeMM<<<blocks, threads, 0, stream>>>(mbar, minmax.gpuptr, volume, sizex, sizey, slicesize);
 
-            minmax.LoadFromGPU();
+            minmax.LoadFromGPU(stream);
 
-            cudaDeviceSynchronize();
+            //cudaDeviceSynchronize();
+
+            cudaStreamSynchronize(stream);
 
             float vmin = +1E-10;
             float vmax = -1E-10;
@@ -235,19 +242,22 @@ extern "C"
                 vmax = fmaxf(vmax, minmax.cpuptr[i].y);
             }
 
+            minmax.DeallocGPU(stream);
+
             HANDLE_ERROR(cudaGetLastError());
             return 1.0f / (vmax - vmin);
         }
         else
         {
-            KRedVolume<<<blocks, threads>>>(mbar, volume, sizex, sizey, slicesize);
+            KRedVolume<<<blocks, threads, 0, stream>>>(mbar, volume, sizex, sizey, slicesize);
 
             HANDLE_ERROR(cudaGetLastError());
             return lambda;
         }
     }
 
-    __global__ void KApplyTitarenkoRings(float *volume, const float *nstaravg, size_t volsizex, size_t volsizey, size_t slicesize)
+    __global__ void KApplyTitarenkoRings(float *volume, const float *nstaravg,
+            size_t volsizex, size_t volsizey, size_t slicesize)
     {
         const size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
         const size_t plane = blockIdx.y * slicesize;
@@ -262,11 +272,12 @@ extern "C"
         }
     }
 
-    void ApplyTitarenkoRings(float *volume, float *nstaravg, int sizex, int sizey, int sizez, size_t slicesize)
+    void ApplyTitarenkoRings(float *volume, float *nstaravg,
+            int sizex, int sizey, int sizez, size_t slicesize, cudaStream_t stream = 0)
     {
         dim3 threads = dim3(min((int)sizex, 128), 1, 1);
         dim3 blocks = dim3((sizex + 127) / 128, sizez, 1);
-        KApplyTitarenkoRings<<<blocks, threads>>>(volume, nstaravg, sizex, sizey, slicesize);
+        KApplyTitarenkoRings<<<blocks, threads, 0, stream>>>(volume, nstaravg, sizex, sizey, slicesize);
 
         HANDLE_ERROR(cudaGetLastError());
     }
@@ -314,10 +325,12 @@ extern "C"
             out[idx] = nvec1[idx] * 0.5f + nvec2[idx] * 0.5f;
     }
 
-    void TitarenkoRingsFilter(rImage &sinobar, float lambda, const float *norm2vec)
+    //problem is here, just dont know exactly what it is
+    void TitarenkoRingsFilter(GArray<float> sinobar, float lambda, const float *norm2vec,
+            cudaStream_t stream = 0)
     {
-        size_t msizex = sinobar.sizex;
-        size_t msizey = sinobar.sizey;
+        size_t msizex = sinobar.shape.x;
+        size_t msizey = sinobar.shape.y;
         // const float fk1[] = {1.0f, -4.0f  ,  6.0f , -4.0f  ,  1.0f};
         float fk2[] = {-2.0f, 13.0f, -34.0f, 46.0f, -34.0f, 13.0f, -2.0f};
 
@@ -327,25 +340,26 @@ extern "C"
             -3.75466717e+04f,  2.54103134e+04f, -1.30230239e+04f,  4.89847819e+03f,
             -1.27719611e+03f,  2.06396597e+02f, -1.55794444e+01f}; */
 
-        rImage kernel1(fk1, sizeof(fk1) / sizeof(fk1[0]), 1);
-        rImage kernel2(fk2, sizeof(fk2) / sizeof(fk2[0]), 1);
+        rImage kernel1(fk1, sizeof(fk1) / sizeof(fk1[0]), 1, 1, MemoryType::EAllocCPUGPU, stream);
+        rImage kernel2(fk2, sizeof(fk2) / sizeof(fk2[0]), 1, 1, MemoryType::EAllocCPUGPU, stream);
 
-        rImage xvec1(msizex, msizey);
-        rImage xvec2(msizex, msizey);
-        rImage mvec1(msizex, msizey);
-        rImage mvec2(msizex, msizey);
-        rImage momentum(msizex, 2 * msizey);
-        rImage intermediate(msizex + 2 * PADDING, msizey);
+        rImage xvec1(msizex, msizey, 1, MemoryType::EAllocGPU, stream);
+        rImage xvec2(msizex, msizey, 1, MemoryType::EAllocGPU, stream);
+        rImage mvec1(msizex, msizey, 1, MemoryType::EAllocCPUGPU, stream);
+        rImage mvec2(msizex, msizey, 1, MemoryType::EAllocGPU, stream);
+        rImage momentum(msizex, 2 * msizey, 1, MemoryType::EAllocGPU, stream);
+        rImage intermediate(msizex + 2 * PADDING, msizey, 1, MemoryType::EAllocGPU, stream);
+        rImage residuum2(msizey, 1, 1, MemoryType::EAllocCPUGPU, stream);
 
-        momentum.SetGPUToZero();
-        xvec1.SetGPUToZero();
-        xvec2.SetGPUToZero();
-        mvec1.CopyFrom(sinobar);
-        mvec2.CopyFrom(sinobar);
-        mvec1.LoadFromGPU();
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        momentum.SetGPUToZero(stream);
+        xvec1.SetGPUToZero(stream);
+        xvec2.SetGPUToZero(stream);
+        mvec1.CopyFrom(sinobar.ptr, stream);
+        mvec2.CopyFrom(sinobar.ptr, stream);
+        mvec1.LoadFromGPU(stream);
 
-        rImage residuum2(msizey, 1);
+        cudaStreamSynchronize(stream);
+
 
         const float alpha1 = CalcAlpha(kernel1.cpuptr, kernel1.GetSize(), lambda);
         const float alpha2 = CalcAlpha(kernel2.cpuptr, kernel2.GetSize(), lambda);
@@ -353,36 +367,48 @@ extern "C"
         const float beta1 = CalcBeta(kernel1.cpuptr, kernel1.GetSize(), lambda);
         const float beta2 = CalcBeta(kernel2.cpuptr, kernel2.GetSize(), lambda);
 
-        Convolve0(mvec1, kernel1, intermediate); // mvec = FtF(mbar)
-        Convolve0(mvec2, kernel2, intermediate); // mvec = FtF(mbar)
+        Convolve0(mvec1, kernel1, intermediate, stream); // mvec = FtF(mbar)
+        Convolve0(mvec2, kernel2, intermediate, stream); // mvec = FtF(mbar)
 
         float maxerr = 1;
         while (maxerr > 1E-6f)
         {
-            Convolve(xvec1, mvec1, kernel1, lambda, alpha1, 100, residuum2, momentum, beta1, intermediate);
+            Convolve(xvec1, mvec1, kernel1, lambda, alpha1, 100, residuum2, momentum, beta1, intermediate, stream);
 
-            residuum2.LoadFromGPU();
-            HANDLE_ERROR(cudaDeviceSynchronize());
+            residuum2.LoadFromGPU(stream);
+            //HANDLE_ERROR(cudaDeviceSynchronize());
+            cudaStreamSynchronize(stream);
             maxerr = 0;
             for (size_t j = 0; j < msizey; j++)
                 maxerr = fmaxf(maxerr, residuum2.cpuptr[j] * norm2vec[j]);
         }
 
-        momentum.SetGPUToZero();
+        momentum.SetGPUToZero(stream);
         maxerr = 1;
 
         while (maxerr > 1E-6f)
         {
-            Convolve(xvec2, mvec2, kernel2, lambda, alpha2, 100, residuum2, momentum, beta2, intermediate);
+            Convolve(xvec2, mvec2, kernel2, lambda, alpha2, 100, residuum2, momentum, beta2, intermediate, stream);
 
-            residuum2.LoadFromGPU();
-            HANDLE_ERROR(cudaDeviceSynchronize());
+            residuum2.LoadFromGPU(stream);
+            cudaStreamSynchronize(stream);
             maxerr = 0;
             for (size_t j = 0; j < msizey; j++)
                 maxerr = fmaxf(maxerr, residuum2.cpuptr[j] * norm2vec[j]);
         }
 
-        KAverageTitarenkoRings<<<(xvec1.GetSize() + 31) / 32, 32>>>(sinobar.gpuptr, xvec1.gpuptr, xvec2.gpuptr, xvec1.GetSize());
+        KAverageTitarenkoRings<<<(xvec1.GetSize() + 31) / 32, 32, 0, stream>>>(sinobar.ptr, xvec1.gpuptr, xvec2.gpuptr, xvec1.GetSize());
+
+        kernel1.DeallocGPU(stream);
+        kernel2.DeallocGPU(stream);
+        xvec1.DeallocGPU(stream);
+        xvec2.DeallocGPU(stream);
+        mvec1.DeallocGPU(stream);
+        mvec2.DeallocGPU(stream);
+        momentum.DeallocGPU(stream);
+        intermediate.DeallocGPU(stream);
+        residuum2.DeallocGPU(stream);
+
         HANDLE_ERROR(cudaGetLastError());
     }
 
@@ -407,26 +433,36 @@ extern "C"
 
     // }
 
-    float TitarenkoRings(float *volume, int vsizex, int vsizey, int vsizez, float lambda, size_t slicesize)
+    float TitarenkoRings(float *volume, int vsizex, int vsizey, int vsizez,
+            float lambda, size_t slicesize, cudaStream_t stream = 0)
     {
         size_t msizex = vsizex;
         size_t msizey = vsizez;
 
-        rImage smooth(msizex, msizey);
-        rImage sinobar(msizex, msizey);
+        rImage smooth(msizex, msizey, 1, EAllocGPU, stream);
+        rImage sinobar(msizex, msizey, 1, EAllocCPUGPU, stream);
 
-        lambda = VolumeAverage(sinobar.gpuptr, volume, vsizex, vsizey, vsizez, lambda, slicesize);
+        lambda = VolumeAverage(sinobar.gpuptr, volume,
+                vsizex, vsizey, vsizez,
+                lambda, slicesize, stream);
 
-        sinobar.LoadFromGPU();
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        sinobar.LoadFromGPU(stream);
+        //HANDLE_ERROR(cudaDeviceSynchronize());
+
+        HANDLE_ERROR(cudaStreamSynchronize(stream));
 
         float norm2vec[msizey];
 
         CalcNorm2(norm2vec, sinobar.cpuptr, msizex, msizey);
 
-        TitarenkoRingsFilter(sinobar, lambda, norm2vec);
+        TitarenkoRingsFilter(sinobar, lambda, norm2vec, stream);
 
-        ApplyTitarenkoRings(volume, sinobar.gpuptr, vsizex, vsizey, vsizez, slicesize);
+        ApplyTitarenkoRings(volume, sinobar.gpuptr,
+                vsizex, vsizey, vsizez, slicesize, stream);
+
+        smooth.DeallocGPU(stream);
+        sinobar.DeallocGPU(stream);
+
         HANDLE_ERROR(cudaGetLastError());
 
         return lambda;
@@ -435,7 +471,8 @@ extern "C"
 
 extern "C"{
 
-    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, float lambda_rings, int ring_blocks)
+    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size,
+            float lambda_rings, int ring_blocks, cudaStream_t stream)
     {
         float lambda_computed;
 
@@ -448,29 +485,28 @@ extern "C"{
 
         for (int m = 0; m < ring_blocks / 2; m++){
 
-            lambda_computed = TitarenkoRings(tomogram, 
-                                nrays, nangles, blockslices, 
-                                lambda_rings, offset);
-            
+            lambda_computed = TitarenkoRings(tomogram,
+                                nrays, nangles, blockslices,
+                                lambda_rings, offset, stream);
             step = (nangles / ring_blocks) * nrays;
             float *tomptr = tomogram;
 
-            for (int n = 0; n < ring_blocks - 1; n++){
-                lambda_computed = TitarenkoRings(tomogram, 
-                                    nrays, nangles, blockslices, 
-                                    lambda_rings, offset);
+            for (int n = 0; n < ring_blocks - 1; n++) {
+                lambda_computed = TitarenkoRings(tomogram,
+                                    nrays, nangles, blockslices,
+                                    lambda_rings, offset, stream);
                 tomptr += step;
             }
-            lambda_computed = TitarenkoRings(tomptr, 
-                                nrays, nangles % ring_blocks + nangles / ring_blocks, blockslices, 
-                                lambda_rings, offset);
+            lambda_computed = TitarenkoRings(tomptr,
+                                nrays, nangles % ring_blocks + nangles / ring_blocks, blockslices,
+                                lambda_rings, offset, stream);
         }
 
         HANDLE_ERROR(cudaGetLastError());
     }
 
-    void getTitarenkoRingsGPU(GPU gpus, int gpu, 
-    float *data, dim3 size, float lambda_rings, int ring_blocks)
+    void getTitarenkoRingsGPU(GPU gpus, int gpu,
+        float *data, dim3 size, float lambda_rings, int ring_blocks)
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
 
@@ -487,35 +523,56 @@ extern "C"{
 
         float *tomogram = opt::allocGPU<float>((size_t) nrays * nangles * blocksize);
 
+        const int nstreams = 3;
+        cudaStream_t streams[nstreams];
+
+        for (int st = 0; st < nstreams; ++st) {
+            cudaStreamCreate(&streams[st]);
+        }
+
         for (i = 0; i < nblock; i++){
-            
+
+            cudaStream_t stream = streams[i % nstreams];
+
             subblock = min(nslices - ptr, blocksize);
 
-            opt::CPUToGPU<float>(data + (size_t)ptr * nrays * nangles, tomogram, (size_t)subblock * nrays * nangles);
+            opt::CPUToGPU<float>(data + (size_t)ptr * nrays * nangles, tomogram, (size_t)subblock * nrays * nangles, stream);
 
-            getTitarenkoRings(gpus, tomogram, 
-                                    dim3(nrays, nangles, subblock), 
-                                    lambda_rings, ring_blocks);
-            
-            opt::GPUToCPU<float>(data + (size_t)ptr * nrays * nangles, tomogram, (size_t)subblock * nrays * nangles);
+            getTitarenkoRings(gpus, tomogram,
+                                    dim3(nrays, nangles, subblock),
+                                    lambda_rings, ring_blocks, stream);
+
+            opt::GPUToCPU<float>(data + (size_t)ptr * nrays * nangles, tomogram, (size_t)subblock * nrays * nangles, stream);
 
             /* Update pointer */
             ptr = ptr + subblock;
         }
+
+        for(int st = 0; st < nstreams; ++st) {
+            cudaStreamSynchronize(streams[st]);
+            cudaStreamDestroy(streams[st]);
+        }
+
         HANDLE_ERROR(cudaFree(tomogram));
-        HANDLE_ERROR(cudaDeviceSynchronize());    
+        HANDLE_ERROR(cudaDeviceSynchronize());
     }
 }
 
 extern "C"{
 
-    void getTitarenkoRingsMultiGPU(int *gpus, int ngpus, 
-    float *data, int nrays, int nangles, int nslices, 
+    void getTitarenkoRingsMultiGPU(int *gpus, int ngpus,
+    float *data, int nrays, int nangles, int nslices,
     float lambda_rings, int ring_blocks)
     {
         int i;
         int blockgpu = (nslices + ngpus - 1) / ngpus;
         int ptr = 0, subblock;
+
+        //float* h_data = nullptr;
+
+        //cudaMallocHost(&h_data,  sizeof(float) * size_t(nrays) * size_t(nangles) * size_t(nslices));
+        //cudaMemcpy(h_data, data, sizeof(float) * size_t(nrays) * size_t(nangles) * size_t(nslices),
+                //cudaMemcpyHostToHost);
 
         GPU gpu_parameters;
 
@@ -524,31 +581,28 @@ extern "C"{
 		std::vector<std::future<void>> threads;
         threads.reserve(ngpus);
 
-        if (ngpus == 1){
-            getTitarenkoRingsGPU(gpu_parameters, 
-                gpus[0], 
-                data, 
-                dim3(nrays, nangles, nslices), 
-                lambda_rings, ring_blocks);
-        }else{
-            for (i = 0; i < ngpus; i++){
+        for (i = 0; i < ngpus; i++){
 
-                subblock = min(nslices - ptr, blockgpu);
+            subblock = min(nslices - ptr, blockgpu);
 
-                threads.push_back(std::async(std::launch::async,
-                    getTitarenkoRingsGPU,
-                    gpu_parameters,
-                    gpus[i],
-                    data + (size_t)ptr * nrays * nangles,
-                    dim3(nrays, nangles, subblock),
-                    lambda_rings, ring_blocks));
+            threads.push_back(std::async(std::launch::async,
+                getTitarenkoRingsGPU,
+                gpu_parameters,
+                gpus[i],
+                data + (size_t)ptr * nrays * nangles,
+                dim3(nrays, nangles, subblock),
+                lambda_rings, ring_blocks));
 
-                /* Update pointer */
-                ptr = ptr + subblock;
-            }
+            /* Update pointer */
+            ptr = ptr + subblock;
         }
 
         for (auto &t : threads)
             t.get();
+
+        //cudaMemcpy(data, h_data, sizeof(float) * size_t(nrays) * size_t(nangles) * size_t(nslices),
+                //cudaMemcpyHostToHost);
+        //cudaFreeHost(h_data);
+
     }
 }

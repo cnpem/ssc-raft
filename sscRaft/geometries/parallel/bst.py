@@ -2,7 +2,7 @@
 from ...rafttypes import *
 from ...processing.io import *
 
-def _bstGPU(tomogram, angles, gpus, dic):
+def _bstGPU(tomogram, angles, gpus, dic, out = None):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
     tomogram using the Backprojection Slice Theorem (BST) method.
 
@@ -60,11 +60,14 @@ def _bstGPU(tomogram, angles, gpus, dic):
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
-    obj          = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+    if out is None:
+        obj          = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+    else:
+        obj = CNICE(out)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
     angles       = numpy.array(angles)
-    angles       = CNICE(angles) 
+    angles       = CNICE(angles)
     angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
 
     param_int     = [nrays, nangles, nslices, objsize, 
@@ -86,7 +89,7 @@ def _bstGPU(tomogram, angles, gpus, dic):
     return obj
 
 
-def bst(tomogram, dic, angles = None, **kwargs):
+def bst(tomogram, dic, angles = None, out=None):
     """Computes the reconstruction of a parallel beam tomogram using the 
     Backprojection Slice Theorem (BST) method.
     
@@ -119,10 +122,10 @@ def bst(tomogram, dic, angles = None, **kwargs):
     
 
     """
-    required = ('gpu',)        
+    required = ('gpu',)
     optional = ('filter' ,'offset','padding','regularization','paganin regularization','blocksize')
     default  = ('lorentz',       0,        2,             1.0,                     0.0,         0 )
-    
+
     dic = SetDictionary(dic,required,optional,default)
 
     dic['regularization'] = 1.0
@@ -140,9 +143,9 @@ def bst(tomogram, dic, angles = None, **kwargs):
     #     angles = dic['angles[rad]']
     # except:
     #     if angles is None:
-    #         logger.error(f'Missing angles list!! Finishing run...') 
+    #         logger.error(f'Missing angles list!! Finishing run...')
     #         raise ValueError(f'Missing angles list!!')
 
-    output = _bstGPU( tomogram, angles, gpus, dic ) 
+    output = _bstGPU( tomogram, angles, gpus, dic , out=out)
 
     return output

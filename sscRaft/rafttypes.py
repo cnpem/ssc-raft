@@ -53,6 +53,7 @@ nthreads = multiprocessing.cpu_count()
 
 # Load required libraies:
 
+libcudart = ctypes.CDLL('libcudart.so', mode=ctypes.RTLD_GLOBAL)
 libstdcpp = ctypes.CDLL( ctypes.util.find_library( "stdc++" ), mode=ctypes.RTLD_GLOBAL )
 # libblas   = ctypes.CDLL( ctypes.util.find_library( "blas" ), mode=ctypes.RTLD_GLOBAL )
 # libfftw3  = ctypes.CDLL( ctypes.util.find_library( "fftw3" ), mode=ctypes.RTLD_GLOBAL )
@@ -291,6 +292,34 @@ except:
 #|      ssc-raft       |#
 #|      Functions      |#
 #########################
+
+CUDA_SUCCESS = 0
+
+def pinned_empty(shape, dtype=numpy.float32):
+    size = numpy.prod(shape)
+    nbytes = size * numpy.dtype(dtype).itemsize
+    host_ptr = ctypes.c_void_p()
+    result = libcudart.cudaMallocHost(ctypes.byref(host_ptr), ctypes.c_size_t(nbytes))
+    if result != CUDA_SUCCESS:
+        raise RuntimeError(f"cudaMallocHost failed with error code {result}")
+
+    print('HostAlloc ptr: ', host_ptr)
+    array = numpy.ctypeslib.as_array(
+        ctypes.cast(host_ptr,ctypes.POINTER(ctypes.c_byte)), shape=(nbytes,))
+    array = array.view(dtype).reshape(shape)
+
+    return array
+
+def free_pinned_array(host):
+    host_ptr = host.ctypes.data_as(ctypes.c_void_p)
+    result = libcudart.cudaFreeHost(host_ptr)
+    if result != CUDA_SUCCESS:
+        raise RuntimeError(f"cudaFreeHost failed with error code {result}")
+
+def pinned_array(data):
+    pinned = pinned_empty(data.shape, data.dtype)
+    pinned[...] = data
+    return pinned
 
 def CNICE(darray,dtype=numpy.float32):
         if darray.dtype != dtype:

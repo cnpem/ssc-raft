@@ -3,12 +3,10 @@
 #include "common/types.hpp"
 #include "common/operations.hpp"
 #include "common/opt.hpp"
-#include "common/logerror.hpp"
 #include "geometries/parallel/em.hpp"
 #include "geometries/parallel/radon.hpp" /* FST is found here!! */
 #include "geometries/parallel/bst.hpp"
 #include "common10/cufft_utils.h"
-#include <logger.hpp>
 
 #define NITER_MIN_REG 20 // must be greater than 1 so back_cu and recon_cu are all meaningful.
 
@@ -170,16 +168,7 @@ int blocksize, int gpu)
 
     float scale = (0 < dx)? dx/(float)inverse_fft_dim[0] : 1.0/(float)inverse_fft_dim[0];
 
-    /* Begin of FST initialization */ 
-
-    ssc_event_start("get_tEM_FQ_GPU()", {
-            ssc_param_int("GPU device number", gpu),
-            ssc_param_int("nrays", nrays),
-            ssc_param_int("nangles", nangles),
-            ssc_param_int("Padding", ( 1 + zpad )),
-            ssc_param_int("Computed sub blocks", blocksize),
-            ssc_param_double("Detector pixel in meters", dx)
-    });
+    /* Begin of FST initialization */
 
     /* cuFFT parameters */
     CUFFT_CALL(cufftCreate(&plan_2D_forward));
@@ -300,8 +289,6 @@ int blocksize, int gpu)
     // realpolar_bst.~cImage();
     // Apagar (não deveria ser necessário):
     // CUDA_RT_CALL(cudaDeviceReset());
-
-    ssc_event_stop(); /* get_tEM_FQ_GPU() */
 }
 }
 
@@ -353,8 +340,6 @@ extern "C"{
     float *count, float *obj, float *angles, float *flat,
     float *paramf, int *parami)
     {
-        ssc_event_start("get_tEM_FQ_MultiGPU()", {ssc_param_int("ngpus", ngpus)});
-
         int i, Maxgpudev;
 		
 		/* Multiples devices */
@@ -408,7 +393,6 @@ extern "C"{
             for(auto& t : threads)
                 t.get();
         }
-        ssc_event_stop(); /* get_tEM_FQ_MultiGPU */
     }
 }
 

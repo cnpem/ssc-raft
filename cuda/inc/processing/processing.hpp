@@ -1,6 +1,7 @@
 #ifndef RAFT_PROCESSING_H
 #define RAFT_PROCESSING_H
 
+#include <driver_types.h>
 #define PADDING 32
 
 #include "common/complex.hpp"
@@ -13,7 +14,7 @@ extern "C"{
 
 	void getBackgroundCorrectionGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, dim3 size, int numflats, int is_log);
 
-	void getBackgroundCorrection(GPU gpus, float* frames, float* flat, float* dark, dim3 size, int numflats);
+	void getBackgroundCorrection(GPU gpus, float* frames, float* flat, float* dark, dim3 size, int numflats, cudaStream_t stream = 0);
 }
 
 /* Rings */
@@ -23,7 +24,7 @@ extern "C"{
 
     void getTitarenkoRingsGPU(GPU gpus, int gpu, float *data, dim3 size, float lambda_rings, int ring_blocks);
 
-    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, float lambda_rings, int ring_blocks);
+    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, float lambda_rings, int ring_blocks, cudaStream_t stream = 0);
 }
 
 /* Rotation Axis */
