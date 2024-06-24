@@ -3,6 +3,7 @@
 #include <cuda_runtime_api.h>
 #include <cufft.h>
 #include <driver_types.h>
+
 #include <chrono>
 #include <cstddef>
 #include <future>
@@ -206,13 +207,11 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
     }
 }
 
-void getBST(float* blockRecon, float* wholesinoblock, float* angles,
-        int Nrays, int Nangles, int trueblocksize,
-        int sizeimage, int pad0, float reg, float paganin,
-        int filter_type, int offset,
-        cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan,
-        int gpu, cudaStream_t stream = 0) {
-    //HANDLE_ERROR(cudaSetDevice(gpu));
+void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, int Nangles, int trueblocksize,
+            int sizeimage, int pad0, float reg, float paganin, int filter_type, int offset, cufftHandle plan1d,
+            cufftHandle plan2d, cufftHandle filterplan, cImage* filtersino, cImage* cartesianblock, cImage* polarblock,
+            cImage* realpolar, int gpu, cudaStream_t stream = 0) {
+    // HANDLE_ERROR(cudaSetDevice(gpu));
 
     int blocksize_bst = 1;
 
@@ -221,30 +220,27 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles,
 
     Filter filter(filter_type, reg, paganin, offset);
 
-    cImage filtersino(Nrays, Nangles * blocksize_bst, 1,
-            MemoryType::EAllocGPU, stream);
+    // cImage filtersino(Nrays, Nangles * blocksize_bst, 1,
+    // MemoryType::EAllocGPU, stream);
 
-    cImage cartesianblock(sizeimage, sizeimage * blocksize_bst, 1,
-            MemoryType::EAllocGPU, stream);
-    cImage polarblock(Nrays * pad0, Nangles * blocksize_bst, 1,
-            MemoryType::EAllocGPU, stream);
-    cImage realpolar(Nrays * pad0, Nangles * blocksize_bst, 1,
-            MemoryType::EAllocGPU, stream);
+    // cImage cartesianblock(sizeimage, sizeimage * blocksize_bst, 1,
+    // MemoryType::EAllocGPU, stream);
+    // cImage polarblock(Nrays * pad0, Nangles * blocksize_bst, 1,
+    // MemoryType::EAllocGPU, stream);
+    // cImage realpolar(Nrays * pad0, Nangles * blocksize_bst, 1,
+    // MemoryType::EAllocGPU, stream);
 
     // BST initialization finishes here.
 
     for (size_t zoff = 0; zoff < (size_t)trueblocksize; zoff += blocksize_bst) {
-
         float* sinoblock = wholesinoblock + insize * zoff;
         if (filter.type != Filter::EType::none)
-            BSTFilter(filterplan, filtersino.gpuptr,
-                    sinoblock, Nrays, Nangles, 0.0, filter, stream);
+            BSTFilter(filterplan, filtersino->gpuptr, sinoblock, Nrays, Nangles, 0.0, filter, stream);
 
         dim3 blocks((Nrays + 255) / 256, Nangles, blocksize_bst);
         dim3 threads(128, 1, 1);
 
-        sino2p<<<blocks, threads, 0, stream>>>(realpolar.gpuptr, sinoblock,
-                Nrays, Nangles, pad0, 0);
+        sino2p<<<blocks, threads, 0, stream>>>(realpolar->gpuptr, sinoblock, Nrays, Nangles, pad0, 0);
 
         Nangles *= 2;
         Nrays *= pad0;
@@ -254,36 +250,34 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles,
         blocks.x *= pad0;
         blocks.x /= 2;
 
-        HANDLE_FFTERROR(cufftExecC2C(plan1d, realpolar.gpuptr, polarblock.gpuptr, CUFFT_FORWARD));
-        convBST<<<blocks, threads, 0, stream>>>(polarblock.gpuptr, Nrays, Nangles);
+        HANDLE_FFTERROR(cufftExecC2C(plan1d, realpolar->gpuptr, polarblock->gpuptr, CUFFT_FORWARD));
+        convBST<<<blocks, threads, 0, stream>>>(polarblock->gpuptr, Nrays, Nangles);
 
         blocks = dim3((sizeimage + 255) / 256, sizeimage, blocksize_bst);
         threads = dim3(256, 1, 1);
 
-        polar2cartesian_fourier<<<blocks, threads, 0, stream>>>(
-                cartesianblock.gpuptr, polarblock.gpuptr, angles, Nrays, Nangles, sizeimage);
+        polar2cartesian_fourier<<<blocks, threads, 0, stream>>>(cartesianblock->gpuptr, polarblock->gpuptr, angles,
+                                                                Nrays, Nangles, sizeimage);
 
-        HANDLE_FFTERROR(cufftExecC2C(plan2d, cartesianblock.gpuptr,
-                    cartesianblock.gpuptr, CUFFT_INVERSE));
+        HANDLE_FFTERROR(cufftExecC2C(plan2d, cartesianblock->gpuptr, cartesianblock->gpuptr, CUFFT_INVERSE));
 
-        //cudaDeviceSynchronize();
+        // cudaDeviceSynchronize();
 
-        GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(
-                blockRecon + outsize * zoff, cartesianblock.gpuptr, sizeimage);
+        GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(blockRecon + outsize * zoff,
+                                                                           cartesianblock->gpuptr, sizeimage);
 
-        //HANDLE_ERROR(cudaPeekAtLastError());
+        // HANDLE_ERROR(cudaPeekAtLastError());
 
         Nangles /= 2;
         Nrays *= 2;
         Nrays /= pad0;
     }
 
-    //manual deallocation to use stream
-    filtersino.DeallocGPU(stream);
-    cartesianblock.DeallocGPU(stream);
-    polarblock.DeallocGPU(stream);
-    realpolar.DeallocGPU(stream);
-
+    // manual deallocation to use stream
+    //filtersino.DeallocGPU(stream);
+    //cartesianblock.DeallocGPU(stream);
+    //polarblock.DeallocGPU(stream);
+    //realpolar.DeallocGPU(stream);
 }
 
 extern "C" {
@@ -307,7 +301,7 @@ void getBSTGPU(CFG configs, float* obj, float* tomo, float* angles, int blockgpu
     int axis_offset = configs.rotation_axis_offset;
 
     int blocksize = configs.blocksize;
-    //blocksize = 8;
+    // blocksize = 8;
 
     if (blocksize == 0) {
         int blocksize_aux = compute_GPU_blocksize(blockgpu, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
@@ -316,16 +310,14 @@ void getBSTGPU(CFG configs, float* obj, float* tomo, float* angles, int blockgpu
     int ind_block = (int)ceil((float)blockgpu / blocksize);
     int ptr = 0, subblock;
 
-
     float* dangles = opt::allocGPU<float>(nangles);
 
     opt::CPUToGPU<float>(angles, dangles, nangles);
 
-    int dimmsfilter[] = { nrays };
-    int dimms1d[] = { (int)nrays * padding / 2 };
-    int dimms2d[] = { (int)sizeImagex, (int)sizeImagex };
-    int beds[] = { nrays * padding / 2 };
-
+    int dimmsfilter[] = {nrays};
+    int dimms1d[] = {(int)nrays * padding / 2};
+    int dimms2d[] = {(int)sizeImagex, (int)sizeImagex};
+    int beds[] = {nrays * padding / 2};
 
     const int nstreams = 2;
     float* dtomo[nstreams];
@@ -335,67 +327,33 @@ void getBSTGPU(CFG configs, float* obj, float* tomo, float* angles, int blockgpu
     cufftHandle plans2d[nstreams];
     cufftHandle filterplans[nstreams];
 
+    cImage* filtersino[nstreams];
+
+    cImage* cartesianblock[nstreams];
+    cImage* polarblock[nstreams];
+    cImage* realpolar[nstreams];
+
     for (int st = 0; st < nstreams; ++st) {
         cudaStreamCreate(&streams[st]);
 
-        HANDLE_FFTERROR(cufftPlanMany(&plans1d[st], 1, dimms1d, beds, 1,
-                    nrays * padding / 2, beds, 1, nrays * padding / 2, CUFFT_C2C,
-                    nangles * blocksize_bst * 2));
-        HANDLE_FFTERROR(cufftPlanMany(&plans2d[st], 2, dimms2d, nullptr, 0,
-                    0, nullptr, 0, 0,
-                    CUFFT_C2C, blocksize_bst));
-        HANDLE_FFTERROR(cufftPlanMany(&filterplans[st], 1, dimmsfilter,
-                nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, nangles * blocksize_bst));
+        HANDLE_FFTERROR(cufftPlanMany(&plans1d[st], 1, dimms1d, beds, 1, nrays * padding / 2, beds, 1,
+                                      nrays * padding / 2, CUFFT_C2C, nangles * blocksize_bst * 2));
+        HANDLE_FFTERROR(
+            cufftPlanMany(&plans2d[st], 2, dimms2d, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize_bst));
+        HANDLE_FFTERROR(cufftPlanMany(&filterplans[st], 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C,
+                                      nangles * blocksize_bst));
 
         cufftSetStream(plans1d[st], streams[st]);
         cufftSetStream(plans2d[st], streams[st]);
         cufftSetStream(filterplans[st], streams[st]);
+
+        filtersino[st] = new cImage(nrays, nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
+        cartesianblock[st] = new cImage(sizeImagex, sizeImagex * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
+        polarblock[st] = new cImage(nrays * padding, nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
+        realpolar[st] = new cImage(nrays * padding, nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
     }
 
-    //for (int i = 0; i < ind_block; i += nstreams) {
-
-        //for (int st = 0; st < nstreams && (i + st) < ind_block; st++) {
-
-            //cudaStream_t stream = streams[st];
-
-            //int ptr = (i + st) * subblock;
-
-            //subblock = min(blockgpu - ptr, (int)blocksize);
-
-            //dtomo[st] = opt::allocGPU<float>((size_t)nrays * nangles * blocksize, stream);
-            //dobj[st] = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize);
-
-            //opt::CPUToGPU<float>(tomo + (size_t)ptr * nrays * nangles, dtomo[st], (size_t)nrays * nangles * subblock, stream);
-
-        //}
-
-        //for (int st = 0; st < nstreams && (i + st) < ind_block; ++st) {
-            //cudaStream_t stream = streams[st];
-            //getBST(dobj[st], dtomo[st], dangles, nrays, nangles,
-                    //subblock, sizeImagex, padding, regularization, paganin_reg,
-                    //filter_type, axis_offset,
-                    //plans1d[st], plans2d[st], filterplans[st],
-                    //gpu, stream);
-        //}
-
-
-        //for (int st = 0; st < nstreams && (i + st) < ind_block; ++st) {
-            //cudaStream_t stream = streams[st];
-            //size_t ptr = (i + st) * subblock;
-            //opt::GPUToCPU<float>(obj + ptr * size_t(sizeImagex * sizeImagex), dobj[st],
-                                 //size_t(sizeImagex * sizeImagex * subblock), stream);
-
-            //HANDLE_ERROR(cudaFreeAsync(dtomo[st], stream));
-            //HANDLE_ERROR(cudaFreeAsync(dobj[st], stream));
-
-            //[> Update pointer <]
-            ////ptr = ptr + subblock;
-        //}
-    //}
-
     for (int i = 0; i < ind_block; ++i) {
-
-
         int st = i % nstreams;
         cudaStream_t stream = streams[i % nstreams];
 
@@ -404,16 +362,14 @@ void getBSTGPU(CFG configs, float* obj, float* tomo, float* angles, int blockgpu
         dtomo[st] = opt::allocGPU<float>((size_t)nrays * nangles * blocksize, stream);
         dobj[st] = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize);
 
-        opt::CPUToGPU<float>(tomo + (size_t)ptr * nrays * nangles,
-                dtomo[st], (size_t)nrays * nangles * subblock, stream);
+        opt::CPUToGPU<float>(tomo + (size_t)ptr * nrays * nangles, dtomo[st], (size_t)nrays * nangles * subblock,
+                             stream);
 
-
-        getBST(dobj[st], dtomo[st], dangles, nrays, nangles,
-                subblock, sizeImagex, padding, regularization, paganin_reg,
-                filter_type, axis_offset,
-                plans1d[st], plans2d[st], filterplans[st],
-                gpu, stream);
-
+        getBST(dobj[st], dtomo[st],
+                dangles, nrays, nangles, subblock, sizeImagex, padding, regularization, paganin_reg,
+               filter_type, axis_offset, plans1d[st], plans2d[st], filterplans[st],
+               filtersino[st], cartesianblock[st], polarblock[st], realpolar[st],
+               gpu, stream);
 
         opt::GPUToCPU<float>(obj + ptr * size_t(sizeImagex * sizeImagex), dobj[st],
                              size_t(sizeImagex * sizeImagex * subblock), stream);
@@ -427,9 +383,16 @@ void getBSTGPU(CFG configs, float* obj, float* tomo, float* angles, int blockgpu
 
     for (int st = 0; st < nstreams; ++st) {
         cudaStreamSynchronize(streams[st]);
+
         cufftDestroy(plans1d[st]);
         cufftDestroy(plans2d[st]);
         cufftDestroy(filterplans[st]);
+
+        delete filtersino[st];
+        delete cartesianblock[st];
+        delete polarblock[st];
+        delete realpolar[st];
+
         cudaStreamDestroy(streams[st]);
     }
 
@@ -477,7 +440,6 @@ void getBSTMultiGPU(int* gpus, int ngpus, float* obj, float* tomogram, float* an
         ptr = ptr + subblock;
     }
     for (i = 0; i < ngpus; i++) threads[i].get();
-
 }
 }
 
