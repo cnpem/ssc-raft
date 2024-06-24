@@ -220,15 +220,6 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, 
 
     Filter filter(filter_type, reg, paganin, offset);
 
-    // cImage filtersino(Nrays, Nangles * blocksize_bst, 1,
-    // MemoryType::EAllocGPU, stream);
-
-    // cImage cartesianblock(sizeimage, sizeimage * blocksize_bst, 1,
-    // MemoryType::EAllocGPU, stream);
-    // cImage polarblock(Nrays * pad0, Nangles * blocksize_bst, 1,
-    // MemoryType::EAllocGPU, stream);
-    // cImage realpolar(Nrays * pad0, Nangles * blocksize_bst, 1,
-    // MemoryType::EAllocGPU, stream);
 
     // BST initialization finishes here.
 
@@ -273,11 +264,6 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, 
         Nrays /= pad0;
     }
 
-    // manual deallocation to use stream
-    //filtersino.DeallocGPU(stream);
-    //cartesianblock.DeallocGPU(stream);
-    //polarblock.DeallocGPU(stream);
-    //realpolar.DeallocGPU(stream);
 }
 
 extern "C" {
