@@ -1,5 +1,5 @@
-from .alignment import *
+from .alignments import *
 from .io import *
 from .background_correction import *
-from .ringsmethods import *
+from .rings_methods import *
 from .rings import *

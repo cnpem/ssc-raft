@@ -257,7 +257,7 @@ int pad0, float reg, float paganin, int filter_type, int offset, int gpu)
         ssc_trace_start("BST_Filter");
 
         if (filter.type != Filter::EType::none)
-            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, 0.0, filter);
+            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, offset, filter);
 
         ssc_trace_stop(); /* BST_Filter */
 		
@@ -323,7 +323,7 @@ extern "C"{
 
         int padding          = configs.tomo.pad.x;
         int filter_type      = configs.reconstruction_filter_type;
-        float paganin_reg    = configs.reconstruction_paganin_reg;
+        float paganin_reg    = configs.reconstruction_paganin;
         float regularization = configs.reconstruction_reg;
         int axis_offset      = configs.rotation_axis_offset;
 

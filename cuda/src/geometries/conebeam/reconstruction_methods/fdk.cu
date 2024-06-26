@@ -54,7 +54,7 @@ extern "C"
             
         }
 
-        printf("Filter:\n");
+        // printf("Filter:\n");
         clock_t f_begin = clock();
 
         if (lab.fourier == 1)
@@ -73,7 +73,7 @@ extern "C"
         // printf(cudaGetErrorString(cudaGetLastError()));
         // printf("\n");
 
-        printf("Backproject:\n");
+        // printf("Backproject:\n");
         clock_t b_begin = clock();
 
         set_backprojection(lab, recon, proj, angles, n_process, ndevs, process);

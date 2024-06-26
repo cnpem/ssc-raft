@@ -21,7 +21,7 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
     // cudaMalloc(W, lab.nh * sizeof(float));
     cudaMalloc(W, (lab.nph) * sizeof(float));
 
-    printf("Filter number: %d \n",lab.filter_type);
+    // printf("Filter number: %d \n",lab.filter_type);
     switch (lab.filter_type){
         case 0:
             // No filter Applied
@@ -83,10 +83,10 @@ void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_
     // printf("\n");
 
  
-    printf("GPU memory allocated...\n");
+    // printf("GPU memory allocated...\n");
 
     clock_t end = clock();
-    printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
 
     // cublasDestroy(handle);
 }}
@@ -108,7 +108,7 @@ void copy_cpu_filter_fft(float* proj, float* c_proj, cufftComplex* c_signal, flo
     cudaFree(c_W);
 
     clock_t end = clock();
-    printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
 }}
 
 extern "C"{
@@ -127,7 +127,7 @@ void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Pro
     cudaMalloc(c_proj, process.n_filter * sizeof(float));    
     cudaMemcpy(*c_proj, &proj[process.idx_filter], process.n_filter * sizeof(float), cudaMemcpyHostToDevice);
  
-    printf("GPU memory allocated...\n");
+    // printf("GPU memory allocated...\n");
 
     cudaDeviceSynchronize(); 
     // printf(cudaGetErrorString(cudaGetLastError()));
@@ -135,7 +135,7 @@ void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Pro
 
 
     clock_t end = clock();
-    printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
 }}
 
 extern "C"{
@@ -154,5 +154,5 @@ void copy_cpu_filter_conv(float* proj, float* c_proj, float* c_Q, Process proces
     cudaFree(c_Q);
 
     clock_t end = clock();
-    printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
 }}

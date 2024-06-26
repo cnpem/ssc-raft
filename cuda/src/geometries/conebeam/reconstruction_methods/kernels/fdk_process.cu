@@ -307,7 +307,7 @@ int memory(Lab lab, int ndev){
     if( ( blockgpu >= 1 && ( blockgpu <= 64 ) ) ){
 
         n_process = ndev;
-        printf("A: n_process = %d, n_gpus = %d \n", n_process, ndev);
+        // printf("A: n_process = %d, n_gpus = %d \n", n_process, ndev);
 
     }else{
 

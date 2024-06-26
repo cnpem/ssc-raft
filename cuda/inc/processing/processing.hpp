@@ -38,5 +38,25 @@ extern "C"{
     float* dark, float* flat, size_t sizex, size_t sizey);
 }
 
+/* Phase retrieval Functions */
+extern "C"{
+
+    void getPhaseMultiGPU(int *gpus, int ngpus, 
+    float *projections, float *paramf, int *parami);
+
+    void getPhase(CFG configs, GPU gpus, float *projections, 
+    dim3 size, dim3 size_pad);
+
+    void _paganin_gpu(CFG configs, GPU gpus, float *projections,
+    dim3 size, dim3 size_pad, dim3 pad);
+
+    void _paganin_gpu_tomopy(CFG configs, GPU gpus, float *projections,
+    dim3 size, dim3 size_pad, dim3 pad);
+
+    void _paganin_gpu_v0(CFG configs, GPU gpus, float *projections,
+    dim3 size, dim3 size_pad, dim3 pad);
+
+}
+
 
 #endif

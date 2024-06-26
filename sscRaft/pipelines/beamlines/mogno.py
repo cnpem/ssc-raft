@@ -1,8 +1,8 @@
 from ...rafttypes import *
 
 from ...processing.io import *
-from ...filters.phase_filters import *
-from ...processing.alignment.rotationaxis import *
+from ...phase_retrieval.phase import *
+from ...processing.alignments.rotationaxis import *
 from ...processing.rings import *
 from ...geometries.conebeam.fdk import *
 from ...geometries.parallel.fbp import *
@@ -122,7 +122,7 @@ def PhaseFilter(tomogram, dic):
       id_sample = ""
    savepath = outpath + 'RaftPhaseFilter_' + id_sample + '_' + name
 
-   tomogram = phase_filters(tomogram,dic)
+   tomogram = phase_retrieval(tomogram,dic)
 
    # Returns [angles,slices,rays]
 

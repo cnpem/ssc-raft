@@ -151,7 +151,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
         /* int dim = { 1, 2 }
             1: if plan 1D multiples cuffts
             2: if plan 2D multiples cuffts */
-        int dim = 1; 
+        // int dim = 1; 
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1, 
@@ -368,6 +368,8 @@ extern "C" {
 __host__ __device__ inline float Filter::apply(float input)
 {
 	float param = 0.0f;
+    float aux   = 0.0f;
+    float indicator = ( paganin == 0.0f ? 1.0f:input);
 
 	if (type == EType::gaussian)
 	{
@@ -375,7 +377,7 @@ __host__ __device__ inline float Filter::apply(float input)
 	}
 	else if (type == EType::lorentz)
 	{
-		input /= ( 1.0f + reg * input * input ) * (1.0f + paganin * input * input);
+		input *= 1.0 / ( ( 1.0f + reg * input * input ) * (1.0f + paganin * input * input) );
 	}
 	else if (type == EType::cosine)
 	{
@@ -396,7 +398,7 @@ __host__ __device__ inline float Filter::apply(float input)
 	}
 	else if (type == EType::ramp)
 	{
-		input /= (1.0f + paganin * input * input);
+		input *= 1.0f / (1.0f + paganin * input * input);
 	}
     else if (type == EType::differential)
 	{
@@ -404,9 +406,12 @@ __host__ __device__ inline float Filter::apply(float input)
 	}
     else if (type == EType::none)
 	{
-		input = 1.0f + 0.0f * input;
+		input = 1.0f;
 	}
 
 	return input;
 }
+
+
+
 

@@ -1,6 +1,6 @@
 from ..rafttypes import *
 from .io import *
-from .ringsmethods.titarenko import * 
+from .rings_methods.titarenko import * 
 
 def rings(tomogram, dic, **kwargs):
     """Apply rings correction on tomogram.

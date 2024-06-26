@@ -205,7 +205,7 @@ dim3 size, dim3 pad)
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    out[index] = inpadded[indpad] / Npadx;   
+    out[index] = inpadded[indpad];   
 }
 
 extern "C"{

@@ -6,7 +6,7 @@ install:
 	pip install . 
 
 dev:
-	python3 setup.py install --user
+	python3 setup.py install 
 
 clean:
 	rm -fr _skbuild/ build/ *.egg-info/ dist/	*~

@@ -1,6 +1,6 @@
 from ..rafttypes import *
 
-from .parallel.em_parallel import *
+from .parallel.em import *
 from ..processing.io import *
 
 def em(data, dic, flat = None, angles = None, guess = None, **kwargs):

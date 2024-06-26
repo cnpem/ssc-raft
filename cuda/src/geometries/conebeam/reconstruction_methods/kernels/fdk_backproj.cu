@@ -94,14 +94,14 @@ void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float**
     // printf(cudaGetErrorString(cudaGetLastError()));
     // printf("\n");
 
-    printf("Allocating gpu memory... c_recon N = %lld \n",N);
+    // printf("Allocating gpu memory... c_recon N = %lld \n",N);
     HANDLE_ERROR(cudaMalloc(c_recon, N * sizeof(float)));
 
-    printf("Allocating gpu memory... c_proj M = %lld \n",M);
+    // printf("Allocating gpu memory... c_proj M = %lld \n",M);
     HANDLE_ERROR(cudaMalloc(c_proj, M * sizeof(float)));     
     HANDLE_ERROR(cudaMemcpy(*c_proj, &proj[process.idx_proj], M * sizeof(float), cudaMemcpyHostToDevice));
  
-    printf("GPU memory allocated...\n");
+    // printf("GPU memory allocated...\n");
     // printf(cudaGetErrorString(cudaGetLastError()));
     // printf("\n");
 
@@ -111,7 +111,7 @@ void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float**
     HANDLE_ERROR(cudaFree(dangles));
 
     clock_t end = clock();
-    printf("Time copy_to_gpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_gpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
 }}
 
 extern "C"{
@@ -126,7 +126,7 @@ void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta
 
 
     long long int N = process.n_recon;    //lab.nbeta * lab.nv * lab.nh;
-    printf("gpu = %d, idx recon = %lld. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
+    // printf("gpu = %d, idx recon = %lld. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
     HANDLE_ERROR(cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost));
 
     HANDLE_ERROR(cudaFree(c_proj));
@@ -134,7 +134,7 @@ void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta
     HANDLE_ERROR(cudaFree(c_beta));
     
     clock_t end = clock();
-    printf("Time copy_to_cpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_cpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
 }}
 
 extern "C"{
@@ -154,7 +154,7 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
 
     cudaSetDevice(process.i_gpu);
 
-    printf("\n Starting Backprojection: GPU %d \n", process.i_gpu);
+    // printf("\n Starting Backprojection: GPU %d \n", process.i_gpu);
 
     clock_t b_begin = clock();
 
@@ -165,7 +165,7 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
     // printf("\n");
 
     clock_t b_end = clock();
-    printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);
+    // printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);
 }}
 
 

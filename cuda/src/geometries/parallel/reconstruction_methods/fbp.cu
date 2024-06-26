@@ -76,7 +76,7 @@ extern "C"{
     dim3 tomo_size, dim3 tomo_pad, dim3 obj_size)
     {
         int filter_type      = configs.reconstruction_filter_type;
-        float paganin_reg    = configs.reconstruction_paganin_reg;
+        float paganin_reg    = configs.reconstruction_paganin;
         float regularization = configs.reconstruction_reg;
         int axis_offset      = configs.rotation_axis_offset;
 
@@ -90,14 +90,14 @@ extern "C"{
         int gridBlock = (int)ceil( nangles / TPBY ) + 1;
         setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
 
-        // if (filter.type != Filter::EType::none)
-        //     filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+        if (filter.type != Filter::EType::none)
+            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         /* Old version - Gio */
-        if (filter.type != Filter::EType::none)
-            SinoFilter(tomogram, 
-                (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
-                0, true, filter, false, sintable);
+        // if (filter.type != Filter::EType::none)
+        //     SinoFilter(tomogram, 
+        //         (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
+        //         axis_offset, true, filter, false, sintable);
 
         BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, tomogram, angles,
                                                 sintable, costable, 
@@ -129,7 +129,7 @@ extern "C"{
 
         int padding          = configs.tomo.pad.x;
         int filter_type      = configs.reconstruction_filter_type;
-        float paganin_reg    = configs.reconstruction_paganin_reg;
+        float paganin_reg    = configs.reconstruction_paganin;
         float regularization = configs.reconstruction_reg;
         int axis_offset      = configs.rotation_axis_offset;
         int i; 
@@ -156,7 +156,6 @@ extern "C"{
             ssc_param_int("Number of sub blocks", ind_block)
         });
         
-
         float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
         float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagey * blocksize);
         float *dangles = opt::allocGPU<float>( nangles );

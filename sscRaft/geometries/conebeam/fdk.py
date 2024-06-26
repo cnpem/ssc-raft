@@ -13,17 +13,17 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
         (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [z, y, x].
 
     Dictionary parameters:
-        *``dic['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
-        *``dic['z1[m]']`` (float): Source-sample distance in meters. Defaults to 500e-3.
-        *``dic['z1+z2[m]']`` (float): Source-detector distance in meters. Defaults to 1.0.
-        *``dic['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
-        *``dic['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[-1].
-        *``dic['Fourier']`` (bool): Type of filter for reconstruction: if uses FFT (True) or not.
-        *``dic['angles']`` (list): list of angles.
-        *``dic['filter']`` (str,optional): Type of filter for reconstruction. 
+        * ``dic['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
+        * ``dic['z1[m]']`` (float): Source-sample distance in meters. Defaults to 500e-3.
+        * ``dic['z1+z2[m]']`` (float): Source-detector distance in meters. Defaults to 1.0.
+        * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
+        * ``dic['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[-1].
+        * ``dic['Fourier']`` (bool): Type of filter for reconstruction: if uses FFT (True) or not.
+        * ``dic['angles[rad]']`` (list): list of angles in radians.
+        * ``dic['filter']`` (str,optional): Type of filter for reconstruction. 
         Options = ('none','gaussian','lorentz','cosine','rectangle','hann','hamming','ramp'). Default is 'hamming'.
-        *``dic['regularization']`` (float,optional): Type of filter for reconstruction, small values. Default is 1.
-        *``dic['energy[eV]']`` (float): beam energy in eV
+        * ``dic['regularization']`` (float,optional): Type of filter for reconstruction, small values. Default is 1.
+        *` `dic['energy[eV]']`` (float): beam energy in eV
     """
 
     # recon = data 
@@ -61,7 +61,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
         # padh = power_of_2_padding(nrays,padh)
 
     try:
-        angles     = dic['angles']
+        angles     = dic['angles[rad]']
     except Exception as e:
         logger.error(f'Missing angles list entry from dictionary!')
         logger.exception(e)

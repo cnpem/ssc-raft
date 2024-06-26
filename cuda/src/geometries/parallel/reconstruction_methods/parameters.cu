@@ -161,8 +161,8 @@ extern "C"{
         configs->tomo.padsize  = dim3(configs->tomo.size.x * ( 1 + configs->tomo.pad.x),configs->tomo.size.y,configs->tomo.size.z);
         
         /* Compute memory in bytes of a single slice for Tomogram and its padded version for FFT */
-        configs->tomo.lenght_memory_bytes    = static_cast<float>(sizeof(float)) *    configs->tomo.size.x;
-        configs->tomo.width_memory_bytes      = static_cast<float>(sizeof(float)) *    configs->tomo.size.y;
+        configs->tomo.lenght_memory_bytes     = static_cast<float>(sizeof(float)) * configs->tomo.size.x;
+        configs->tomo.width_memory_bytes      = static_cast<float>(sizeof(float)) * configs->tomo.size.y;
 
         configs->tomo.slice_memory_bytes      = configs->tomo.lenght_memory_bytes * configs->tomo.width_memory_bytes;
         configs->tomo.slice_padd_memory_bytes = static_cast<float>(sizeof(float)) * configs->tomo.padsize.x * configs->tomo.padsize.y;
@@ -180,8 +180,12 @@ extern "C"{
         /* Set Reconstruction method variables */
         configs->reconstruction_filter_type  = parameters_int[7];  /* Reconstruction Filter type */
         configs->rotation_axis_offset        = parameters_int[8];  /* Rotation Axis offset */
+        configs->geometry.energy             = parameters_float[2]; /* Energy parameter in eV*/
+        configs->geometry.z2x                = parameters_float[3]; /* Distance sample to detector in x direction [meters]; z2x = z2y in PARALLEL geometry;*/
+        configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
+        configs->geometry.wavelenght         = ( plank * vc ) / configs->geometry.energy;
         
-        configs->reconstruction_paganin_reg  = 4.0f * float(M_PI) * float(M_PI) * parameters_float[0]; /* Reconstruction Filter regularization parameter */
+        configs->reconstruction_paganin      = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * parameters_float[0]; /* Reconstruction Paganin parameter */
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
     
         /* Compute total memory used of FBP method on a singles slice */
@@ -206,7 +210,7 @@ extern "C"{
         printf("FBP filter: %d \n", configs->reconstruction_filter_type);
         printf("FBP regularization: %e \n", configs->reconstruction_reg);
         printf("FBP rot axis offset: %d \n", configs->rotation_axis_offset);
-        printf("FBP regularization Paganin: %e \n", configs->reconstruction_paganin_reg);
+        printf("FBP Paganin: %e \n", configs->reconstruction_paganin);
         printf("FBP blocksize: %d \n", configs->blocksize);
     }
 
@@ -237,8 +241,8 @@ extern "C"{
         configs->tomo.padsize  = dim3(configs->tomo.size.x * ( 1 + configs->tomo.pad.x),configs->tomo.size.y,configs->tomo.size.z);
         
         /* Compute memory in bytes of a single slice for Tomogram and its padded version for FFT */
-        configs->tomo.lenght_memory_bytes    = static_cast<float>(sizeof(float)) *    configs->tomo.size.x;
-        configs->tomo.width_memory_bytes      = static_cast<float>(sizeof(float)) *    configs->tomo.size.y;
+        configs->tomo.lenght_memory_bytes     = static_cast<float>(sizeof(float)) * configs->tomo.size.x;
+        configs->tomo.width_memory_bytes      = static_cast<float>(sizeof(float)) * configs->tomo.size.y;
 
         configs->tomo.slice_memory_bytes      = configs->tomo.lenght_memory_bytes * configs->tomo.width_memory_bytes;
         configs->tomo.slice_padd_memory_bytes = static_cast<float>(sizeof(float)) * configs->tomo.padsize.x * configs->tomo.padsize.y;
@@ -252,12 +256,16 @@ extern "C"{
         /* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
         configs->geometry.magnitude_x        = 1.0;
         configs->geometry.magnitude_y        = 1.0;
+        configs->geometry.energy             = parameters_float[2]; /* Energy parameter in eV*/
+        configs->geometry.z2x                = parameters_float[3]; /* Distance sample to detector in x direction [meters]; z2x = z2y in PARALLEL geometry;*/
+        configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
+        configs->geometry.wavelenght         = ( plank * vc ) / configs->geometry.energy;
                 
         /* Set Reconstruction method variables */
         configs->reconstruction_filter_type  = parameters_int[7];  /* Reconstruction Filter type */
         configs->rotation_axis_offset        = parameters_int[8];  /* Rotation Axis offset */
         
-        configs->reconstruction_paganin_reg  = 4.0f * float(M_PI) * float(M_PI) * parameters_float[0]; /* Reconstruction Filter regularization parameter */
+        configs->reconstruction_paganin      = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * parameters_float[0]; /* Reconstruction Paganin parameter */
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
     
         /* Compute total memory used of FBP method on a singles slice */
@@ -281,7 +289,7 @@ extern "C"{
         printf("BST filter: %d \n", configs->reconstruction_filter_type);
         printf("BST regularization: %e \n", configs->reconstruction_reg);
         printf("BST rot axis offset: %d \n", configs->rotation_axis_offset);
-        printf("BST regularization Paganin: %e \n", configs->reconstruction_paganin_reg);
+        printf("BST Paganin: %e \n", configs->reconstruction_paganin);
         printf("BST blocksize: %d \n", configs->blocksize);
     }
 }

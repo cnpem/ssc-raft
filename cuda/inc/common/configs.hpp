@@ -62,6 +62,8 @@ typedef struct dimension
     float lenght_memory_bytes;
     float slice_memory_bytes;
     float slice_padd_memory_bytes;
+    float frame_memory_bytes;
+    float frame_padd_memory_bytes;
 
 }DIM; /* Data dimensions */
 
@@ -76,6 +78,7 @@ typedef struct geometry
 
     /* General reconstruction variables*/
     float detector_pixel_x, detector_pixel_y;
+    float obj_pixel_x, obj_pixel_y;
     float energy, wavelenght, wavenumber;
     float z1x, z1y, z2x, z2y;
     float magnitude_x, magnitude_y;  
@@ -98,6 +101,7 @@ typedef struct config
 {   
     /* Pipeline variables */
     float total_required_mem_per_slice_bytes;
+    float total_required_mem_per_frame_bytes;
     int blocksize;
 
     GEO geometry;
@@ -113,9 +117,10 @@ typedef struct config
     /* Flat/Dark Correction */
     int numflats, numdarks;
 
-    /* Phase Filter */
-    int  phase_filter_type;  /* Phase Filter type */
-    float phase_filter_reg; /* Phase Filter regularization parameter */
+    /* Phase Retrieval */
+    int  phase_type;  /* Phase type */
+    float phase_reg; /* Phase regularization parameter */
+    float delta_beta; /* delta/beta parameter */
 
     /* Rings */
     int rings_block;
@@ -127,9 +132,9 @@ typedef struct config
     /* Reconstruction method variables */
     int reconstruction_method;
     int reconstruction_filter_type;   /* Reconstruction Filter type */
-    float reconstruction_paganin_reg; /* Reconstruction Paganin Filter regularization parameter */
+    float reconstruction_paganin;     /* Reconstruction Paganin regularization parameter */
     float reconstruction_reg;         /* General regularization parameter */
-    float reconstruction_tv;         /* Total variation regularization parameter */
+    float reconstruction_tv;          /* Total variation regularization parameter */
 
     int datatype;
     float threshold; 

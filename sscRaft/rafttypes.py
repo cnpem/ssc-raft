@@ -1,11 +1,15 @@
 #We use the one encoding: utf8
+
+# Ctypes =========
 import ctypes
 from ctypes import *
 import ctypes.util
-import multiprocessing
+
+# General =========
 import os
 import sys
 import numpy
+import numpy as np
 import json
 import h5py
 import time
@@ -13,14 +17,28 @@ from time import time
 import warnings
 import pathlib
 import inspect
+import matplotlib.pyplot as plt
+
+# Multiprocessing =========
+import multiprocessing
+from multiprocessing import shared_memory
+from multiprocessing.shared_memory import SharedMemory as SM
+import multiprocessing as mp
 
 # wiggle.py ============
 import uuid
 import SharedArray as sa
 from scipy.optimize import minimize
-# ======================
+
+
 # alignment.py =========
-import matplotlib.pyplot as plt
+
+import concurrent.futures
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from functools import partial
+from tqdm import tqdm
+
+import skimage
 import scipy
 from skimage.registration import phase_cross_correlation
 from skimage.transform import pyramid_gaussian
@@ -205,6 +223,18 @@ except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_STITCH_360TO180-')
     pass
 
+######## Raft - Phase Retrieval Paganin method and similar methods ##########
+try:
+    libraft.getPhaseMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int,
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+    ]
+    
+    libraft.getPhaseMultiGPU.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_PHASE_RETRIEVAL-')
+    pass
+
 ######## Raft - Parallel Radon ##########
 try:
     libraft.getRadonRTMultiGPU.argtypes = [
@@ -220,8 +250,7 @@ except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_RADON_RT-')
     pass
 
-######## Conical Raft ##########
-## FDK:
+######## Raft - FDK ##########
 class Lab(ctypes.Structure):
         _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float), ("z", ctypes.c_float),
                 ("dx", ctypes.c_float), ("dy", ctypes.c_float),("dz", ctypes.c_float),
@@ -247,13 +276,16 @@ class Lab(ctypes.Structure):
                 ]
 
 try:
-        libraft.gpu_fdk.argtypes = [Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
-
+    libraft.gpu_fdk.argtypes = [
+        Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p
+    ]
+    libraft.getBackgroundCorrectionMultiGPU.restype  = None
 except:
-    print('-.RAFT_CONICAL-')
+    print('Cannot find C/CUDA library: -.RAFT_FDK-')
     pass
 
-## Transmission Expectation-Maximization (TEM):
+## Transmission Expectation-Maximization (tEMRT - conebeam):
 class Lab_EM(ctypes.Structure):
     _fields_ = [
         ("Lx", ctypes.c_float), ("Ly", ctypes.c_float), ("Lz", ctypes.c_float),
@@ -267,8 +299,7 @@ class Lab_EM(ctypes.Structure):
 lib_cone_tEM  = load_library(_lib, ext)
 
 try:
-    conebeam_tEM_gpu = lib_cone_tEM.conebeam_tEM_gpu
-    conebeam_tEM_gpu.argtypes = [
+    libraft.conebeam_tEM_gpu.argtypes = [
         Lab_EM, # struct Lab lab.
         ctypes.c_void_p, # float *flat.
         ctypes.c_void_p, # float *px.
@@ -281,10 +312,38 @@ try:
         ctypes.c_int, # int niter.
         ctypes.c_float, # float tv.
         ctypes.c_float] # float max_val.
-    conebeam_tEM_gpu.restype = ctypes.c_int
+    libraft.conebeam_tEM_gpu.restype = ctypes.c_int
 except:
     raise NotImplementedError()
 
+######## Raft - Conebeam Radon by Ray Tracing ##########
+class Lab_CB(ctypes.Structure):
+    _fields_ = [("x", ctypes.c_float),
+                ("y", ctypes.c_float),
+                ("z", ctypes.c_float),
+                ("x0", ctypes.c_float),
+                ("y0", ctypes.c_float),
+                ("z0", ctypes.c_float),
+                ("nx", ctypes.c_int),
+                ("ny", ctypes.c_int),
+                ("nz", ctypes.c_int),
+                ("sx", ctypes.c_float),
+                ("sy", ctypes.c_float),
+                ("sz", ctypes.c_float),
+                ("nbeta", ctypes.c_int),
+                ("n_detector", ctypes.c_int),
+                ("n_ray_points",  ctypes.c_int)]
+    
+try:
+    libraft.cbradon.argtypes = [
+        Lab_CB, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_int
+    ]
+    libraft.cbradon.restype  = ctypes.c_int
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_CONEBEAM_RADON_RT-')
+    pass
 
 
 #########################
@@ -310,37 +369,33 @@ def nice(f): # scientific notation + 2 decimals
 
 def FilterNumber(mfilter):
     if mfilter.lower() == 'none':
-            return 0
+        return 0
     elif mfilter.lower() == 'gaussian':
-            return 1
+        return 1
     elif mfilter.lower() == 'lorentz':
-            return 2
+        return 2
     elif mfilter.lower() == 'cosine':
-            return 3
+        return 3
     elif mfilter.lower() == 'rectangle':
-            return 4
+        return 4
     elif mfilter.lower() == 'hann':
-            return 5
+        return 5
     elif mfilter.lower() == 'hamming':
-            return 6
+        return 6
     elif mfilter.lower() == 'ramp':
-            return 7
+        return 7
     else:
-            return 6
+        return 6
 
-def PhaseFilterNumber(mfilter):
-    if mfilter.lower() == 'none':
-            return 0
-    elif mfilter.lower() == 'paganin':
-            return 1
-    elif mfilter.lower() == 'bronnikov':
-            return 2
-    elif mfilter.lower() == 'born':
-            return 3
-    elif mfilter.lower() == 'rytov':
-            return 4
+def PhaseMethodNumber(mfilter):
+    if mfilter.lower() == 'paganin':
+        return 0
+    elif mfilter.lower() == 'tomopy':
+        return 1
+    elif mfilter.lower() == 'v0':
+        return 2
     else:
-            return 0
+        return 0
 
 def setInterpolation(name):
     """ Set interpolation 

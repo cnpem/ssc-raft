@@ -141,3 +141,14 @@ dim3 opt::setGridBlock(dim3 size){
     return gridBlock;
 }
 
+__global__ void opt::scale(cuComplex *data, dim3 size, float scale)
+{
+    size_t index        = opt::getIndex3d(size);
+    size_t total_points = opt::get_total_points(size);
+
+    if ( index >= total_points ) return;
+    
+    data[index].x *= scale; 
+    data[index].y *= scale; 
+};
+    
