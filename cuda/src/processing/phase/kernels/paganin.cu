@@ -96,7 +96,7 @@ extern "C" {
         size_t npad = opt::get_total_points(size_pad);
         float scale = (float)( 1.0f / ( size_pad.x * size_pad.y) );
 
-        cuComplex *dataPadded = opt::allocGPU<cuComplex>(npad);
+        cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
         opt::paddR2C<<<gpus.Grd,gpus.BT>>>(data, dataPadded, size, pad, 1.0f);
 
@@ -121,9 +121,16 @@ extern "C" {
         size_t npad = opt::get_total_points(size_pad);
         float scale = (float)( 1.0f / ( size_pad.x * size_pad.y) );
 
-        cuComplex *dataPadded = opt::allocGPU<cuComplex>(npad);
+        cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);        
 
-        opt::paddR2C<<<gpus.Grd,gpus.BT>>>(data, dataPadded, size, pad, 1.0f);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
+                        (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
+                        (int)ceil( size_pad.z / threadsPerBlock.z ) + 1);
+        
+        opt::paddR2C<<<gridBlock,threadsPerBlock>>>(data, dataPadded, size, pad, 1.0f);
+
+        // printf(cudaGetErrorString(cudaGetLastError()));
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
 
@@ -135,7 +142,9 @@ extern "C" {
 
         // opt::fftshift2D<<<gpus.Grd,gpus.BT>>>(dataPadded, size_pad);
 
-        opt::remove_paddC2R<<<gpus.Grd,gpus.BT>>>(dataPadded, data, size, pad);
+        opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, data, size, pad);
+
+        // printf(cudaGetErrorString(cudaGetLastError()));
 
         HANDLE_ERROR(cudaFree(dataPadded));
     }
@@ -146,7 +155,7 @@ extern "C" {
         size_t npad = opt::get_total_points(size_pad);
         float scale = (float)( 1.0f / ( size_pad.x * size_pad.y) );
 
-        cuComplex *dataPadded = opt::allocGPU<cuComplex>(npad);
+        cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
         opt::paddR2C<<<gpus.Grd,gpus.BT>>>(data, dataPadded, size, pad, 1.0f);
 

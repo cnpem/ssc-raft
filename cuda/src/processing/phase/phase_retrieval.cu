@@ -126,15 +126,15 @@ extern "C" {
     float *projections, dim3 size, dim3 size_pad)
 	{	
 		/* Plan for Fourier transform - cufft */
-		int n[] = {(int)size_pad.x,(int)size_pad.x};
-		HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, size.z));
+		// int n[] = {(int)size_pad.x,(int)size_pad.x};
+		// HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, size.z));
 
 		applyPhase(configs, gpus, projections, size, size_pad);
 	
 		// cudaDeviceSynchronize();
 
 		/* Destroy plan */
-		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
+		// HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 
 	void getPhaseGPU(CFG configs, GPU gpus, 
@@ -149,6 +149,8 @@ extern "C" {
         int nrayspad   = configs.tomo.padsize.x;
         int nslicespad = configs.tomo.padsize.y;
 
+        printf("nrays = %d, nslices = %d, nrayspad = %d, nslicespad = %d \n",nrays,nslices,nrayspad,nslicespad);
+
 		int i; 
         int blocksize = configs.blocksize;
 
@@ -162,7 +164,7 @@ extern "C" {
 		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
 
         		/* Plan for Fourier transform - cufft */
-		int n[] = {nrays,nslices};
+		int n[] = {nrayspad,nslicespad};
 		HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize));
 
 		/* Loop for each batch of size 'batch' in threads */
@@ -170,7 +172,7 @@ extern "C" {
 
 		for (i = 0; i < ind_block; i++){
 
-			subblock    = min(configs.tomo.size.z - ptr, blocksize);
+			subblock    = min(sizez - ptr, blocksize);
 			ptr_block = (size_t)nrays * nslices * ptr;
 
 			/* Update pointer */
@@ -184,7 +186,7 @@ extern "C" {
             opt::CPUToGPU<float>(projections + ptr_block, dprojections, 
                             (size_t)nrays * nslices * subblock);
 
-			getPhase( configs, gpus, projections,
+			getPhase( configs, gpus, dprojections,
                     dim3(nrays, nslices, subblock), 
                     dim3(nrayspad, nslicespad, subblock)
                     );
@@ -264,55 +266,5 @@ extern "C" {
 
 		HANDLE_ERROR(cudaDeviceSynchronize());
 	}
-
-	// void setPhaseFilterKernel(CFG *configs, GPU gpus, 
-    // float *kernel, int phase_type, float phase_reg,
-	// dim3 size_pad)
-	// {	
-	// 	// cublasHandle_t handle = NULL;
-    //     // cublasCreate(&handle);
-    //     // cublasStatus_t stat;
-
-	// 	/* Compute phase filter kernel */ 
-	// 	switch (phase_type){
-	// 			case 0:
-	// 				/* code */
-	// 				printf("No filter was selected!");
-	// 				break;
-	// 			case 1:
-	// 				/* code */
-	// 				paganinKernel<<<gpus.Grd,gpus.BT>>>(kernel, phase_reg, size_pad);
-	// 				break;
-	// 			case 2:
-	// 				/* code */
-	// 				bronnikovKernel<<<gpus.Grd,gpus.BT>>>(kernel, phase_reg, size_pad);
-	// 				break;
-	// 			case 3:
-	// 				/* code */
-	// 				bornKernel<<<gpus.Grd,gpus.BT>>>(kernel, phase_reg, size_pad);
-	// 				break;
-	// 			case 4:
-	// 				/* code */
-	// 				rytovKernel<<<gpus.Grd,gpus.BT>>>(kernel, phase_reg, size_pad);
-	// 				break;
-	// 			default:
-	// 				printf("Using default Paganin phase filter. \n");
-	// 				paganinKernel<<<gpus.Grd,gpus.BT>>>(kernel, phase_reg, size_pad);
-	// 				break;
-	// 		}
-
-    //     /* Normalize kernel by maximum value */ 
- 	// 	// int max;
-    //     // stat = cublasIsamax(handle, (int)size_pad.x * size_pad.y, kernel, 1, &max);
-
-    //     // if (stat != CUBLAS_STATUS_SUCCESS)
-    //     //     printf("Cublas Max failed\n");
-
-	// 	// float maximum;
-	// 	// HANDLE_ERROR(cudaMemcpy(&maximum, kernel + max, sizeof(float), cudaMemcpyDeviceToHost));
-    //     // Normalize<<<gpus.Grd,gpus.BT>>>(kernel, maximum, size_pad);
-
-	// 	// cublasDestroy(handle);
-	// }
 }
 

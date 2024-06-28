@@ -17,8 +17,8 @@ include_directories(
     ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
 )
 
-set(ssccommons_SOURCE_DIR ./externals/ssc-commons)
-add_subdirectory(${ssccommons_SOURCE_DIR})
+# set(ssccommons_SOURCE_DIR ./externals/ssc-commons)
+# add_subdirectory(${ssccommons_SOURCE_DIR})
 
 include_directories(
     cuda/inc
@@ -31,13 +31,7 @@ include_directories(
 file(GLOB_RECURSE RAFT_SRC cuda/src/**/*.c*)
 add_library(raft SHARED ${RAFT_SRC})
 
-target_link_libraries(raft ${CUDA_LIBRARIES} ssccommons_shared CUDA::cufft CUDA::cublas)
+target_link_libraries(raft ${CUDA_LIBRARIES} CUDA::cufft CUDA::cublas)
 
 
 install(TARGETS raft LIBRARY DESTINATION ${PROJECT_NAME}/lib)
-set_target_properties(raft PROPERTIES INSTALL_RPATH "$ORIGIN") # look for binaries in same path (to link sscommons)
-
-install(TARGETS ssccommons_wrapper LIBRARY DESTINATION ${PROJECT_NAME}/lib)
-install(TARGETS ssccommons_shared LIBRARY DESTINATION ${PROJECT_NAME}/lib)
-target_link_libraries(ssccommons_wrapper PUBLIC ssccommons_shared)
-set_target_properties(ssccommons_wrapper PROPERTIES INSTALL_RPATH "$ORIGIN") # look for binaries in same path (to link sscommons)

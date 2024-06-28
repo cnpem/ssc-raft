@@ -20,7 +20,7 @@ dim3 size, dim3 pad, float value)
     int ii     = (int)( i - padx / 2 );
     int jj     = (int)( j - pady / 2 );
 
-    long long int index  = IND(ii,jj,k,size.x,size.y);
+    long long int index  = size.x * k * size.y + size.x * jj + ii; 
 
     long long int indpad =  Npadx * k * Npady + Npadx * j + i;
 
@@ -131,13 +131,13 @@ dim3 size, dim3 pad)
     int ii     = (int)( i - padx / 2 );
     int jj     = (int)( j - pady / 2 );
 
-    long long int index  = IND(ii,jj,k,size.x,size.y);
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
 
     long long int indpad =  Npadx * k *  Npady +  Npadx * j +  i;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    out[index] = inpadded[indpad].x;
+    // out[index] = inpadded[indpad].x;
 }
 
 __global__ void opt::remove_paddC2C(cufftComplex *inpadded, cufftComplex *out, 
