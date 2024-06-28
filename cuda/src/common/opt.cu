@@ -1,3 +1,4 @@
+#include <driver_types.h>
 #include "common/configs.hpp"
 #include "common/complex.hpp"
 #include "common/opt.hpp"
@@ -66,14 +67,14 @@ __global__ void setSinCosTable(float *sintable, float *costable, float *angles, 
     costable[k] = __cosf(angles[k]);
 }
 
-void getLog(float *data, dim3 size)
+void getLog(float *data, dim3 size, cudaStream_t stream)
 {
     dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-    dim3 gridBlock( (int)ceil( size.x / threadsPerBlock.x ) + 1, 
-                    (int)ceil( size.y / threadsPerBlock.y ) + 1, 
+    dim3 gridBlock( (int)ceil( size.x / threadsPerBlock.x ) + 1,
+                    (int)ceil( size.y / threadsPerBlock.y ) + 1,
                     (int)ceil( size.z / threadsPerBlock.z ) + 1);
 
-    Klog<<<gridBlock,threadsPerBlock>>>(data, size);
+    Klog<<<gridBlock,threadsPerBlock, 0, stream>>>(data, size);
 }
 
 static __global__ void Klog(float* data, dim3 size)
@@ -148,7 +149,7 @@ __global__ void opt::scale(cuComplex *data, dim3 size, float scale)
 
     if ( index >= total_points ) return;
     
-    data[index].x *= scale; 
-    data[index].y *= scale; 
+    data[index].x = data[index].x * scale; 
+    data[index].y = data[index].y * scale; 
 };
     

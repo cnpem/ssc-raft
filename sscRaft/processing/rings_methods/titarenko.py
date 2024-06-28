@@ -44,7 +44,7 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
     else:
         logger.info(f'Titarenko\'s regularization set to {rings_lambda}.')  
 
-    tomogram            = numpy.ascontiguousarray(tomogram.astype(numpy.float32))
+    tomogram            = CNICE(tomogram)
     tomogram_ptr         = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     libraft.getTitarenkoRingsMultiGPU(gpusptr, ctypes.c_int(ngpus), tomogram_ptr, 

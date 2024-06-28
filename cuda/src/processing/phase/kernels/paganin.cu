@@ -94,23 +94,29 @@ extern "C" {
     dim3 size, dim3 size_pad, dim3 pad)
     {
         size_t npad = opt::get_total_points(size_pad);
-        float scale = (float)( 1.0f / ( size_pad.x * size_pad.y) );
+        float scale = ( 1.0f / (float)( size_pad.x * size_pad.y) );
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
-        opt::paddR2C<<<gpus.Grd,gpus.BT>>>(data, dataPadded, size, pad, 1.0f);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
+                        (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
+                        (int)ceil( size_pad.z / threadsPerBlock.z ) + 1);
+        
+
+        opt::paddR2C<<<gridBlock,threadsPerBlock>>>(data, dataPadded, size, pad, 1.0f);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
 
-        paganinKernel<<<gpus.Grd,gpus.BT>>>(configs, dataPadded, size_pad);
+        paganinKernel<<<gridBlock,threadsPerBlock>>>(configs, dataPadded, size_pad);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
 
-        opt::scale<<<gpus.Grd,gpus.BT>>>(dataPadded, size_pad, scale);
+        opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
 
         // opt::fftshift2D<<<gpus.Grd,gpus.BT>>>(dataPadded, size_pad);
 
-        opt::remove_paddC2R<<<gpus.Grd,gpus.BT>>>(dataPadded, data, size, pad);
+        opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, data, size, pad);
 
         HANDLE_ERROR(cudaFree(dataPadded));
     }
@@ -130,21 +136,17 @@ extern "C" {
         
         opt::paddR2C<<<gridBlock,threadsPerBlock>>>(data, dataPadded, size, pad, 1.0f);
 
-        // printf(cudaGetErrorString(cudaGetLastError()));
-
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
 
-        paganinKernel_tomopy<<<gpus.Grd,gpus.BT>>>(configs, dataPadded, size_pad);
+        paganinKernel_tomopy<<<gridBlock,threadsPerBlock>>>(configs, dataPadded, size_pad);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
 
-        opt::scale<<<gpus.Grd,gpus.BT>>>(dataPadded, size_pad, scale);
+        opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
 
-        // opt::fftshift2D<<<gpus.Grd,gpus.BT>>>(dataPadded, size_pad);
+        // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
 
         opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, data, size, pad);
-
-        // printf(cudaGetErrorString(cudaGetLastError()));
 
         HANDLE_ERROR(cudaFree(dataPadded));
     }
@@ -157,19 +159,24 @@ extern "C" {
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
-        opt::paddR2C<<<gpus.Grd,gpus.BT>>>(data, dataPadded, size, pad, 1.0f);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
+                        (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
+                        (int)ceil( size_pad.z / threadsPerBlock.z ) + 1);
+
+        opt::paddR2C<<<gridBlock,threadsPerBlock>>>(data, dataPadded, size, pad, 1.0f);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
 
-        paganinKernel_v0<<<gpus.Grd,gpus.BT>>>(configs, dataPadded, size_pad);
+        paganinKernel_v0<<<gridBlock,threadsPerBlock>>>(configs, dataPadded, size_pad);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
 
-        opt::scale<<<gpus.Grd,gpus.BT>>>(dataPadded, size_pad, scale);
+        opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
 
-        // opt::fftshift2D<<<gpus.Grd,gpus.BT>>>(dataPadded, size_pad);
+        // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
 
-        opt::remove_paddC2R<<<gpus.Grd,gpus.BT>>>(dataPadded, data, size, pad);
+        opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, data, size, pad);
 
         HANDLE_ERROR(cudaFree(dataPadded));
     }

@@ -1,3 +1,4 @@
+#include <driver_types.h>
 #include "common/opt.hpp"
 #include "processing/filters.hpp"
 #include "common/complex.hpp"
@@ -342,23 +343,21 @@ extern "C" {
         BasicOps::set_pixel(out, fpixel, tx, ty, sizex, threshold, raftDataType);
     }
 
-    void BSTFilter(cufftHandle plan, 
-    complex* filtersino, float* sinoblock, 
-    size_t nrays, size_t nangles, int csino, Filter reg)
-    {
-
+    void BSTFilter(cufftHandle plan,
+            complex* filtersino, float* sinoblock,
+            size_t nrays, size_t nangles, int csino, Filter reg, cudaStream_t stream) {
         dim3 filterblock((nrays+255)/256,nangles,1);
         dim3 filterthread(256,1,1);
 
-        SetX<<<filterblock,filterthread>>>(filtersino, sinoblock, nrays);
-            
+        SetX<<<filterblock,filterthread, 0, stream>>>(filtersino, sinoblock, nrays);
+
         HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_FORWARD));
-            
-        BandFilterC2C<<<filterblock,filterthread>>>(filtersino, nrays, csino, reg);
-            
+
+        BandFilterC2C<<<filterblock,filterthread, 0, stream>>>(filtersino, nrays, csino, reg);
+
         HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_INVERSE));
-        
-        GetX<<<filterblock,filterthread>>>(sinoblock, filtersino, nrays);
+
+        GetX<<<filterblock,filterthread, 0, stream>>>(sinoblock, filtersino, nrays);
 
         //cudaMemset(sinoblock, 0, nrays*nangles*4);
     }

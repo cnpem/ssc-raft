@@ -3,6 +3,7 @@
 #ifndef RAFT_FILTER_H
 #define RAFT_FILTER_H
 
+#include <driver_types.h>
 #include "common/configs.hpp"
 #include "common/types.hpp"
 #include "common/operations.hpp"
@@ -64,7 +65,7 @@ extern "C"{
 	
 	__global__ void BandFilterC2C(complex* vec, size_t sizex, int center, struct Filter mfilter);
 	
-	void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, struct Filter reg);
+	void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, struct Filter reg, cudaStream_t stream = 0);
 
 	void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad);

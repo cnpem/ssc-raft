@@ -17,7 +17,7 @@ extern "C" {
 	float* blockRecon, float *wholesinoblock, float *angles,
 	cImage& cartesianblock, cImage& polarblock, cImage& realpolar,
 	cufftHandle plan1d, cufftHandle plan2d,
-	int Nrays, int Nangles, int trueblocksize, int blocksize, int sizeimage, 
+	int Nrays, int Nangles, int trueblocksize, int blocksize, int sizeimage,
     int pad0);
 
 }

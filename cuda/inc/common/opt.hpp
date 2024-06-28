@@ -13,14 +13,17 @@
 #define RAFT_OPT_H
 
 #include <cuda.h>
+#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include <cufft.h>
+#include <driver_types.h>
 
 // #include <cublas.h>
 
 #include "common/configs.hpp"
 #include "common/logerror.hpp"
 
-void getLog(float *data, dim3 size);
+void getLog(float *data, dim3 size, cudaStream_t stream = 0);
 
 __global__ void setSinCosTable(float *sintable, float *costable, float *angles, int nangles);
     
@@ -111,23 +114,23 @@ namespace opt{
         size_t total_points = opt::get_total_points(size);
 
         if ( index >= total_points ) return;
-        
-        data[index] *= scale; 
+
+        data[index] *= scale;
     };
     
     __global__ void scale(cuComplex *data, dim3 size, float scale);
 
     template<typename Type>
-    Type* allocGPU(size_t size)    
-    { Type *ptr; HANDLE_ERROR(cudaMalloc((void **)&ptr, size * sizeof(Type) )); return ptr; };
+    Type* allocGPU(size_t size, cudaStream_t stream = 0)
+    { Type *ptr; HANDLE_ERROR(cudaMallocAsync((void **)&ptr, size * sizeof(Type), stream)); return ptr; };
 
     template<typename Type>
-    void CPUToGPU(Type *cpuptr, Type *gpuptr, size_t size)
-    {HANDLE_ERROR(cudaMemcpy(gpuptr, cpuptr, size * sizeof(Type), cudaMemcpyHostToDevice));};
+    void CPUToGPU(Type *cpuptr, Type *gpuptr, size_t size, cudaStream_t stream = 0)
+    {HANDLE_ERROR(cudaMemcpyAsync(gpuptr, cpuptr, size * sizeof(Type), cudaMemcpyHostToDevice, stream));};
 
     template<typename Type>
-    void GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size)
-    {HANDLE_ERROR(cudaMemcpy(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost));};
+    void GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size, cudaStream_t stream = 0)
+    {HANDLE_ERROR(cudaMemcpyAsync(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost, stream));};
 
     void MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE);
 
