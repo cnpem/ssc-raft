@@ -1,7 +1,7 @@
 from ...rafttypes import *
 import numpy
 
-def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
+def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None) -> numpy.ndarray:
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
     GPU function.
 
@@ -13,22 +13,28 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
         (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [z, y, x].
 
     Dictionary parameters:
-        * ``dic['gpu']`` (ndarray): List of gpus for processing. Defaults to [0].
-        * ``dic['z1[m]']`` (float): Source-sample distance in meters. Defaults to 500e-3.
-        * ``dic['z1+z2[m]']`` (float): Source-detector distance in meters. Defaults to 1.0.
-        * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters. Defaults to 1.44e-6.
-        * ``dic['reconSize']`` (int): Reconstruction dimension. Defaults to data shape[-1].
-        * ``dic['Fourier']`` (bool): Type of filter for reconstruction: if uses FFT (True) or not.
-        * ``dic['angles[rad]']`` (list): list of angles in radians.
-        * ``dic['filter']`` (str,optional): Type of filter for reconstruction. 
-        Options = ('none','gaussian','lorentz','cosine','rectangle','hann','hamming','ramp'). Default is 'hamming'.
-        * ``dic['regularization']`` (float,optional): Type of filter for reconstruction, small values. Default is 1.
-        *` `dic['energy[eV]']`` (float): beam energy in eV
+
+        * ``dic['gpu']`` (ndarray): List of gpus for processing [required]
+        * ``dic['angles[rad]']`` (list): List of angles in radians [required]
+        * ``dic['z1[m]']`` (float): Source-sample distance in meters [required]
+        * ``dic['z1+z2[m]']`` (float): Source-detector distance in meters [required]
+        * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters [required]
+        * ``dic['filter']`` (str,optional): Filter type [Default: \'lorentz\']
+
+            #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
+          
+        * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
+        * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
+        * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
+        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
     """
 
     # recon = data 
     try:
-        regularization = dic['paganin regularization']
+        regularization = dic['beta/delta']
+
+        if regularization != 0.0:
+            regularization = 1.0 / regularization
     except:
         regularization = 0.0
 
@@ -45,26 +51,29 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
     elif len(tomogram.shape) == 3:
             nslices = tomogram.shape[0]
     else:
-        logger.error(f'Data has wrong shape = {tomogram.shape}. It needs to be 2D or 3D.')
-        sys.exit(1)
+        message_error = f'Data has wrong shape = {tomogram.shape}. It needs to be 2D or 3D.'
+        logger.error(message_error)
+        raise ValueError(message_error)
 
     padh = int(nrays // 2)
     try:
         pad  = dic['padding']
-        logger.info(f'Set FDK pad value as {pad} x horizontal dimension ({padh}).')
+        # logger.info(f'Set FDK pad value as {pad} x horizontal dimension ({padh}).')
         padh = int(pad * padh)
         # padh = power_of_2_padding(nrays,padh)
     except:
         pad  = 1
-        logger.info(f'Set default FDK pad value as {pad} x horizontal dimension ({padh}).')
+        # logger.info(f'Set default FDK pad value as {pad} x horizontal dimension ({padh}).')
         padh = int(pad * padh)
         # padh = power_of_2_padding(nrays,padh)
 
     try:
-        angles     = dic['angles[rad]']
-    except Exception as e:
-        logger.error(f'Missing angles list entry from dictionary!')
-        logger.exception(e)
+        angles = dic['angles[rad]']
+    except:
+        if angles is None:
+            message_error = f'Missing angles list.'
+            logger.error(message_error) 
+            raise ValueError(message_error)
     
     # try:
     #     start_recon_slice = dic['slices'][0]
@@ -79,31 +88,28 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
 
     blockslices_recon = end_recon_slice - start_recon_slice
 
-    try:
-        reconsize = dic['reconSize']
+    # try:
+    #     reconsize = dic['reconSize']
 
-        if isinstance(reconsize,list) or isinstance(reconsize,tuple):
+    #     if isinstance(reconsize,list) or isinstance(reconsize,tuple):
         
-            if len(dic['reconSize']) == 1:
-                nx, ny, nz = int(reconsize[0]), int(reconsize[0]), int(blockslices_recon)
-            else:
-                nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(blockslices_recon)
+    #         if len(dic['reconSize']) == 1:
+    #             nx, ny, nz = int(reconsize[0]), int(reconsize[0]), int(blockslices_recon)
+    #         else:
+    #             nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(blockslices_recon)
         
-        elif isinstance(reconsize,int):
+    #     elif isinstance(reconsize,int):
             
-            nx, ny, nz = int(reconsize), int(reconsize), int(blockslices_recon)
+    #         nx, ny, nz = int(reconsize), int(reconsize), int(blockslices_recon)
         
-        else:
-            logger.error(f'Dictionary entry `reconsize` wrong ({reconsize}). The entry `reconsize` is optional, but if it exists it needs to be a list = [nx,ny].')
-            logger.error(f'Finishing run...')
-            sys.exit(1)
+    #     else:
+    #         logger.error(f'Dictionary entry `reconsize` wrong ({reconsize}). The entry `reconsize` is optional, but if it exists it needs to be a list = [nx,ny].')
+    #         logger.error(f'Finishing run...')
+    #         sys.exit(1)
 
-    except:
-        nx, ny, nz = int(nrays), int(nrays), int(blockslices_recon)
-        logger.info(f'Set default reconstruction size ({nx},{ny},{nz}) = (x,y,z).')
-
-    if blockslices_recon > nslices:
-        logger.warning(f'Trying to reconstruct more slices than provided by the tomogram data.')    
+    # except:
+    nx, ny, nz = int(nrays), int(nrays), int(blockslices_recon)
+    logger.info(f'Set default reconstruction size ({nx},{ny},{nz}) = (x,y,z).')
 
     start_tomo_slice  = 0
     end_tomo_slice    = nslices
@@ -117,9 +123,9 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
     nbeta  = len(angles)
 
     if nbeta != nangles: 
-        logger.error(f'Number of projection do not match: size of angles list ({nbeta}) is different from the number of projections ({nangles}).')
-        logger.error(f'Finishing run...')
-        sys.exit(1)
+        message_error = f'Number of projection do not match: size of angles list ({nbeta}) is different from the number of projections ({nangles}).'
+        logger.error(message_error)
+        raise ValueError(message_error)
 
     beta_max = angles[nbeta - 1]
     dbeta    = angles[1] - angles[0]
@@ -128,12 +134,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}) -> numpy.ndarray:
     dx, dy, dz = dh*magn, dh*magn, dv*magn
     x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
 
-    try:
-        fourier = dic['fourier']
-    except:
-        fourier = True
-        logger.info(f'Set default FDK filtering method as FFT.')
-
+    fourier    = True
     filtername = dic['filter']
     filter     = FilterNumber(dic['filter'])
 

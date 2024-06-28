@@ -106,7 +106,7 @@ extern "C"{
 
 		/* Set Phase Retrieval */
 		configs->phase_type                     = parameters_int[11]; /* Phase method type */
-		configs->delta_beta                     = parameters_float[19]; /* Phase regularization parameter */
+		configs->beta_delta                     = parameters_float[19]; /* Phase regularization parameter */
 
 		/* Set Rings */
 		configs->rings_block                    = parameters_int[12];
@@ -119,7 +119,7 @@ extern "C"{
 		configs->reconstruction_method          = parameters_int[14];
 		configs->reconstruction_filter_type     = parameters_int[15];   /* Reconstruction Filter type */
 
-		configs->reconstruction_paganin         = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * parameters_float[23]; /* Reconstruction Filter regularization parameter */
+		configs->reconstruction_paganin         = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * (configs->beta_delta == 0.0f ? 0.0f: (1.0f / configs->beta_delta) ); /* Reconstruction Filter regularization parameter */
 		configs->reconstruction_reg             = parameters_float[24]; /* General regularization parameter */
 
 		/* Set Slices on Reconstruction and on Tomogram */

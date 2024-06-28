@@ -4,7 +4,7 @@ from ..processing.io import *
 def phase_retrieval(frames, dic):
 
     required = ('gpu',)
-    optional = ( 'method', 'delta/beta','padding','blocksize')
+    optional = ( 'method', 'beta/delta','padding','blocksize')
     default  = ('paganin',          0.0,        2,          0)
     
     dic = SetDictionary(dic,required,optional,default)
@@ -23,7 +23,7 @@ def phase_retrieval(frames, dic):
     else:
         nangles = frames.shape[0]
 
-    delta_beta = dic['delta/beta']
+    beta_delta = dic['beta/delta']
     z2         = dic['z2[m]']
     energy     = dic['energy[eV]']
     magn       = dic['magn']
@@ -46,7 +46,7 @@ def phase_retrieval(frames, dic):
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
 
-    param_float     = [delta_beta,pixel_det,pixel_det,energy,z2,z2,magn,magn]
+    param_float     = [beta_delta,pixel_det,pixel_det,energy,z2,z2,magn,magn]
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)

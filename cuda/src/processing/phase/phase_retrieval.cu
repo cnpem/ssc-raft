@@ -32,10 +32,9 @@ extern "C" {
 
         /* Set Phase  */
 		configs->phase_type                = parameters_int[6]; /* Phase type */
-		configs->delta_beta                = parameters_float[0]; /* Phase  delta/beta parameter */
+		configs->beta_delta                = parameters_float[0]; /* Phase  beta/delta parameter */
 
         /* Set Geometry */
-        // configs->geometry.geometry         = parameters_int[9];
         configs->geometry.detector_pixel_x = parameters_float[1];
         configs->geometry.detector_pixel_y = parameters_float[2];
         configs->geometry.energy           = parameters_float[3];
@@ -44,27 +43,6 @@ extern "C" {
         configs->geometry.magnitude_x      = parameters_float[6];
         configs->geometry.magnitude_y      = parameters_float[7];
         configs->geometry.wavelenght       = ( plank * vc ) / configs->geometry.energy;
-
-        /* Set magnitude [(z1+z2)/z1] according to the beam geometry */
-		// switch (configs->geometry.geometry){
-		// 	case 0: /* Parallel */	
-		// 		configs->geometry.magnitude_x = 1.0;
-		// 		configs->geometry.magnitude_y = 1.0;
-		// 		break;
-		// 	case 1: /* Conebeam */
-		// 		// configs->geometry.magnitude_x = ( configs->geometry.z1x + configs->geometry.z2x ) / configs->geometry.z1x;
-		// 		// configs->geometry.magnitude_y = ( configs->geometry.z1y + configs->geometry.z2y ) / configs->geometry.z1y;
-		// 		break;
-		// 	case 2: /* Fanbeam */		
-		// 		// configs->geometry.magnitude_x = ( configs->geometry.z1x + configs->geometry.z2x ) / configs->geometry.z1x;
-		// 		configs->geometry.magnitude_y = 1.0;
-		// 		break;
-		// 	default:
-		// 		// printf("Parallel case as default! \n");
-		// 		configs->geometry.magnitude_x = 1.0;
-		// 		configs->geometry.magnitude_y = 1.0;
-		// 		break;
-		// }
 
         configs->geometry.obj_pixel_x = configs->geometry.detector_pixel_x / configs->geometry.magnitude_x;
         configs->geometry.obj_pixel_y = configs->geometry.detector_pixel_y / configs->geometry.magnitude_y;
@@ -91,51 +69,35 @@ extern "C" {
         printf("Tomo Pad: %d, %d, %d \n",configs->tomo.pad.x,configs->tomo.pad.y,configs->tomo.pad.z);
         printf("Tomo Padsize: %d, %d, %d \n",configs->tomo.padsize.x,configs->tomo.padsize.y,configs->tomo.padsize.z);
         printf("Phase type: %d \n", configs->phase_type);
-        printf("Phase delta / beta: %e \n", configs->delta_beta);
+        printf("Phase beta / delta: %e \n", configs->beta_delta);
         printf("z2: %e \n", configs->geometry.z2x);
         printf("pixeldet: %e \n", configs->geometry.detector_pixel_x);
         printf("energy: %e \n", configs->geometry.energy);
         printf("magn: %e \n", configs->geometry.magnitude_x );
     }
 
-	void applyPhase(CFG configs, GPU gpus, 
-    float *projections, dim3 tomo, dim3 tomo_pad)
-	{
-		switch (configs.phase_type){
-			case 0:
-				/* Paganin */
-				_paganin_gpu(configs, gpus, projections, tomo, tomo_pad, configs.tomo.pad);
-				break;
-            case 1:
-				/* Paganin tomopy */
-				_paganin_gpu_tomopy(configs, gpus, projections, tomo, tomo_pad, configs.tomo.pad);
-				break;
-            case 2:
-				/* Paganin v0 */
-				_paganin_gpu_v0(configs, gpus, projections, tomo, tomo_pad, configs.tomo.pad);
-				break;
-			default:
-                // printf("Using default Paganin phase filter. \n");
-				_paganin_gpu(configs, gpus, projections, tomo, tomo_pad, configs.tomo.pad);
-				break;
-		}	
-
-	}
-
 	void getPhase(CFG configs, GPU gpus, 
     float *projections, dim3 size, dim3 size_pad)
 	{	
-		/* Plan for Fourier transform - cufft */
-		// int n[] = {(int)size_pad.x,(int)size_pad.x};
-		// HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, size.z));
-
-		applyPhase(configs, gpus, projections, size, size_pad);
-	
-		// cudaDeviceSynchronize();
-
-		/* Destroy plan */
-		// HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
-	}
+		switch (configs.phase_type){
+			case 0:
+				/* Paganin */
+				_paganin_gpu(configs, gpus, projections, size, size_pad, configs.tomo.pad);
+				break;
+            case 1:
+				/* Paganin tomopy */
+				_paganin_gpu_tomopy(configs, gpus, projections, size, size_pad, configs.tomo.pad);
+				break;
+            case 2:
+				/* Paganin v0 */
+				_paganin_gpu_v0(configs, gpus, projections, size, size_pad, configs.tomo.pad);
+				break;
+			default:
+                // printf("Using default Paganin phase filter. \n");
+				_paganin_gpu(configs, gpus, projections, size, size_pad, configs.tomo.pad);
+				break;
+	    }
+    }
 
 	void getPhaseGPU(CFG configs, GPU gpus, 
 	float *projections, int sizez, int ngpu)
@@ -149,8 +111,6 @@ extern "C" {
         int nrayspad   = configs.tomo.padsize.x;
         int nslicespad = configs.tomo.padsize.y;
 
-        printf("nrays = %d, nslices = %d, nrayspad = %d, nslicespad = %d \n",nrays,nslices,nrayspad,nslicespad);
-
 		int i; 
         int blocksize = configs.blocksize;
 
@@ -161,7 +121,11 @@ extern "C" {
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
+        printf("nrays = %d, nslices = %d, blocksize = %d, nrayspad = %d, nslicespad = %d \n",nrays,nslices,blocksize,nrayspad,nslicespad);
+
 		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
+
+        printf("Size dproj = %ld \n",(size_t) nrays * nslices * blocksize);
 
         		/* Plan for Fourier transform - cufft */
 		int n[] = {nrayspad,nslicespad};
@@ -172,7 +136,7 @@ extern "C" {
 
 		for (i = 0; i < ind_block; i++){
 
-			subblock    = min(sizez - ptr, blocksize);
+			subblock  = min(sizez - ptr, blocksize);
 			ptr_block = (size_t)nrays * nslices * ptr;
 
 			/* Update pointer */

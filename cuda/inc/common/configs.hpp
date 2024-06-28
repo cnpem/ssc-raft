@@ -120,7 +120,7 @@ typedef struct config
     /* Phase Retrieval */
     int  phase_type;  /* Phase type */
     float phase_reg; /* Phase regularization parameter */
-    float delta_beta; /* delta/beta parameter */
+    float beta_delta; /* beta/delta parameter */
 
     /* Rings */
     int rings_block;

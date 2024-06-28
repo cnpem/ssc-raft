@@ -33,7 +33,7 @@ def fbp(tomogram, dic, angles = None, **kwargs):
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
           
-        * ``dic['delta/beta']`` (float,optional): Paganin by slices method ``delta/beta`` ratio [Default: 0.0 (no Paganin applied)]
+        * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
@@ -45,8 +45,8 @@ def fbp(tomogram, dic, angles = None, **kwargs):
     
     """
     required = ('gpu',)        
-    optional = ( 'filter','offset','padding','regularization','delta/beta','blocksize', 'energy[eV]','z2[m]','method')
-    default  = ('lorentz',       0,        2,             1.0,         0.0,          0,          0.0,    0.0,    'RT')
+    optional = ( 'filter','offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method')
+    default  = ('lorentz',       0,        2,             1.0,         0.0,          0,         0.0,    0.0,    'RT')
     
     dic = SetDictionary(dic,required,optional,default)
 
@@ -54,13 +54,6 @@ def fbp(tomogram, dic, angles = None, **kwargs):
     method                = dic['method']
     gpus                  = dic['gpu']
 
-    # objsize = dic['objsize']
-    # if objsize % 32 != 0:
-    #         objsize += 32-(objsize%32)
-    #         logger.info(f'Reconstruction size not multiple of 32. Setting to: {objsize}')
-    # dic.update({'objsize': objsize})
-
-    
     if method == 'RT':
         try:
             angles = dic['angles[rad]']
@@ -70,20 +63,14 @@ def fbp(tomogram, dic, angles = None, **kwargs):
                 raise ValueError(f'Missing angles list!!')
 
         output = fbpGPU( tomogram, angles, gpus, dic ) 
+
+        return output
     
-    elif method == 'BST':
+    if method == 'BST':
 
         angles = numpy.linspace(0.0, numpy.pi, tomogram.shape[-2], endpoint=False)
 
         output = bstGPU( tomogram, angles, gpus, dic ) 
-    else:
-        try:
-            angles = dic['angles[rad]']
-        except:
-            if angles is None:
-                logger.error(f'Missing angles list!! Finishing run...') 
-                raise ValueError(f'Missing angles list!!')
+    
 
-        output = fbpGPU( tomogram, angles, gpus, dic ) 
-
-    return output
+        return output

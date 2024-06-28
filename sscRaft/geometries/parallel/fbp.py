@@ -22,7 +22,7 @@ def fbpGPU(tomogram, angles, gpus, dic):
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
             
-        * ``dic['delta/beta']`` (float,optional): Paganin by slices method ``delta/beta`` ratio [Default: 0.0 (no Paganin applied)]
+        * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
@@ -45,12 +45,12 @@ def fbpGPU(tomogram, angles, gpus, dic):
     objsize        = nrays
 
     filter_type    = FilterNumber(dic['filter'])
-    delta_beta     = dic['delta/beta']
+    beta_delta     = dic['beta/delta']
     regularization = dic['regularization']
     offset         = dic['offset']
     blocksize      = dic['blocksize']
 
-    if delta_beta != 0.0:
+    if beta_delta != 0.0:
         energy = dic['energy[eV]']
         z2     = dic['z2[m]']
     else:
@@ -78,7 +78,7 @@ def fbpGPU(tomogram, angles, gpus, dic):
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
 
-    param_float     = [delta_beta, regularization, energy, z2]
+    param_float     = [beta_delta, regularization, energy, z2]
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
@@ -111,7 +111,7 @@ def bstGPU(tomogram, angles, gpus, dic):
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
             
-        * ``dic['delta/beta']`` (float,optional): Paganin by slices method ``delta/beta`` ratio [Default: 0.0 (no Paganin applied)]
+        * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
@@ -138,12 +138,12 @@ def bstGPU(tomogram, angles, gpus, dic):
     objsize        = nrays
 
     filter_type    = FilterNumber(dic['filter'])
-    delta_beta     = dic['delta/beta']
+    beta_delta     = dic['beta/delta']
     regularization = dic['regularization']
     offset         = int(dic['offset'])
     blocksize      = dic['blocksize']
 
-    if delta_beta != 0.0:
+    if beta_delta != 0.0:
         energy = dic['energy[eV]']
         z2     = dic['z2[m]']
     else:
@@ -170,7 +170,7 @@ def bstGPU(tomogram, angles, gpus, dic):
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
 
-    param_float     = [delta_beta, regularization, energy, z2]
+    param_float     = [beta_delta, regularization, energy, z2]
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
