@@ -1,3 +1,3 @@
-from .fdk import *
-from .em import *
-from .radon import *
+from .em_methods import *
+from .fdk_methods import *
+from .radon_methods import *

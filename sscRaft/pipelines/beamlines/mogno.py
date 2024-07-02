@@ -4,8 +4,8 @@ from ...processing.io import *
 from ...phase_retrieval.phase import *
 from ...processing.alignments.rotationaxis import *
 from ...processing.rings import *
-from ...geometries.conebeam.fdk import *
-from ...geometries.parallel.fbp import *
+from ...geometries.conebeam.fdk_methods import *
+from ...geometries.parallel.fbp_methods import *
 from ...processing.background_correction import *
 
 from sscRaft import __version__

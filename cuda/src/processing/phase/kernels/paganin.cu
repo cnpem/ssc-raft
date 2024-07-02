@@ -102,10 +102,10 @@ extern "C" {
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 threadsPerBlock(TPBX,TPBY,1);
         dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
                         (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
-                        (int)ceil( size_pad.z / threadsPerBlock.z ) + 1);
+                        size_pad.z);
         
         opt::paddR2C<<<gridBlock,threadsPerBlock>>>(data, dataPadded, size, pad, 1.0f);
 
@@ -115,7 +115,7 @@ extern "C" {
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
 
-        // opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
+        opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
 
         // opt::fftshift2D<<<gpus.Grd,gpus.BT>>>(dataPadded, size_pad);
 
@@ -167,10 +167,10 @@ extern "C" {
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 threadsPerBlock(TPBX,TPBY,1);
         dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
                         (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
-                        (int)ceil( size_pad.z / threadsPerBlock.z ) + 1);
+                        size_pad.z);
 
         opt::paddR2C<<<gridBlock,threadsPerBlock>>>(data, dataPadded, size, pad, 1.0f);
 

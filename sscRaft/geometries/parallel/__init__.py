@@ -1,3 +1,3 @@
-from .fbp import *
-from .radon import *
-from .em import *
+from .fbp_methods import *
+from .radon_methods import *
+from .em_methods import *

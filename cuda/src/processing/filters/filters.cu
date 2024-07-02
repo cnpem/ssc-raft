@@ -346,6 +346,7 @@ extern "C" {
     void BSTFilter(cufftHandle plan,
             complex* filtersino, float* sinoblock,
             size_t nrays, size_t nangles, int csino, Filter reg, cudaStream_t stream) {
+
         dim3 filterblock((nrays+255)/256,nangles,1);
         dim3 filterthread(256,1,1);
 
@@ -368,8 +369,7 @@ __host__ __device__ inline float Filter::apply(float input)
 {
 	float param = 0.0f;
     float aux   = 0.0f;
-    float indicator = ( paganin == 0.0f ? 1.0f:input);
-
+    
 	if (type == EType::gaussian)
 	{
 		input *= exp(-0.693f * reg * input * input) / (1.0f + paganin * input * input);

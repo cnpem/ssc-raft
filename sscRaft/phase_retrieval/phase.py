@@ -3,8 +3,8 @@ from ..processing.io import *
 
 def phase_retrieval(frames, dic):
 
-    required = ('gpu',)
-    optional = ( 'method', 'beta/delta','padding','blocksize')
+    required = ('gpu','detectorPixel[m]','z2[m]','energy[eV]','magn')
+    optional = ('method', 'beta/delta','padding','blocksize')
     default  = ('paganin',          0.0,        2,          0)
     
     dic = SetDictionary(dic,required,optional,default)
@@ -37,11 +37,11 @@ def phase_retrieval(frames, dic):
         logger.error(f'Blocksize is bigger than the number of angles ({nangles}) divided by the number of GPUs selected ({ngpus})!')
         raise ValueError(f'Blocksize is bigger than the number of angles ({nangles}) divided by the number of GPUs selected ({ngpus})!')
 
-    filtername = dic['method']
-    filter     = PhaseMethodNumber(filtername)
+    methodname = dic['method']
+    method     = PhaseMethodNumber(methodname)
 
     param_int     = [nrays, nslices, nangles, 
-                     padx, pady, padz, filter, blocksize]
+                     padx, pady, padz, method, blocksize]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
@@ -54,8 +54,11 @@ def phase_retrieval(frames, dic):
     frames = numpy.ascontiguousarray(frames.astype(numpy.float32))
     frames_ptr = frames.ctypes.data_as(ctypes.c_void_p)
 
+    logger.info(f'Begin Phase Retrieval by {method}.')
     libraft.getPhaseMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
                         frames_ptr, param_float_ptr, param_int_ptr)                     
+
+    logger.info(f'Finished Phase Retrieval.')
 
     return frames
 

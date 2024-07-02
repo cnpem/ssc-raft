@@ -1,6 +1,6 @@
 from ...rafttypes import *
 
-from ...geometries.parallel import fbp, radon
+from ...geometries.parallel import fbp_methods, radon_methods
 
 try:
     import tomopy
@@ -154,7 +154,7 @@ def apply_shifts(data,shifts, method='scipy',cpus=32,turn_off_vertical=False,rem
 def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0]):
     print('Reprojecting...')
     if radon_method == 'raft':
-        tomogram = radon(tomogram, angles, gpus)
+        tomogram = radon_methods(tomogram, angles, gpus)
         tomogram = numpy.swapaxes(tomogram,0,1)
     elif radon_method == 'tomopy':
         tomogram = tomopy.sim.project.project(tomogram,angles,ncore=cpus,pad=False)
@@ -165,7 +165,7 @@ def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0]):
 def reconstruct_and_reproject(data,angles,dic,tomo_method='raft',radon_method='raft',cpus=1,gpus=[0]):
     print('Reconstructing...')
     if tomo_method == 'raft':
-        tomo = fbp(numpy.swapaxes(data,0,1), dic["algorithm_dic"])
+        tomo = fbp_method(numpy.swapaxes(data,0,1), dic["algorithm_dic"])
         # tomo = sscRaft.bst(numpy.swapaxes(data,0,1), dic["algorithm_dic"])
     elif tomo_method == 'tomopy':
         tomo = tomopy.recon(data,angles,algorithm='fbp',ncore=cpus,filter_name='ramlak')
@@ -389,6 +389,6 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
         if reached_threshold.all() == True:
             break # exit for loop
 
-        aligned_tomo = fbp(numpy.swapaxes(sinogram,0,1), dic["algorithm_dic"])
+        aligned_tomo = fbp_method(numpy.swapaxes(sinogram,0,1), dic["algorithm_dic"])
         
     return aligned_tomo, sinogram, cumulative_shifts, reprojected_sinogram

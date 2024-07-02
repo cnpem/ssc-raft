@@ -211,6 +211,7 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, 
             int sizeimage, int pad0, float reg, float paganin, int filter_type, int offset, cufftHandle plan1d,
             cufftHandle plan2d, cufftHandle filterplan, cImage* filtersino, cImage* cartesianblock, cImage* polarblock,
             cImage* realpolar, int gpu, cudaStream_t stream = 0) {
+    
     // HANDLE_ERROR(cudaSetDevice(gpu));
 
     int blocksize_bst = 1;
@@ -220,11 +221,11 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, 
 
     Filter filter(filter_type, reg, paganin, offset);
 
-
     // BST initialization finishes here.
 
     for (size_t zoff = 0; zoff < (size_t)trueblocksize; zoff += blocksize_bst) {
         float* sinoblock = wholesinoblock + insize * zoff;
+
         if (filter.type != Filter::EType::none)
             BSTFilter(filterplan, filtersino->gpuptr, sinoblock, Nrays, Nangles, 0.0, filter, stream);
 
@@ -398,7 +399,7 @@ void getBSTMultiGPU(int* gpus, int ngpus, float* obj, float* tomogram, float* an
     GPU gpu_parameters;
 
     setBSTParameters(&configs, paramf, parami);
-    // printBSTParameters(&configs);
+    printBSTParameters(&configs);
 
     /* Projection data sizes */
     int nrays = configs.tomo.size.x;

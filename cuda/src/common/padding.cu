@@ -28,8 +28,8 @@ dim3 size, dim3 pad, float value)
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (j >= size.y)) return;
 
-    if (i == 0 && j == 0 && k == 0)
-        printf("index = %ld, ii = %d, jj = %d, inx = %e, iny = %e \n",index,ii,jj,outpadded[indpad].x,outpadded[indpad].y);
+    // if (i == 0 && j == 0 && k == 0)
+    //     printf("index = %ld, ii = %d, jj = %d, inx = %e, iny = %e \n",index,ii,jj,outpadded[indpad].x,outpadded[indpad].y);
 
     outpadded[indpad].x = in[index];
 }
@@ -137,7 +137,7 @@ dim3 size, dim3 pad)
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    if ( (indpad < 0) || (indpad >= 4194304)){ printf("Return indpad %lld, i = %d, j = %d, k = %d, npadx = %d, npady = %d \n",indpad,i,j,k,Npadx,Npady); return;};
+    // if ( (indpad < 0) || (indpad >= 4194304)){ printf("Return indpad %lld, i = %d, j = %d, k = %d, npadx = %d, npady = %d \n",indpad,i,j,k,Npadx,Npady); return;};
 
     // if (i == 0 && j == 10 && k == 0)
     //     printf("index C2R = %ld, ii = %d, jj = %d, inx = %e, iny = %e \n",index,ii,jj, inpadded[indpad].x, inpadded[indpad].y);

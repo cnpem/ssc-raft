@@ -89,8 +89,8 @@ extern "C"{
         int gridBlock = (int)ceil( nangles / TPBY ) + 1;
         setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
 
-        if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+        // if (filter.type != Filter::EType::none)
+        //     filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         /* Old version - Gio */
         // if (filter.type != Filter::EType::none)
@@ -197,7 +197,7 @@ extern "C"{
 		CFG configs; GPU gpu_parameters;
 
         setFBPParameters(&configs, paramf, parami);
-        // printFBPParameters(&configs);
+        printFBPParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.obj.size, ngpus, gpus);
 
