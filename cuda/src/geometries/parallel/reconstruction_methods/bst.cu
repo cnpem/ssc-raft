@@ -347,7 +347,8 @@ void getBSTGPU(CFG configs, float* obj, float* tomo, float* angles, int blockgpu
         subblock = min(blockgpu - ptr, (int)blocksize);
 
         dtomo[st] = opt::allocGPU<float>((size_t)nrays * nangles * blocksize, stream);
-        dobj[st] = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize);
+
+        dobj[st] = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize, stream);
 
         opt::CPUToGPU<float>(tomo + (size_t)ptr * nrays * nangles, dtomo[st], (size_t)nrays * nangles * subblock,
                              stream);

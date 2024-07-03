@@ -42,7 +42,7 @@ extern "C" {
         configs->geometry.z2y              = parameters_float[5];
         configs->geometry.magnitude_x      = parameters_float[6];
         configs->geometry.magnitude_y      = parameters_float[7];
-        configs->geometry.wavelenght       = ( plank * vc ) / configs->geometry.energy;
+        configs->geometry.wavelenght       = ( plank * vc ) / (configs->geometry.energy == 0.0 ? 1.0:configs->geometry.energy);
 
         configs->geometry.obj_pixel_x = configs->geometry.detector_pixel_x / configs->geometry.magnitude_x;
         configs->geometry.obj_pixel_y = configs->geometry.detector_pixel_y / configs->geometry.magnitude_y;
@@ -124,8 +124,6 @@ extern "C" {
         printf("nrays = %d, nslices = %d, blocksize = %d, nrayspad = %d, nslicespad = %d \n",nrays,nslices,blocksize,nrayspad,nslicespad);
 
 		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
-
-        printf("Size dproj = %ld \n",(size_t) nrays * nslices * blocksize);
 
         		/* Plan for Fourier transform - cufft */
 		int n[] = {nrayspad,nslicespad};

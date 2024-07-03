@@ -26,7 +26,7 @@ extern "C" {
 
         float wx = (float)i + hx - nyqx;
         float wy = (float)j + hy - nyqy;
-        float gamma = configs.geometry.wavelenght * configs.geometry.z2x * float(M_PI) * ( configs.beta_delta == 0.0 ? 0.0:( 1.0f / configs.beta_delta ) );
+        float gamma = configs.geometry.wavelenght * configs.geometry.z2x * float(M_PI) * ( configs.beta_delta == 0.0 ? 0.0 : ( 1.0f / configs.beta_delta ) );
 
         float kernel = 1.0f / ( 1.0f + gamma * (wx*wx + wy*wy) );
         
@@ -128,20 +128,15 @@ extern "C" {
     dim3 size, dim3 size_pad, dim3 pad)
     {
         size_t npad = opt::get_total_points(size_pad);
-        printf("Size dataPadded = %ld \n",npad);
         float scale = (float)( 1.0f / ( size_pad.x * size_pad.y) );
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad); 
-        // cufftComplex *dataPadded; 
-        // HANDLE_ERROR(cudaMalloc((void **)&dataPadded, npad * sizeof(cufftComplex)))  
 
         dim3 threadsPerBlock(TPBX,TPBY,1);
         dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
                         (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
                         size_pad.z);
-        
-		printf("GD: %d, %d, %d \n", gridBlock.x, gridBlock.y, gridBlock.z);
-        
+                
         opt::paddR2C<<<gridBlock,threadsPerBlock>>>(data, dataPadded, size, pad, 1.0f);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));

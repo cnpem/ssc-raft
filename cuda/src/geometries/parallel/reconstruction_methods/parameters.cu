@@ -183,9 +183,9 @@ extern "C"{
         configs->geometry.energy             = parameters_float[2]; /* Energy parameter in eV*/
         configs->geometry.z2x                = parameters_float[3]; /* Distance sample to detector in x direction [meters]; z2x = z2y in PARALLEL geometry;*/
         configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
-        configs->geometry.wavelenght         = ( plank * vc ) / configs->geometry.energy;
+        configs->geometry.wavelenght         = ( plank * vc ) / (configs->geometry.energy == 0.0 ? 1.0 : configs->geometry.energy);
         
-        configs->reconstruction_paganin      = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * (parameters_float[0] == 0.0f ? 0.0f: (1.0f / parameters_float[0])); /* Reconstruction Paganin parameter */
+        configs->reconstruction_paganin      = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * parameters_float[0]; /* Reconstruction Paganin parameter */
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
     
         /* Compute total memory used of FBP method on a singles slice */
@@ -259,14 +259,16 @@ extern "C"{
         configs->geometry.energy             = parameters_float[2]; /* Energy parameter in eV*/
         configs->geometry.z2x                = parameters_float[3]; /* Distance sample to detector in x direction [meters]; z2x = z2y in PARALLEL geometry;*/
         configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
-        configs->geometry.wavelenght         = ( plank * vc ) / configs->geometry.energy;
+        configs->geometry.wavelenght         = ( plank * vc ) / (configs->geometry.energy == 0.0 ? 1.0 : configs->geometry.energy);
                 
         /* Set Reconstruction method variables */
         configs->reconstruction_filter_type  = parameters_int[7];  /* Reconstruction Filter type */
         configs->rotation_axis_offset        = parameters_int[8];  /* Rotation Axis offset */
         
-        configs->reconstruction_paganin      = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * (parameters_float[0] == 0.0f ? 0.0f: ( 1.0f / parameters_float[0] )); /* Reconstruction Paganin parameter */
+        configs->reconstruction_paganin      = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * parameters_float[0]; /* Reconstruction Paganin parameter */
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
+
+        printf("Dados: %e %e %e %e \n",configs->geometry.wavelenght,configs->geometry.z2x,parameters_float[0],configs->reconstruction_paganin);
     
         /* Compute total memory used of FBP method on a singles slice */
         configs->total_required_mem_per_slice_bytes = (
