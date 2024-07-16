@@ -108,7 +108,7 @@ extern "C" {
         HANDLE_ERROR(cudaMemcpy(workspace->dark, darks + process.tomoptr_index, process.tomoptr_size * sizeof(float), cudaMemcpyHostToDevice));
 
         /* Enter Reconstruction Pipeline */
-        _ReconstructionPipeline(configs, workspace, process, gpus);
+        _ReconstructionPipeline(configs, workspace, gpus);
 
         /* Copy Reconstructed data from device to host */
         HANDLE_ERROR(cudaMemcpy(&obj[process.objptr_index], workspace->obj, process.objptr_size * sizeof(float), cudaMemcpyDeviceToHost));
@@ -121,7 +121,7 @@ extern "C" {
 
 
 extern "C"{
-    void _ReconstructionPipeline(CFG configs, WKP *workspace, Process process, GPU gpus)
+    void _ReconstructionPipeline(CFG configs, WKP *workspace, GPU gpus)
     {
         if( configs.flags.do_flat_dark_correction == 1)
             getBackgroundCorrection(gpus, workspace->tomo, workspace->flat, workspace->dark, 
@@ -146,11 +146,11 @@ extern "C"{
         switch (configs.geometry.geometry){
             case 0:
                 /* Parallel */
-                getReconstructionParallel(configs, process, gpus, workspace);
+                getReconstructionParallel(configs, gpus, workspace);
                 break;
             case 1:
                 /* Conebeam */
-                getReconstructionConebeam(configs, process, gpus, workspace);
+                getReconstructionConebeam(configs, gpus, workspace);
                 break;
             case 2:
                 /* Fanbeam */
@@ -158,7 +158,7 @@ extern "C"{
                 // getReconstructionFanbeam(configs, process, gpus, workspace);
                 break;
             default:
-                getReconstructionMethods(configs, process, gpus, workspace);
+                getReconstructionMethods(configs, gpus, workspace);
                 break;
         }	
     }
@@ -166,17 +166,17 @@ extern "C"{
 
 extern "C"{
 
-    void getReconstructionParallel(CFG configs, Process process, GPU gpus, WKP *workspace)
+    void getReconstructionParallel(CFG configs, GPU gpus, WKP *workspace)
     {
-       getReconstructionMethods(configs, process, gpus, workspace);	
+       getReconstructionMethods(configs, gpus, workspace);	
     }
 
-    void getReconstructionConebeam(CFG configs, Process process, GPU gpus, WKP *workspace)
+    void getReconstructionConebeam(CFG configs, GPU gpus, WKP *workspace)
     {
-        getReconstructionMethods(configs, process, gpus, workspace);
+        getReconstructionMethods(configs, gpus, workspace);
     }
 
-    void getReconstructionMethods(CFG configs, Process process, GPU gpus, WKP *workspace)
+    void getReconstructionMethods(CFG configs, GPU gpus, WKP *workspace)
     {
         switch (configs.reconstruction_method){
             case 0:
@@ -205,7 +205,7 @@ extern "C"{
                             workspace->obj, 
                             workspace->tomo, 
                             workspace->angles, 
-                            process.tomobatch_size);
+                            configs.tomo.batchsize.z);
                 break;
             case 3:
                 /* EM RT tEM */

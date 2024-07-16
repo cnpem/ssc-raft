@@ -17,11 +17,11 @@ extern "C"{
 	void _ReconstructionProcessPipeline(CFG configs, Process process, GPU gpus, 
     float *recon, float *frames, float *flats, float *darks, float *angles);
 
-    void _ReconstructionPipeline(CFG configs, WKP *workspace, Process process, GPU gpus);
+    void _ReconstructionPipeline(CFG configs, WKP *workspace, GPU gpus);
 
-    void getReconstructionParallel(CFG configs, Process process, GPU gpus,  WKP *workspace);
-    void getReconstructionConebeam(CFG configs, Process process, GPU gpus,  WKP *workspace);
-    void getReconstructionMethods(CFG configs, Process process, GPU gpus, WKP *workspace);
+    void getReconstructionParallel(CFG configs, GPU gpus,  WKP *workspace);
+    void getReconstructionConebeam(CFG configs, GPU gpus,  WKP *workspace);
+    void getReconstructionMethods(CFG configs, GPU gpus, WKP *workspace);
 
 }
 
