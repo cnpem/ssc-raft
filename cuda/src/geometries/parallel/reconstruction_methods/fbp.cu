@@ -93,10 +93,10 @@ extern "C"{
         //     filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         /* Old version - Gio */
-        // if (filter.type != Filter::EType::none)
-        //     SinoFilter(tomogram, 
-        //         (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
-        //         axis_offset, true, filter, false, sintable);
+        if (filter.type != Filter::EType::none)
+            SinoFilter(tomogram, 
+                (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
+                axis_offset, true, filter, false, sintable);
 
         BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, tomogram, angles,
                                                 sintable, costable, 

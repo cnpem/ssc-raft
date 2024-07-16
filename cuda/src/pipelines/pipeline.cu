@@ -130,11 +130,6 @@ extern "C"{
         if( configs.flags.do_flat_dark_log == 1) 
             getLog(workspace->tomo, configs.tomo.batchsize);
 
-        // if( configs.flags.do_phase_filter == 1) 
-        //     getPhaseFilter(gpus, configs.geometry, workspace->tomo, 
-        //     configs.phase_filter_type, configs.phase_filter_reg, 
-        //     configs.tomo.batchsize, configs.tomo.padsize);
-
         if( configs.flags.do_rings == 1) 
             getTitarenkoRings(gpus, workspace->tomo, 
             configs.tomo.batchsize, configs.rings_lambda, 
@@ -144,9 +139,6 @@ extern "C"{
         //     int rotation_axis_offset = getRotAxisOfsset();
         // else
         //     rotation_axis_offset = configs.rotation_axis_offset;
-
-        // if( configs.flags.do_alignment == 1) 
-        //     getTomogramAlignment();
 
         // if( configs.flags.do_rotation == 1 && configs.flags.do_rotation_correction == 1 && configs.reconstruction_method != 0) 
         //     setRotAxisCorrection();

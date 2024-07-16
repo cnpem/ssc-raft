@@ -29,14 +29,6 @@ __global__ void setSinCosTable(float *sintable, float *costable, float *angles, 
     
 static __global__ void Klog(float* data, dim3 size);
 
-extern "C"{
-    __global__ void padding(float *in, cufftComplex *inpadded, 
-    float value, dim3 size, dim3 padsize);
-
-    __global__ void recuperate_padding(cufftComplex *inpadded, float *in, 
-    dim3 size, dim3 padsize);
-}
-
 namespace opt{
     inline __host__ __device__ int assert_dimension(int size1, int size2)
     { return ( size1 == size2 ? 1 : 0 ); };
@@ -115,7 +107,7 @@ namespace opt{
 
         if ( index >= total_points ) return;
 
-        data[index] *= scale;
+        data[index] /= scale;
     };
     
     __global__ void scale(cuComplex *data, dim3 size, float scale);
@@ -234,6 +226,7 @@ namespace opt{
 
     __global__ void remove_paddR2R(float *inpadded, float *out, 
     dim3 size, dim3 pad);
+
 }
 
 

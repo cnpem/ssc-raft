@@ -11,8 +11,12 @@
 #define IND(I,J,K,NX,NY) (long long int)( (I) + (J) * (NX) + (K) * (NX) * (NY) )
 
 #define vc 299792458           /* Velocity of Light [m/s] */ 
-#define plank 4.135667662E-15  /* Plank constant [ev*s] */
+#define plank 4.135667696E-15  /* Plank constant [ev*s] */
 #define PI 3.141592653589793238462643383279502884
+
+#define BOLTZMANN_CONSTANT 1.3806488e-16  /* [erg/k] */ 
+#define SPEED_OF_LIGHT 299792458e+2       /* [cm/s]  */ 
+#define PLANCK_CONSTANT 6.58211928e-19    /* [keV*s] */
 
 #define TPBX 16
 #define TPBY 16
@@ -79,7 +83,7 @@ typedef struct geometry
     /* General reconstruction variables*/
     float detector_pixel_x, detector_pixel_y;
     float obj_pixel_x, obj_pixel_y;
-    float energy, wavelenght, wavenumber;
+    float energy, wavelength, wavenumber;
     float z1x, z1y, z2x, z2y;
     float magnitude_x, magnitude_y;  
     

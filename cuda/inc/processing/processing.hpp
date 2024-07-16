@@ -45,19 +45,24 @@ extern "C"{
     void getPhaseMultiGPU(int *gpus, int ngpus, 
     float *projections, float *paramf, int *parami);
 
-    void getPhase(CFG configs, GPU gpus, float *projections, 
+    void getPhase(CFG configs, GPU gpus, float *kernel, float *projections, 
     dim3 size, dim3 size_pad);
-
-    void _paganin_gpu(CFG configs, GPU gpus, float *projections,
-    dim3 size, dim3 size_pad, dim3 pad);
-
-    void _paganin_gpu_tomopy(CFG configs, GPU gpus, float *projections,
-    dim3 size, dim3 size_pad, dim3 pad);
-
-    void _paganin_gpu_v0(CFG configs, GPU gpus, float *projections,
-    dim3 size, dim3 size_pad, dim3 pad);
-
 }
 
+namespace phase_pag{ // Phase retrieval Paganin
+
+    __global__ void padding(float *in, cufftComplex *inpadded, dim3 size, dim3 pad);
+    __global__ void recuperate_padding(cufftComplex *inpadded, float *in, dim3 size, dim3 pad);
+
+    __global__ void paganinKernel(float *kernel, float beta_delta, float wavelength, 
+    float pixel_objx, float pixel_objy, float z2, dim3 size);
+
+    void apply_paganin_filter(CFG configs, GPU gpus, float *projections, float *kernel,
+    dim3 size, dim3 size_pad, dim3 pad);
+
+    __global__ void mult(cufftComplex *a, float *b, cufftComplex *ans, dim3 size);
+
+    __global__ void copy(float *projection, float *kernel, dim3 size);
+}
 
 #endif

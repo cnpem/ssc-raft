@@ -66,8 +66,8 @@ extern "C"{
 		configs->geometry.z2y              = parameters_float[21];
 
 		/* Set wavelenght and wavenumber */
-		configs->geometry.wavelenght       = ( plank * vc          ) / configs->geometry.energy;
-		configs->geometry.wavenumber       = ( 2.0   * float(M_PI) ) / configs->geometry.wavelenght;
+		configs->geometry.wavelength       = ( plank * vc          ) / configs->geometry.energy;
+		configs->geometry.wavenumber       = ( 2.0   * float(M_PI) ) / configs->geometry.wavelength;
 
 		/* Set magnitude [(z1+z2)/z1] according to the beam geometry */
 		switch (configs->geometry.geometry){
@@ -119,7 +119,7 @@ extern "C"{
 		configs->reconstruction_method          = parameters_int[14];
 		configs->reconstruction_filter_type     = parameters_int[15];   /* Reconstruction Filter type */
 
-		configs->reconstruction_paganin         = configs->geometry.wavelenght * configs->geometry.z2x * float(M_PI) * (configs->beta_delta == 0.0f ? 0.0f: (1.0f / configs->beta_delta) ); /* Reconstruction Filter regularization parameter */
+		configs->reconstruction_paganin         = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * (configs->beta_delta == 0.0f ? 0.0f: (1.0f / configs->beta_delta) ); /* Reconstruction Filter regularization parameter */
 		configs->reconstruction_reg             = parameters_float[24]; /* General regularization parameter */
 
 		/* Set Slices on Reconstruction and on Tomogram */

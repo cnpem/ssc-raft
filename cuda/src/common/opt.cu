@@ -149,28 +149,7 @@ __global__ void opt::scale(cuComplex *data, dim3 size, float scale)
 
     if ( index >= total_points ) return;
     
-    data[index].x = data[index].x * scale; 
-    data[index].y = data[index].y * scale; 
+    data[index].x = data[index].x / scale; 
+    data[index].y = data[index].y / scale; 
 }
 
-// __global__ void opt::CopyC2R(cufftComplex *in, float *out, dim3 size, int type)
-// {
-//     size_t index        = opt::getIndex3d(size);
-//     size_t total_points = opt::get_total_points(size);
-
-//     if ( index >= total_points ) return;
-
-//     (type == 0)
-//         out[index] = in[index].x; 
-    
-// }
-
-// __global__ void opt::CopyC2R(cufftComplex *in, float *out, dim3 size)
-// {
-//     size_t index        = opt::getIndex3d(size);
-//     size_t total_points = opt::get_total_points(size);
-
-//     if ( index >= total_points ) return;
-
-//     out[index] = in[index].x; 
-// }

@@ -1,3 +1,5 @@
+#include <cublas_v2.h>
+
 #include "processing/filters.hpp"
 #include "processing/processing.hpp"
 #include "common/opt.hpp"
@@ -25,7 +27,7 @@ extern "C" {
             - padsizex = nx_pad = nx * (1 + padx) = 4096
             - See Pad example above. 
         */
-        configs->tomo.padsize = dim3(configs->tomo.size.x * ( 1 + configs->tomo.pad.x),configs->tomo.size.y * ( 1 + configs->tomo.pad.y),configs->tomo.size.z);
+        configs->tomo.padsize = dim3(configs->tomo.size.x * ( 1 + configs->tomo.pad.x ),configs->tomo.size.y * ( 1 + configs->tomo.pad.y ),configs->tomo.size.z);
 
         /* GPU blocksize */
         configs->blocksize = parameters_int[7];
@@ -42,7 +44,8 @@ extern "C" {
         configs->geometry.z2y              = parameters_float[5];
         configs->geometry.magnitude_x      = parameters_float[6];
         configs->geometry.magnitude_y      = parameters_float[7];
-        configs->geometry.wavelenght       = ( plank * vc ) / (configs->geometry.energy == 0.0 ? 1.0:configs->geometry.energy);
+        configs->geometry.wavelength       = ( plank * vc ) / (configs->beta_delta == 0.0 ? 1.0:configs->geometry.energy);
+        // configs->geometry.wavelength       = 2.0f * float(M_PI) * ( PLANCK_CONSTANT * SPEED_OF_LIGHT ) / (configs->beta_delta == 0.0 ? 1.0:configs->geometry.energy);
 
         configs->geometry.obj_pixel_x = configs->geometry.detector_pixel_x / configs->geometry.magnitude_x;
         configs->geometry.obj_pixel_y = configs->geometry.detector_pixel_y / configs->geometry.magnitude_y;
@@ -76,27 +79,90 @@ extern "C" {
         printf("magn: %e \n", configs->geometry.magnitude_x );
     }
 
+    void compute_phase_kernel(CFG configs, float *kernel)
+    {
+        /* Data sizes */
+        int sizex        = configs.tomo.padsize.x;
+        int sizey        = configs.tomo.padsize.y;
+
+        float z2         = configs.geometry.z2x;
+        float pixel_objx = configs.geometry.obj_pixel_x;
+        float pixel_objy = configs.geometry.obj_pixel_y;
+        float wavelength = configs.geometry.wavelength;
+        float beta_delta = configs.beta_delta;
+
+		cublasHandle_t handle = NULL;
+        cublasCreate(&handle);
+        cublasStatus_t stat;
+
+        dim3 threadsPerBlock(TPBX,TPBY,1);
+        dim3 gridBlock( (int)ceil( sizex / threadsPerBlock.x ) + 1, 
+                        (int)ceil( sizey / threadsPerBlock.y ) + 1, 1);
+
+		switch (configs.phase_type){
+				case 0:
+					/* code */
+					phase_pag::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
+                    pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
+					break;
+				case 1:
+					/* code */
+					
+					break;
+				case 2:
+					/* code */
+					
+					break;
+				case 3:
+					/* code */
+					
+					break;
+				case 4:
+					/* code */
+					
+					break;
+
+				default:
+					phase_pag::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
+                    pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
+					break;
+			}
+
+        // Normalize kernel by maximum value
+ 		int max;
+        stat = cublasIsamax(handle, sizex * sizey, kernel, 1, &max);
+
+        if (stat != CUBLAS_STATUS_SUCCESS)
+            printf("Cublas Max failed\n");
+
+		float scale;
+		HANDLE_ERROR(cudaMemcpy(&scale, kernel + max, sizeof(float), cudaMemcpyDeviceToHost));
+
+        // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1));
+
+        opt::scale<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1), scale);
+    }
+
 	void getPhase(CFG configs, GPU gpus, 
-    float *projections, dim3 size, dim3 size_pad)
+    float *projections, float *kernel, dim3 size, dim3 size_pad)
 	{	
 		switch (configs.phase_type){
 			case 0:
 				/* Paganin */
-				_paganin_gpu(configs, gpus, projections, size, size_pad, configs.tomo.pad);
+				phase_pag::apply_paganin_filter(configs, gpus, projections, kernel, size, size_pad, configs.tomo.pad);
 				break;
             case 1:
 				/* Paganin tomopy */
-				_paganin_gpu_tomopy(configs, gpus, projections, size, size_pad, configs.tomo.pad);
 				break;
             case 2:
 				/* Paganin v0 */
-				_paganin_gpu_v0(configs, gpus, projections, size, size_pad, configs.tomo.pad);
 				break;
 			default:
                 // printf("Using default Paganin phase filter. \n");
-				_paganin_gpu(configs, gpus, projections, size, size_pad, configs.tomo.pad);
+				phase_pag::apply_paganin_filter(configs, gpus, projections, kernel, size, size_pad, configs.tomo.pad);
 				break;
 	    }
+    
     }
 
 	void getPhaseGPU(CFG configs, GPU gpus, 
@@ -111,6 +177,13 @@ extern "C" {
         int nrayspad   = configs.tomo.padsize.x;
         int nslicespad = configs.tomo.padsize.y;
 
+        /* Kernel Computation */
+
+        size_t nsize   = nrayspad * nslicespad;
+		float *kernel  = opt::allocGPU<float>(nsize);
+
+        compute_phase_kernel(configs, kernel);
+
 		int i; 
         int blocksize = configs.blocksize;
 
@@ -121,11 +194,9 @@ extern "C" {
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
-        printf("nrays = %d, nslices = %d, blocksize = %d, nrayspad = %d, nslicespad = %d \n",nrays,nslices,blocksize,nrayspad,nslicespad);
-
 		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
 
-        		/* Plan for Fourier transform - cufft */
+        /* Plan for Fourier transform - cufft */
 		int n[] = {nrayspad,nslicespad};
 		HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize));
 
@@ -141,6 +212,7 @@ extern "C" {
 			ptr = ptr + subblock;
 
             if( subblock != blocksize){
+                HANDLE_ERROR(cudaDeviceSynchronize());
 				HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 				HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, subblock));
 			}
@@ -148,7 +220,7 @@ extern "C" {
             opt::CPUToGPU<float>(projections + ptr_block, dprojections, 
                             (size_t)nrays * nslices * subblock);
 
-			getPhase( configs, gpus, dprojections,
+			getPhase( configs, gpus, dprojections, kernel,
                     dim3(nrays, nslices, subblock), 
                     dim3(nrayspad, nslicespad, subblock)
                     );
@@ -157,13 +229,14 @@ extern "C" {
                                 (size_t)nrays * nslices * subblock);
 
 		}
-		// HANDLE_ERROR(cudaDeviceSynchronize());
+		HANDLE_ERROR(cudaDeviceSynchronize());
         
         /* Destroy plan */
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 
         /* Free memory */
 		HANDLE_ERROR(cudaFree(dprojections));
+        HANDLE_ERROR(cudaFree(kernel));
 
 	}
 
@@ -179,16 +252,16 @@ extern "C" {
 		for(i = 0; i < ngpus; i++) 
 			assert(gpus[i] < Maxgpudev && "Invalid device number.");
 
-		CFG configs; DIM tomo; GPU gpu_parameters;
+		CFG configs; GPU gpu_parameters;
 
         setPhaseParameters(&configs, paramf, parami);
-
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
         printPhaseParameters(&configs);
         printGPUParameters(&gpu_parameters);
 
-		int subvolume = (tomo.size.z + ngpus - 1) / ngpus;
+    
+		int subvolume = (configs.tomo.size.z + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; size_t ptr_volume = 0;
 
 		if (ngpus == 1){ /* 1 device */
@@ -205,8 +278,8 @@ extern "C" {
 
 			for (i = 0; i < ngpus; i++){
 				
-				subblock   = min(tomo.size.z - ptr, subvolume);
-				ptr_volume = (size_t)tomo.size.x * tomo.size.y * ptr;
+				subblock   = min(configs.tomo.size.z - ptr, subvolume);
+				ptr_volume = (size_t)configs.tomo.size.x * configs.tomo.size.y * ptr;
 
 				/* Update pointer */
 				ptr = ptr + subblock;

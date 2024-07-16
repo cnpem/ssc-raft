@@ -1,5 +1,6 @@
 #include "common/configs.hpp"
 #include "common/opt.hpp"
+#include "processing/processing.hpp"
 
 /*============================================================================*/
 /* namespace opt (in 'inc/commons/opt.hpp') functions definitions */
@@ -7,15 +8,15 @@
 __global__ void opt::paddR2C(float *in, cufftComplex *outpadded, 
 dim3 size, dim3 pad, float value)
 {
-    int Npadx = ( 1 + pad.x ) * size.x;
-    int Npady = ( 1 + pad.y ) * size.y;
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
     int i     = blockIdx.x*blockDim.x + threadIdx.x;
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
     int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int ii     = (int)( i - ( pad.x * size.x / 2 ) );
+    int jj     = (int)( j - ( pad.y * size.y / 2 ) );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
 
@@ -34,8 +35,8 @@ dim3 size, dim3 pad, float value)
 __global__ void opt::paddC2C(cufftComplex *in, cufftComplex *outpadded,
 dim3 size, dim3 pad, float value)
 {
-    int Npadx = ( 1 + pad.x ) * size.x;
-    int Npady = ( 1 + pad.y ) * size.y;
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
@@ -61,8 +62,8 @@ dim3 size, dim3 pad, float value)
 __global__ void opt::paddC2R(cufftComplex *in, float *outpadded, 
 dim3 size, dim3 pad, float value)
 {
-    int Npadx = ( 1 + pad.x ) * size.x;
-    int Npady = ( 1 + pad.y ) * size.y;
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
@@ -86,8 +87,8 @@ dim3 size, dim3 pad, float value)
 __global__ void opt::paddR2R(float *in, float *outpadded, 
 dim3 size, dim3 pad, float value)
 {
-    int Npadx = ( 1 + pad.x ) * size.x;
-    int Npady = ( 1 + pad.y ) * size.y;
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
     int padx  = pad.x * size.x;
     int pady  = pad.y * size.y;
@@ -115,8 +116,8 @@ dim3 size, dim3 pad, float value)
 __global__ void opt::remove_paddC2R(cufftComplex *inpadded, float *out, 
 dim3 size, dim3 pad)
 {
-    int Npadx = ( 1 + pad.x ) * size.x;
-    int Npady = ( 1 + pad.y ) * size.y;
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
     int i     = blockIdx.x*blockDim.x + threadIdx.x;
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
@@ -138,8 +139,8 @@ dim3 size, dim3 pad)
 __global__ void opt::remove_paddC2C(cufftComplex *inpadded, cufftComplex *out, 
 dim3 size, dim3 pad)
 {
-    int Npadx = ( 1 + pad.x ) * size.x;
-    int Npady = ( 1 + pad.y ) * size.y;
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
@@ -160,8 +161,8 @@ dim3 size, dim3 pad)
 __global__ void opt::remove_paddR2C(float *inpadded, cufftComplex *out, 
 dim3 size, dim3 pad)
 {
-    int Npadx = ( 1 + pad.x ) * size.x;
-    int Npady = ( 1 + pad.y ) * size.y;
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
@@ -181,8 +182,8 @@ dim3 size, dim3 pad)
 __global__ void opt::remove_paddR2R(float *inpadded, float *out, 
 dim3 size, dim3 pad)
 {
-    int Npadx = ( 1 + pad.x ) * size.x;
-    int Npady = ( 1 + pad.y ) * size.y;
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
     int padx  = pad.x * size.x;
     int pady  = pad.y * size.y;
@@ -203,51 +204,76 @@ dim3 size, dim3 pad)
     out[index] = inpadded[indpad];   
 }
 
-extern "C"{
-    __global__ void padding(float *in, cufftComplex *inpadded, float value, dim3 size, dim3 padsize)
-    {
-        size_t Npadx = size.x + 2 * padsize.x;
-        size_t Npady = size.y + 2 * padsize.y;
+__global__ void phase_pag::copy(float *projection, float *kernel, dim3 size)
+{
+    int i      = blockIdx.x*blockDim.x + threadIdx.x;
+    int j      = blockIdx.y*blockDim.y + threadIdx.y;
+    int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-        int i      = blockIdx.x*blockDim.x + threadIdx.x;
-        int j      = blockIdx.y*blockDim.y + threadIdx.y;
-        int k      = blockIdx.z*blockDim.z + threadIdx.z;
+    size_t index  = size.x * k * size.y + size.x * j + i;
+    size_t ind = size.x * j + i;
 
-        int ii     = (int)( i - padsize.x );
-        int jj     = (int)( j - padsize.y );
+    if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
 
-        long long int index  = size.x * k * size.y + size.x * jj + ii;
-        long long int indpad = Npadx  * k * Npady  + Npadx  *  j +  i;
+    projection[index] = kernel[ind];
 
-        if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
+}
 
-        inpadded[indpad].x = value;
-        inpadded[indpad].y = 0.0;
+__global__ void phase_pag::padding(float *in, cufftComplex *inpadded, dim3 size, dim3 pad)
+{
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
 
-        if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+    int padding_x = pad.x * size.x / 2;
+    int padding_y = pad.y * size.y / 2;
 
-        inpadded[indpad].x = in[index];
+    int i      = blockIdx.x*blockDim.x + threadIdx.x;
+    int j      = blockIdx.y*blockDim.y + threadIdx.y;
+    int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    }
-    __global__ void recuperate_padding(cufftComplex *inpadded, float *in, dim3 size, dim3 padsize)
-    {
-        size_t Npadx = size.x + 2 * padsize.x;
-        size_t Npady = size.y + 2 * padsize.y;
+    int ii     = i - padding_x;
+    int jj     = j - padding_y;
 
-        int i      = blockIdx.x*blockDim.x + threadIdx.x;
-        int j      = blockIdx.y*blockDim.y + threadIdx.y;
-        int k      = blockIdx.z*blockDim.z + threadIdx.z;
-        
-        int ii     = (int)( i - padsize.x );
-        int jj     = (int)( j - padsize.y );
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad = Npadx  * k * Npady  + Npadx  *  j +  i;
 
-        long long int index  = size.x * k * size.y + size.x * jj + ii;
-        long long int indpad = Npadx  * k * Npady  + Npadx  *  j +  i;
+    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
-        if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+    // if ( ( i <   padding_x            ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *     jj +      0];
+    // if ( ( i > ( padding_x + size.x ) ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *     jj + size.x];
+    // if ( ( j <   padding_y            ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *      0 +     ii];
+    // if ( ( j < ( padding_y + size.y ) ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * size.y +     ii];
 
-        in[index] = inpadded[indpad].x;
-        
-    }
+    inpadded[indpad].x = 1.0;
+    inpadded[indpad].y = 0.0;
+
+    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+
+    inpadded[indpad].x = in[index];
+
+}
+
+__global__ void phase_pag::recuperate_padding(cufftComplex *inpadded, float *in, dim3 size, dim3 pad)
+{
+    int Npadx = size.x * ( 1 + pad.x );
+    int Npady = size.y * ( 1 + pad.y );
+
+    int padding_x = pad.x * size.x / 2;
+    int padding_y = pad.y * size.y / 2;
+
+    int i      = blockIdx.x*blockDim.x + threadIdx.x;
+    int j      = blockIdx.y*blockDim.y + threadIdx.y;
+    int k      = blockIdx.z*blockDim.z + threadIdx.z;
+    
+    int ii     = (int)( i - padding_x );
+    int jj     = (int)( j - padding_y );
+
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+    long long int indpad = Npadx  * k * Npady  + Npadx  *  j +  i;
+
+    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+
+    in[index] = inpadded[indpad].x;
+    
 }
 

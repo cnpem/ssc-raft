@@ -54,11 +54,12 @@ def phase_retrieval(frames, dic):
     frames = numpy.ascontiguousarray(frames.astype(numpy.float32))
     frames_ptr = frames.ctypes.data_as(ctypes.c_void_p)
 
-    logger.info(f'Begin Phase Retrieval by {method}.')
-    libraft.getPhaseMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
-                        frames_ptr, param_float_ptr, param_int_ptr)                     
+    logger.info(f'Begin Phase Retrieval by {methodname}')
 
-    logger.info(f'Finished Phase Retrieval.')
+    libraft.getPhaseMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
+                            frames_ptr, param_float_ptr, param_int_ptr)                     
+
+    logger.info(f'Finished Phase Retrieval')
 
     return frames
 

@@ -5,7 +5,7 @@ try:
     from .rafttypes   import *
     from .geometries  import *
     from .processing  import *
-    from .phase_retrieval     import *
+    from .phase_retrieval  import *
     from .pipelines   import *
 
 except OSError:
