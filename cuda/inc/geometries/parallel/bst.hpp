@@ -5,6 +5,10 @@
 #include "common/operations.hpp"
 #include "common/types.hpp"
 
+void getBST(CFG configs, GPU gpus,
+    float* obj, float* tomo, float* angles,
+    dim3 tomo_size, dim3 tomo_pad, dim3 obj_size, cudaStream_t stream = 0);
+
 extern "C" {
 
     void setBSTParameters(CFG *configs, float *parameters_float, int *parameters_int);

@@ -1,8 +1,12 @@
+#include <unistd.h>
+#include <cstddef>
+#include <iostream>
 #include "common/configs.hpp"
+#include "common/types.hpp"
 
 extern "C"{
     int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
-    bool using_fft, float GPU_MEMORY) 
+    bool using_fft, float gpu_memory)
     {
         const float empiric_const = using_fft? 4.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
         const float epsilon = 4.0;       // how much free memory we want to leave, in GB.
@@ -17,10 +21,13 @@ extern "C"{
 
         std::cout << "Calculating blocksize..." << std::endl;
 
-        raw_blocksize = static_cast<int>(-epsilon + 
-                            (GPU_MEMORY)/(BYTES_TO_GB*total_required_mem_per_slice) );
+        std::cout << gpu_memory << ", " << BYTES_TO_GB << ", " << total_required_mem_per_slice
+            << "\n";
+
+        raw_blocksize = static_cast<int>(-epsilon +
+                            (gpu_memory)/(BYTES_TO_GB*total_required_mem_per_slice) );
         raw_blocksize = raw_blocksize/empiric_const;
-        
+
         std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
 
         if (nslices < raw_blocksize) {
@@ -33,47 +40,32 @@ extern "C"{
             blocksize = 1 << blocksize_exp;
         }
         std::cout << "\t  Blocksize: " << blocksize << std::endl;
-        
+
         return blocksize;
     }
 }
 
 extern "C"{
+
 	Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes)
-	{  
-        int process_index;
+	{
+        Process *process = (Process *) malloc(sizeof(Process) * total_number_of_processes);
 
-        Process *process = (Process *)malloc(sizeof(Process) * total_number_of_processes);
+        if (isParallelOrFanbeamGeometry(configs)) {
+            for (int p = 0; p < total_number_of_processes; p++)
+                setProcessParallel(configs, process, gpus, p, total_number_of_processes);
+        } else { //cone beam geometry
+            for (int p = 0; p < total_number_of_processes; p++)
+                setProcessConebeam(configs, process, gpus, p, total_number_of_processes);
+        }
 
-        switch (configs.geometry.geometry){
-            case 0:
-                /* Parallel */
-                for (process_index = 0; process_index < total_number_of_processes; process_index++)
-                    setProcessParallel(configs, process, gpus, process_index, total_number_of_processes);
-                break;
-            case 1:
-                /* Conebeam */
-                for (process_index = 0; process_index < total_number_of_processes; process_index++)
-                    setProcessConebeam(configs, process, gpus, process_index, total_number_of_processes);
-                break;
-            case 2:
-                /* Fanbeam - the process division for Fanbeam geometry is the same as the Parallel one */
-               for (process_index = 0; process_index < total_number_of_processes; process_index++)
-                    setProcessParallel(configs, process, gpus, process_index, total_number_of_processes);
-                break;
-            default:
-                printf("Nope.");
-                break;
-        }	
-
-        return process; 
-                
+        return process;
 	}
 }
 
 extern "C"{
     void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
-    {   
+    {
         /* Processes to parallelize the data z-axis by independent blocks */
         /* Declare variables */
         long long int  n_obj, n_tomo, ind_obj, ind_tomo;
@@ -95,21 +87,20 @@ extern "C"{
         ind_tomo = (long long int)             ind   * configs.tomo.size.x * configs.tomo.size.y;
 
         /* Set process struct */
-        (*process).index          = index;
-        (*process).index_gpu      = (int)gpus.gpus[index % gpus.ngpus]; 
-        (*process).batch_index    = (int)index % gpus.ngpus;
-        (*process).tomobatch_size = (int)( ind_max - ind );
-        (*process).objbatch_size  = (int)( ind_max - ind );
+        process[index].index          = index;
+        process[index].index_gpu      = (int)gpus.gpus[index % gpus.ngpus];
+        process[index].batch_index    = (int)index % gpus.ngpus;
+        process[index].tomobatch_size = (int)( ind_max - ind );
+        process[index].objbatch_size  = (int)( ind_max - ind );
 
         /* Tomogram division */
-        (*process).tomo_index_z   = ind;
-        (*process).tomoptr_index  = ind_tomo;
-        (*process).tomoptr_size   = n_tomo;
+        process[index].tomo_index_z   = ind;
+        process[index].tomoptr_index  = ind_tomo;
+        process[index].tomoptr_size   = n_tomo;
 
         /* Reconstruction division */
-        (*process).objptr_size    = n_obj;
-        (*process).objptr_index   = ind_obj;
-        
+        process[index].objptr_size    = n_obj;
+        process[index].objptr_index   = ind_obj;
     }
 }
 
@@ -196,12 +187,16 @@ extern "C"{
 extern "C"{
     int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft)
     {
-        int blocksizeMax = compute_GPU_blocksize(sizeZ, 
-                                                configs.total_required_mem_per_slice_bytes,
+        const float total_required_mem_per_slice_bytes = calcTotalRequiredMemoryBytes(configs);
+        const float gpu_memory = getTotalDeviceMemory() / (1024.0 * 1024.0 * 1024.0);
+        const int blocksizeMax = compute_GPU_blocksize(sizeZ,
+                                                total_required_mem_per_slice_bytes,
                                                 using_fft,
-                                                GPU_MEMORY);   
+                                                gpu_memory);
 
-        int n_total_processes = (int)ceil( (float) sizeZ / blocksizeMax );
+        const int n_total_processes = (int)ceil( (float) sizeZ / blocksizeMax );
+
+        ssc_assert(n_total_processes > 0, "Invalid number of total processes");
 
         return n_total_processes;
     }

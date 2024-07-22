@@ -326,9 +326,17 @@ extern "C" {
         /* Complex (real part) to Float */
         size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
         size_t ty = blockIdx.y + gridDim.y * blockIdx.z;
-        
+
+        //if (tx == 0) {
+            //printf("** %f %f\n", out[ty*sizex + tx], in[ty*sizex + tx].x);
+        //}
+
         if(tx < sizex)
             out[ty*sizex + tx] = in[ty*sizex + tx].x;
+
+        //if (tx == 0) {
+            //printf("**** %f %f\n", out[ty*sizex + tx], in[ty*sizex + tx].x);
+        //}
     }
 
     __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy)

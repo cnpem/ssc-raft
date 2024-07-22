@@ -1,12 +1,13 @@
 #ifndef RAFT_CONFIGS_H
 #define RAFT_CONFIGS_H
 
-#define PARALLEL 0
-#define CONEBEAM 1
-#define FANBEAM  2
+#include <complex.h>
+#include <driver_types.h>
+#include <vector_types.h>
+#include <cstddef>
 
-#define FFT_RANK_2D 2 
-#define FFT_RANK_1D 1 
+#define FFT_RANK_2D 2
+#define FFT_RANK_1D 1
 
 #define IND(I,J,K,NX,NY) (long long int)( (I) + (J) * (NX) + (K) * (NX) * (NY) )
 
@@ -43,7 +44,7 @@
 #include <future>
 
 typedef struct dimension
-{   
+{
     dim3 size; /* Dimension values */
     float  posx,  posy,  posz; /* points values */
     float    dx,    dy,    dz; /* spacing values */
@@ -69,28 +70,37 @@ typedef struct dimension
     float frame_memory_bytes;
     float frame_padd_memory_bytes;
 
-}DIM; /* Data dimensions */
+} DIM; /* Data dimensions */
+
+inline float calcSliceMemoryBytes(DIM dimension) {
+   return dimension.size.x * dimension.size.y * sizeof(float);
+}
+
+inline float calcPaddedSliceMemoryBytes(DIM dimension) {
+    return ((dimension.size.x + 2 * dimension.pad.x) + (dimension.size.y + 2 * dimension.pad.y)) * sizeof(float);
+}
+
+inline float calcWidthMemoryBytes(DIM dimension) {
+    return dimension.size.y * sizeof(float);
+}
+
+inline float calcLengthMemoryBytes(DIM dimension) {
+    return dimension.size.x * sizeof(float);
+}
 
 typedef struct geometry
-{   
-    /* Geometry: 
-        0 -> parallel (PARALLEL)
-        1 -> conebeam (CONEBEAM)
-        2 -> fanbeam  (FANBEAM)
-    */
-    int geometry;
-
+{
     /* General reconstruction variables*/
     float detector_pixel_x, detector_pixel_y;
     float obj_pixel_x, obj_pixel_y;
     float energy, wavelength, wavenumber;
     float z1x, z1y, z2x, z2y;
-    float magnitude_x, magnitude_y;  
-    
-}GEO;
+    float magnitude_x, magnitude_y;
+
+} GEO;
 
 typedef struct flags
-{   
+{
     /* Bool variables - Pipeline */
     int do_flat_dark_correction, do_flat_dark_log;
     int do_phase_filter;
@@ -98,11 +108,11 @@ typedef struct flags
     int do_rotation, do_rotation_auto_offset, do_rotation_correction;
     int do_alignment;
     int do_reconstruction;
-    
-}FLAG;
+
+} FLAG;
 
 typedef struct config
-{   
+{
     /* Pipeline variables */
     float total_required_mem_per_slice_bytes;
     float total_required_mem_per_frame_bytes;
@@ -114,9 +124,9 @@ typedef struct config
 
     /* Reconstruction variables */
     DIM obj;
-    
+
     /* Tomogram variables */
-    DIM tomo; 
+    DIM tomo;
 
     /* Flat/Dark Correction */
     int numflats, numdarks;
@@ -141,8 +151,8 @@ typedef struct config
     float reconstruction_tv;          /* Total variation regularization parameter */
 
     int datatype;
-    float threshold; 
-    int interpolation; /* interpolation type */         
+    float threshold;
+    int interpolation; /* interpolation type */
 
     /* Paralell */
 
@@ -159,8 +169,29 @@ typedef struct config
 
     /* EM Conical */
 
-}CFG;
+} CFG;
 
+inline void printDim(dim3 d) {
+    printf("dim3 {%d, %d, %d}\n", d.x, d.y, d.z);
+}
+
+inline float calcTotalRequiredMemoryBytes(CFG configs) {
+    return (
+            calcSliceMemoryBytes(configs.tomo) +
+            calcSliceMemoryBytes(configs.obj) +
+            calcPaddedSliceMemoryBytes(configs.tomo) +
+            calcLengthMemoryBytes(configs.tomo) +
+            calcWidthMemoryBytes(configs.tomo)
+           );
+}
+
+inline bool isParallelOrFanbeamGeometry(CFG configs) {
+    return configs.geometry.magnitude_y == 1;
+}
+
+inline bool isConeGeometry(CFG configs) {
+    return configs.geometry.magnitude_y != 1;
+}
 
 struct GPU
 {
@@ -181,12 +212,12 @@ extern "C" {
 
 	inline void getDeviceProperties()
 	{	/* Get Device Properties */
-		int gpudevices; 
+		int gpudevices;
 		cudaDeviceProp prop;
-		cudaGetDeviceCount(&gpudevices); /* Total Number of GPUs */ 
-		printf("GPUs number: %d\n",gpudevices); 
-		cudaGetDeviceProperties(&prop,0); /* Name of GPU */ 
-		printf("Device name: %s\n",prop.name);	
+		cudaGetDeviceCount(&gpudevices); /* Total Number of GPUs */
+		printf("GPUs number: %d\n",gpudevices);
+		cudaGetDeviceProperties(&prop,0); /* Name of GPU */
+		printf("Device name: %s\n",prop.name);
 	};
 
 }
@@ -225,6 +256,15 @@ struct Process{
 };
 
 
+inline size_t getTotalDeviceMemory(int device = 0) {
+    size_t total_mem, free_mem;
+
+    cudaSetDevice(device);
+    cudaMemGetInfo(&free_mem, &total_mem);
+
+    return total_mem;
+}
+
 /* Commom parameters */
 extern "C"{
 
@@ -235,25 +275,26 @@ extern "C"{
 }
 
 /* Processes - parallelization */
-extern "C"{
 
-	Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes);
+extern "C" {
+
+    Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes);
 
     void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
 
     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
-    
+
     int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft);
 
     int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
-    bool using_fft, float GPU_MEMORY); 
+            bool using_fft, float GPU_MEMORY);
 
 }
 
 /* Workspace - GPU pointers */
 extern "C"{
 
-	WKP *allocateWorkspace(CFG configs, Process process);
+	WKP *allocateWorkspace(CFG configs, size_t tomo_batch_size, size_t obj_batch_size);
 
 	void freeWorkspace(WKP *workspace, CFG configs);
 
