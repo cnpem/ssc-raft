@@ -34,7 +34,7 @@ extern "C"{
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
         /* Set total number of processes to be sent to the GPUs */
-        total_number_of_processes = getTotalProcesses(configs, A100_MEM, configs.tomo.size.z, true);
+        total_number_of_processes = getTotalProcesses(configs, BYTES_TO_GB * getTotalDeviceMemory(), configs.tomo.size.z, true);
 
         /* Set processes pipeline for different geometries */
         Process *process = setProcesses(configs, gpu_parameters, total_number_of_processes);
@@ -111,8 +111,6 @@ extern "C" {
                     process.tomobatch_size * configs.tomo.size.x * sizeof(float), cudaMemcpyHostToDevice));
         HANDLE_ERROR(cudaMemcpy(workspace->dark, darks + process.tomo_index_z * configs.tomo.size.x,
                     process.tomobatch_size * configs.tomo.size.x * sizeof(float), cudaMemcpyHostToDevice));
-
-        thrust::fill_n(thrust::device_ptr<float>(workspace->obj), process.tomoptr_size, -43.0);
 
         /* Enter Reconstruction Pipeline */
         _ReconstructionPipeline(configs, workspace, gpus);
