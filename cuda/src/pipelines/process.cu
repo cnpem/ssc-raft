@@ -185,10 +185,9 @@ extern "C"{
 }
 
 extern "C"{
-    int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft)
+    int getTotalProcesses(CFG configs, float gpu_memory, int sizeZ, bool using_fft)
     {
         const float total_required_mem_per_slice_bytes = calcTotalRequiredMemoryBytes(configs);
-        const float gpu_memory = getTotalDeviceMemory() / (1024.0 * 1024.0 * 1024.0);
         const int blocksizeMax = compute_GPU_blocksize(sizeZ,
                                                 total_required_mem_per_slice_bytes,
                                                 using_fft,
