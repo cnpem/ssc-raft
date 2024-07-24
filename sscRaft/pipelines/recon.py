@@ -80,7 +80,7 @@ def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
     angles = CNICE(angles)
     angles_ptr = angles.ctypes.data_as(ctypes.c_void_p)
 
-    nflats = flat.shape[0]
+    nflats = 1 if flat.ndim <= 2 else flat.shape[0]
 
     phase_type = 0
     rings_block = 0
@@ -140,9 +140,15 @@ def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
     param_float = CNICE(param_float, numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
 
+    do_flat_dark_correction = True
+    do_log_correction = False
 
-    flags = numpy.zeros(100, dtype=numpy.int32)
-    flags = CNICE(flags)
+    flags = numpy.array([
+        do_flat_dark_correction,
+        do_log_correction,
+        False, False, False, False, False
+    ])
+    flags = CNICE(flags, dtype=np.int32)
     flags_ptr = flags.ctypes.data_as(ctypes.c_void_p)
 
     libraft.ReconstructionPipeline(obj_ptr, tomogram_ptr,

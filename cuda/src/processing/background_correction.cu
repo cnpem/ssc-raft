@@ -124,40 +124,6 @@ extern "C"{
 
 	}
 
-    void __getBackgroundCorrectionMultiGPU(int* gpus, int ngpus,
-            float* frames, float* flat, float* dark,
-            int nrays, int nangles, int nslices, int numflats,
-            int is_log) {
-        const size_t sizez = nslices;
-        const size_t sizey = nangles;
-        const size_t sizex = nrays;
-
-        #pragma omp parallel for simd collapse(3)
-        for (size_t idz = 0; idz < sizez; ++idz) {
-            for (size_t idy = 0; idy < sizey; ++idy) {
-                for (size_t idx = 0; idx < sizex; ++idx) {
-
-                    const float flat1 = flat[sizex * numflats * idz + idx];
-                    const float dk = dark[sizex * idz + idx];
-
-                    float ft;
-                    if(numflats > 1) {
-                        const float interp = float(idy) / float(sizey);
-                        const float flat2 = flat[sizex * numflats * idz + sizex + idx];
-                        ft = flat1 * ( 1.0f - interp ) + interp * flat2;
-                    }else{
-                        ft = flat1;
-                    }
-
-                    const size_t line = sizex * sizey * idz + sizex * idy + idx;
-                    const float T = frames[line] - dk;
-                    const float Q = ft - dk;
-
-                    frames[line] = fmaxf(T, 0.5f) / fmaxf(Q,0.5f);
-                }
-            }
-        }
-    }
 
 	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus,
     float* frames, float* flat, float* dark,

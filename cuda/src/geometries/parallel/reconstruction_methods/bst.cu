@@ -258,8 +258,6 @@ void getBST(CFG configs, GPU gpus,
 
     // BST initialization finishes here.
 
-    printf("Axis offset: %d\n", axis_offset);
-
     for (size_t zoff = 0; zoff < (size_t)trueblocksize; zoff += blocksize_bst) {
         float* sinoblock = tomo + insize * zoff;
 

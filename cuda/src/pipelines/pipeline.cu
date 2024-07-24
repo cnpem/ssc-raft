@@ -8,6 +8,7 @@
 #include "geometries/parallel/em.hpp"
 #include "geometries/parallel/fbp.hpp"
 #include "geometries/parallel/bst.hpp"
+#include "processing/processing.hpp"
 
 using std::thread;
 
@@ -128,9 +129,9 @@ extern "C" {
 extern "C"{
     void _ReconstructionPipeline(CFG configs, WKP *workspace, GPU gpus)
     {
-        //if( configs.flags.do_flat_dark_correction == 1)
-            //getBackgroundCorrection(gpus, workspace->tomo, workspace->flat, workspace->dark,
-            //configs.tomo.batchsize, configs.numflats);
+        if( configs.flags.do_flat_dark_correction == 1)
+            getBackgroundCorrection(gpus, workspace->tomo, workspace->flat, workspace->dark,
+                    configs.tomo.batchsize, configs.numflats);
 
         //if( configs.flags.do_flat_dark_log == 1)
             //getLog(workspace->tomo, configs.tomo.batchsize);
