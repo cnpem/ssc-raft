@@ -258,11 +258,13 @@ void getBST(CFG configs, GPU gpus,
 
     // BST initialization finishes here.
 
+    printf("Axis offset: %d\n", axis_offset);
+
     for (size_t zoff = 0; zoff < (size_t)trueblocksize; zoff += blocksize_bst) {
         float* sinoblock = tomo + insize * zoff;
 
         if (filter.type != Filter::EType::none)
-            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, 0.0, filter, stream);
+            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, axis_offset, filter, stream);
 
         dim3 blocks((Nrays + 255) / 256, Nangles, blocksize_bst);
         dim3 threads(128, 1, 1);

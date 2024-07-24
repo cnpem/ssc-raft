@@ -1,6 +1,10 @@
 import numpy
 from ..rafttypes import *
 
+RECON_METHODS = {
+    'FBP': 0,
+    'BST': 1
+}
 
 def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam
@@ -80,7 +84,11 @@ def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
 
     phase_type = 0
     rings_block = 0
-    reconstruction_method = 1 # BST
+
+    if dic['method'] not in RECON_METHODS.keys():
+        raise ArgumentError("Invalid reconstruction method: ", dic['method'])
+
+    reconstruction_method = RECON_METHODS[dic['method']]
     reconstruction_filter_type = 0
 
     obj_start_slice = 0

@@ -188,46 +188,38 @@ extern "C"{
                 break;
             case 3:
                 /* EM RT tEM */
-                // get_tEM_RT( configs, gpus, 
-                //             workspace->obj, 
-                //             workspace->tomo, 
-                //             workspace->flat, 
-                //             workspace->angles, 
+                // get_tEM_RT( configs, gpus,
+                //             workspace->obj,
+                //             workspace->tomo,
+                //             workspace->flat,
+                //             workspace->angles,
                 //             process.tomobatch_size);
                 break;
             case 4:
                 /* EM RT eEM TV */
-                
                 break;
             case 5:
                 /* EM RT tEM TV */
-                
                 break;
             case 6:
                 /* EM FST eEM */
-                
                 break;
             case 7:
                 /* EM FST eEM TV*/
-                
                 break;
             case 8:
                 /* EM FST tEM TV*/
-                
             case 9:
                 /* FDK */
                 break;
             case 10:
                 /* EM Conical eEM*/
-                
                 break;
             case 11:
                 /* EM Conical tEM*/
-                
                 break;
             case 12:
                 /* EM Conical eEM TV*/
-                
                 break;
             case 13:
                 /* EM Conical tEM TV*/
