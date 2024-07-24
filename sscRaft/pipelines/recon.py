@@ -89,7 +89,6 @@ def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
         raise ArgumentError("Invalid reconstruction method: ", dic['method'])
 
     reconstruction_method = RECON_METHODS[dic['method']]
-    reconstruction_filter_type = 0
 
     obj_start_slice = 0
     obj_end_slice = nslices
@@ -108,7 +107,7 @@ def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
         rings_block,
         offset,
         reconstruction_method,
-        reconstruction_filter_type,
+        filter_type,
         obj_start_slice, obj_end_slice,
         tomo_start_slice, tomo_end_slice,
         em_iter
