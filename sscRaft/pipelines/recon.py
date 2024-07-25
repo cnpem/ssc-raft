@@ -83,7 +83,8 @@ def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
     nflats = 1 if flat.ndim <= 2 else flat.shape[0]
 
     phase_type = 0
-    rings_block = 0
+    rings_block = dic.get('rings_block', 0.0)
+    rings_lambda = dic.get('rings_lambda', 0.0)
 
     if dic['method'] not in RECON_METHODS.keys():
         raise ArgumentError("Invalid reconstruction method: ", dic['method'])
@@ -134,7 +135,8 @@ def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
         z1, z1,
         z2, z2,
         magnitude_x, magnitude_y,
-        beta_delta, regularization
+        beta_delta, rings_lambda,
+        regularization
     ]
     param_float = numpy.array(param_float)
     param_float = CNICE(param_float, numpy.float32)
@@ -142,11 +144,14 @@ def reconPipeline(tomogram, flat, dark, angles, gpus, dic):
 
     do_flat_dark_correction = True
     do_log_correction = False
+    do_rotation = do_rotation_correction = True
 
     flags = numpy.array([
         do_flat_dark_correction,
         do_log_correction,
-        False, False, False, False, False
+        False, False,
+        do_rotation, do_rotation_correction,
+        False
     ])
     flags = CNICE(flags, dtype=np.int32)
     flags_ptr = flags.ctypes.data_as(ctypes.c_void_p)

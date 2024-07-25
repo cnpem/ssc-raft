@@ -88,6 +88,7 @@ extern "C"{
 		configs->flags.do_rotation              = flags[4];
 		configs->flags.do_rotation_correction   = flags[5];
 		configs->flags.do_reconstruction        = flags[6];
+        configs->flags.do_rotation_auto_offset = false;
 
 		/* Set Flat/Dark Correction */
 		configs->numflats                       = parameters_int[9];

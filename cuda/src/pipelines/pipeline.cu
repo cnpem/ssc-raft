@@ -4,6 +4,7 @@
 #include <thrust/reduce.h>
 #include <cstdio>
 #include "common/configs.hpp"
+#include "common/opt.hpp"
 #include "pipelines/pipeline.hpp"
 #include "geometries/parallel/em.hpp"
 #include "geometries/parallel/fbp.hpp"
@@ -17,16 +18,16 @@ extern "C"{
             float *flats, float *darks, float *angles,
             float *parameters_float, int *parameters_int, int *flags,
             int *gpus, int ngpus)
-	{
+    {
         int i, Maxgpu;
         int total_number_of_processes;
 
-		/* Multiples devices */
-		cudaGetDeviceCount(&Maxgpu);
+        /* Multiples devices */
+        cudaGetDeviceCount(&Maxgpu);
 
-		/* If devices input are larger than actual devices on GPU, exit */
-		for(i = 0; i < ngpus; i++)
-			assert(gpus[i] < Maxgpu && "Invalid device number.");
+        /* If devices input are larger than actual devices on GPU, exit */
+        for(i = 0; i < ngpus; i++)
+            assert(gpus[i] < Maxgpu && "Invalid device number.");
 
         CFG configs; GPU gpu_parameters;
 
@@ -43,8 +44,8 @@ extern "C"{
         // clock_t b_begin = clock();
 
         _setReconstructionPipeline(&configs, process, gpu_parameters,
-                                    obj, data, flats, darks, angles,
-                                    total_number_of_processes);
+                obj, data, flats, darks, angles,
+                total_number_of_processes);
 
         HANDLE_ERROR(cudaGetLastError());
 
@@ -56,8 +57,8 @@ extern "C"{
 
 extern "C"{
     void _setReconstructionPipeline(CFG *configs, Process *process, GPU gpus,
-    float *obj, float *data, float *flats, float *darks,
-    float *angles, int total_number_of_processes)
+            float *obj, float *data, float *flats, float *darks,
+            float *angles, int total_number_of_processes)
     {
 
         configs->tomo.batchsize    = dim3(   configs->tomo.size.x, configs->tomo.size.y, process->tomobatch_size);
@@ -69,11 +70,11 @@ extern "C"{
         for (int p = 0; p < total_number_of_processes; ++p) {
 
             threads_pipeline.emplace_back(  thread(
-                                            _ReconstructionProcessPipeline,
-                                            (*configs), process[p],
-                                            gpus, obj, data, flats, darks,
-                                            angles
-                                            ));
+                        _ReconstructionProcessPipeline,
+                        (*configs), process[p],
+                        gpus, obj, data, flats, darks,
+                        angles
+                        ));
 
             if (p % gpus.ngpus == gpus.ngpus - 1) {
                 for (int g = 0; g < gpus.ngpus; ++g) {
@@ -92,12 +93,12 @@ extern "C"{
 
 extern "C" {
 
-	void _ReconstructionProcessPipeline(CFG configs, Process process, GPU gpus,
-    float *obj, float *data, float *flats, float *darks, float *angles)
-	{
+    void _ReconstructionProcessPipeline(CFG configs, Process process, GPU gpus,
+            float *obj, float *data, float *flats, float *darks, float *angles)
+    {
 
-		/* Initialize GPU device */
-		HANDLE_ERROR(cudaSetDevice(process.index_gpu));
+        /* Initialize GPU device */
+        HANDLE_ERROR(cudaSetDevice(process.index_gpu));
 
         /* Local GPUs Pointers: allocation */
         WKP *workspace = allocateWorkspace(configs, process.tomobatch_size, process.objbatch_size);
@@ -121,33 +122,43 @@ extern "C" {
 
         freeWorkspace(workspace, configs);
 
-		// cudaDeviceSynchronize();
-	}
+        // cudaDeviceSynchronize();
+    }
 }
 
 
 extern "C"{
     void _ReconstructionPipeline(CFG configs, WKP *workspace, GPU gpus)
     {
-        if( configs.flags.do_flat_dark_correction == 1)
+        if( configs.flags.do_flat_dark_correction )
             getBackgroundCorrection(gpus, workspace->tomo, workspace->flat, workspace->dark,
                     configs.tomo.batchsize, configs.numflats);
 
-        //if( configs.flags.do_flat_dark_log == 1)
-            //getLog(workspace->tomo, configs.tomo.batchsize);
+        if( configs.flags.do_flat_dark_log )
+            getLog(workspace->tomo, configs.tomo.batchsize);
 
-        //if( configs.flags.do_rings == 1)
-            //getTitarenkoRings(gpus, workspace->tomo,
-            //configs.tomo.batchsize, configs.rings_lambda,
-            //configs.rings_block);
+        printf("Do rings with: lambda: %f rings_block: %d\n",
+                configs.rings_lambda, configs.rings_block);
 
-        // if( configs.flags.do_rotation == 1 && configs.flags.do_rotation_auto_offset == 1)
-        //     int rotation_axis_offset = getRotAxisOfsset();
-        // else
-        //     rotation_axis_offset = configs.rotation_axis_offset;
+        if( configs.flags.do_rings )
+            getTitarenkoRings(gpus, workspace->tomo,
+                    configs.tomo.batchsize, configs.rings_lambda,
+                    configs.rings_block);
 
-        // if( configs.flags.do_rotation == 1 && configs.flags.do_rotation_correction == 1 && configs.reconstruction_method != 0)
-        //     setRotAxisCorrection();
+
+        printf("Do rotation? %d\n", configs.flags.do_rotation);
+
+        if ( configs.flags.do_rotation) {
+            printf("do rotation_auto_offset: %d\n", configs.flags.do_rotation_auto_offset);
+            const int rotation_axis_offset = configs.flags.do_rotation_auto_offset ?
+                 getCentersino(workspace->tomo, workspace->tomo,
+                         workspace->dark, workspace->flat,
+                         configs.tomo.size.x, configs.tomo.size.y) :
+                 configs.rotation_axis_offset;
+            printf("deviation: %d\n", rotation_axis_offset);
+            getCorrectRotationAxis(workspace->tomo, workspace->tomo,
+                    configs.tomo.batchsize, rotation_axis_offset);
+        }
 
         getReconstructionMethods(configs, gpus, workspace);
     }
@@ -172,20 +183,20 @@ extern "C"{
             case 1:
                 /* BST */
                 getBST( configs, gpus,
-                         workspace->obj,
-                         workspace->tomo,
-                         workspace->angles,
-                         configs.tomo.batchsize,
-                         configs.tomo.padbatchsize,
-                         configs.obj.batchsize);
+                        workspace->obj,
+                        workspace->tomo,
+                        workspace->angles,
+                        configs.tomo.batchsize,
+                        configs.tomo.padbatchsize,
+                        configs.obj.batchsize);
                 break;
             case 2:
                 /* EM RT eEM */
                 get_eEM_RT( configs, gpus,
-                            workspace->obj,
-                            workspace->tomo,
-                            workspace->angles,
-                            configs.tomo.batchsize.z);
+                        workspace->obj,
+                        workspace->tomo,
+                        workspace->angles,
+                        configs.tomo.batchsize.z);
                 break;
             case 3:
                 /* EM RT tEM */

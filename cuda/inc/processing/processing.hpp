@@ -29,6 +29,11 @@ extern "C"{
 
 /* Rotation Axis */
 
+extern "C" {
+    void getCorrectRotationAxis(float* d_tomo_in, float* d_tomo_out,
+            dim3 tomo_size, int deviation);
+}
+
 /* Centersino - Find offset for 180 degrees parallel tomogram */
 extern "C"{
 

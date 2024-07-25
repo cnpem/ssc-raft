@@ -1,6 +1,7 @@
 // Authors: Giovanni Baraldi, Gilberto Martinez, Eduardo Miqueles
 // Sinogram centering
 
+#include <vector_types.h>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
@@ -186,21 +187,38 @@ extern "C"{
             
         return -posx/2;
     }
-}
 
-extern "C"{
-    int findcentersino16(uint16_t* frame0, uint16_t* frame180, 
-    uint16_t* dark, uint16_t* flat, int sizex, int sizey)
-    {
-        Image2D<uint16_t> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);
-        return getCentersino16(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
+    __global__ void KCorrectRotationAxis(float* tomoin, float* tomoout,
+            int sizex, int sizey, int sizez, int deviation) {
+        const size_t idz = threadIdx.z + blockIdx.z * blockDim.z;
+        const size_t idy = threadIdx.y + blockIdx.y * blockDim.y;
+        const size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
+
+        if (idx != 0) //use gridDim.x == 1 to simplify kernel implementation
+            return;
+
+        const int offset = abs(deviation);
+
+        float* in = &tomoin[idz * sizex * sizey + idy * sizex];
+        float* out = &tomoout[idz * sizex * sizey + idy * sizex];
+
+        if (deviation > 0) { //shift right
+            for (int x = sizex - 1; x >= offset; --x) out[x] = in[x - offset];
+            for (int x = offset - 1; x >= 0; --x) out[x] = 0.0f;
+        } else if (deviation < 0) { //shift left
+            for (int x = 0; x < sizex - offset; ++x) out[x] = in[x + offset];
+            for (int x = sizex - offset; x < sizex; ++x) out[x] = 0.0f;
+        }
     }
 
-    int findcentersino(float* frame0, float* frame180,
-    float* dark, float* flat, int sizex, int sizey)
-    {
-        Image2D<float> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);
-        return getCentersino(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
+    void getCorrectRotationAxis(float* d_tomo_in, float* d_tomo_out,
+            dim3 tomo_size, int deviation) {
+        dim3 gridDim(1, 32, 32);
+        dim3 blockDim(tomo_size.x,
+                tomo_size.y / 32 + tomo_size.y % 32,
+                tomo_size.z / 32 + tomo_size.z % 32);
+        KCorrectRotationAxis<<<blockDim, gridDim>>>(d_tomo_in, d_tomo_out,
+                tomo_size.x, tomo_size.y, tomo_size.z, deviation);
     }
 
     /**
@@ -230,5 +248,22 @@ extern "C"{
                 }
             }
         }
+    }
+
+}
+
+extern "C"{
+    int findcentersino16(uint16_t* frame0, uint16_t* frame180, 
+    uint16_t* dark, uint16_t* flat, int sizex, int sizey)
+    {
+        Image2D<uint16_t> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);
+        return getCentersino16(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
+    }
+
+    int findcentersino(float* frame0, float* frame180,
+    float* dark, float* flat, int sizex, int sizey)
+    {
+        Image2D<float> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);
+        return getCentersino(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
     }
 }
