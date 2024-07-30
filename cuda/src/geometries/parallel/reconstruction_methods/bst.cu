@@ -6,11 +6,13 @@
 
 #include <chrono>
 #include <cstddef>
+#include <cstdio>
 #include <future>
 #include <ratio>
 #include <vector>
 
 #include "common/complex.hpp"
+#include "common/configs.hpp"
 #include "common/logerror.hpp"
 #include "common/opt.hpp"
 #include "common/types.hpp"
@@ -205,6 +207,99 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
         Nrays *= 2;
         Nrays /= pad0;
     }
+}
+
+void getBST(CFG configs, GPU gpus,
+        float* obj, float* tomo, float* angles,
+        dim3 tomo_size, dim3 tomo_pad, dim3 obj_size, cudaStream_t stream) {
+
+    int blocksize_bst = 1;
+
+    const int filter_type = configs.reconstruction_filter_type;
+    int Nrays = tomo_size.x;
+    int Nangles = tomo_size.y;
+    const int sizeimage = obj_size.x;
+    const float reg = configs.reconstruction_reg;
+    const int axis_offset = configs.rotation_axis_offset;
+    const int trueblocksize = tomo_size.z;
+    const int padding = configs.tomo.pad.x;
+
+    size_t insize = Nrays * Nangles;
+    size_t outsize = sizeimage * sizeimage;
+
+
+    int dimmsfilter[] = {Nrays};
+    int dimms1d[] = {(int)Nrays * padding / 2};
+    int dimms2d[] = {(int)sizeimage, (int)sizeimage};
+    int beds[] = {Nrays * padding / 2};
+
+
+    cufftHandle plan1d;
+    cufftHandle plan2d;
+    cufftHandle filterplan;
+
+    HANDLE_FFTERROR(cufftPlanMany(&plan1d, 1, dimms1d, beds, 1, Nrays * padding / 2, beds, 1,
+                                  Nrays * padding / 2, CUFFT_C2C, Nangles * blocksize_bst * 2));
+    HANDLE_FFTERROR(
+        cufftPlanMany(&plan2d, 2, dimms2d, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize_bst));
+    HANDLE_FFTERROR(cufftPlanMany(&filterplan, 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C,
+                                  Nangles * blocksize_bst));
+
+    cufftSetStream(plan1d, stream);
+    cufftSetStream(plan2d, stream);
+    cufftSetStream(filterplan, stream);
+
+    cImage filtersino(Nrays, Nangles * blocksize_bst, 1, MemoryType::EAllocGPU, stream);
+    cImage cartesianblock(sizeimage, sizeimage * blocksize_bst, 1, MemoryType::EAllocGPU, stream);
+    cImage polarblock(Nrays * padding, Nangles * blocksize_bst, 1, MemoryType::EAllocGPU, stream);
+    cImage realpolar(Nrays * padding, Nangles * blocksize_bst, 1, MemoryType::EAllocGPU, stream);
+
+    Filter filter(filter_type, reg, paganin, axis_offset);
+
+    // BST initialization finishes here.
+
+    for (size_t zoff = 0; zoff < (size_t)trueblocksize; zoff += blocksize_bst) {
+        float* sinoblock = tomo + insize * zoff;
+
+        if (filter.type != Filter::EType::none)
+            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, axis_offset, filter, stream);
+
+        dim3 blocks((Nrays + 255) / 256, Nangles, blocksize_bst);
+        dim3 threads(128, 1, 1);
+
+        sino2p<<<blocks, threads, 0, stream>>>(realpolar.gpuptr, sinoblock, Nrays, Nangles, padding, 0);
+
+        Nangles *= 2;
+        Nrays *= padding;
+        Nrays /= 2;
+
+        blocks.y *= 2;
+        blocks.x *= padding;
+        blocks.x /= 2;
+
+        HANDLE_FFTERROR(cufftExecC2C(plan1d, realpolar.gpuptr, polarblock.gpuptr, CUFFT_FORWARD));
+        convBST<<<blocks, threads, 0, stream>>>(polarblock.gpuptr, Nrays, Nangles);
+
+        blocks = dim3((sizeimage + 255) / 256, sizeimage, blocksize_bst);
+        threads = dim3(256, 1, 1);
+
+        polar2cartesian_fourier<<<blocks, threads, 0, stream>>>(cartesianblock.gpuptr, polarblock.gpuptr, angles,
+                                                                Nrays, Nangles, sizeimage);
+
+        HANDLE_FFTERROR(cufftExecC2C(plan2d, cartesianblock.gpuptr, cartesianblock.gpuptr, CUFFT_INVERSE));
+
+        // cudaDeviceSynchronize();
+
+        GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(obj + outsize * zoff,
+                                                                           cartesianblock.gpuptr, sizeimage);
+
+        // HANDLE_ERROR(cudaPeekAtLastError());
+
+        Nangles /= 2;
+        Nrays *= 2;
+        Nrays /= padding;
+    }
+
 }
 
 void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, int Nangles, int trueblocksize,

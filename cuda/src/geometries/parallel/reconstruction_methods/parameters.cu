@@ -7,9 +7,6 @@
 extern "C"{
     void setEMRTParameters(CFG *configs, float *parameters_float, int *parameters_int)
     {
-        /* Set Geometry */
-        configs->geometry.geometry = PARALLEL;
-        
         /* Set Tomogram (or detector) variables */
         configs->tomo.size     = dim3(parameters_int[0],parameters_int[1],parameters_int[2]);  
 
@@ -74,9 +71,6 @@ extern "C"{
 
     void setEMFQParameters(CFG *configs, float *parameters_float, int *parameters_int)
     {
-        /* Set Geometry */
-        configs->geometry.geometry = PARALLEL;
-
         /* Detector pixel size [m] */
         configs->geometry.detector_pixel_x    = parameters_float[0];
         configs->geometry.detector_pixel_y    = parameters_float[1];
@@ -136,9 +130,6 @@ extern "C"{
 
     void setFBPParameters(CFG *configs, float *parameters_float, int *parameters_int)
     {
-        /* Set Geometry */
-        configs->geometry.geometry = PARALLEL;
-
         /* Set Tomogram (or detector) variables */
         configs->tomo.size     = dim3(parameters_int[0],parameters_int[1],parameters_int[2]);  
 
@@ -218,9 +209,6 @@ extern "C"{
 
     void setBSTParameters(CFG *configs, float *parameters_float, int *parameters_int)
     {
-        /* Set Geometry */
-        configs->geometry.geometry = PARALLEL;
-
         /* Set Tomogram (or detector) variables */
         configs->tomo.size     = dim3(parameters_int[0],parameters_int[1],parameters_int[2]);  
 

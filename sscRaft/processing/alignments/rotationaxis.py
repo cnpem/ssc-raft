@@ -1,3 +1,4 @@
+from typing import Optional
 from ...rafttypes import *
 import numpy
 import ctypes
@@ -170,6 +171,30 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
 
     return deviation
 
+def c_correct_rotation_axis(data: numpy.ndarray, deviation: int,
+                            out: Optional[np.ndarray] = None) -> np.ndarray:
+
+    if out is None:
+        out = np.empty_like(data)
+    else:
+        if not out.flags.c_contiguous:
+            raise ValueError('Output array must be contiguous')
+
+    out = CNICE(out)
+    out_ptr = out.ctypes.data_as(c_void_p)
+    data = CNICE(data)
+    data_ptr = data.ctypes.data_as(c_void_p)
+
+    sizez, sizey, sizex = [ctypes.c_int(d) for d in data.shape]
+
+    libraft.correctRotationAxis(data_ptr, out_ptr,
+                                sizex, sizey, sizez,
+                                ctypes.c_int(deviation))
+
+
+    return out
+
+
 def correct_rotation_axis(data: numpy.ndarray, deviation: int) -> numpy.ndarray:
     """Corrects the rotation axis of a data according to a deviation value defined 
     by the number of pixels translated form the center of the data.
@@ -184,7 +209,7 @@ def correct_rotation_axis(data: numpy.ndarray, deviation: int) -> numpy.ndarray:
         (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, 2 * deviation + lenght] 
 
     * CPU function
-    """    
+    """
     logger.info(f'Applying given rotation axis correction deviation value: {deviation}')
 
     deviation = - deviation # Fix centersino value
