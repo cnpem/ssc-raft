@@ -3,7 +3,7 @@
 #include "common/opt.hpp"
 
 
-__global__ void phase_pag::mult(cufftComplex *a, float *b, 
+__global__ void contrast_enhance::multiplication(cufftComplex *a, float *b, 
 cufftComplex *ans, dim3 size)
 {
     int i  = threadIdx.x + blockIdx.x*blockDim.x;
@@ -20,7 +20,7 @@ cufftComplex *ans, dim3 size)
 
 }
 
-__global__ void phase_pag::paganinKernel(float *kernel, float beta_delta, float wavelength, 
+__global__ void contrast_enhance::paganinKernel(float *kernel, float beta_delta, float wavelength, 
 float pixel_objx, float pixel_objy, float z2, dim3 size)
 {
     /* Version of Paganin by frames published by Paganin et al (2002)
@@ -34,17 +34,38 @@ float pixel_objx, float pixel_objy, float z2, dim3 size)
 
     if ( (i >= size.x) || (j >= size.y) || (k >= 1) ) return;
 
-    /* Reciprocal grid */ 
-    float nyqx   = 0.5;
-    float nyqy   = 0.5;
-    
-    float wx     = float( int( i + size.x / 2.0 ) % int( size.x ) ) / float( size.x ) - nyqx;
-    float wy     = float( int( j + size.y / 2.0 ) % int( size.y ) ) / float( size.y ) - nyqy;
+    /* Reciprocal grid */
+    float wx = fminf( i, size.x - i ) / (float)size.x;  
+    float wy = fminf( j, size.y - j ) / (float)size.y;
 
-    wx           = wx / pixel_objx;
-    wy           = wy / pixel_objy;
+    wx       = wx / pixel_objx;
+    wy       = wy / pixel_objy;
 
     kernel[ind]  = 1.0f / ( beta_delta + gamma * (wx*wx + wy*wy) );
+}
+
+__global__ void contrast_enhance::contrast_paganin_based_Kernel(float *kernel, float regularization, 
+float pixel_objx, float pixel_objy, dim3 size)
+{
+    int i        = blockIdx.x*blockDim.x + threadIdx.x;
+    int j        = blockIdx.y*blockDim.y + threadIdx.y;
+    int k        = blockIdx.z*blockDim.z + threadIdx.z;
+    size_t ind   = size.x * j + i;
+
+    if ( (i >= size.x) || (j >= size.y) || (k >= 1) ) return;
+
+    /* Reciprocal grid */
+    
+    float hx = 2.0f / size.x;
+    float hy = 2.0f / size.y;
+
+    float wx = fminf( i, size.x - i ) / (float)size.x;  
+    float wy = fminf( j, size.y - j ) / (float)size.y;
+
+    wx       = wx / hx;
+    wy       = wy / hy;
+
+    kernel[ind]  = 1.0f / ( 1.0f + regularization * (wx*wx + wy*wy) );
 }
 
 __global__ void paganinKernel_tomopy(CFG configs, cufftComplex *data, dim3 size)
@@ -60,7 +81,7 @@ __global__ void paganinKernel_v0(CFG configs, cufftComplex *data, dim3 size)
     Yu et al (2002) https://doi.org/10.1364/OE.26.011110 */
 }
 
-void phase_pag::apply_paganin_filter(CFG configs, GPU gpus, float *projections, float *kernel,
+void contrast_enhance::apply_contrast_filter(CFG configs, GPU gpus, float *projections, float *kernel,
 dim3 size, dim3 size_pad, dim3 pad)
 {
     size_t npad = opt::get_total_points(size_pad);
@@ -72,11 +93,11 @@ dim3 size, dim3 size_pad, dim3 pad)
     dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
                     (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, size_pad.z);
     
-    phase_pag::padding<<<gridBlock,threadsPerBlock>>>(projections, dataPadded, size, pad);
+    contrast_enhance::padding<<<gridBlock,threadsPerBlock>>>(projections, dataPadded, size, pad);
 
     HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
 
-    phase_pag::mult<<<gridBlock,threadsPerBlock>>>(dataPadded, kernel, dataPadded, size_pad);
+    contrast_enhance::multiplication<<<gridBlock,threadsPerBlock>>>(dataPadded, kernel, dataPadded, size_pad);
 
     HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
 
@@ -84,9 +105,7 @@ dim3 size, dim3 size_pad, dim3 pad)
 
     // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
 
-    phase_pag::recuperate_padding<<<gridBlock,threadsPerBlock>>>(dataPadded, projections, size, pad);
-
-    opt::scale<<<gridBlock,threadsPerBlock>>>(projections, size, scale);
+    contrast_enhance::recuperate_padding<<<gridBlock,threadsPerBlock>>>(dataPadded, projections, size, pad);
 
     HANDLE_ERROR(cudaFree(dataPadded));
 

@@ -419,10 +419,8 @@ def FilterNumber(mfilter):
 def PhaseMethodNumber(mfilter):
     if mfilter.lower() == 'paganin':
         return 0
-    elif mfilter.lower() == 'tomopy':
+    elif mfilter.lower() == 'fresnel':
         return 1
-    elif mfilter.lower() == 'v0':
-        return 2
     else:
         return 0
 

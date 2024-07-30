@@ -49,7 +49,7 @@ extern "C"{
     dim3 size, dim3 size_pad);
 }
 
-namespace phase_pag{ // Phase retrieval Paganin
+namespace contrast_enhance{ // Phase retrieval Paganin
 
     __global__ void padding(float *in, cufftComplex *inpadded, dim3 size, dim3 pad);
     __global__ void recuperate_padding(cufftComplex *inpadded, float *in, dim3 size, dim3 pad);
@@ -57,12 +57,17 @@ namespace phase_pag{ // Phase retrieval Paganin
     __global__ void paganinKernel(float *kernel, float beta_delta, float wavelength, 
     float pixel_objx, float pixel_objy, float z2, dim3 size);
 
-    void apply_paganin_filter(CFG configs, GPU gpus, float *projections, float *kernel,
+    void apply_contrast_filter(CFG configs, GPU gpus, float *projections, float *kernel,
     dim3 size, dim3 size_pad, dim3 pad);
 
-    __global__ void mult(cufftComplex *a, float *b, cufftComplex *ans, dim3 size);
+    __global__ void multiplication(cufftComplex *a, float *b, cufftComplex *ans, dim3 size);
 
     __global__ void copy(float *projection, float *kernel, dim3 size);
+
+    __global__ void contrast_paganin_based_Kernel(float *kernel, float regularization, 
+    float pixel_objx, float pixel_objy, dim3 size);
 }
+
+namespace denoise{}
 
 #endif

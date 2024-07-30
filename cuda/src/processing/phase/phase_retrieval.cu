@@ -79,7 +79,7 @@ extern "C" {
         printf("magn: %e \n", configs->geometry.magnitude_x );
     }
 
-    void compute_phase_kernel(CFG configs, float *kernel)
+    void compute_contrast_kernel(CFG configs, float *kernel)
     {
         /* Data sizes */
         int sizex        = configs.tomo.padsize.x;
@@ -100,33 +100,33 @@ extern "C" {
                         (int)ceil( sizey / threadsPerBlock.y ) + 1, 1);
 
 		switch (configs.phase_type){
-				case 0:
-					/* code */
-					phase_pag::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
-                    pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
-					break;
-				case 1:
-					/* code */
-					
-					break;
-				case 2:
-					/* code */
-					
-					break;
-				case 3:
-					/* code */
-					
-					break;
-				case 4:
-					/* code */
-					
-					break;
+            case 0:
+                /* code */
+                contrast_enhance::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
+                pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
+                break;
+            case 1:
+                /* code */
+                
+                break;
+            case 2:
+                /* code */
+                
+                break;
+            case 3:
+                /* code */
+                
+                break;
+            case 4:
+                /* code */
+                
+                break;
 
-				default:
-					phase_pag::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
-                    pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
-					break;
-			}
+            default:
+                contrast_enhance::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
+                pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
+                break;
+        }
 
         // Normalize kernel by maximum value
  		int max;
@@ -146,22 +146,7 @@ extern "C" {
 	void getPhase(CFG configs, GPU gpus, 
     float *projections, float *kernel, dim3 size, dim3 size_pad)
 	{	
-		switch (configs.phase_type){
-			case 0:
-				/* Paganin */
-				phase_pag::apply_paganin_filter(configs, gpus, projections, kernel, size, size_pad, configs.tomo.pad);
-				break;
-            case 1:
-				/* Paganin tomopy */
-				break;
-            case 2:
-				/* Paganin v0 */
-				break;
-			default:
-                // printf("Using default Paganin phase filter. \n");
-				phase_pag::apply_paganin_filter(configs, gpus, projections, kernel, size, size_pad, configs.tomo.pad);
-				break;
-	    }
+        contrast_enhance::apply_contrast_filter(configs, gpus, projections, kernel, size, size_pad, configs.tomo.pad);
     
     }
 
@@ -182,7 +167,7 @@ extern "C" {
         size_t nsize   = nrayspad * nslicespad;
 		float *kernel  = opt::allocGPU<float>(nsize);
 
-        compute_phase_kernel(configs, kernel);
+        compute_contrast_kernel(configs, kernel);
 
 		int i; 
         int blocksize = configs.blocksize;
@@ -257,8 +242,8 @@ extern "C" {
         setPhaseParameters(&configs, paramf, parami);
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
-        printPhaseParameters(&configs);
-        printGPUParameters(&gpu_parameters);
+        // printPhaseParameters(&configs);
+        // printGPUParameters(&gpu_parameters);
 
     
 		int subvolume = (configs.tomo.size.z + ngpus - 1) / ngpus;
