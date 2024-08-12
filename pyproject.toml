@@ -4,8 +4,8 @@ requires = [
     "setuptools>=60.0",
     "scikit-build>=0.17",
     "cython>=3.0.0",
-    "cmake>=3.18",
-    "wheel==0.42.0",
+    "cmake>=3.10",
+    "wheel>=0.42.0",
     "ninja>=1.10.2"
 ]
 
@@ -15,13 +15,22 @@ name = "sscRaft"
 license = { file = "LICENSE.txt" }
 
 dependencies = [
-    "numpy",
+    "numpy<2",
     "scikit-image >=0.19.3",
     "scipy",
     "matplotlib",
     "SharedArray",
     "uuid",
-    "h5py"
+    "h5py",
+    "click>=8.0.4",
+    "colorama>=0.4.5",
+    "rich>=12.6.0",
+    "mdurl>=0.1.0",
+    "Pygments>=2.14.0",
+    "shellingham>=1.5.0",
+    "typer>=0.9.0",
+    "typing_extensions>=4.1.1",
+    "tqdm"
 ]
 
 classifiers=[
@@ -54,4 +63,7 @@ platforms = ["Linux"]
 
 [tool.setuptools.dynamic]
 version = {attr = "sscRaft._version.__version__"}
+
+#[project.scripts]
+#ssc-raft = "sscRaft.cli.ssc_raft_cli:app"
 
