@@ -96,12 +96,46 @@ libraft  = load_library(_lib, ext)
 #| Function prototypes |#
 #########################
 
+############# Raft ##############
+try:
+    # Float logarithm on CPU
+    libraft.logf_cpu.argtypes = [
+        ctypes.c_void_p, ctypes.c_int
+    ]
+    
+    libraft.logf_cpu.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_LOG_CPU-')
+    pass
+
+try:
+    # Float exponential on CPU
+    libraft.expf_cpu.argtypes = [
+        ctypes.c_void_p, ctypes.c_int
+    ]
+    
+    libraft.expf_cpu.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_EXP_CPU-')
+    pass
+
+try:
+    # Float transpose on CPU
+    libraft.transpose_cpu.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int
+    ]
+    
+    libraft.transpose_cpu.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_TRANSPOSE_CPU-')
+    pass
+
 ######## Parallel Raft ##########
 
 try:
     # EM Ray Tracing MultiGPU without semafaro
     libraft.get_tEM_RT_MultiGPU.argtypes = [
-        ctypes.c_void_p, c_int, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
     ]
     
@@ -112,7 +146,7 @@ except:
 
 try:
     libraft.get_eEM_RT_MultiGPU.argtypes = [
-        ctypes.c_void_p, c_int, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
     ]
 

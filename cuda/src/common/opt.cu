@@ -8,6 +8,35 @@
 /*============================================================================*/
 /* namespace opt (in 'inc/commons/opt.hpp') functions definitions */
 
+void opt::logf_cpu(float *data, size_t datasize)
+{
+    for (int i = 0; i <= datasize; i++)
+        data[i] = logf(data[i]);
+
+}
+
+void opt::expf_cpu(float *data, size_t datasize)
+{
+    for (int i = 0; i <= datasize; i++)
+        data[i] = expf(data[i]);
+
+}
+
+void opt::transpose_cpu(float *data, int sizex, int sizey, int sizez)
+{
+    float aux;
+
+    for (int k = 0; k <= sizez; k++){
+        for (int j = 0; j <= sizey; j++){
+            for (int i = 0; i <= sizex; i++){
+                aux                          = data[IND(i,j,k,sizex,sizey)];
+                data[IND(i,j,k,sizex,sizey)] = data[IND(i,k,j,sizex,sizey)];
+                data[IND(i,k,j,sizex,sizey)] = aux;
+            }
+        }
+    }
+}
+
 void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE)
 {	
     /* rank:

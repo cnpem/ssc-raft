@@ -3,9 +3,9 @@ from ..processing.io import *
 
 def phase_retrieval(frames, dic):
 
-    required = ('gpu','detectorPixel[m]','z2[m]','energy[eV]','magn')
-    optional = ('method', 'beta/delta','padding','blocksize')
-    default  = ('paganin',          0.0,        2,          0)
+    required = ('gpu','detectorPixel[m]')
+    optional = ('method', 'beta/delta','padding','blocksize','z2[m]','energy[eV]','magn')
+    default  = ('paganin',          0.0,        2,         0,      1,           1,     1)
     
     dic = SetDictionary(dic,required,optional,default)
 
