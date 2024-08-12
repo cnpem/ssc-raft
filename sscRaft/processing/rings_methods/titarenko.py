@@ -69,19 +69,19 @@ def rings(tomogram, dic, **kwargs):
     Dictionary parameters:
 
         * ``dic['gpu']`` (int list): List of GPUs to use [required]
-        * ``dic['lambda rings']`` (float,optional): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
-        * ``dic['rings block']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1]   
+        * ``dic['regularization']`` (float,optional): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
+        * ``dic['blocks']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1]   
     """
     required = ('gpu',)
-    optional = ('lambda rings','rings block')
+    optional = ('regularization','blocks')
     default  = (-1,1)
 
     dic = SetDictionary(dic,required,optional,default)
 
     gpus = dic['gpu']
 
-    rings_lambda = dic['lambda rings']
-    rings_block  = dic['rings block']
+    rings_lambda = dic['regularization']
+    rings_block  = dic['blocks']
 
     tomogram = TitarenkoRingsGPU( tomogram, gpus, rings_lambda, rings_block ) 
 

@@ -52,12 +52,19 @@ def fbpGPU(tomogram, angles, gpus, dic):
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
-        energy = dic['energy[eV]']
-        z2     = dic['z2[m]']
+
+        try:
+            energy = dic['energy[eV]']
+        except:
+            energy = 1
+    
+        try:
+            z2 = dic['z2[m]']
+        except:
+            z2 = 1
     else:
         beta_delta = 0.0
-        energy = 1.0
-        z2     = 0.0
+        z2         = 0.0
 
     padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
@@ -147,12 +154,19 @@ def bstGPU(tomogram, angles, gpus, dic):
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
-        energy = dic['energy[eV]']
-        z2     = dic['z2[m]']
+
+        try:
+            energy = dic['energy[eV]']
+        except:
+            energy = 1
+    
+        try:
+            z2 = dic['z2[m]']
+        except:
+            z2 = 1
     else:
         beta_delta = 0.0
-        energy = 1.0
-        z2     = 0.0
+        z2         = 0.0
 
     print('beta_delta:',beta_delta)
     print('z2:',z2)

@@ -46,7 +46,7 @@ def fbp(tomogram, dic, angles = None, **kwargs):
     """
     required = ('gpu',)        
     optional = ( 'filter','offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method')
-    default  = ('lorentz',       0,        2,             1.0,         0.0,          0,         0.0,    0.0,    'RT')
+    default  = ('lorentz',       0,        2,             1.0,         0.0,          0,         1.0,    1.0,    'RT')
     
     dic = SetDictionary(dic,required,optional,default)
 
