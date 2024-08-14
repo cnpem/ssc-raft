@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 include(FetchContent)
 
 project(sscRaft LANGUAGES CXX CUDA)

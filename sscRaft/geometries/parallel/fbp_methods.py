@@ -101,7 +101,7 @@ def fbpGPU(tomogram, angles, gpus, dic):
 
     return obj
 
-def bstGPU(tomogram, angles, gpus, dic):
+def bstGPU(tomogram, angles, gpus, dic, obj = None):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
     tomogram using the Backprojection Slice Theorem (BST) method.
 
@@ -182,7 +182,8 @@ def bstGPU(tomogram, angles, gpus, dic):
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
-    obj          = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+    if obj is None:
+        obj = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
     angles       = numpy.array(angles)

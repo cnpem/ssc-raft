@@ -4,7 +4,7 @@ from ..processing.io import *
 from .parallel.fbp_methods import *
 from .parallel.em_methods import *
 
-def fbp(tomogram, dic, angles = None, **kwargs):
+def fbp(tomogram, dic, angles = None, obj = None, **kwargs):
     """Computes the reconstruction of a parallel beam tomogram using the 
     Backprojection Slice Theorem (BST) method.
     
@@ -62,7 +62,7 @@ def fbp(tomogram, dic, angles = None, **kwargs):
                 logger.error(f'Missing angles list!! Finishing run...') 
                 raise ValueError(f'Missing angles list!!')
 
-        output = fbpGPU( tomogram, angles, gpus, dic ) 
+        output = fbpGPU( tomogram, angles, gpus, dic)
 
         return output
     
@@ -70,8 +70,7 @@ def fbp(tomogram, dic, angles = None, **kwargs):
 
         angles = numpy.linspace(0.0, numpy.pi, tomogram.shape[-2], endpoint=False)
 
-        output = bstGPU( tomogram, angles, gpus, dic ) 
-    
+        output = bstGPU( tomogram, angles, gpus, dic, obj=obj)
 
         return output
 

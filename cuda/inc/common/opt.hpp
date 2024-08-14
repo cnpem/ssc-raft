@@ -228,6 +228,8 @@ namespace opt{
     dim3 size, dim3 pad);
 
     extern "C" {
+
+        void flip_x(float *data, int sizex, int sizey, int sizez);
         void transpose_cpu(float *data, int sizex, int sizey, int sizez);
     }
 }

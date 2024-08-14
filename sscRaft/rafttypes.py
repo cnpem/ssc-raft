@@ -98,6 +98,18 @@ libraft  = load_library(_lib, ext)
 
 ############# Raft ##############
 
+
+try:
+    # Float flipx on CPU
+    libraft.flip_x.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int
+    ]
+    
+    libraft.flip_x.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_FLIP_X-')
+    pass
+
 try:
     # Float transpose on CPU
     libraft.transpose_cpu.argtypes = [
