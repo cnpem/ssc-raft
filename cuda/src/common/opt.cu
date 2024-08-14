@@ -22,7 +22,7 @@ void opt::flip_x(float *data, int sizex, int sizey, int sizez) {
         for (size_t j = 0; j < sizey; ++j) {
             float* row = data + j * sizex + k * sizexy;
             for (size_t i = 0; i < (sizex/2); ++i) {
-                std::swap(row[i], row[sizex - i]);
+                std::swap(row[i], row[sizex - 1 - i]);
             }
         }
     }
