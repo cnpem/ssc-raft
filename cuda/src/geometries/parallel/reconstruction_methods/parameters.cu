@@ -261,7 +261,7 @@ extern "C"{
         configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta; /* Reconstruction Paganin parameter */
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
 
-        printf("Dados: %e %e %e %e \n",configs->geometry.wavelength,configs->geometry.z2x,parameters_float[0],configs->reconstruction_paganin);
+        // printf("Dados: %e %e %e %e \n",configs->geometry.wavelength,configs->geometry.z2x,parameters_float[0],configs->reconstruction_paganin);
     
         /* Compute total memory used of FBP method on a singles slice */
         configs->total_required_mem_per_slice_bytes = (
