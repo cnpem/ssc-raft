@@ -1,4 +1,7 @@
 #include <driver_types.h>
+#include <cstddef>
+#include <cstdlib>
+#include <cstring>
 #include "common/configs.hpp"
 #include "common/complex.hpp"
 #include "common/opt.hpp"
@@ -8,33 +11,25 @@
 /*============================================================================*/
 /* namespace opt (in 'inc/commons/opt.hpp') functions definitions */
 
-void opt::logf_cpu(float *data, size_t datasize)
-{
-    for (int i = 0; i <= datasize; i++)
-        data[i] = logf(data[i]);
-
-}
-
-void opt::expf_cpu(float *data, size_t datasize)
-{
-    for (int i = 0; i <= datasize; i++)
-        data[i] = expf(data[i]);
-
-}
 
 void opt::transpose_cpu(float *data, int sizex, int sizey, int sizez)
 {
-    float aux;
+    const size_t sizexy = sizex * sizey;
+    const size_t sizexz = sizex * sizez;
+    const size_t sizexyz = size_t(sizex) * size_t(sizey) * size_t(sizez);
 
-    for (int k = 0; k <= sizez; k++){
-        for (int j = 0; j <= sizey; j++){
-            for (int i = 0; i <= sizex; i++){
-                aux                          = data[IND(i,j,k,sizex,sizey)];
-                data[IND(i,j,k,sizex,sizey)] = data[IND(i,k,j,sizex,sizey)];
-                data[IND(i,k,j,sizex,sizey)] = aux;
-            }
+    float* temp = (float*) malloc(sizeof(float) * sizexyz);
+
+    for (size_t k = 0; k < sizez; ++k) {
+        for (size_t j = 0; j < sizey; ++j) {
+            memcpy(temp + j * sizexz + k * sizex, data + j * sizex + k * sizexy,
+                    sizeof(float) * sizex);
         }
     }
+
+    memcpy(data, temp, sizeof(float) * sizexyz);
+
+    free(temp);
 }
 
 void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE)

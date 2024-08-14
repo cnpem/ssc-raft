@@ -97,27 +97,6 @@ libraft  = load_library(_lib, ext)
 #########################
 
 ############# Raft ##############
-try:
-    # Float logarithm on CPU
-    libraft.logf_cpu.argtypes = [
-        ctypes.c_void_p, ctypes.c_int
-    ]
-    
-    libraft.logf_cpu.restype  = None
-except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_LOG_CPU-')
-    pass
-
-try:
-    # Float exponential on CPU
-    libraft.expf_cpu.argtypes = [
-        ctypes.c_void_p, ctypes.c_int
-    ]
-    
-    libraft.expf_cpu.restype  = None
-except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_EXP_CPU-')
-    pass
 
 try:
     # Float transpose on CPU

@@ -227,9 +227,9 @@ namespace opt{
     __global__ void remove_paddR2R(float *inpadded, float *out, 
     dim3 size, dim3 pad);
 
-    void logf_cpu(float *data, size_t datasize);
-    void expf_cpu(float *data, size_t datasize);
-    void transpose_cpu(float *data, int sizex, int sizey, int sizez);
+    extern "C" {
+        void transpose_cpu(float *data, int sizex, int sizey, int sizez);
+    }
 }
 
 
