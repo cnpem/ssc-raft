@@ -30,7 +30,8 @@ extern "C"
 
         // printf("B: ndevs = %d, blockgpu = %d \n", ndevs, blockgpu);
 
-
+        printf("Rot axis = %d \n", lab.rotation_axis_offset);
+        
         n_process = memory(lab, ndevs);
         
         // printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);

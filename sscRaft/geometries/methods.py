@@ -4,7 +4,7 @@ from ..processing.io import *
 from .parallel.fbp_methods import *
 from .parallel.em_methods import *
 
-def fbp(tomogram, dic, angles = None, obj = None, **kwargs):
+def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
     """Computes the reconstruction of a parallel beam tomogram using the 
     Backprojection Slice Theorem (BST) method.
     
@@ -38,6 +38,9 @@ def fbp(tomogram, dic, angles = None, obj = None, **kwargs):
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
+        * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
+
 
     References:
 
@@ -45,12 +48,12 @@ def fbp(tomogram, dic, angles = None, obj = None, **kwargs):
     
     """
     required = ('gpu',)        
-    optional = ( 'filter','offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method')
-    default  = ('lorentz',       0,        2,             1.0,         0.0,          0,         1.0,    1.0,    'RT')
+    optional = ( 'filter','rotation axis offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method')
+    default  = ('lorentz',                     0,        2,             1.0,         0.0,          0,         1.0,    1.0,    'RT')
     
     dic = SetDictionary(dic,required,optional,default)
 
-    dic['regularization'] = 1.0
+    # dic['regularization'] = 1.0
     method                = dic['method']
     gpus                  = dic['gpu']
 
@@ -62,7 +65,7 @@ def fbp(tomogram, dic, angles = None, obj = None, **kwargs):
                 logger.error(f'Missing angles list!! Finishing run...') 
                 raise ValueError(f'Missing angles list!!')
 
-        output = fbpGPU( tomogram, angles, gpus, dic)
+        output = fbpGPU( tomogram, angles, gpus, dic, obj=obj)
 
         return output
     
@@ -74,7 +77,7 @@ def fbp(tomogram, dic, angles = None, obj = None, **kwargs):
 
         return output
 
-def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
+def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
     """ Expectation maximization (EM) for 3D tomographic reconstructions for parallel, 
     conebeam and fanbeam geometries.
 
@@ -99,8 +102,6 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
     Dictionary parameters:
     
         * ``dic['gpu']`` (int list):  List of GPU devices used for computation [required]
-        * ``dic['flat']`` (ndarray):  Flat 2D data. Tha axis are (slices,rays)  [required]
-        * ``dic['angles[rad]']`` (floar list):  List of angles in radians [required]
         * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters [required for ``tEMFQ``]
         * ``dic['method']`` (str): Choose EM-method. Options: [required]
     
@@ -111,9 +112,12 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
             #. ``tEMFQ``: Transmission EM using the Fourier Slice Theorem (FST) for the forward operator and Backprojection Slice Theorem (BST) for the inverse operator.
         
         * ``dic['beamgeometry']`` (str): Beam geometry - \'parallel\', \'conebeam\' or \'fanbeam`\' [default: \'parallel\'] [required]
+        * ``dic['flat']`` (ndarray, optional):  Flat 2D data. Tha axis are (slices,rays)  [default: None]
+        * ``dic['angles[rad]']`` (floar list, optional):  List of angles in radians [default: None]
         * ``dic['iterations']`` (int, optional): Global number of iterations [default: 100]
         * ``dic['interpolation']`` (str, optional):  Type of interpolation. Options: \'nearest\' or \'bilinear\' [default: \'bilinear\']
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 2]  
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [default: 0 (automatically)]
 
     """
     # Set default dictionary parameters:
@@ -141,40 +145,34 @@ def em(data, dic, flat = None, angles = None, guess = None, **kwargs):
     # Interpolation for EM Frequency
     interpolation = setInterpolation(dic['interpolation'])
 
-    try:
-        angles = dic['angles[rad]']
-    except:
-        if angles is None:
+    if angles is None:
+        try:
+            angles = dic['angles[rad]']
+        except:
             logger.error(f'Missing angles list!! Finishing run...') 
             raise ValueError(f'Missing angles list!!')
         
     if method != 'eEMRT':
-        try:
-            flat = dic['flat']
-        except:
-            if flat is None:
+        if flat is None:
+            try:
+                flat = dic['flat']
+            except:
                 logger.warning(f'No flat provided.') 
                 flat = numpy.ones((data.shape[0],data.shape[-1])) 
 
-    # Initial guess for EM Frequency
-    try:
-        guess = dic['guess']
-    except:
-        pass 
-
     if method == 'eEMRT':
 
-        output = eEMRT_GPU_(data, angles, iterations, gpus, blocksize) 
+        output = eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj) 
     
     elif method == 'tEMRT':
 
-        output = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize)
+        output = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj)
 
     elif method == 'tEMFQ':
 
         output = tEMFQ_GPU_(data, flat, angles, 
                             pad, interpolation, det_pixel, 
-                            tv_reg, iterations, gpus, blocksize, guess)  
+                            tv_reg, iterations, gpus, blocksize, obj = obj)  
     else:
         logger.error(f'Invalid EM method:{method}')
         raise ValueError(f'Invalid EM method:{method}')

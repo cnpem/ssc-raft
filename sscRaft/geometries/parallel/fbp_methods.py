@@ -27,6 +27,8 @@ def fbpGPU(tomogram, angles, gpus, dic):
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
+        * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
 
     """        
     ngpus    = len(gpus)
@@ -47,7 +49,7 @@ def fbpGPU(tomogram, angles, gpus, dic):
     filter_type    = FilterNumber(dic['filter'])
     beta_delta     = dic['beta/delta']
     regularization = dic['regularization']
-    offset         = dic['offset']
+    offset         = dic['rotation axis offset']
     blocksize      = dic['blocksize']
     energy         = dic['energy[eV]']
     z2             = dic['z2[m]']
@@ -67,7 +69,8 @@ def fbpGPU(tomogram, angles, gpus, dic):
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
-    obj          = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+    if obj is None:
+        obj = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
     angles       = numpy.array(angles)
@@ -118,6 +121,8 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
+        * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
 
     References:
 
@@ -142,7 +147,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
     filter_type    = FilterNumber(dic['filter'])
     beta_delta     = dic['beta/delta']
     regularization = dic['regularization']
-    offset         = int(dic['offset'])
+    offset         = int(dic['rotation axis offset'])
     blocksize      = dic['blocksize']
     energy         = dic['energy[eV]']
     z2             = dic['z2[m]']

@@ -26,7 +26,7 @@ extern "C" {
         CFG configs; GPU gpu_parameters;
 
         setEMRTParameters(&configs, paramf, parami);
-        printEMRTParameters(&configs);
+        // printEMRTParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
         // printGPUParameters(&gpu_parameters);
@@ -136,11 +136,6 @@ extern "C" {
             get_tEM_RT( configs, gpus, dobj, dcount, dflat, dangles,
                         backcounts, temp, back, subblock);
 
-            printf(cudaGetErrorString(cudaGetLastError()));
-
-            printf("iblock = %d, Indblock = %d, blocksize = %d, Subblock = %d, sizeImage = %d \n",ind_block, i,blocksize,subblock,sizeImage);
-            printf("sizez = %d, ptr_block_obj = %ld, mult = %ld \n",sizez,ptr_block_obj,(size_t)sizeImage * sizeImage * subblock);
-
             opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, (size_t)sizeImage * sizeImage * subblock);
 
         }
@@ -217,7 +212,7 @@ extern "C"{
         CFG configs; GPU gpu_parameters;
 
         setEMRTParameters(&configs, paramf, parami);
-        printEMRTParameters(&configs);
+        // printEMRTParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
 
@@ -355,3 +350,4 @@ extern "C" {
         HANDLE_ERROR(cudaFree(backones));
     }
 }
+

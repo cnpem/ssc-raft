@@ -1,6 +1,6 @@
 from ...rafttypes import *
 
-def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize):
+def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
     """ Wrapper for MultiGPU/CUDA function of the 
     Emission Expectation maximization (EM) method for 3D tomographic reconstructions in 
     parallel beam geometry. 
@@ -33,9 +33,12 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize):
     gpus          = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_ptr      = gpus.ctypes.data_as(ctypes.c_void_p)
     
-    obj           = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
-    obj           = CNICE(obj)
-    obj_ptr       = obj.ctypes.data_as(ctypes.c_void_p)
+    if obj is not None:
+        obj     = CNICE(obj)
+        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
+    else:
+        obj     = numpy.ones([nslices, objsize, objsize], dtype=numpy.float32)
+        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     tomo          = CNICE(tomo) #sino pointer
     tomo_ptr      = tomo.ctypes.data_as(ctypes.c_void_p) 
@@ -64,7 +67,7 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize):
 
     return obj
 
-def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize):
+def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
     """ Wrapper for MultiGPU/CUDA function of the 
     Transmission Expectation maximization (EM) method for 3D tomographic reconstructions in 
     parallel beam geometry. Flat (or empty) here is defined by a measurement without
@@ -99,17 +102,20 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize):
 
     objsize       = counts.shape[-1]
 
-    counts        = numpy.exp(-counts)
-    flat          = numpy.ones(counts.shape)
+    counts        = numpy.exp(-counts, counts)
+    # flat          = numpy.ones(counts.shape)
     
     ngpus         = len(gpus)
     gpus          = numpy.array(gpus)
     gpus          = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_ptr      = gpus.ctypes.data_as(ctypes.c_void_p)
-    
-    obj           = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
-    obj           = CNICE(obj)
-    obj_ptr       = obj.ctypes.data_as(ctypes.c_void_p)
+
+    if obj is not None:
+        obj     = CNICE(obj)
+        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
+    else:
+        obj     = numpy.ones([nslices, objsize, objsize], dtype=numpy.float32)
+        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     counts        = CNICE(counts) 
     counts_ptr    = counts.ctypes.data_as(ctypes.c_void_p) 
@@ -191,7 +197,7 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
         obj     = CNICE(obj)
         obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
     else:
-        obj     = numpy.ones([nslices, nrays, nrays], dtype=numpy.float32)
+        obj     = numpy.ones([nslices, objsize, objsize], dtype=numpy.float32)
         obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     count       = CNICE(count) 

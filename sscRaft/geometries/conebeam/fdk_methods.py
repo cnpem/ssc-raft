@@ -1,7 +1,7 @@
 from ...rafttypes import *
 import numpy
 
-def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None) -> numpy.ndarray:
+def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, obj: numpy.ndarray = None) -> numpy.ndarray:
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
     GPU function.
 
@@ -139,6 +139,8 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None) -
     filter     = FilterNumber(dic['filter'])
 
     logger.info(f'FDK filter: {filtername}({filter})')
+
+    offset         = dic['rotation axis offset']
     
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
@@ -157,7 +159,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None) -
                 slice_recon_start = start_recon_slice, slice_recon_end = end_recon_slice,  
                 slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice,
                 nph = nph, padh = padh,
-                energy = energy)
+                energy = energy, rotation_axis_offset = offset)
 
     time = numpy.zeros(2)
     time = numpy.ascontiguousarray(time.astype(numpy.float64))
@@ -176,14 +178,14 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None) -
     proj = numpy.ascontiguousarray(tomogram.astype(numpy.float32))
     proj_p = proj.ctypes.data_as(ctypes.c_void_p)
 
-    recon = numpy.zeros((lab.nz, lab.ny, lab.nx))
-
     logger.info(f'Recon shape: ({lab.nx}, {lab.ny}, {lab.nz}) = (nx,ny,nz).')
 
-    recon = numpy.ascontiguousarray(recon.astype(numpy.float32))
-    recon_p = recon.ctypes.data_as(ctypes.c_void_p)
+    if obj is None:
+        obj = CNICE(obj)
+        obj = numpy.zeros([lab.nz, lab.ny, lab.nx], dtype=numpy.float32)    
+    obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
-    libraft.gpu_fdk(lab, recon_p, proj_p, angles_p, gpus_p, 
+    libraft.gpu_fdk(lab, obj_ptr, proj_p, angles_p, gpus_p, 
                     ctypes.c_int(ndev), time_p)
 
-    return recon
+    return obj

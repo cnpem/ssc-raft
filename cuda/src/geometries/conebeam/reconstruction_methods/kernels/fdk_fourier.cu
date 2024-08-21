@@ -125,8 +125,13 @@ __global__ void signal_filter_pad(Lab lab, float* W, cufftComplex* signal, Proce
     set_filter_idxs_pad(n, &k, &j, &i, lab, process);
     idx = (long long int) k + j*lab.nph + i * lab.nph * lab.nbeta;
 
-    signal[idx].x = signal[idx].x*W[k];
-    signal[idx].y = signal[idx].y*W[k];      
+    float sink, cosk;
+    float value = -2.0f * float(M_PI) * lab.rotation_axis_offset * k * float(lab.nh) / (lab.dh); 
+
+    __sincosf(value, &sink, &cosk);
+
+    signal[idx].x = ( signal[idx].x * cosk - signal[idx].y * sink ) * W[k];
+    signal[idx].y = ( signal[idx].y * cosk + signal[idx].x * sink ) * W[k];      
 }}
 
 extern "C"{
@@ -138,8 +143,13 @@ __global__ void signal_filter(Lab lab, float* W, cufftComplex* signal, Process p
     set_filter_idxs(n, &k, &j, &i, lab, process);
     idx = (long long int) k + j*lab.nh + i*lab.nh*lab.nbeta;
 
-    signal[idx].x = signal[idx].x*W[k];
-    signal[idx].y = signal[idx].y*W[k];      
+    float sink, cosk;
+    float value = - 2.0f * float(M_PI)/ float(lab.nh) * lab.rotation_axis_offset * k; 
+
+    __sincosf(value, &sink, &cosk);
+
+    signal[idx].x = ( signal[idx].x * cosk - signal[idx].y * sink ) * W[k];
+    signal[idx].y = ( signal[idx].y * cosk + signal[idx].x * sink ) * W[k];        
 }}
 
 extern "C"{

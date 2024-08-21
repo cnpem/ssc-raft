@@ -35,6 +35,7 @@ typedef struct {
     int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
     int nph, padh;
     float energy;
+    int rotation_axis_offset;
 
     /* Filter Types definitions
     enum EType
