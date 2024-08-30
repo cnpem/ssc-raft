@@ -1,9 +1,11 @@
 #include <driver_types.h>
 
+#include <chrono>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <thread>
+#include <utility>
 #include <vector>
 
 #include "common/complex.hpp"
@@ -28,12 +30,13 @@ void opt::flip_x(float *data, int sizex, int sizey, int sizez) {
     }
 }
 
+//this implementation is still quite naive, but can be faster than numpy for big arrays
 void opt::transpose_cpu(float *data, int sizex, int sizey, int sizez) {
     const size_t sizexy = sizex * sizey;
     const size_t sizexz = sizex * sizez;
     const size_t sizexyz = size_t(sizex) * size_t(sizey) * size_t(sizez);
 
-    float *temp = (float *)malloc(sizeof(float) * sizexyz);
+    float *temp = (float *)aligned_alloc(64, sizeof(float) * sizexyz);
 
     for (size_t j = 0; j < sizey; ++j) {
         for (size_t k = 0; k < sizez; ++k) {
