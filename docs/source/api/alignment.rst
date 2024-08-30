@@ -3,17 +3,29 @@
 Alignment API
 #############
 
-.. automodule:: sscRaft.processing.alignment.alignments
+.. _apialign:
+.. automodule:: sscRaft.processing.alignments.alignment
      :members:
      :undoc-members:
      :show-inheritance:
 
-.. automodule:: sscRaft.processing.alignment.wiggle
+.. _apiwiggle:
+
+.. automodule:: sscRaft.processing.alignments.wiggle
      :members:
      :undoc-members:
      :show-inheritance:
 
-.. automodule:: sscRaft.processing.alignment.rotationaxis
+.. _apirotaxis:
+
+.. automodule:: sscRaft.processing.alignments.rotationaxis
+     :members:
+     :undoc-members:
+     :show-inheritance:
+
+.. _apistitch:
+
+.. automodule:: sscRaft.processing.alignments.stitching360
      :members:
      :undoc-members:
      :show-inheritance:

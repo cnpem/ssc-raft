@@ -239,18 +239,19 @@ __global__ void contrast_enhance::padding(float *in, cufftComplex *inpadded, dim
 
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
-    // if ( ( i < padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +      0];
-    // if ( ( i > size.x + padding_x   ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
-    // if ( ( j < padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +     ii];
-    // if ( ( j > size.y + padding_y   ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * (size.y-1) +     ii];
-
     inpadded[indpad].x = 1.0;
     inpadded[indpad].y = 0.0;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
+    // if ( (i < 0) || (i >= size.x) || (j < 0) || (j >= size.y) || (k >= size.z) ) return;
 
+    if ( ( i <          padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
+    if ( ( i > size.x + padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
+    if ( ( j <          padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii];
+    if ( ( j > size.y + padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * (size.y-1) +          ii];
+
+    // long long int index  = size.x * k * size.y + size.x * j + i;
     inpadded[indpad].x = in[index];
-
 }
 
 __global__ void contrast_enhance::recuperate_padding(cufftComplex *inpadded, float *in, dim3 size, dim3 pad)
@@ -271,8 +272,11 @@ __global__ void contrast_enhance::recuperate_padding(cufftComplex *inpadded, flo
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad = Npadx  * k * Npady  + Npadx  *  j +  i;
 
+    
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
-
+    // if ( (i < 0) || (i >= size.x) || (j < 0) || (j >= size.y) || (k >= size.z) ) return;
+    
+    // long long int index  = size.x * k * size.y + size.x * j + i;
     in[index] = inpadded[indpad].x;
     
 }

@@ -169,8 +169,9 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
 
 def correct_background(frames, flat, dark, gpus = [0], is_log = False):
     """ Function to correct tomography projections (or frames) background 
-    with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
-    a sample, to measure the background.
+    with flat (or empty) and dark. Flat (or empty). Flat is a measurement without
+    a sample, to measure the background. Dark is a measurements without a beam and sample, 
+    to measure detector pixel response.
     
     Can be computed in two ways.
 
@@ -182,18 +183,18 @@ def correct_background(frames, flat, dark, gpus = [0], is_log = False):
     .. math::
         T = \\frac{D - D_d}{D_f - D_d}
 
-    for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the projection volume, 
-    :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
+    for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the measurements volume, 
+    :math:`D_f` is the flat measurement and :math:`D_d` is the dark measurement.
 
     Args:
-        frames (ndarray): Frames (or projections) of size [slices, angles, lenght]
-        flat   (ndarray): Flat of size [slices, number of flats, lenght]
-        dark   (ndarray): Dark of size [slices, lenght]
-        gpus  (int list, optional): List of GPUs [Default: [0]]
-        is_log (bool, optional): Apply ``- logarithm()`` or not [Default: False]
+        frames (ndarray): Frames (or projections) of size [slices, angles, lenght].
+        flat   (ndarray): Flat of size [slices, number of flats, lenght].
+        dark   (ndarray): Dark of size [slices, lenght].
+        gpus  (int list, optional): List of GPUs [Default: [0]].
+        is_log (bool, optional): Apply ``- logarithm()`` or not [Default: False].
 
     Returns:
-        (ndarray): Corrected frames (or projections) of dimension [slices, angles, lenght]
+        (ndarray): Corrected frames (or projections) of dimension [slices, angles, lenght].
 
     * One or MultiGPUs. 
     * Calls function ``background_correctionGPU()``.

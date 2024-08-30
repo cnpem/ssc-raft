@@ -5,13 +5,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
-[3.0.0-dev] - 2024-04-15
-------------------------
+[3.0.0] - 2024-08-30
+--------------------
 Added
 ~~~~~
 - ``EM`` on Frequency domain
 - ``BST`` reconstruction with new filters and paganin filter
-- ``FBP`` with padding
 - Radon ray tracing for parallel beam
 - Wiggle and other methods of alignment
 - C/C++/CUDA pipeline
@@ -19,6 +18,11 @@ Added
 - ``correct_background()`` function that corrects the background (flat/dark) with data axis as ``[slices,angles,lenght]`` as input
 - ``correct_rotation_axis()`` function to correct axis deviation
 - Stitching 360 to 180 degrees tomography functions for parallel beam
+- ``phase_retrieval()`` function added with Paganin method
+- Pinned memory functions for usage
+- ``CUDA STREAMS`` added in most functions
+- ``transpose()`` C/C++/CUDA function to change from projection space to sinogram space
+- ``flip_x()`` C/C++/CUDA function to flip (reflect) x-axis
  
 Changed
 ~~~~~~~
@@ -26,12 +30,16 @@ Changed
 - Dictionary entries 
 - Changed dictionary all function entries from ``angles`` to ``angles[rad]`` on ``EM``
 - ``em()`` function to support all ``EM`` related methods for parallel beam, as of now
+- ``fbp()`` function to support all ``FBP`` related methods for parallel beam, like BST, as of now
 - Rings and flat/dark correction functions
+- Paganin regularization dictionary entry for slices version from ``paganin regularization`` to ``beta/delta`` and standardization for all Paganin related methods
+- Reconstruction methods have now the possibility to receive the reconstruction volume as input 
 
 Known Bugs
 ~~~~~~~~~~
 - ``BST`` works for 180 degrees only on a regular angle mesh
 - ``BST`` angles are hardcoded and not as input
+- Padding not working very well on ``FBP`` and ``phase_retrieval()`` on Paganin by frames - turned-off
 - Memory issues on ``EM`` for cone-beam geometry
 - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
 - Memory issues on ``FDK``: In reconstruction by slices
@@ -40,6 +48,9 @@ Known Bugs
 Removed
 ~~~~~~~
 - ``em_cone()`` function
+- ``bst()`` function
+- ``phase_filter()`` functions 
+- CLI as of now
 
 To be done
 ~~~~~~~~~~
@@ -47,6 +58,56 @@ To be done
 - Refactoring ``EM`` conebeam ray tracing
 - Refactoring ``FST`` frequency domain forward method for parallel beam
 - Refactoring ``RadonCONE`` ray tracing forward method for conebeam
+
+[2.3.0] - 2024-07-03
+--------------------
+Added
+~~~~~
+- Radon Conebeam function
+- New requirements
+- CLI on pyproject
+
+Changed
+~~~~~~~
+- Changed requirements versions
+
+
+[2.2.12] - 2024-05-29
+---------------------
+
+Changed
+~~~~~~~
+- Changed CC and VMF alignment methods to perform alignment iteratively from binned to original sinograms
+- Minor changes to IR alignemnt. Also performs alignment iteratively now, but it is not yet compatible with wrapped sinogram.
+
+[2.2.11] - 2024-05-17
+---------------------
+
+Fixed
+~~~~~
+- Bug fix for Iterative reprojection (IR) alignment 
+
+Added
+~~~~~
+- Added workaround to reduce sinogram with odd number of pixels in XY to an (even,even) shape so it works with sscRaft filters in FBP.
+
+
+[2.2.10] - 2024-04-15
+---------------------
+Added
+~~~~~
+- Iterative reprojection (IR) alignment module added
+- Parallel implementation for parts of cross-correlation alignment
+
+[2.2.9] - 2024-03-26
+--------------------
+Added
+~~~~~
+- Alignment: function for shifting frames using scipy in parallel 
+
+Changed
+~~~~~~~
+- Divided cross-correlation alignment in two steps for ease of use with auxiliary plots
 
 
 [2.2.8] - 2024-02-23

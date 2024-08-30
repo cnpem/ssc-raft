@@ -11,18 +11,20 @@ among others.
 Codes and public prototypes are being increasingly included within this project,
 as long as they are tested and developed by the Scientific Computing Group.  
 
-The ``sscRaft`` package source code is available in `zenodo website <https://zenodo.org/>`_ under the 
+The ``ssc-raft`` package source code is available in `zenodo website <https://zenodo.org/>`_ under the 
 DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
 
-For more information on the ``sscRaft`` package, visit the `website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ 
+For more information on the ``ssc-raft`` package, visit the `website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ 
 (needs to be inside the CNPEM network to access the website).
 
 Publications
 *************
 
-* Eduardo X Miqueles, Gilberto Martinez Jr. and Patricio P. Guerrero. *Fast image reconstruction at a synchrotron laboratory*. Proceedings of the 2020 SIAM Conference on Parallel Processing for Scientific Computing, 2020, p. 24-34. DOI: `10.1137/1.9781611976137.3 <https://doi.org/10.1137/1.9781611976137.3>`_.
-* Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermudez, J.S.V. (2014). *Generalized Titarenko\'s algorithm for ring artefacts reduction*. J. Synchrotron Rad, 21, 1333-1346. DOI: `10.1107/S1600577514016919 <https://doi.org/10.1107/S1600577514016919>`_.
-* Miqueles, Eduardo and Koshev, Nikolay and Helou, Elias S. (2018). *A Backprojection Slice Theorem for Tomographic Reconstruction*. IEEE Transactions on Image Processing, 27(2), p. 894-906. DOI: `10.1109/TIP.2017.2766785 <https://doi.org/10.1109/TIP.2017.2766785>`_.
+* Miqueles, E.X. and Gilberto, M.Jr and Guerrero, P.P. (2020). *Fast image reconstruction at a synchrotron laboratory*. Proceedings of the 2020 SIAM Conference on Parallel Processing for Scientific Computing, p. 24-34. DOI: `10.1137/1.9781611976137.3 <https://doi.org/10.1137/1.9781611976137.3>`_.
+* Miqueles, E.X. and Rinkel, J. and O'Dowd, F. and Bermudez, J.S.V. (2014). *Generalized Titarenko\'s algorithm for ring artefacts reduction*. J. Synchrotron Rad, 21, p. 1333-1346. DOI: `10.1107/S1600577514016919 <https://doi.org/10.1107/S1600577514016919>`_.
+* Miqueles, E.X. and Koshev, Nikolay and Helou, E. S. (2018). *A Backprojection Slice Theorem for Tomographic Reconstruction*. IEEE Transactions on Image Processing, 27(2), p. 894-906. DOI: `10.1109/TIP.2017.2766785 <https://doi.org/10.1109/TIP.2017.2766785>`_.
+* Miqueles, E.X. and Guerrero, P.P. (2020). *Automatic regularization for tomographic image reconstruction*. Results in Applied Mathematics, 6, p. 100088. DOI: `10.1016/j.rinam.2019.100088 <https://doi.org/10.1016/j.rinam.2019.100088>`_.
+
 
 Acknowledgements
 ****************

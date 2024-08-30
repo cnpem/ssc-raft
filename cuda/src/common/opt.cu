@@ -114,7 +114,6 @@ static __global__ void Klog(float *data, dim3 size) {
     if ((i >= size.x) || (j >= size.y) || (k >= size.z)) return;
 
     size_t index = IND(i, j, k, size.x, size.y);
-    // size_t index = (size_t)(i + j * size.x + k * size.x * size.y);
 
     data[index] = -logf(data[index]);
 }

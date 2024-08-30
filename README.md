@@ -70,10 +70,10 @@ One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install with
     make clean && make
 ```
 
-The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 2.2.8
+The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 3.0.0
 
 ```bash
-    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v2.2.8 --single-branch
+    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.0.0 --single-branch
     cd ssc-raft 
     make clean && make
 ```
@@ -90,7 +90,7 @@ If one is inside the CNPEM network, they can install the latest version of sscRa
 Where `version` is the version number of the `sscRaft`
 
 ```bash
-    pip install sscRaft==2.2.8 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+    pip install sscRaft==3.0.0 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 ```
 
 More information on the `sscRaft` package on [sscRaft website](https://gcc.lnls.br/wiki/docs/ssc-raft/) and [sscRaft documentation](https://gcc.lnls.br/ssc/ssc-raft/index.html) available inside the CNPEM network.
@@ -110,22 +110,19 @@ Before installation, you will need the following packages installed:
 * `PIP`
 * `libcurl4-openssl-dev`
 
-The following `SSC` modules are used:
-
-* `ssc-commons`
+This package supports nvidia ``GPUs`` with capabilities ``7.0`` or superior and a compiler with support to ``c++17``.
 
 The following modules are used:
 
 * `CUBLAS`
 * `CUFFT`
 * `PTHREADS`
-* `CMAKE>=3.18`
+* `CMAKE>=3.10`
 
 The following `Python3` modules are used:
 
 * `scikit-build>=0.17.0`
 * `setuptools>=64.0.0`
-* `cython>=3.0.0`
 * `numpy`
 * `scikit-image >=0.19.3`
 * `scipy`

@@ -44,8 +44,7 @@ extern "C" {
         configs->geometry.z2y              = parameters_float[5];
         configs->geometry.magnitude_x      = parameters_float[6];
         configs->geometry.magnitude_y      = parameters_float[7];
-        configs->geometry.wavelength       = ( plank * vc ) / (configs->beta_delta == 0.0 ? 1.0:configs->geometry.energy);
-        // configs->geometry.wavelength       = 2.0f * float(M_PI) * ( PLANCK_CONSTANT * SPEED_OF_LIGHT ) / (configs->beta_delta == 0.0 ? 1.0:configs->geometry.energy);
+        configs->geometry.wavelength       = (configs->beta_delta == 0.0 ? 1.0:( ( plank * vc ) / configs->geometry.energy ) );
 
         configs->geometry.obj_pixel_x = configs->geometry.detector_pixel_x / configs->geometry.magnitude_x;
         configs->geometry.obj_pixel_y = configs->geometry.detector_pixel_y / configs->geometry.magnitude_y;
@@ -138,9 +137,9 @@ extern "C" {
 		float scale;
 		HANDLE_ERROR(cudaMemcpy(&scale, kernel + max, sizeof(float), cudaMemcpyDeviceToHost));
 
-        // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1));
-
         opt::scale<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1), scale);
+
+        // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1));
     }
 
 	void getPhase(CFG configs, GPU gpus, 

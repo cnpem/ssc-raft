@@ -22,7 +22,6 @@ class HDF5Saver:
                 hdf5_group.create_dataset(str(parent_key) + "/" + str(key), data=value)
 
 
-
 def read_hdf5(filepath, hdf5path, d_type = numpy.float32):
     """Read HDF5 file with h5py.
 

@@ -6,7 +6,8 @@ try:
     import tomopy
 except:
     import warnings
-    warnings.warn("Could not import Tomopy. Do not try to use tomopy for Iterative Reprojection alignment.")
+    # warnings.warn("Could not import Tomopy. Do not try to use tomopy for Iterative Reprojection alignment.")
+    pass
 
 from .common import find_common_non_null_area, remove_zeroed_borders, shift_slices_via_fourier_transform_parallel
 

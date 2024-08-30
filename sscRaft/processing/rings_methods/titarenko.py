@@ -2,7 +2,7 @@ from ...rafttypes import *
 from ...processing.io import *
 
 def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
-    """ Rings artifacts reduction by Generalized Titarenko\'s algorithm.  
+    """ Rings artifacts reduction by Generalized Titarenko\'s algorithm [1]_.  
 
     Args:
         tomogram (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
@@ -53,36 +53,3 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
 
     return tomogram
 
-def rings(tomogram, dic, **kwargs):
-    """Apply rings correction on tomogram.
-
-    Args:
-        tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
-        dic   (dictionary): Dictionary with the parameters.
-
-    Returns:
-        (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
-    
-    * One or MultiGPUs
-    * Calls function ``TitarenkoRingsGPU()``
-
-    Dictionary parameters:
-
-        * ``dic['gpu']`` (int list): List of GPUs to use [required]
-        * ``dic['regularization']`` (float,optional): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
-        * ``dic['blocks']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1]   
-    """
-    required = ('gpu',)
-    optional = ('regularization','blocks')
-    default  = (-1,1)
-
-    dic = SetDictionary(dic,required,optional,default)
-
-    gpus = dic['gpu']
-
-    rings_lambda = dic['regularization']
-    rings_block  = dic['blocks']
-
-    tomogram = TitarenkoRingsGPU( tomogram, gpus, rings_lambda, rings_block ) 
-
-    return tomogram

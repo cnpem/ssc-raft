@@ -6,7 +6,7 @@ from .parallel.em_methods import *
 
 def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
     """Computes the reconstruction of a parallel beam tomogram using the 
-    Backprojection Slice Theorem (BST) method.
+    Backprojection Slice Theorem (BST) method [1]_.
     
 
     Args:

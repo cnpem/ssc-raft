@@ -2,10 +2,46 @@ from ..rafttypes import *
 from ..processing.io import *
 
 def phase_retrieval(frames, dic):
+    """ Application of phase retrieval methods based on the Transport of Equation (TIE) approach [1]_. 
+    The data input needs to be corrected by flat (or empty) and dark before the method.
+    Flat is a measurement without a sample, to measure the background. 
+    Dark is a measurements without a beam and sample, to measure detector pixel response.
+    
+    Can be computed as
 
-    required = ('gpu','detectorPixel[m]')
-    optional = ('method', 'beta/delta','padding','blocksize','z2[m]','energy[eV]','magn')
-    default  = ('paganin',          0.0,        2,         0,      1,           1,     1)
+    .. math::
+        T = \\frac{D - D_d}{D_f - D_d}
+
+    where :math:`T` is the corrected frames, :math:`D` is the measurements volume, 
+    :math:`D_f` is the flat measurement and :math:`D_d` is the dark measurement.
+
+    Args:
+        tomo (ndarray): 2D or 3D tomogram data. Axes are [angles,slices,rays].
+        dic (dict): dictionary with function parameters.
+
+    Returns:
+        (ndarray): 2D or 3D filtered tomogram. Axes are [angles,slices,rays].
+
+    Dictionary parameters:
+
+        * ``dic['gpu']`` (list of ints): List of GPUs. Example [0,1,2] for 3 GPUs [required] 
+        * ``dic['beta/delta']`` (float): Paganin by slices method ``beta/delta`` ratio [default: 0.0] 
+        * ``dic['method']`` (str): Method - options: \'paganin\' [default: \'paganin\']
+        * ``dic['z2[m]']`` (float): Sample-Detector distance in meters [default: 1.0] 
+        * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters [default: 1.0] 
+        * ``dic['energy[eV]']`` (float): Beam line energy in KeV [default: 1.0] 
+        * ``dic['magn']`` (float): Magnification of beam [default: 1.0] 
+        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 0] 
+        * ``dic['blocksize']`` (int,optional): Size of projection blocks to be processed simultaneously [default: 0 (automatic computation)] 
+
+    References:
+
+        .. [1] D. Paganin, S. C. Mayo, T. E. Gureyev, P. R. Miller, S. W. Wilkins (2002). Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object. Journal of Microscopy, 206:33-40. DOI: https://doi.org/10.1046/j.1365-2818.2002.01010.x
+    """  
+
+    required = (    'gpu',)
+    optional = ( 'method', 'beta/delta','padding','blocksize','z2[m]','energy[eV]','magn', 'detectorPixel[m]')
+    default  = ('paganin',          0.0,        0,          0,      1,           1,     1,                1.0)
     
     dic = SetDictionary(dic,required,optional,default)
 
@@ -29,7 +65,8 @@ def phase_retrieval(frames, dic):
     magn       = dic['magn']
     pixel_det  = dic['detectorPixel[m]']
 
-    padx, pady, padz  = dic['padding'],dic['padding'],0 # (padx, pady, padz)
+    # padx, pady, padz  = dic['padding'],dic['padding'],0 # (padx, pady, padz)
+    padx, pady, padz  = 0,0,0 # (padx, pady, padz) -> padding with bugs as of 22/Ago/2024 Paola Ferraz
 
     blocksize = dic['blocksize']
 
@@ -54,12 +91,8 @@ def phase_retrieval(frames, dic):
     frames = numpy.ascontiguousarray(frames.astype(numpy.float32))
     frames_ptr = frames.ctypes.data_as(ctypes.c_void_p)
 
-    logger.info(f'Begin Phase Retrieval by {methodname}')
-
     libraft.getPhaseMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
                             frames_ptr, param_float_ptr, param_int_ptr)                     
-
-    logger.info(f'Finished Phase Retrieval')
 
     return frames
 

@@ -19,9 +19,9 @@ This page documents the API reference for the sscRaft.
     api/correction
     api/alignment
     api/rings
+    api/phaseret
     api/reconstruction
     api/forward
-    api/pipelines
 
 
 

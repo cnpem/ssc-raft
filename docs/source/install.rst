@@ -11,6 +11,8 @@ Before installation, you will need the following packages installed:
 * ``PIP``
 * ``libcurl4-openssl-dev``
 
+This package supports nvidia ``GPUs`` with capabilities ``7.0`` or superior and a compiler with support to ``c++17``.
+
 See bellow for build requirements and dependencies.
 
 The library sscRaft can be installed from the source code at `zenodo website <https://zenodo.org/>`_ or by ``pip``/ ``git``
@@ -51,11 +53,11 @@ One can clone our `gitlab <https://gitlab.cnpem.br/>`_ repository inside the CNP
     make clean && make
 
 
-The ``<version>`` is the version of the ``sscRaft`` to be installed. Example, to install version 2.2.8
+The ``<version>`` is the version of the ``sscRaft`` to be installed. Example, to install version 3.0.0
 
 .. code-block:: bash
 
-    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v2.2.8 --single-branch
+    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.0.0 --single-branch
     cd ssc-raft 
     make clean && make
 
@@ -74,7 +76,7 @@ Where ``version`` is the version number of the ``sscRaft``
 
 .. code-block:: bash
 
-    pip install sscRaft==2.2.8 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+    pip install sscRaft==3.0.0 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 
 
 Memory
@@ -99,10 +101,9 @@ The build requirements are:
 * ``CUBLAS``
 * ``CUFFT``
 * ``PTHREADS``
-* ``CMAKE>=3.18``
+* ``CMAKE>=3.10``
 * ``scikit-build>=0.17.0``
 * ``setuptools>=64.0.0``
-* ``cython>=3.0.0``
 
 The ``Python3`` dependencies are:
 
@@ -113,10 +114,6 @@ The ``Python3`` dependencies are:
 * ``SharedArray``
 * ``uuid``
 * ``h5py``
-
-The following ``SSC`` modules are used:
-
-* ``ssc-commons``
 
 Uninstall
 *********

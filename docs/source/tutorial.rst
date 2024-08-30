@@ -34,6 +34,9 @@ The ssc-raft algorithm is called as ``sscRaft`` python module.
     :maxdepth: 1
 
     tutorial/correction
+    tutorial/phaseret
+    tutorial/rings
+    tutorial/alignment
     tutorial/reconstructions
     tutorial/forward
 

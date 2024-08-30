@@ -38,6 +38,12 @@ float pixel_objx, float pixel_objy, float z2, dim3 size)
     float wx = fminf( i, size.x - i ) / (float)size.x;  
     float wy = fminf( j, size.y - j ) / (float)size.y;
 
+    // float wx = ( - 1.0f + float(i) ) * 0.5f * float(size.x);
+    // float wy = ( - 1.0f + float(j) ) * 0.5f * float(size.y);
+
+    // wx       = wx / ( (float)size.x * pixel_objx );
+    // wy       = wy / ( (float)size.y * pixel_objy );
+
     wx       = wx / pixel_objx;
     wy       = wy / pixel_objy;
 
@@ -101,15 +107,13 @@ dim3 size, dim3 size_pad, dim3 pad)
 
     HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
 
-    // opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
+    opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
 
     // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
 
     contrast_enhance::recuperate_padding<<<gridBlock,threadsPerBlock>>>(dataPadded, projections, size, pad);
 
     HANDLE_ERROR(cudaFree(dataPadded));
-
-    // getLog(projections, size);
 }
 
 

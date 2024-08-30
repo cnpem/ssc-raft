@@ -67,10 +67,10 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
         padh = int(pad * padh)
         # padh = power_of_2_padding(nrays,padh)
 
-    try:
-        angles = dic['angles[rad]']
-    except:
-        if angles is None:
+    if angles is None:
+        try:
+            angles = dic['angles[rad]']
+        except:
             message_error = f'Missing angles list.'
             logger.error(message_error) 
             raise ValueError(message_error)
@@ -140,7 +140,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
 
     logger.info(f'FDK filter: {filtername}({filter})')
 
-    offset         = dic['rotation axis offset']
+    offset = 0 # dic['rotation axis offset'] -> Bug as of 22/Ago/2024 Paola Ferraz
     
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 

@@ -172,7 +172,7 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
     return deviation
 
 def c_correct_rotation_axis(data: numpy.ndarray, deviation: int,
-                            out: Optional[np.ndarray] = None) -> np.ndarray:
+                            out: Optional[numpy.ndarray] = None) -> numpy.ndarray:
 
     if out is None:
         out = np.empty_like(data)
