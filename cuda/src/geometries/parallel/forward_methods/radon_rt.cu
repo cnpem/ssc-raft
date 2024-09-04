@@ -73,7 +73,6 @@ extern "C" {
         /* Phantom data sizes */
         int sizeImagex  = phantom_size.x;
         int sizeImagey  = phantom_size.y;
-        int sizeImagez  = phantom_size.z;
 
         float tmin = sqrtf(ax * ax + ay * ay);
         float dt   = 2.0f*tmin/(nrays-1);

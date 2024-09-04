@@ -474,7 +474,6 @@ extern "C"{
     void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size,
             float lambda_rings, int ring_blocks, cudaStream_t stream)
     {
-        float lambda_computed;
 
         /* Projection data sizes */
         int nrays        = size.x;
@@ -485,19 +484,19 @@ extern "C"{
 
         for (int m = 0; m < ring_blocks / 2; m++){
 
-            lambda_computed = TitarenkoRings(tomogram,
+            TitarenkoRings(tomogram,
                                 nrays, nangles, blockslices,
                                 lambda_rings, offset, stream);
             step = (nangles / ring_blocks) * nrays;
             float *tomptr = tomogram;
 
             for (int n = 0; n < ring_blocks - 1; n++) {
-                lambda_computed = TitarenkoRings(tomogram,
+                TitarenkoRings(tomogram,
                                     nrays, nangles, blockslices,
                                     lambda_rings, offset, stream);
                 tomptr += step;
             }
-            lambda_computed = TitarenkoRings(tomptr,
+            TitarenkoRings(tomptr,
                                 nrays, nangles % ring_blocks + nangles / ring_blocks, blockslices,
                                 lambda_rings, offset, stream);
         }

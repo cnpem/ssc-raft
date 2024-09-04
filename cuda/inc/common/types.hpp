@@ -97,7 +97,6 @@ inline void _ssc_cufft_check(cufftResult fftres,
 inline void _ssc_cuda_check(cudaError_t cudares,
         const char *file, const int line) {
     if (cudares != cudaSuccess) {
-        int device;
         fprintf(stderr, "%s (%d): *** cudaError: %s",
                         file, line, cudaGetErrorString(cudares));
         raise(SIGABRT);
