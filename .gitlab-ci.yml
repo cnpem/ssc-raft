@@ -109,5 +109,5 @@ deploy_docs:
     - wiki
   dependencies:
     - build_docs
-  # only:
-  #   - tags
+  only:
+    - tags
