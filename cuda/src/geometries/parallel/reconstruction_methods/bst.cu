@@ -505,8 +505,6 @@ void getBSTMultiGPU(int* gpus, int ngpus, float* obj, float* tomogram, float* an
     /* Reconstruction sizes */
     int sizeImagex = configs.obj.size.x;
 
-    float* h_tomogram;
-
     int blockgpu = (nslices + ngpus - 1) / ngpus;
     int subblock, ptr = 0;
     std::vector<std::future<void>> threads;

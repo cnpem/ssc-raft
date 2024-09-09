@@ -1,12 +1,12 @@
-RUNDIR=	sscRaft sscRaft/ cuda/ 
+RUNDIR=	sscRaft sscRaft/ cuda/
 
 all: install
 
 install:
-	pip install . 
+	python3 -m pip install -v .
 
 dev:
-	python3 setup.py install 
+	python3 setup.py install
 
 dgx:
 	python3 setup.py install --user

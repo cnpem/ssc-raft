@@ -126,12 +126,7 @@ extern "C"{
         int sizeImagex = configs.obj.size.x;
         int sizeImagey = configs.obj.size.y;
 
-        int padding          = configs.tomo.pad.x;
-        int filter_type      = configs.reconstruction_filter_type;
-        float paganin_reg    = configs.reconstruction_paganin;
-        float regularization = configs.reconstruction_reg;
-        int axis_offset      = configs.rotation_axis_offset;
-        int i; 
+        int i;
 
         int blocksize = configs.blocksize;
 

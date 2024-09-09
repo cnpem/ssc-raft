@@ -134,26 +134,6 @@ extern "C"{
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
 		int ptr = 0, subblock;
 
-        float *h_frames;
-        float *h_flat;
-        float *h_dark;
-
-
-        //HANDLE_ERROR(cudaHostRegister(h_frame_align, sizeof(float) * size_t(nrays * nangles * nslices), cudaHostRegisterDefault));
-        //HANDLE_ERROR(cudaHostRegister(h_flat_align, sizeof(float) * size_t(nrays * numflats * nslices), cudaHostRegisterDefault));
-        //HANDLE_ERROR(cudaHostRegister(h_dark_align, sizeof(float) * size_t(nrays * 1 * nslices), cudaHostRegisterDefault));
-
-        //HANDLE_ERROR(cudaMallocHost(&h_frames, sizeof(float) * size_t(nrays) * size_t(nangles) * size_t(nslices)));
-        //HANDLE_ERROR(cudaMallocHost(&h_flat, sizeof(float) * nslices * numflats * nslices));
-        //HANDLE_ERROR(cudaMallocHost(&h_dark, sizeof(float) * nslices * 1 * nslices));
-
-        //HANDLE_ERROR(cudaMemcpy(h_frames, frames, sizeof(float) * size_t(nrays) * size_t(nangles) * size_t(nslices), cudaMemcpyHostToHost));
-        //HANDLE_ERROR(cudaMemcpy(h_flat, flat, sizeof(float) * nslices * numflats * nslices, cudaMemcpyHostToHost));
-        //HANDLE_ERROR(cudaMemcpy(h_dark, dark, sizeof(float) * nslices * 1 * nslices, cudaMemcpyHostToHost));
-
-
-        //printf(">>> pinned allocs: %p %p %p\n", h_frames, h_flat, h_dark);
-
         GPU gpu_parameters;
         setGPUParameters(&gpu_parameters, dim3(nrays,nangles,nslices), ngpus, gpus);
 
@@ -180,14 +160,6 @@ extern "C"{
 
         for(auto& t : threads)
             t.get();
-
-        //HANDLE_ERROR(cudaMemcpy(frames, h_frames, sizeof(float) * nrays * nangles * nslices, cudaMemcpyHostToHost));
-        //HANDLE_ERROR(cudaMemcpy(flat, h_flat, sizeof(float) * nslices * numflats * nslices, cudaMemcpyHostToHost));
-        //HANDLE_ERROR(cudaMemcpy(dark, h_dark, sizeof(float) * nslices * 1 * nslices, cudaMemcpyHostToHost));
-
-        //HANDLE_ERROR(cudaFreeHost(h_frames));
-        //HANDLE_ERROR(cudaFreeHost(h_flat));
-        //HANDLE_ERROR(cudaFreeHost(h_dark));
 	}
 }
 

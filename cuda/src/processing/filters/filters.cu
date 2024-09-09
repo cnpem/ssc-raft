@@ -376,8 +376,7 @@ extern "C" {
 __host__ __device__ inline float Filter::apply(float input)
 {
 	float param = 0.0f;
-    float aux   = 0.0f;
-    
+
 	if (type == EType::gaussian)
 	{
 		input *= exp(-0.693f * reg * input * input) / (1.0f + paganin * input * input);

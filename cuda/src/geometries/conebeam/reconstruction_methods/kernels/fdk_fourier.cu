@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 # define vc 299792458           /* Velocity of Light [m/s] */ 
-# define plank 4.135667662E-15  /* Plank constant [ev*s] */
 
 extern "C"{
 __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process){
