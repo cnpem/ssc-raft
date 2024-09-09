@@ -33,32 +33,6 @@ namespace opt{
     inline __host__ __device__ int assert_dimension(int size1, int size2)
     { return ( size1 == size2 ? 1 : 0 ); };
 
-    inline __host__ __device__ size_t getIndex(dim3 size)
-    { 
-        size_t i = blockIdx.x*blockDim.x + threadIdx.x; 
-        size_t j = blockIdx.y*blockDim.y + threadIdx.y; 
-        size_t k = blockIdx.z*blockDim.z + threadIdx.z; 
-        
-        return IND(i,j,k,size.x,size.y); 
-    };
-
-	inline __host__ __device__ size_t getIndex3d(dim3 size)
-    { 
-        size_t i = blockIdx.x*blockDim.x + threadIdx.x; 
-        size_t j = blockIdx.y*blockDim.y + threadIdx.y; 
-        size_t k = blockIdx.z*blockDim.z + threadIdx.z; 
-        
-        return IND(i,j,k,size.x,size.y); 
-    };
-    
-    inline __host__ __device__ size_t getIndex2d(dim3 size)    
-    { 
-        int i = blockIdx.x*blockDim.x + threadIdx.x; 
-        int j = blockIdx.y*blockDim.y + threadIdx.y; 
-        
-        return IND(i,j,0,size.x,size.y); 
-    };
-
     inline __host__ __device__ int assert_dimension_xyz(dim3 size1, dim3 size2)
     { 
         int i;
@@ -102,15 +76,18 @@ namespace opt{
     template<typename Type>
     __global__ void scale(Type *data, dim3 size, float scale)
     {
-        size_t index        = opt::getIndex3d(size);
-        size_t total_points = opt::get_total_points(size);
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x; 
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y; 
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
 
-        if ( index >= total_points ) return;
+        size_t index = size.y * size.x * k + size.x * j + i; 
 
-        data[index] /= scale;
+        if( (i >= size.x) || (j >= size.y) || (k >= size.z)) return;  
+
+        data[index] = data[index] / scale;
     };
     
-    __global__ void scale(cuComplex *data, dim3 size, float scale);
+    __global__ void scale(cufftComplex *data, dim3 size, float scale);
 
     template<typename Type>
     Type* allocGPU(size_t size, cudaStream_t stream)
@@ -198,10 +175,6 @@ namespace opt{
             }
         }
     };
-
-    __global__ void product_Real_Real(float *a, float *b, float *ans, dim3 sizea, dim3 sizeb);
-    __global__ void product_Complex_Real(cufftComplex *a, float *b, cufftComplex *ans, dim3 sizea, dim3 sizeb);
-    __global__ void product_Complex_Complex(cufftComplex *a, cufftComplex *b, cufftComplex *ans, dim3 sizea, dim3 sizeb);
 
      __global__ void paddR2C(float *in, cufftComplex *outpadded, 
     dim3 size, dim3 pad, float value);

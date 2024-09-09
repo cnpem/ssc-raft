@@ -15,7 +15,7 @@ extern "C"{
         int j = blockIdx.y*blockDim.y + threadIdx.y; /* angles */
         int k = blockIdx.z*blockDim.z + threadIdx.z; /* slices */
         const size_t total_proj_size = proj_size.x * proj_size.y * proj_size.z;
-        const size_t index           = opt::getIndex3d(proj_size);
+        const size_t index           = proj_size.y * proj_size.x * k + proj_size.x * j + i;
         
         if ( index >= total_proj_size ) return;
         

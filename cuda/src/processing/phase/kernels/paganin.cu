@@ -17,7 +17,6 @@ cufftComplex *ans, dim3 size)
 
     ans[index].x = a[index].x * b[ind];	
     ans[index].y = a[index].y * b[ind];
-
 }
 
 __global__ void contrast_enhance::paganinKernel(float *kernel, float beta_delta, float wavelength, 
@@ -91,7 +90,7 @@ void contrast_enhance::apply_contrast_filter(CFG configs, GPU gpus, float *proje
 dim3 size, dim3 size_pad, dim3 pad)
 {
     size_t npad = opt::get_total_points(size_pad);
-    float scale = (float)( size.x * size.y);
+    float scale = (float)( size_pad.x * size_pad.y);
 
     cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
@@ -109,7 +108,7 @@ dim3 size, dim3 size_pad, dim3 pad)
 
     opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
 
-    // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
+    opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
 
     contrast_enhance::recuperate_padding<<<gridBlock,threadsPerBlock>>>(dataPadded, projections, size, pad);
 

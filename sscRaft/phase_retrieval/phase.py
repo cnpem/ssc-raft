@@ -65,8 +65,7 @@ def phase_retrieval(frames, dic):
     magn       = dic['magn']
     pixel_det  = dic['detectorPixel[m]']
 
-    # padx, pady, padz  = dic['padding'],dic['padding'],0 # (padx, pady, padz)
-    padx, pady, padz  = 0,0,0 # (padx, pady, padz) -> padding with bugs as of 22/Ago/2024 Paola Ferraz
+    padx, pady, padz  = dic['padding'],dic['padding'],0 # (padx, pady, padz)
 
     blocksize = dic['blocksize']
 

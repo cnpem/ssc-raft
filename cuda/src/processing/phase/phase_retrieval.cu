@@ -128,18 +128,22 @@ extern "C" {
         }
 
         // Normalize kernel by maximum value
- 		int max;
+ 		int max = 0;
         stat = cublasIsamax(handle, sizex * sizey, kernel, 1, &max);
 
         if (stat != CUBLAS_STATUS_SUCCESS)
-            printf("Cublas Max failed\n");
+            printf("Cublas Max failed in Phase Constrast Kernels\n");
 
-		float scale;
+        HANDLE_ERROR(cudaDeviceSynchronize());
+
+		float scale = 0;
 		HANDLE_ERROR(cudaMemcpy(&scale, kernel + max, sizeof(float), cudaMemcpyDeviceToHost));
 
         opt::scale<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1), scale);
 
         // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1));
+
+        HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
 	void getPhase(CFG configs, GPU gpus, 
@@ -244,7 +248,6 @@ extern "C" {
         // printPhaseParameters(&configs);
         // printGPUParameters(&gpu_parameters);
 
-    
 		int subvolume = (configs.tomo.size.z + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; size_t ptr_volume = 0;
 

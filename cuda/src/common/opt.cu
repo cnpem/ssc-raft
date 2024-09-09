@@ -121,40 +121,6 @@ static __global__ void Klog(float *data, dim3 size) {
     data[index] = -logf(data[index]);
 }
 
-__global__ void opt::product_Real_Real(float *a, float *b, float *ans, dim3 sizea, dim3 sizeb) {
-    size_t indexa = opt::getIndex3d(sizea);
-    size_t indexb = opt::getIndex3d(sizeb);
-    size_t total_points_a = opt::get_total_points(sizea);
-    size_t total_points_b = opt::get_total_points(sizeb);
-
-    if (indexa >= total_points_a || indexb >= total_points_b) return;
-
-    ans[indexa] = a[indexa] * b[indexb];
-}
-
-__global__ void opt::product_Complex_Real(cufftComplex *a, float *b, cufftComplex *ans, dim3 sizea, dim3 sizeb) {
-    size_t indexa = opt::getIndex3d(sizea);
-    size_t indexb = opt::getIndex3d(sizeb);
-    size_t total_points_a = opt::get_total_points(sizea);
-    size_t total_points_b = opt::get_total_points(sizeb);
-
-    if (indexa >= total_points_a || indexb >= total_points_b) return;
-
-    ans[indexa].x = a[indexa].x * b[indexb];
-    ans[indexa].y = a[indexa].y * b[indexb];
-}
-
-__global__ void opt::product_Complex_Complex(cufftComplex *a, cufftComplex *b, cufftComplex *ans, dim3 sizea,
-                                             dim3 sizeb) {
-    size_t indexa = opt::getIndex3d(sizea);
-    size_t indexb = blockIdx.x * blockDim.x + threadIdx.x;  // opt::getIndex3d(sizeb);
-    size_t total_points_a = opt::get_total_points(sizea);
-    size_t total_points_b = opt::get_total_points(sizeb);
-
-    if (indexa >= total_points_a || indexb >= sizeb.x) return;
-
-    ans[indexa] = ComplexMult(a[indexa], b[indexb]);
-}
 
 dim3 opt::setGridBlock(dim3 size) {
     dim3 gridBlock((int)ceil(size.x / TPBX) + 1, (int)ceil(size.y / TPBY) + 1, (int)ceil(size.z / TPBZ) + 1);
@@ -162,11 +128,15 @@ dim3 opt::setGridBlock(dim3 size) {
     return gridBlock;
 }
 
-__global__ void opt::scale(cuComplex *data, dim3 size, float scale) {
-    size_t index = opt::getIndex3d(size);
-    size_t total_points = opt::get_total_points(size);
+__global__ void opt::scale(cufftComplex *data, dim3 size, float scale) {
 
-    if (index >= total_points) return;
+    size_t i = blockIdx.x*blockDim.x + threadIdx.x; 
+    size_t j = blockIdx.y*blockDim.y + threadIdx.y; 
+    size_t k = blockIdx.z*blockDim.z + threadIdx.z;
+
+    size_t index = size.y * size.x * k + size.x * j + i; 
+
+    if( (i >= size.x) || (j >= size.y) || (k >= size.z)) return;  
 
     data[index].x = data[index].x / scale;
     data[index].y = data[index].y / scale;
