@@ -132,6 +132,7 @@ extern "C" {
 
             opt::CPUToGPU<float>(count + ptr_block_tomo, dcount, (size_t)nrays * nangles * subblock);
             opt::CPUToGPU<float>(flat + ptr_block_flat, dflat, (size_t)nrays *subblock);
+            opt::CPUToGPU<float>(obj + ptr_block_obj, dobj, (size_t)sizeImage * sizeImage * subblock);
 
             get_tEM_RT( configs, gpus, dobj, dcount, dflat, dangles,
                         backcounts, temp, back, subblock);
@@ -171,7 +172,8 @@ extern "C" {
                         (int)ceil((sizeImage)/threadsPerBlock.y)+1,
 		                (int)ceil(blockSize/threadsPerBlock.z)+1);
 
-        kernel_ones<<<gridBlockF,threadsPerBlock>>>(output, sizeImage, nrays, nangles, blockSize);
+        /* Commented to add initial guess: `output` variable is also the initial guess */ 
+        // kernel_ones<<<gridBlockF,threadsPerBlock>>>(output, sizeImage, nrays, nangles, blockSize); 
         
         kernel_backprojection<<<gridBlockF,threadsPerBlock>>>(backcounts, count, angles, sizeImage, nrays, nangles, blockSize);
 
@@ -295,6 +297,7 @@ extern "C"{
             ptr = ptr + subblock;
 
             HANDLE_ERROR(cudaMemcpy(dtomo, tomogram + ptr_block_tomo, sizeof(float) * (size_t)configs.tomo.size.x * configs.tomo.size.y * subblock, cudaMemcpyHostToDevice));	
+            HANDLE_ERROR(cudaMemcpy(dobj, obj + ptr_block_obj, (size_t)configs.obj.size.x * configs.obj.size.y * subblock * sizeof(float), cudaMemcpyHostToDevice));
             
             get_eEM_RT( configs, gpus, dobj, dtomo, dangles, subblock);                           
             
@@ -334,7 +337,8 @@ extern "C" {
         HANDLE_ERROR(cudaMalloc((void **)&backones  ,sizeof(float) * (size_t)sizeImage * sizeImage * blockSize));
         HANDLE_ERROR(cudaMalloc((void **)&temp      ,sizeof(float) * (size_t)nrays     * nangles   * blockSize));
 
-        kernel_ones<<<gridBlockF,threadsPerBlock>>>(output, sizeImage, nrays, nangles, blockSize);
+        /* Commented to add initial guess: `output` variable is also the initial guess */
+        // kernel_ones<<<gridBlockF,threadsPerBlock>>>(output, sizeImage, nrays, nangles, blockSize);
 
         kernel_backprojectionOfOnes<<<gridBlockF,threadsPerBlock>>>(backones, angles, sizeImage, nrays, nangles, blockSize);
 

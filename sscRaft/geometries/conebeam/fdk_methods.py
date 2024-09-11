@@ -181,8 +181,8 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     logger.info(f'Recon shape: ({lab.nx}, {lab.ny}, {lab.nz}) = (nx,ny,nz).')
 
     if obj is None:
+        obj = numpy.zeros([lab.nz, lab.ny, lab.nx], dtype=numpy.float32)  
         obj = CNICE(obj)
-        obj = numpy.zeros([lab.nz, lab.ny, lab.nx], dtype=numpy.float32)    
     obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     libraft.gpu_fdk(lab, obj_ptr, proj_p, angles_p, gpus_p, 

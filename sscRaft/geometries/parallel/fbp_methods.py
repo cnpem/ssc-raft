@@ -70,7 +70,8 @@ def fbpGPU(tomogram, angles, gpus, dic):
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     if obj is None:
-        obj = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+        obj      = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+        obj      = CNICE(obj)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
     angles       = numpy.array(angles)
@@ -174,7 +175,8 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     if obj is None:
-        obj = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+        obj      = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+        obj      = CNICE(obj)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
     angles       = numpy.array(angles)

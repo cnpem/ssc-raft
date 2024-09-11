@@ -35,10 +35,10 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
     
     if obj is not None:
         obj     = CNICE(obj)
-        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
     else:
         obj     = numpy.ones([nslices, objsize, objsize], dtype=numpy.float32)
-        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
+        obj     = CNICE(obj)
+    obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     tomo          = CNICE(tomo) #sino pointer
     tomo_ptr      = tomo.ctypes.data_as(ctypes.c_void_p) 
@@ -112,10 +112,10 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
 
     if obj is not None:
         obj     = CNICE(obj)
-        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
     else:
         obj     = numpy.ones([nslices, objsize, objsize], dtype=numpy.float32)
-        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
+        obj     = CNICE(obj)
+    obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     counts        = CNICE(counts) 
     counts_ptr    = counts.ctypes.data_as(ctypes.c_void_p) 
@@ -195,10 +195,10 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
     # obj can be the initial guess
     if obj is not None:
         obj     = CNICE(obj)
-        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
     else:
         obj     = numpy.ones([nslices, objsize, objsize], dtype=numpy.float32)
-        obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
+        obj     = CNICE(obj)
+    obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     count       = CNICE(count) 
     count_ptr   = count.ctypes.data_as(ctypes.c_void_p) 

@@ -9,7 +9,8 @@ Version 3.0.0 - 2024-09-10
 --------------------------
 * Added
 
-  - ``EM`` on Frequency domain
+  - ``EM`` on Frequency domain for parallel-beam
+  - Initial guess in ``tEMRT`` and  ``eEMRT`` for parallel-beam
   - ``BST`` reconstruction with new filters and paganin filter
   - Radon ray tracing for parallel beam
   - Wiggle and other methods of alignment
