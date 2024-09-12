@@ -3,11 +3,11 @@ from ..processing.io import *
 
 def phase_retrieval(frames, dic):
     """ Application of phase retrieval methods based on the Transport of Equation (TIE) approach [1]_. 
-    The data input needs to be corrected by flat (or empty) and dark before the method.
+    The data measurement needs to be corrected by flat (or empty) and dark previously.
     Flat is a measurement without a sample, to measure the background. 
-    Dark is a measurements without a beam and sample, to measure detector pixel response.
+    Dark is a measurement without a beam and sample, to measure detector pixel response.
     
-    Can be computed as
+    The data input can be computed as
 
     .. math::
         T = \\frac{D - D_d}{D_f - D_d}
@@ -15,8 +15,10 @@ def phase_retrieval(frames, dic):
     where :math:`T` is the corrected frames, :math:`D` is the measurements volume, 
     :math:`D_f` is the flat measurement and :math:`D_d` is the dark measurement.
 
+    The logarithm is not applied on the output data, as in [1]_.
+
     Args:
-        tomo (ndarray): 2D or 3D tomogram data. Axes are [angles,slices,rays].
+        frames (ndarray): 2D or 3D tomogram data. Axes are [angles,slices,rays].
         dic (dict): dictionary with function parameters.
 
     Returns:
@@ -37,6 +39,7 @@ def phase_retrieval(frames, dic):
     References:
 
         .. [1] D. Paganin, S. C. Mayo, T. E. Gureyev, P. R. Miller, S. W. Wilkins (2002). Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object. Journal of Microscopy, 206:33-40. DOI: https://doi.org/10.1046/j.1365-2818.2002.01010.x
+    
     """  
 
     required = (    'gpu',)

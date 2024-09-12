@@ -12,7 +12,7 @@ The input and output data is on the following format:
 - ``output``: Corrected three-dimensional tomogram data. The axes are ``[slices, angles, rays]`` in python syntax.
 
 ---
-> **Note:** The data input needs to be corrected by flat (or empty) and dark before the method.
+> **Note:** The measurement needs to be corrected by flat (or empty) and dark previously.
 ---
 
 ```python
@@ -23,10 +23,22 @@ The input and output data is on the following format:
     tomogram = ...
     '''
 
-    output = sscRaft.rings(tomogram, dic = {'gpu': [0,1], 'method': 'paganin', 'beta/delta': 1e-3,
-                                            'detectorPixel[m]': 3.61e-6, 'z2[m]':500e-3, 
-                                            'energy[eV]': 22e3, 'magn': 1.1,
-                                            'blocksize': 0})
+    output = sscRaft.phase_retrieval(tomogram, dic = {'gpu': [0,1], 'method': 'paganin', 'beta/delta': 1e-3,
+                                                      'detectorPixel[m]': 3.61e-6, 'z2[m]':500e-3, 
+                                                      'energy[eV]': 22e3, 'magn': 1.1,
+                                                      'blocksize': 0})
 ```
+
+For the classic Paganin method, we have to apply $-\log()$ on the output
+
+```python
+    import numpy
+
+    output = -numpy.log(output)
+```
+
+---
+> **Caution:** The logarithm is not implemented inside the function.
+---
 
 The reference to all the input parameters can be found on the {ref}`Phase Retrieval API documentation <apiphaseretrieval>`.
