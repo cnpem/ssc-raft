@@ -11,10 +11,12 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
 
     Args:
         tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
-        dic (dict): Dictionary with the experiment info.
+        angles (float list, optional):  List of angles in radians [default: None]
+        obj (ndarray, optional): Reconstructed 3D object array [default: None]
+        dic (dict, optional): Dictionary with the experiment info [default: None
 
     Returns:
-        (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
+        (ndarray): Reconstructed sample 3D object. The axes are [z, y, x]
 
     * One or MultiGPUs. 
     * Calls function ``bstGPU()``
@@ -89,7 +91,10 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
 
     Args:
         data (ndarray): Tomographic 3D data. The axis are (slices,angles,rays) 
-        dic (dict): input dictionary 
+        flat (ndarray, optional):  Flat 2D data. Tha axis are (slices,rays) [default: None]
+        angles (float list, optional):  List of angles in radians [default: None]
+        obj (ndarray, optional): Reconstructed 3D object array [default: None]
+        dic (dict, optional): input dictionary [default: None]
         
     Returns:
         (ndarray): stacking 3D reconstructed volume, reconstructed sinograms (z,y,x)
@@ -112,8 +117,8 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
             #. ``tEMFQ``: Transmission EM using the Fourier Slice Theorem (FST) for the forward operator and Backprojection Slice Theorem (BST) for the inverse operator.
         
         * ``dic['beamgeometry']`` (str): Beam geometry - \'parallel\', \'conebeam\' or \'fanbeam`\' [default: \'parallel\'] [required]
-        * ``dic['flat']`` (ndarray, optional):  Flat 2D data. Tha axis are (slices,rays)  [default: None]
-        * ``dic['angles[rad]']`` (floar list, optional):  List of angles in radians [default: None]
+        * ``dic['flat']`` (ndarray, optional):  Flat 2D data. Tha axis are (slices,rays) [default: None]
+        * ``dic['angles[rad]']`` (float list, optional):  List of angles in radians [default: None]
         * ``dic['iterations']`` (int, optional): Global number of iterations [default: 100]
         * ``dic['interpolation']`` (str, optional):  Type of interpolation. Options: \'nearest\' or \'bilinear\' [default: \'bilinear\']
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 2]  

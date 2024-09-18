@@ -1,5 +1,8 @@
 from ...rafttypes import *
 
+import time
+import numpy
+
 def coneradon_projection(phantom, beta, dic):
     
     z1,z2 = dic['Distances'] 

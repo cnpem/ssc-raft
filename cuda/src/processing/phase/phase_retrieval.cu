@@ -61,7 +61,7 @@ extern "C" {
 
         /* Compute total memory used of Phase Filter method on a single frame */
         configs->total_required_mem_per_frame_bytes = (
-                configs->tomo.frame_memory_bytes // Projection
+                2 * configs->tomo.frame_padd_memory_bytes // Projection
                 ); 
     }
 
@@ -176,7 +176,7 @@ extern "C" {
         int blocksize = configs.blocksize;
 
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_frame_bytes, true, A100_MEM);
             blocksize          = min(sizez, blocksize_aux);
         }
 
@@ -195,6 +195,8 @@ extern "C" {
 
 			subblock  = min(sizez - ptr, blocksize);
 			ptr_block = (size_t)nrays * nslices * ptr;
+
+            printf("Subblock = %d, blocksize = %d \n", subblock, blocksize);
 
 			/* Update pointer */
 			ptr = ptr + subblock;

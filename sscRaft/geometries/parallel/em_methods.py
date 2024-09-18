@@ -9,9 +9,11 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
 
     Args:
         tomo (ndarray): Tomographic 3D data with shape (slices,angles,lenght) 
-        angles (float list): List of angles in radians
-        iterations (int): EM iterations
-        gpus (int list): List of gpus
+        angles (float list): List of angles in radians 
+        iterations (int): EM iterations 
+        gpus (int list): List of gpus 
+        blocksize (int): Number of simultaneous reconstructed slices 
+        obj (ndarray, optional): Reconstructed 3D object array and initial guess [default: zeros array]
         
     Returns:
         (ndarray): stacking 3D reconstructed volume (z,y,x) or 2D reconstructed sinograms (y,x)
@@ -78,9 +80,11 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
     Args:
         counts (ndarray): Photon counts 3D data with shape (slices,angles,lenght) 
         flat (ndarray): Flat (or background) data with shape (slices,1,lenght) 
-        angles (float list): List of angles in radians
-        iterations (int): EM iterations
-        gpus (int list): List of gpus
+        angles (float list): List of angles in radians 
+        iterations (int): EM iterations 
+        gpus (int list): List of gpus 
+        blocksize (int): Number of simultaneous reconstructed slices 
+        obj (ndarray, optional): Reconstructed 3D object array and initial guess [default: zeros array]
         
     Returns:
         (ndarray): stacking 3D reconstructed volume (z,y,x) or 2D reconstructed sinograms (y,x)
