@@ -607,6 +607,43 @@ def crop_ellipse(data, pixeldet, magn = 1, npixelsx = 0, npixelsy = 0):
             
     return data
 
+def crop_circle_simple(data, pixel_size, npixels = 0):
+    r"""Function to crop a circle of radius :math:`r` on the xy-plane of a 3D data.
+        
+        - r = (radius - npixels * pixel_size);
+
+
+    Args:
+        data (ndarray): 3D data
+        pixel_size (float): Pixel size in meters 
+        npixels (int, optional): How many pixels to subtract from radius to reduce cropped circle [Default: 0]
+
+    Returns:
+        (ndarray): 3D cropped data
+    """
+    dimx = data.shape[-1]
+    dimy = data.shape[-2]
+
+    diameterx = dimx * pixel_size
+    radiusx = diameterx / 2.0
+
+    diametery =  dimy * pixel_size
+    radiusy = diametery / 2.0
+
+    x = numpy.linspace(-radiusx,radiusx,dimx)
+    y = numpy.linspace(-radiusy,radiusy,dimy)
+
+    Xm, Ym = numpy.meshgrid(x,y)
+    radius = max(radiusx,radiusy)
+    r = radius - npixels * pixel_size
+
+    mask = (Xm)**2 + (Ym)**2  <= r**2
+
+    for i in range(data.shape[0]):
+            data[i,:,:] = numpy.where(mask,data[i,:,:],0)
+
+    return data
+
 if __name__ == "__main__":
    pass
 

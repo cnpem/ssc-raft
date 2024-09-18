@@ -3,37 +3,29 @@ import numpy
 
 from sscRaft import __version__
 
-class HDF5Saver:
-    # HDF5Saver('test_dictionary.hdf5').save_data(random_data)
-    def __init__(self, filename):
-        self.filename = filename
-
-    def save_data(self, data):
-        with h5py.File(self.filename, 'w') as f:
-            self._save_dict_to_hdf5(f, data)
-
-    def _save_dict_to_hdf5(self, hdf5_group: str, data, parent_key=""):
-        for key, value in data.items():
-            if isinstance(value, dict):  # Handle nested dictionaries
-                self._save_dict_to_hdf5(hdf5_group.create_group(str(parent_key) + "/" + str(key)),
-                                        value,
-                                        parent_key + "/" + key)
-            else:
-                hdf5_group.create_dataset(str(parent_key) + "/" + str(key), data=value)
-
-
-def read_hdf5(filepath, hdf5path, d_type = numpy.float32):
+def read_hdf5(filepath, hdf5path, d_type = numpy.float32, pin_memory=False):
     """Read HDF5 file with h5py.
 
     Args:
         filepath (str): Full path and name of HDF5 file
         hdf5path (str): Full data path inside HDF5 file
-        d_type (numpy dtype, optional): datatype. [Default: numpy.float32]
+        d_type (numpy dtype, optional): datatype [default: numpy.float32]
+        pin_memory (bool,optional): Create pinned memory data [default: False]
 
     Returns:
         (ndarray): numpy array data with d_type as datatype 
     """
-    return h5py.File(filepath, "r")[hdf5path][:].astype(d_type)
+    with h5py.File(filepath, 'r') as f:
+        dataset = f[hdf5path]
+
+    if pin_memory:
+        data = pinned_empty(dataset.shape, d_type)
+    else:
+        data = numpy.empty(dataset.shape, d_type)
+
+    data[...] = dataset[:]
+
+    return data
 
 def _save_hdf5_complex(filepath, data, dic = None, software = 'sscRaft', version = __version__):
    
@@ -341,7 +333,7 @@ def read_flat(detector,filepath,hdf5path):
     if dim_flat == 2:
         flat = numpy.expand_dims(flat,0)
 
-    # flat = flat - np.mean(flat, axis=0, dtype=np.float32)
+    # flat = flat - numpy.mean(flat, axis=0, dtype=numpy.float32)
     return flat 
 
 def read_dark(detector,filepath,hdf5path):
@@ -378,7 +370,7 @@ def read_dark(detector,filepath,hdf5path):
     if dim_dark == 2:
         dark = numpy.expand_dims(dark,0)
     
-    # dark = dark - np.mean(dark, axis=0, dtype=np.float32)
+    # dark = dark - numpy.mean(dark, axis=0, dtype=numpy.float32)
     return dark 
 
 def ReadTomoFlatDark(dic):
