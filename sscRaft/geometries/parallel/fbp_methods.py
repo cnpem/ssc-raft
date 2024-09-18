@@ -3,7 +3,7 @@ from ...rafttypes import *
 
 from ...processing.io import *
 
-def fbpGPU(tomogram, angles, gpus, dic):
+def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
     tomogram using the Filtered Backprojection (FBP) method.
 
@@ -12,6 +12,7 @@ def fbpGPU(tomogram, angles, gpus, dic):
         angles (float list): List of angles in radians
         gpus (int list): List of gpus
         dic (dict): Dictionary with parameters info
+        obj (ndarray, optional): Reconstructed 3D object array [default: None]
 
     Returns:
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
@@ -107,6 +108,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         angles (float list): List of angles in radians
         gpus (int list): List of gpus
         dic (dict): Dictionary with parameters info
+        obj (ndarray, optional): Reconstructed 3D object array [default: None]
 
     Returns:
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].

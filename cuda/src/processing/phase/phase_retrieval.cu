@@ -61,7 +61,7 @@ extern "C" {
 
         /* Compute total memory used of Phase Filter method on a single frame */
         configs->total_required_mem_per_frame_bytes = (
-                configs->tomo.frame_memory_bytes // Projection
+                2 * configs->tomo.frame_padd_memory_bytes // Projection
                 ); 
     }
 
