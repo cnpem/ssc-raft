@@ -600,15 +600,15 @@ class ConeBeamRadon:
         t_start = time.time()
         # ctypes.POINTER(ctypes.c_float)
         self.data_dict["px"] = numpy.ascontiguousarray(self.data_dict["px"].astype(numpy.float32))
-        px_pointer = self.data_dict["px"].ctypes.data_as(ctypes.c_ctypes.c_void_p)
+        px_pointer = self.data_dict["px"].ctypes.data_as(ctypes.c_void_p)
         self.data_dict["py"] = numpy.ascontiguousarray(self.data_dict["py"].astype(numpy.float32))
-        py_pointer = self.data_dict["py"].ctypes.data_as(ctypes.c_ctypes.c_void_p)
+        py_pointer = self.data_dict["py"].ctypes.data_as(ctypes.c_void_p)
         self.data_dict["pz"] = numpy.ascontiguousarray(self.data_dict["pz"].astype(numpy.float32))
-        pz_pointer = self.data_dict["pz"].ctypes.data_as(ctypes.c_ctypes.c_void_p)
+        pz_pointer = self.data_dict["pz"].ctypes.data_as(ctypes.c_void_p)
         self.data_dict["beta"] = numpy.ascontiguousarray(self.data_dict["beta"].astype(numpy.float32))
-        beta_pointer = self.data_dict["beta"].ctypes.data_as(ctypes.c_ctypes.c_void_p)
+        beta_pointer = self.data_dict["beta"].ctypes.data_as(ctypes.c_void_p)
         self.data_dict["phantom"] = numpy.ascontiguousarray(self.data_dict["phantom"].astype(numpy.float32))
-        phantom_pointer = self.data_dict["phantom"].ctypes.data_as(ctypes.c_ctypes.c_void_p)
+        phantom_pointer = self.data_dict["phantom"].ctypes.data_as(ctypes.c_void_p)
         # creating the struct lab:
         self.lab = Lab_CB(
             x=self.data_dict["Lx"],
@@ -634,7 +634,7 @@ class ConeBeamRadon:
         except:
             self.tomo = numpy.empty((self.lab.nbeta, self.data_dict["nv"], self.data_dict["nh"]), dtype=numpy.float32, order='C')
             self.tomo = numpy.ascontiguousarray(self.tomo.astype(numpy.float32))
-        tomo_pointer = self.tomo.ctypes.data_as(ctypes.c_ctypes.c_void_p)
+        tomo_pointer = self.tomo.ctypes.data_as(ctypes.c_void_p)
         # calling the C++/CUDA function to simulate the tomography:
         print('Starting the computation of the x-ray path integrals...')
         status_code = libraft.cbradon(self.lab, px_pointer, py_pointer, pz_pointer, beta_pointer, phantom_pointer, tomo_pointer, gpu_id)
