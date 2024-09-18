@@ -196,6 +196,8 @@ extern "C" {
 			subblock  = min(sizez - ptr, blocksize);
 			ptr_block = (size_t)nrays * nslices * ptr;
 
+            printf("Subblock = %d, blocksize = %d \n", subblock, blocksize);
+
 			/* Update pointer */
 			ptr = ptr + subblock;
 

@@ -271,7 +271,6 @@ __global__ void contrast_enhance::recuperate_padding(cufftComplex *inpadded, flo
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad = Npadx  * k * Npady  + Npadx  *  j +  i;
 
-    
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
     in[index] = inpadded[indpad].x;
