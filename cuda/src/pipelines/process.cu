@@ -35,19 +35,19 @@ extern "C"{
 
         std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
 
-        if (raw_blocksize <= 0){
-            blocksize = 1;
-        }else{
-            if (nslices < raw_blocksize) {
-                blocksize = nslices;
-            } else {
-                while (raw_blocksize >> blocksize_exp) {
-                    blocksize_exp++;
-                }
-                blocksize_exp--;
-                blocksize = 1 << blocksize_exp;
+        // if (raw_blocksize <= 0){
+        //     blocksize = 1;
+        // }else{
+        if (nslices < raw_blocksize) {
+            blocksize = nslices;
+        } else {
+            while (raw_blocksize >> blocksize_exp) {
+                blocksize_exp++;
             }
+            blocksize_exp--;
+            blocksize = 1 << blocksize_exp;
         }
+        // }
         std::cout << "\t  Blocksize: " << blocksize << std::endl;
 
         return blocksize;
