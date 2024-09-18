@@ -495,7 +495,7 @@ void getBSTMultiGPU(int* gpus, int ngpus, float* obj, float* tomogram, float* an
     GPU gpu_parameters;
 
     setBSTParameters(&configs, paramf, parami);
-    printBSTParameters(&configs);
+    // printBSTParameters(&configs);
 
     /* Projection data sizes */
     int nrays = configs.tomo.size.x;

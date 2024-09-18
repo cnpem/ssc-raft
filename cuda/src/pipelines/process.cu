@@ -8,8 +8,8 @@ extern "C"{
     int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
     bool using_fft, float gpu_memory)
     {
-        const float empiric_const = using_fft? 2.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
-        const float epsilon = 2.0;       // how much free memory we want to leave, in GB.
+        const float empiric_const = using_fft? 4.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
+        const float epsilon = 4.0;       // how much free memory we want to leave, in GB.
         
         // the values permitted for blocksize are powers of two.
         int raw_blocksize; // biggest blocksize feasible, although not necessarily: 

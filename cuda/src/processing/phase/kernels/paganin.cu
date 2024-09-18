@@ -94,9 +94,10 @@ dim3 size, dim3 size_pad, dim3 pad)
 
     cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
-    dim3 threadsPerBlock(TPBX,TPBY,1);
+    dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
     dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
-                    (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, size_pad.z);
+                    (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
+                    (int)ceil( size_pad.z / threadsPerBlock.z ) + 1);
     
     contrast_enhance::padding<<<gridBlock,threadsPerBlock>>>(projections, dataPadded, size, pad);
 

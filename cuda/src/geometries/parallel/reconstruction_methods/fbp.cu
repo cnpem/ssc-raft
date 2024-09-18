@@ -192,7 +192,7 @@ extern "C"{
 		CFG configs; GPU gpu_parameters;
 
         setFBPParameters(&configs, paramf, parami);
-        printFBPParameters(&configs);
+        // printFBPParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.obj.size, ngpus, gpus);
 

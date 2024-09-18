@@ -61,7 +61,7 @@ extern "C" {
 
         /* Compute total memory used of Phase Filter method on a single frame */
         configs->total_required_mem_per_frame_bytes = (
-                2 * configs->tomo.frame_padd_memory_bytes // Projection
+                8*configs->tomo.frame_padd_memory_bytes // Projection
                 ); 
     }
 
@@ -195,8 +195,6 @@ extern "C" {
 
 			subblock  = min(sizez - ptr, blocksize);
 			ptr_block = (size_t)nrays * nslices * ptr;
-
-            printf("Subblock = %d, blocksize = %d \n", subblock, blocksize);
 
 			/* Update pointer */
 			ptr = ptr + subblock;
