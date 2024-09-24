@@ -12,18 +12,18 @@ extern "C"{
         const float epsilon = 4.0;       // how much free memory we want to leave, in GB.
         
         // the values permitted for blocksize are powers of two.
-        int raw_blocksize; // biggest blocksize feasible, although not necessarily: 
+        long raw_blocksize; // biggest blocksize feasible, although not necessarily: 
             // 1) a power of two; and 
             // 2) not a divisor of nslices (i.e., nslices % raw_blocksize != 0).
 
-        int blocksize_exp = 1; // to store which power of 2 will be used. 
-        int blocksize;
+        long blocksize_exp = 1; // to store which power of 2 will be used. 
+        long blocksize;
 
         std::cout << "Calculating blocksize..." << std::endl;
 
         std::cout << gpu_memory << ", " << BYTES_TO_GB << ", " << total_required_mem_per_slice << "\n";
 
-        raw_blocksize = static_cast<int>(-epsilon + (gpu_memory)/(BYTES_TO_GB*total_required_mem_per_slice) );
+        raw_blocksize = static_cast<long>(-epsilon + (gpu_memory)/(BYTES_TO_GB*total_required_mem_per_slice) );
         
         std::cout << "\t  total_required_mem_per_slice: " << total_required_mem_per_slice << std::endl;
         std::cout << "\t  total_required_mem_per_slice GB: " << BYTES_TO_GB*total_required_mem_per_slice << std::endl;
