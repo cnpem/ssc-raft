@@ -33,15 +33,24 @@ float pixel_objx, float pixel_objy, float z2, dim3 size)
 
     if ( (i >= size.x) || (j >= size.y) || (k >= 1) ) return;
 
+    // int nx = size.x - 1;
+    // int ny = size.y - 1;
+
+    // float wx = fminf( i, nx - i ) / (float)nx;  
+    // float wy = fminf( j, ny - j ) / (float)ny;
+
     /* Reciprocal grid */
     float wx = fminf( i, size.x - i ) / (float)size.x;  
     float wy = fminf( j, size.y - j ) / (float)size.y;
 
-    // float wx = ( - 1.0f + float(i) ) * 0.5f * float(size.x);
-    // float wy = ( - 1.0f + float(j) ) * 0.5f * float(size.y);
+    // float wx = -nx + 2.0f * float(i);
+    // float wy = -ny + 2.0f * float(j);
 
-    // wx       = wx / ( (float)size.x * pixel_objx );
-    // wy       = wy / ( (float)size.y * pixel_objy );
+    // wx       = ( 0.5f * wx ) / ( (float)nx * pixel_objx );
+    // wy       = ( 0.5f * wy ) / ( (float)ny * pixel_objy );
+
+    // wx       = ( 0.5f * wx ) / ( pixel_objx );
+    // wy       = ( 0.5f * wy ) / ( pixel_objy );
 
     wx       = wx / pixel_objx;
     wy       = wy / pixel_objy;
@@ -109,7 +118,7 @@ dim3 size, dim3 size_pad, dim3 pad)
 
     opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
 
-    opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
+    // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
 
     contrast_enhance::recuperate_padding<<<gridBlock,threadsPerBlock>>>(dataPadded, projections, size, pad);
 

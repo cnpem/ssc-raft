@@ -21,19 +21,19 @@ extern "C"{
 
         std::cout << "Calculating blocksize..." << std::endl;
 
-        std::cout << gpu_memory << ", " << BYTES_TO_GB << ", " << total_required_mem_per_slice << "\n";
+        // std::cout << gpu_memory << ", " << BYTES_TO_GB << ", " << total_required_mem_per_slice << "\n";
 
         raw_blocksize = static_cast<long>(-epsilon + (gpu_memory)/(BYTES_TO_GB*total_required_mem_per_slice) );
         
-        std::cout << "\t  total_required_mem_per_slice: " << total_required_mem_per_slice << std::endl;
+        // std::cout << "\t  total_required_mem_per_slice: " << total_required_mem_per_slice << std::endl;
         std::cout << "\t  total_required_mem_per_slice GB: " << BYTES_TO_GB*total_required_mem_per_slice << std::endl;
         std::cout << "\t  gpu_memory: " << gpu_memory << std::endl;
-        std::cout << "\t  before - Raw blocksize: " << raw_blocksize << std::endl;
-        std::cout << "\t  empiric_const: " << empiric_const << std::endl;
+        // std::cout << "\t  before - Raw blocksize: " << raw_blocksize << std::endl;
+        // std::cout << "\t  empiric_const: " << empiric_const << std::endl;
 
         raw_blocksize = raw_blocksize/empiric_const;
 
-        std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
+        // std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
 
         // if (raw_blocksize <= 0){
         //     blocksize = 1;

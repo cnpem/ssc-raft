@@ -101,9 +101,6 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
         deviation = find_rotation_axis_auto(dic=dic, data=tomogram, flat=flat[0,:,:], dark=dark[0,:,:])
         dic['axis offset'], dic['axis offset auto']  = deviation, False
 
-    # Swap axes using transpose in CPU from ssc-raft
-    tomogram, flat, dark = calculate_transposed_volumes(tomogram, flat, dark)
-
     # Correction by flat-dark:
     tomogram = correct_background(data=tomogram, flat=flat, dark=dark, gpus=gpus, is_log=True)
 
@@ -113,8 +110,6 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
         dic['axis offset'] = offset
         tomogram = process_tomogram_volume(tomogram, dic, fix_stitching)
 
-    # Begin including `process_tomogram_volume` because of phase retrieval Newton method volume type return
-    # Perform image filter pipeline calculations
     tomogram = process_tomogram_volume(tomogram, dic, multiple_filters)
     dic      = update_paganin_regularization(dic) 
 

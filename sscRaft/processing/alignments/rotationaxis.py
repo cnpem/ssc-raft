@@ -98,13 +98,7 @@ def correct_rotation_axis360(data: numpy.ndarray, dic: dict) -> numpy.ndarray:
     else:
         proj[:,:,0:data.shape[2]] = data
 
-        logger.info(f'Corrected projection for rotation axis: new shape {proj.shape}')
-
-    # Garbage Collector
-    # lists are cleared whenever a full collection or
-    # collection of the highest generation (2) is run
-    # collected = gc.collect() # or gc.collect(2)
-    # logger.log(DEBUG_MEM,f'Garbage collector: collected {collected} objects.')
+    logger.info(f'Corrected projection for rotation axis: new shape {proj.shape}')
 
     return proj, shift
 
@@ -214,7 +208,6 @@ def correct_rotation_axis(data: numpy.ndarray, deviation: int) -> numpy.ndarray:
 
     deviation = - deviation # Fix centersino value
 
-
     proj = numpy.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * numpy.abs(deviation)))
 
     if(deviation < 0):
@@ -222,6 +215,10 @@ def correct_rotation_axis(data: numpy.ndarray, deviation: int) -> numpy.ndarray:
     else:
         proj[:,:,0:data.shape[2]] = data
 
-        logger.info(f'Corrected projection for rotation axis: new shape {proj.shape}')
+    # logger.info(f'Corrected projection for rotation axis: new shape {proj.shape}')
+    logger.info(f'Corrected projection for rotation axis: modified')
+
+    
+    proj = proj[:,:,numpy.abs(deviation):-numpy.abs(deviation)]
 
     return proj

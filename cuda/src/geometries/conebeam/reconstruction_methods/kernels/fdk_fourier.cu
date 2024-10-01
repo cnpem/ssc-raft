@@ -124,14 +124,17 @@ __global__ void signal_filter_pad(Lab lab, float* W, cufftComplex* signal, Proce
     set_filter_idxs_pad(n, &k, &j, &i, lab, process);
     idx = (long long int) k + j*lab.nph + i * lab.nph * lab.nbeta;
 
-    float sink, cosk;
-    float w = fminf( k, lab.nph - k ) / float(lab.nph);
-    float value = - 2.0f * float(M_PI) * lab.rotation_axis_offset * w * float(lab.nph) / (lab.dh); 
+    // float sink, cosk;
+    // float w = fminf( k, lab.nph - k ) / float(lab.nph);
+    // float value = - 2.0f * float(M_PI) * lab.rotation_axis_offset * w * float(lab.nph) / (lab.dh); 
 
-    __sincosf(value, &sink, &cosk);
+    // __sincosf(value, &sink, &cosk);
 
-    signal[idx].x = ( signal[idx].x * cosk - signal[idx].y * sink ) * W[k];
-    signal[idx].y = ( signal[idx].y * cosk + signal[idx].x * sink ) * W[k];      
+    // signal[idx].x = ( signal[idx].x * cosk - signal[idx].y * sink ) * W[k];
+    // signal[idx].y = ( signal[idx].y * cosk + signal[idx].x * sink ) * W[k];     
+
+    signal[idx].x = signal[idx].x * W[k];
+    signal[idx].y = signal[idx].y * W[k];       
 }}
 
 extern "C"{

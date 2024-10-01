@@ -379,28 +379,28 @@ __host__ __device__ inline float Filter::apply(float input)
 
 	if (type == EType::gaussian)
 	{
-		input *= exp(-0.693f * reg * input * input) / (1.0f + paganin * input * input);
+		input *= exp(-0.693f * reg * input * input) * ( 1.0f / (1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::lorentz)
 	{
-		input *= 1.0 / ( ( 1.0f + reg * input * input ) * (1.0f + paganin * input * input) );
+		input *= 1.0 / ( ( 1.0f + reg * input * input ) * ( 1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::cosine)
 	{
-		input *= cosf(float(M_PI) * 0.5f * input) / (1.0f + paganin * input * input);
+		input *= cosf(float(M_PI) * 0.5f * input) * ( 1.0f / ( 1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::rectangle)
 	{
 		param = fmaxf(input * reg * float(M_PI) * 0.5f, 1E-4f);
-		input *= ( sinf(param) / param ) / (1.0f + paganin * input * input);
+		input *= ( sinf(param) / param ) * ( 1.0f / ( 1.0f + paganin * input * input) );
 	}
 	else if (type == EType::hann)
 	{
-		input *= 0.5f + 0.5f * cosf(2.0f * float(M_PI) * input) / (1.0f + paganin * input * input);
+		input *= ( 0.5f + 0.5f * cosf(2.0f * float(M_PI) * input) ) * ( 1.0f / ( 1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::hamming)
 	{
-		input *= (0.54f + 0.46f * cosf(2.0f * float(M_PI) * input)) / (1.0f + paganin * input * input);
+		input *= ( 0.54f + 0.46f * cosf(2.0f * float(M_PI) * input) ) * ( 1.0f / ( 1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::ramp)
 	{
