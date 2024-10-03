@@ -168,6 +168,9 @@ extern "C"{
         configs->geometry.magnitude_x        = 1.0;
         configs->geometry.magnitude_y        = 1.0;
 
+        configs->geometry.obj_pixel_x        = parameters_float[4];
+        configs->geometry.obj_pixel_y        = parameters_float[5];
+
         configs->beta_delta                  = parameters_float[0];
                 
         /* Set Reconstruction method variables */
@@ -178,7 +181,7 @@ extern "C"{
         configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
         configs->geometry.wavelength         = (configs->beta_delta == 0.0 ? 1.0:( ( plank * vc ) / configs->geometry.energy ) );
 
-        configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta; /* Reconstruction Paganin parameter */
+        configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta; /* Reconstruction Paganin parameter. */
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
     
         /* Compute total memory used of FBP method on a singles slice */
@@ -203,6 +206,7 @@ extern "C"{
         printf("FBP filter: %d \n", configs->reconstruction_filter_type);
         printf("FBP regularization: %e \n", configs->reconstruction_reg);
         printf("FBP rot axis offset: %d \n", configs->rotation_axis_offset);
+        printf("FBP beta_delta: %e \n", configs->beta_delta);
         printf("FBP Paganin: %e \n", configs->reconstruction_paganin);
         printf("FBP blocksize: %d \n", configs->blocksize);
     }
@@ -247,6 +251,9 @@ extern "C"{
         configs->geometry.magnitude_x        = 1.0;
         configs->geometry.magnitude_y        = 1.0;
 
+        configs->geometry.obj_pixel_x        = parameters_float[4];
+        configs->geometry.obj_pixel_y        = parameters_float[5];
+
         configs->beta_delta                  = parameters_float[0];
                 
         /* Set Reconstruction method variables */
@@ -258,7 +265,7 @@ extern "C"{
         configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
         configs->geometry.wavelength         = (configs->beta_delta == 0.0 ? 1.0:( ( plank * vc ) / configs->geometry.energy ) );
 
-        configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta; /* Reconstruction Paganin parameter */
+        configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta; /* Reconstruction Paganin parameter. */
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
 
         // printf("Dados: %e %e %e %e \n",configs->geometry.wavelength,configs->geometry.z2x,parameters_float[0],configs->reconstruction_paganin);

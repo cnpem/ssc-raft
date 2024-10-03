@@ -21,7 +21,7 @@ enum PhaseFilterType
 struct Filter{
 
 	Filter() = default;
-	explicit Filter(int _type, float _paganin, float _reg, int _axis_offset): type((EType)_type), paganin(_paganin), reg(_reg), axis_offset(_axis_offset) {}; 
+	explicit Filter(int _type, float _paganin, float _reg, int _axis_offset, float _pixel): type((EType)_type), paganin(_paganin), reg(_reg), axis_offset(_axis_offset), pixel(_pixel) {}; 
 
 	enum EType
 	{
@@ -41,6 +41,7 @@ struct Filter{
 	float reg       = 1.0f;
 	float paganin   = 0.0f;
 	int axis_offset = 0.0f;
+    float pixel     = 1.0f;
 	
 	__host__ __device__ inline float apply(float input);
 };

@@ -185,8 +185,8 @@ extern "C" {
 		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
 
         /* Plan for Fourier transform - cufft */
-		int n[] = {nrayspad,nslicespad};
-		HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize));
+		int n[] = {nslicespad,nrayspad};
+		HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, n, 1, nslicespad*nrayspad, n, 1, nslicespad*nrayspad, CUFFT_C2C, blocksize));
 
 		/* Loop for each batch of size 'batch' in threads */
 		int ptr = 0, subblock; size_t ptr_block = 0;
@@ -202,7 +202,7 @@ extern "C" {
             if( subblock != blocksize){
                 HANDLE_ERROR(cudaDeviceSynchronize());
 				HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
-				HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, subblock));
+				HANDLE_FFTERROR(cufftPlanMany(&gpus.mplan, 2, n, n, 1, nslicespad*nrayspad, n, 1, nslicespad*nrayspad, CUFFT_C2C, subblock));
 			}
 
             opt::CPUToGPU<float>(projections + ptr_block, dprojections, 

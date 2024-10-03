@@ -211,10 +211,11 @@ extern "C"{
         int i;
         float wmax = 1.0/(2.0*lab.dh);
 
-        float z2 = lab.Dsd - lab.D;
+        float magn = lab.Dsd / lab.D;
+        float z2   = lab.Dsd - lab.D;
         float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg;
+        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
 
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (wmax)/(lab.nph-1) + (2*i*wmax)/(lab.nph-1); 
     
@@ -229,11 +230,12 @@ extern "C"{
     __global__ void filt_W(Lab lab, float* W){
         int i;
         float wmax = 1.0/(2.0*lab.dh);
-
+        
+        float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
         float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg;
+        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
@@ -249,10 +251,11 @@ extern "C"{
         float wmax = 1.0/(2.0*lab.dh);
         float c = 0.693f;
 
+        float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
         float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg;
+        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
 
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
@@ -268,10 +271,11 @@ extern "C"{
         int i;
         float wmax = 1.0/(2.0*lab.dh);
 
+        float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
         float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg;
+        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
@@ -287,10 +291,11 @@ extern "C"{
         int i;
         float wmax = 1.0/(2.0*lab.dh);
 
+        float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
         float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg;
+        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
@@ -306,10 +311,11 @@ extern "C"{
         float wmax = 1.0/(2.0*lab.dh);
         float param;
 
+        float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
         float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg;
+        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
@@ -332,10 +338,11 @@ extern "C"{
         int i;
         float wmax = 1.0/(2.0*lab.dh);
 
+        float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
         float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg; 
+        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn; 
         
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2*i*wmax)/(lab.nph); 
     
@@ -351,10 +358,11 @@ extern "C"{
         int i;
         float wmax = 1.0f / ( 2.0f * lab.dh );
 
+        float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
         float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg; 
+        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn; 
 
         for (i = 0; i <= lab.nph/2 ; i++) W[i] = (2.0f * i * wmax) / ( lab.nph ); 
     

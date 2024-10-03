@@ -62,7 +62,7 @@ void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TY
     n[0] being the size of the outermost and
     n[rank-1] innermost (contiguous) dimension of a transform. */
     int *n = (int *)malloc(RANK);
-    n[0] = (int)DATASIZE.x;
+    n[0] = (int)DATASIZE.y;
 
     int idist = DATASIZE.x; /* Input data distance between batches */
     int odist = DATASIZE.x; /* Output data distance between batches */
@@ -73,7 +73,7 @@ void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TY
 
     int batch = DATASIZE.y * DATASIZE.z; /* Number of batched executions */
 
-    if (RANK >= 2) n[1] = (int)DATASIZE.y;
+    if (RANK >= 2) n[1] = (int)DATASIZE.x;
     batch = DATASIZE.z;
     idist *= DATASIZE.y;
     odist *= DATASIZE.y;
@@ -85,7 +85,7 @@ void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TY
         batch = 1;
     }
 
-    int *inembed = NULL, *onembed = NULL; /* Input/Output size with pitch (ignored for 1D transforms).
+    int *inembed = n, *onembed = n; /* Input/Output size with pitch (ignored for 1D transforms).
     If set to NULL all other advanced data layout parameters are ignored. */
     int istride = 1, ostride = 1;         /* Distance between two successive input/output elements. */
 

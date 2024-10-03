@@ -5,6 +5,37 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0.html>`_.
 
+Version 3.0.1 - 2024-10-02
+--------------------------
+* Added
+
+  - ``correct_rotation_axis_cropped()`` function tha crops the extra padding added for rotation axis offset correction
+  
+* Changed
+
+  - Corrected bug on FFTShift for ``phase_retrieval()`` function (classic Paganin method)
+  - Corrected bug on ``cufftPlanMany`` for ``phase_retrieval()`` function (classic Paganin method) 
+  - Inclusion of magnitude on on Paganin by slices version in ``FDK``
+ 
+* Known Bugs
+
+  - ``BST`` works for 180 degrees only on a regular angle mesh
+  - ``BST`` angles are hardcoded and not as input
+  - Padding not working very well on ``FBP`` - turned-off
+  - Memory issues on ``EM`` for cone-beam geometry
+  - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+  - Memory issues on ``FDK``: In reconstruction by slices
+  - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+  - Problem on Paganin by slices version in the methods ``FBP by RT`` and ``FBP by BST`` where the beta/delta parameter have a difference of 1e-11 of the same parameter for ``FDK`` method
+
+
+* To be done
+
+  - Refactoring ``FDK``
+  - Refactoring ``EM`` conebeam ray tracing
+  - Refactoring ``FST`` frequency domain forward method for parallel beam
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam
+
 Version 3.0.0 - 2024-09-10
 --------------------------
 * Added
@@ -44,6 +75,7 @@ Version 3.0.0 - 2024-09-10
   - Memory issues on ``EM`` for cone-beam geometry
   - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
   - Memory issues on ``FDK``: In reconstruction by slices
+  - Paganin slice version not working on ``FBP by RT`` and ``FBP by BST`` methods
   - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
 
 * Removed

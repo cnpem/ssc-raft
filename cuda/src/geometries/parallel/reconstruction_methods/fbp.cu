@@ -78,10 +78,11 @@ extern "C"{
         float paganin_reg    = configs.reconstruction_paganin;
         float regularization = configs.reconstruction_reg;
         int axis_offset      = configs.rotation_axis_offset;
+        float pixel          = configs.geometry.obj_pixel_x;
 
         int nangles          = configs.tomo.size.y;
 
-        Filter filter(filter_type, regularization, paganin_reg, axis_offset);
+        Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel);
         
         float *sintable = opt::allocGPU<float>(nangles);
         float *costable = opt::allocGPU<float>(nangles);
@@ -192,7 +193,7 @@ extern "C"{
 		CFG configs; GPU gpu_parameters;
 
         setFBPParameters(&configs, paramf, parami);
-        // printFBPParameters(&configs);
+        printFBPParameters(&configs);
 
         setGPUParameters(&gpu_parameters, configs.obj.size, ngpus, gpus);
 

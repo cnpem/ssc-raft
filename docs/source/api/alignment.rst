@@ -21,7 +21,7 @@ Alignment API
 .. automodule:: sscRaft.processing.alignments.rotationaxis
      :members:
      :undoc-members:
-     :show-inheritance:
+     :show-inheritance: 
 
 .. _apistitch:
 

@@ -232,13 +232,14 @@ extern "C" {
 		int ty = blockIdx.y * blockDim.y + threadIdx.y;
 
 		float rampfilter = float(tx) / (float)sizex;
+
 		rampfilter = mfilter.apply(rampfilter);
 
 		float fcenter = 1.0f - (bShiftCenter ? (sintable[ty]) : 0);
-		fcenter = -2*float(M_PI)/float(2*sizex-2) * fcenter * icenter;
+		fcenter = -2.0f*float(M_PI)/float(2*sizex-2) * fcenter * icenter;
 
 		if(tx < sizex)
-			vec[ty*sizex + tx] *= exp1j(fcenter * tx) * rampfilter;
+			vec[ty*sizex + tx] *= exp1j(fcenter * tx ) * rampfilter;
 	}
 
 	void Highpass(rImage& x, float wid)
@@ -301,11 +302,12 @@ extern "C" {
 		int tx = blockIdx.x * blockDim.x + threadIdx.x;
 		int ty = blockIdx.y * blockDim.y + threadIdx.y;
 
-		float rampfilter = 2.0f*fminf(tx,sizex-tx)/(float)sizex;
+		float rampfilter = 2.0f*fminf(tx,sizex-tx)/((float)sizex);
+
 		rampfilter = mfilter.apply(rampfilter);
 
 		if(tx < sizex)
-			vec[ty*sizex + tx] *= exp1j(-2*float(M_PI)/float(sizex) * center * tx) * rampfilter;
+			vec[ty*sizex + tx] *= exp1j(-2*float(M_PI)/float(sizex) * center * tx ) * rampfilter;
 	}
 
     __global__ void SetX(complex* out, float* in, int sizex)
@@ -379,11 +381,11 @@ __host__ __device__ inline float Filter::apply(float input)
 
 	if (type == EType::gaussian)
 	{
-		input *= exp(-0.693f * reg * input * input) * ( 1.0f / (1.0f + paganin * input * input ) );
+		input *= exp(-0.693f * reg * input * input) * ( 1.0f / ( 1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::lorentz)
 	{
-		input *= 1.0 / ( ( 1.0f + reg * input * input ) * ( 1.0f + paganin * input * input ) );
+		input *= ( 1.0f / ( 1.0f + reg * input * input ) ) * ( 1.0f / ( 1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::cosine)
 	{

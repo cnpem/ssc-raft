@@ -68,8 +68,8 @@ extern "C" {
 		printf("Dims: %e, %e, %e, %e, %e, %e \n",param.z1x,param.z1y,param.z2x,param.z2y,param.energy,param.lambda);
 		
 		/* Plan for Fourier transform - cufft */
-		int n[] = {(int)param.Npadx,(int)param.Npady};
-		HANDLE_FFTERROR(cufftPlanMany(&param.mplan , 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, param.blocksize));
+		int n[] = {(int)param.Npady,(int)param.Npadx};
+		HANDLE_FFTERROR(cufftPlanMany(&param.mplan , 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, param.blocksize)); //wrong
 
 		size_t zblock = param.blocksize;
 
@@ -83,7 +83,7 @@ extern "C" {
 
 				HANDLE_FFTERROR(cufftDestroy(param.mplan));
 
-				HANDLE_FFTERROR(cufftPlanMany(&param.mplan , 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, zblock));
+				HANDLE_FFTERROR(cufftPlanMany(&param.mplan , 2, n, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, zblock)); //wrong
 			}
 
 			switch ((int)param.filter){

@@ -22,8 +22,8 @@ copyright = '2022, GCC'
 author = 'GCC'
 
 # The full version, including alpha/beta/rc tags
-release = '3.0.0'
-version = '3.0.0'
+release = '3.0.1'
+version = '3.0.1'
 
 # -- General configuration ---------------------------------------------------
 
