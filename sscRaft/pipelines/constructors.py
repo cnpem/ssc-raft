@@ -5,12 +5,11 @@ import numpy as np
 # from .io.saver import async_save_worker, async_save_worker_phase
 
 # Generic processing function
-def apply_filter_constructor(tomogram: numpy.ndarray, 
+def apply_filter_constructor(tomogram: numpy.ndarray,
+                             recon: numpy.ndarray, 
                              dic: dict, 
                              process_fn, 
-                             process_name: str, 
-                             save_prefix: str, 
-                             should_save_key: str) -> numpy.ndarray:
+                             process_name: str) -> numpy.ndarray:
     """
     Apply a filter constructor to a tomogram.
 
@@ -30,7 +29,7 @@ def apply_filter_constructor(tomogram: numpy.ndarray,
     
     # Apply the specific filter process
     logger.info(f"Applying {process_name}...")
-    tomogram = process_fn(tomogram, dic)
+    tomogram = process_fn(tomogram, recon, dic)
     
     # Calculate and log the elapsed time
     elapsed = time.time() - start
@@ -41,7 +40,7 @@ def apply_filter_constructor(tomogram: numpy.ndarray,
     
     return tomogram
 
-def dont_process(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
+def dont_process(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
     """
     Returns the input tomogram unchanged.
 
@@ -59,7 +58,7 @@ def dont_process(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
     """
     return tomogram
 
-def process_tomogram_volume(tomogram: numpy.ndarray, 
+def process_tomogram_volume(tomogram: numpy.ndarray, recon: numpy.ndarray,
                             dic: dict,
                             process_fn: callable) -> numpy.ndarray:
     """
@@ -68,6 +67,8 @@ def process_tomogram_volume(tomogram: numpy.ndarray,
     Args:
         tomogram (numpy.ndarray): 
             The input tomogram
+        recon (numpy.ndarray): 
+            The input reconstruction array
         dic (dict): 
             A dictionary containing parameters required by the processing function.
         process_fn (callable): 

@@ -16,31 +16,18 @@ default_dictionary ={
     "gpu": get_gpu_list(),
     "nprocesses": cpu_count(),
     "beam_energy": 22e3,
-    "norm_use_log": False,
-    "save_norm": False,
-    "image_filter": 'none', # ['median', 'gaussian', 'none']
-    "image_filter_sigma": 0.0,
-    "save_image_filter": False,
     "paganin_filter_method": 'none', # ['raft_by_frames', 'tomopy_by_frames', 'raft_by_slices', 'none']
     "paganin_filter_beta_delta": 0.0,
-    "save_paganin_filter": False,
-    "rings_method": "raft_titarenko", # ['raft_titarenko', 'raft_all_stripes', 'tomopy_titarenko', 'tomopy_all_stripes', 'tomopy_stripes_filtering', 'none']
+    "rings_method": "raft_titarenko", # ['raft_titarenko', 'raft_all_stripes', 'none']
     "rings_regularization_raft_ti": -1, 
     "rings_blocks_raft_ti": 1, 
-    "rings_parameters": [10, 121, 21, 1, 2.5],
-    "save_rings": False,
+    "rings_parameters": [10, 121, 21, 1],
     "projections": [0, -1],
-    "phase_retrieval_method": 'none',  # ['newton_tikhonov', 'newton_laplacian', 'NL_tikhonov', 'ctf', 'none']
-    "phase_retrieval_regularization": [-1, -1, 1e-3],
-    "phase_retrieval_iterations": [10, 30], # "Tik" or "Lap"
-    "save_phase_retrieval": True,
     "rotation_axis_shift": [0, True],
-    "save_rotation_axis": False,
-    "recon_method": "raft_fdk",  # ['astra_fdk', 'raft_fdk', 'fbp_RT', 'fbp_BST', 'tEMRT', 'tEMFQ', 'none']
+    "recon_method": "raft_fdk",  # ['fbp_RT', 'fbp_BST', 'none']
     "slices": [0, -1],
     "recon_filter": "hamming",  # ['ramp', 'gaussian', 'hamming', 'hann', 'cosine', 'lorentz', 'rectangle']
     "padding": 2,
-    "iterations": 50,          # construction iterations for iterative methods
     "save_recon": True,
     "crop_circle_recon": True,
     "blocksize": 0,
@@ -75,29 +62,4 @@ def update_with_defaults(input_dict, default_dict, missing_value=None) -> dict:
             
     return updated_dict
 
-def set_fresnel_dictionary(type_, alpha, gamma, maxitN, maxitCG, z1, z2, pixel, energy, gpu):
-    dic = {}
-    dic['gpu']            = gpu
-    dic['z1']             = (z1,z1)
-    dic['z2']             = (z2,z2)
-    dic['energy']         = energy
-    dic['blocksize']      = 1
-    dic['detpixelsize']   = (pixel,pixel)
-    dic['beamgeometry']   = 'conebeam'
-    dic['maxiterations']  = (maxitN, maxitCG)
-    dic['regularization'] = (type_,alpha,gamma,0.0)
-
-    # Parametros de DEV: Com BUGS ============================================ ???????
-    dic['poni']                = (0, 0)               # não use
-    dic['mask']                = (False, None)        # não use
-    dic['normX']               = False                # não use
-    dic['ratio']               = 0 # não use
-    dic['support']             = (False, None)        # não use
-    dic['tolerances']          = (1e-8, 1e-8) # não use
-    dic['zeropadding']         = (0, 0, False, False) # não mudar valores aqui: bugs
-    dic['rotationdetector']    = (0, 0, False)        # não use
-    dic['samplemasscenter']    = (0, 0)               # não use
-    dic['regularizationextra'] = (2/3,False)
-
-    return dic
 

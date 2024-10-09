@@ -78,13 +78,11 @@ def _background_correctionGPU(frames, flat, dark, gpus, is_log):
 
     logger.info(f'Number of flats is {nflats}.')
 
-    print(f'flat shape: {flat.shape}')
     if flat.shape[-1] != nrays or flat.shape[0] != nslices:
         message_error = f'Flat dimension ({flat.shape[0]},{flat.shape[-1]}) does not match data dimension ({frames.shape[0]},{frames.shape[-1]}).'
         logger.error(message_error)
         raise ValueError(f'Flat dimension ({flat.shape[0]},{flat.shape[-1]}) does not match data dimension ({frames.shape[0]},{frames.shape[-1]}).')
 
-    print(f'dark shape: {dark.shape}')
     if dark.shape[-1] != nrays or dark.shape[0] != nslices:
         message_error = f'Dark dimension ({dark.shape[0]},{dark.shape[-1]}) does not match data dimension ({frames.shape[0]},{frames.shape[-1]}).'
         logger.error(message_error)

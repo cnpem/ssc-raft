@@ -15,8 +15,7 @@ def read_hdf5(filepath, hdf5path, d_type = numpy.float32, pin_memory=False):
     Returns:
         (ndarray): numpy array data with d_type as datatype 
     """
-    with h5py.File(filepath, 'r') as f:
-        dataset = f[hdf5path]
+    dataset = h5py.File(filepath, 'r')[hdf5path]
 
     if pin_memory:
         data = pinned_empty(dataset.shape, d_type)

@@ -168,14 +168,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         energy         = 1.0
         pixelx, pixely = 1.0, 1.0
 
-    print('beta_delta:',beta_delta)
-    print('z2:',z2)
-    print('energy:',energy)
-    print('padding:',dic['padding'])
-
     padx, pady, padz  = dic['padding'] + 2,0,0 # (padx, pady, padz)
-
-    print('padding after:',padx, pady, padz)
 
     # logger.info(f'Set BST pad value as {pad} x horizontal dimension ({padx}).')
 

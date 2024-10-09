@@ -63,6 +63,6 @@ platforms = ["Linux"]
 [tool.setuptools.dynamic]
 version = {attr = "sscRaft._version.__version__"}
 
-#[project.scripts]
-#ssc-raft = "sscRaft.cli.ssc_raft_cli:app"
+[project.scripts]
+ssc-raft = "sscRaft.cli.ssc_raft_cli:app"
 

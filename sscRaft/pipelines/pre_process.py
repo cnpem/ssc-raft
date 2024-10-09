@@ -8,6 +8,8 @@ from ..processing.alignments.stitching360 import *
 
 from ..processing.opt import transpose
 
+import time
+
 def apply_log(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
     start = time.time()
     logger.info('Start applying -log(tomogram)...')
@@ -33,23 +35,21 @@ def update_paganin_regularization(dic: dict) -> dict:
     
     # Update regularization value if the method is not 'paganin_by_slices'
     if dic['paganin_method'] != 'paganin_by_slices':
-        dic['beta_delta'] = 0.0
+        dic['beta/delta'] = 0.0
     
     return dic
 
-def fix_stitching(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
+def fix_stitching(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
     start = time.time()
 
-    deviation    = dic.get('axis offset', 0)
+    deviation    = dic.get('stitching overlap', 0)
     gpus         = dic.get('gpu',[0])
 
     tomogram = stitch360To180(tomogram, deviation, gpus=gpus)
 
-
     # Calculate and log the elapsed time
     elapsed = time.time() - start
-    logger.info(f'Time for Stitching: {elapsed} seconds')
-    start = time.time()
+    logger.info(f'Time for Stitching: {elapsed:.2f} seconds')
 
     logger.info("Finished Stitching")
 
@@ -58,19 +58,19 @@ def fix_stitching(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
 
     return tomogram
 
-def fix_rotation_axis(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
+def fix_rotation_axis(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
     start = time.time()
 
     deviation = dic.get('axis offset', 0)
 
     # Apply rotation axis correction
 
-    tomogram = correct_rotation_axis(tomogram, deviation)
+    tomogram = correct_rotation_axis_cropped(tomogram, deviation)
 
     # Calculate and log the elapsed time
     elapsed = time.time() - start
-    logger.info(f'Time for Raft Rotation Axis: {elapsed} seconds')
-    start = time.time()
+    logger.info(f'Time for Raft Rotation Axis: {elapsed:.2f} seconds')
+    
     logger.info("Finished Raft Rotation Axis")
 
     # Asyncronously save the processed rotation axis tomogram volume
@@ -80,10 +80,10 @@ def fix_rotation_axis(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
 
 def angle_verification(dic: dict, tomogram: numpy.ndarray) -> numpy.ndarray:
     file_path = dic['input_path']
-    file_name = dic['input_file_name']
+    file_name = dic['input_name']
     abs_file_path = "".join([file_path, file_name])
 
-    tomogram_shape_angles = tomogram.shape[0]
+    tomogram_shape_angles = tomogram.shape[1]
 
     # Try to read the angles from the HDF5 file
     try:
@@ -92,11 +92,12 @@ def angle_verification(dic: dict, tomogram: numpy.ndarray) -> numpy.ndarray:
             try:
                 angles = h5f['exchange/theta'][:].astype(numpy.float32)
             except KeyError:
-                logger.error(f"Dataset 'Rotional_stage_gather' not found in {abs_file_path}.")
+                logger.error(f"Dataset 'exchange/theta' not found in {abs_file_path}.")
                 raise
 
         # Convert angles to radians and store the last angle from the vector
-        angles = numpy.deg2rad(angles)
+        angles = numpy.asarray(numpy.deg2rad(angles))
+        angles = abs(min(angles)) + angles
         last_angle_from_vector = angles[-1]
 
         # Ensure angles array matches the tomogram shape
@@ -107,11 +108,7 @@ def angle_verification(dic: dict, tomogram: numpy.ndarray) -> numpy.ndarray:
 
     except (IOError, KeyError) as e:
 
-        logger.error(f"Error reading angles from HDF5 file {abs_file_path}: {str(e)}. Setting angles.")
-        # Fallback: create a list of angles from scratch
-        nangles = tomogram_shape_angles
-        last_angle = 180.0
-        angles = numpy.linspace(0.0, numpy.deg2rad(last_angle), nangles, endpoint=False)
+        logger.error(f"Error reading angles from HDF5 file {abs_file_path}: {str(e)}.")
     
     return angles
 
@@ -123,8 +120,8 @@ def find_rotation_axis_auto(dic:dict, angles: numpy.ndarray, data: numpy.ndarray
         # Find index of projection at 180 degrees to compute the rotation axis deviation
         dangle = angles[1] - angles[0]
         iangle = ( numpy.pi / dangle ).astype(int)
-        frame0 = data[0,:,:]
-        frame1 = data[iangle-1,:,:]
+        frame0 = data[:,0,:]
+        frame1 = data[:,iangle-1,:]
 
     except:
         message = (
@@ -134,14 +131,14 @@ def find_rotation_axis_auto(dic:dict, angles: numpy.ndarray, data: numpy.ndarray
         )
         logger.warning(message)
 
-        frame0 = data[0,:,:]
-        frame1 = data[-1,:,:]
+        frame0 = data[:,0,:]
+        frame1 = data[:,-1,:]
 
     if dic.get('axis offset auto', True):
         deviation = Centersino(frame0, frame1, flat, dark)  
-        logger.info(f'Rotation axis offset computed: {deviation}')
+        logger.info(f'Rotation axis offset computed: {deviation} pixels')
     else:
-        logger.warning(f'Rotation axis deviation value of {deviation} provided by the user.')
+        logger.warning(f'Rotation axis deviation value of {deviation} pixels provided by the user.')
 
     return deviation
 
@@ -150,7 +147,7 @@ def find_stitching_auto(dic: dict, tomogram: numpy.ndarray) -> int:
 
     deviation = getOffsetStitching360(tomogram[:2, :, :], gpus=gpus)
 
-    logger.info(f'Stitching offset computed: {deviation}')
+    logger.info(f'Stitching overlap computed: {deviation}')
 
     return deviation
 

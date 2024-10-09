@@ -3,13 +3,15 @@ from .constructors import *
 from ..geometries.methods import *
 from ..io.saver import async_save_worker
 
+import time
+
 # Define the supported tomogram reconstruction methods
 def set_fbp_method(method_name: str):
-    return lambda tomogram, dic: fbp(tomogram, dic={**dic, 'method': method_name})
+    return lambda tomogram, recon, dic: fbp(tomogram=tomogram, obj=recon, dic={**dic, 'method': method_name})
 
 # Define the supported tomogram reconstruction methods
 def set_em_method(method_name: str):
-    return lambda tomogram, dic: em(tomogram, dic={**dic, 'method': method_name})
+    return lambda tomogram, recon, dic: em(tomogram=tomogram, obj=recon, dic={**dic, 'method': method_name})
 
 # Define the supported tomogram reconstruction methods
 recon_function_methods = {
@@ -21,7 +23,7 @@ recon_function_methods = {
     'none': dont_process
 }
 
-def multiple_recon_methods_wrapper(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
+def multiple_recon_methods_wrapper(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
     """
     Wrapper function for multiple tomogram reconstruction methods.
 
@@ -35,17 +37,15 @@ def multiple_recon_methods_wrapper(tomogram: numpy.ndarray, dic: dict) -> numpy.
     Raises:
         ValueError: If the specified reconstruction method is not implemented.
     """
-    reconstruction = dic['recon array']
-
     recon_method   = dic.get('recon_method', 'fbp_BST')
     if recon_method in recon_function_methods:
-        reconstruction = recon_function_methods[recon_method](tomogram=tomogram, dic=dic, obj=reconstruction)
+        reconstruction = recon_function_methods[recon_method](tomogram=tomogram, recon=recon, dic=dic)
     else:
         raise ValueError(f"Unknown reconstruction method `{recon_method}` is not implemented!")
 
     return reconstruction
 
-def reconstruction_methods(tomogram: numpy.ndarray, dic:dict) -> numpy.ndarray:
+def reconstruction_methods(tomogram: numpy.ndarray, recon: numpy.ndarray, dic:dict) -> numpy.ndarray:
     """
     Perform tomogram reconstruction using multiple reconstruction methods.
 
@@ -59,21 +59,21 @@ def reconstruction_methods(tomogram: numpy.ndarray, dic:dict) -> numpy.ndarray:
     """
     start = time.time()
 
+    save_name   = dic.get('reconstruct', 'Recon_' + dic['input_name'])
+
     # Perform the actual reconstruction
-    recon = multiple_recon_methods_wrapper(tomogram, dic)
+    recon = multiple_recon_methods_wrapper(tomogram, recon, dic)
 
     elapsed = time.time() - start
-    logger.info(f'Finished data reconstruction! Total execution time: {str(elapsed)} seconds')
+    logger.info(f'Finished data reconstruction! Total execution time: {elapsed:.2f} seconds')
 
     # Apply crop circle to reconstructed volume if specified
     if dic['crop_circle_recon']:
         recon = crop_circle_simple(recon, dic['detector_pixel[m]'],
-                                   npixels=numpy.abs(dic['rotation_axis_shift'][0]))
-
-    elapsed = time.time() - start
+                                   npixels=numpy.abs(dic['offset']))
 
     # Save the tomogram asynchronously if specified
-    async_save_worker(recon, dic, 'recon', 'save_recon')
+    async_save_worker(recon, dic, save_name, 'save_recon')
 
     return recon
 

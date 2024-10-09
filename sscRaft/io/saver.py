@@ -23,8 +23,8 @@ def async_save(tomogram: numpy.ndarray, dic: dict, save_prefix: str) -> None:
         None
     """
     start = time.time()
-    save_path = "".join([dic['output_path'], save_prefix, '_', dic['sample_id'], '_', dic['input_file_name']])
-    logger.info(f"Saving File asynchronously to {save_path}...")
+    save_path = os.path.join(dic['output_path'], save_prefix)
+    logger.info(f"Saving File asynchronously to {save_path}")
     hdf5_saver = HDF5Saver()
     hdf5_saver.save_hdf5_recon(save_path, tomogram, dic)  
     logger.info(f"File saved to {save_path} asynchronously.")

@@ -18,6 +18,7 @@ from ...processing.opt import transpose, flip_x, flip_x_np
 
 numpy.seterr(divide='ignore', invalid='ignore') #to ignore divde by zero warning
 
+import time
 
 def process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=False):
     start_read = time.time()
@@ -49,10 +50,10 @@ def process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=False):
         recon = numpy.zeros(recon_shape, dtype=numpy.float32)
 
     elapsed = time.time() - alloc_output_start
-    print(f"Alloc recon output: {elapsed} seconds.")
+    logger.info(f"Alloc recon output: {elapsed:.2f} seconds.")
 
     elapsed = time.time() - start_read
-    print(f"Read datasets (data, flats, dark, angles): {elapsed} seconds.")
+    logger.info(f"Read datasets (data, flats, dark, angles): {elapsed:.2f} seconds.")
 
     start_pre = time.time()
 
@@ -67,14 +68,16 @@ def process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=False):
     flats[:, 1, :] = numpy.mean(flat_post, axis=0)
     darks          = numpy.mean(dark, axis=0)
 
+    data = transpose(data[:-1, :, :])
+
     data  = flip_x(data)
     flats = flip_x_np(flats)
     darks = flip_x_np(darks)
 
-    print('Data shape (nangles,nslices,nrays):', data.shape)
+    logger.info(f'Data shape (nangles,nslices,nrays): {data.shape}')
 
     elapsed = time.time() - start_pre
-    print(f"Pre-Process TOMCAT data and flat for RAFT: {elapsed} seconds.")
+    logger.info(f"Pre-Process TOMCAT data and flat for RAFT: {elapsed:.2f} seconds.")
     
     return data, flats, darks, recon
 
@@ -84,10 +87,10 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
     start = time.time()
 
     gpus         = dic.get('gpu',[0])
-    is_stitching = dic.get('stitching', False)
+    is_stitching = dic.get('stitching', 'F')
 
     # Select slices (angles) to reconstruct
-    tomogram, flat, dark = select_slices_to_reconstruct(tomogram=tomogram, flat=flat, dark=dark, dic=dic)
+    # tomogram, flat, dark = select_slices_to_reconstruct(tomogram=tomogram, flat=flat, dark=dark, dic=dic)
 
     # Angle verification
     angle_vector = angle_verification(dic=dic, tomogram=tomogram)
@@ -96,32 +99,41 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
 
     logger.debug(f"Tomogram shape: {tomogram.shape}, Flat shape: {flat.shape}, Dark shape: {dark.shape}")
     
-    if is_stitching is False:
-        # Find automatic rotation axis deviation:
-        deviation = find_rotation_axis_auto(dic=dic, data=tomogram, flat=flat[0,:,:], dark=dark[0,:,:])
-        dic['axis offset'], dic['axis offset auto']  = deviation, False
+    deviation = dic.get('axis offset', -1)
+
+    if is_stitching == 'F': 
+        if deviation == -1:
+            # Find automatic rotation axis deviation:
+            deviation = find_rotation_axis_auto(dic=dic, data=tomogram, flat=flat[0,:,:], dark=dark[0,:,:])
+            dic['axis offset'], dic['axis offset auto']  = deviation, False
 
     # Correction by flat-dark:
-    tomogram = correct_background(data=tomogram, flat=flat, dark=dark, gpus=gpus, is_log=True)
+    start2 = time.time()
+    tomogram = correct_background(tomogram, flat, dark, gpus, True)
+    elapsed = time.time() - start2
+    logger.info(f'Finished correction by Flat, Dark and log! Total Time: {elapsed:.2f} seconds')
 
     # Stitching
-    if is_stitching:
+    if is_stitching == 'T':
         offset = find_stitching_auto(dic=dic, tomogram=tomogram)
-        dic['axis offset'] = offset
-        tomogram = process_tomogram_volume(tomogram, dic, fix_stitching)
+        dic['stitching overlap'] = offset
+        tomogram = process_tomogram_volume(tomogram, recon, dic, fix_stitching)
+        dic['angles[rad]'] = numpy.linspace(0.0, numpy.pi, tomogram.shape[1], endpoint=False)
 
-    tomogram = process_tomogram_volume(tomogram, dic, multiple_filters)
+    tomogram = process_tomogram_volume(tomogram, recon, dic, multiple_filters)
     dic      = update_paganin_regularization(dic) 
 
     # Perform rotation axis deviation correction
-    if is_stitching is False:
-        tomogram = process_tomogram_volume(tomogram, dic, fix_rotation_axis)
+    if is_stitching == 'F':
+        dic['offset'] = dic['axis offset']
+    else:
+        dic['offset'] = 0
 
     # Perform tomography reconstruction
-    recon = process_tomogram_volume(tomogram, dic, reconstruction_methods)
+    recon = process_tomogram_volume(tomogram, recon, dic, reconstruction_methods)
 
     elapsed = time.time() - start
-    logger.info(f'Finished TOMCAT Reconstruction Pipeline! Total Time: {elapsed} seconds')
+    logger.info(f'Finished TOMCAT Reconstruction Pipeline! Total Time: {elapsed:.2f} seconds')
 
     return recon
 
@@ -130,23 +142,25 @@ def tomcat_free_pinned_memory(tomogram: numpy.ndarray, flats: numpy.ndarray, rec
     free_pinned_array(tomogram)
     free_pinned_array(recon)
 
-def tomcat_pipeline(dic: dict):
+def tomcat_pipeline(dic: dict) -> None:
 
-    pin_memory   = dic.get('pinned_memory',False)
-    is_stitching = dic.get('stitching',False)
+    pin_memory   = dic.get('pin_memory',False)
+    is_stitching = dic.get('stitching','F')
 
     filepath     = dic.get('input_path','') 
     filename     = dic.get('input_name','')
 
-    flat_path    = dic.get('flat_path', filepath + filename)
-    dark_path    = dic.get('dark_path', filepath + filename)
+    datafile     = os.path.join(filepath,filename)
+
+    flat_path    = dic.get('flat_path', datafile)
+    dark_path    = dic.get('dark_path', datafile)
 
     h5data       = dic.get('input_data_hdf5_path','exchange/data') 
     h5flat_pre   = dic.get('flat_pre_dataset','exchange/data_white_pre') 
     h5flat_pos   = dic.get('flat_pos_dataset','exchange/data_white_post') 
     h5dark       = dic.get('dark_dataset','exchange/data_dark') 
 
-    filepaths    = [filepath + filename,flat_path,dark_path]
+    filepaths    = [datafile,flat_path,dark_path]
     h5path       = [h5data,h5flat_pre,h5flat_pos,h5dark]
 
     tomogram, flat, dark, recon = process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=pin_memory)

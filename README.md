@@ -80,7 +80,7 @@ The `<version>` is the version of the `sscRaft` to be installed. Example, to ins
 
 ### PIP
 
-If one is inside the CNPEM network, they can install the latest version of sscRaft directly from the `pip server`
+If one is inside the CNPEM cluster, they can install the latest version of sscRaft directly from the `pip server`
 
 ```bash
     pip install sscRaft==version --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
