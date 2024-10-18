@@ -382,6 +382,20 @@ except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_CONEBEAM_RADON_RT-')
     pass
 
+
+try:
+    libraft.cbradon_MultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int,
+        Lab_CB, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+    ]
+    libraft.cbradon_MultiGPU.restype  = ctypes.c_int
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_CONEBEAM_RADON_MULTIGPU_RT-')
+    pass
+
+
+
 try:
     libraft.ReconstructionPipeline.argtypes = [
         ctypes.c_void_p, ctypes.c_void_p,

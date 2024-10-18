@@ -28,6 +28,14 @@ int cbradon(
     float *sample, 
     float *tomo, 
     int gpu_id);
+
+int cbradon_MultiGPU(
+        int* gpus, int ngpus,
+        struct Lab lab,
+        float* px, float *py, float *pz,
+        float *beta,
+        float *sample,
+        float *tomo);
 }
 
 // Ray integral function.
@@ -68,6 +76,6 @@ __device__ void set_phantom_idxs(float x, float y, float z, long long int *i, lo
 __device__ bool not_inside_phantom(long long int i, long long int j, long long int k, struct Lab lab);
 
 // Utilitary functions.
-void malloc_float_on_gpu(float **cuda_pointer, size_t N, std::string name);
-void copy_float_array_from_cpu_to_gpu(float *cuda_pointer, float *pointer, long long int N, std::string name);
-void copy_float_array_from_gpu_to_cpu(float *pointer, float *cuda_pointer, long long int N, std::string name);
+void malloc_float_on_gpu(float **cuda_pointer, size_t N);
+void copy_float_array_from_cpu_to_gpu(float *cuda_pointer, float *pointer, long long int N);
+void copy_float_array_from_gpu_to_cpu(float *pointer, float *cuda_pointer, long long int N);
