@@ -422,57 +422,58 @@ def make_tomo_for_zoom_iterative(data_dict, n_gpus, save="hdf5", verbose=True):
     if verbose:
         print("Número de bytes do phantom: ", phantom.nbytes)
         print("Número de bytes de um phantom de mesmas dimesões: ", numpy.empty(phantom.shape, dtype=numpy.float32).nbytes)
-    t_start = time.time()
-    n_chunks = _calc_n_chunks(n_gpus, phantom, nbeta, nv, nh)
-    beta_chunks = numpy.array_split(data_dict["beta"], n_chunks)
-    if verbose:
-        print("Número de chunks: ", n_chunks)
-    for idx_chunk in range(n_chunks):
-        betas = numpy.array_split(beta_chunks[idx_chunk], n_gpus)
-        if verbose:
-            print("Tamanho do beta de cada GPU: ", [ len(b) for b in betas])
-        dicts = [ make_data_dict(
-            phantom=phantom, 
-            beta=betas[i], 
-            px=data_dict["px"], py=data_dict["py"], pz=data_dict["pz"], 
-            sx=data_dict["sx"], sy=data_dict["sy"], sz=data_dict["sz"], 
-            Lx=data_dict["Lx"], Ly=data_dict["Ly"], Lz=data_dict["Lz"],
-            x0=data_dict["x0"], y0=data_dict["y0"], z0=data_dict["z0"],
-            nh=data_dict["nh"], nv=data_dict["nv"],
-            n_ray_points=data_dict["n_ray_points"]) for i in range(n_gpus) ]
-        tomo_gpus = []
-        for i, dic in enumerate(dicts):
-            tomo_shape = (dic["beta"].shape[0], nv, nh)
-            dic["tomo_mem"] = SM(create=True, size=numpy.empty(tomo_shape, dtype=numpy.float32).nbytes)
-            tomo_gpus.append(numpy.ndarray(tomo_shape, buffer=dic["tomo_mem"].buf, dtype=numpy.float32, order='C'))
 
-        t_start_chunk = time.time()
-        tomo_procs = []
-        manager = mp.Manager()
-        for arg in zip(dicts, numpy.arange(n_gpus)):
-            p = mp.Process(target=_tomo_manager_worker, args=(arg[0], arg[1]))
-            tomo_procs.append(p)
-            p.start()
-        for proc in tomo_procs:
-            proc.join()
-        #print("Total time on GPUs: " + str(time.time()-t_start_chunk))
-        res.append(numpy.vstack(tomo_gpus))
-        #print("Total time after concatenating: " + str(time.time()-t_start_chunk))
-        for dic in dicts:
-            dic["tomo_mem"].close()
-            dic["tomo_mem"].unlink()
-    res = numpy.vstack(res)
-    #print("Total time: " + str(time.time()-t_start))
+    data_dict["px"] = CNICE(data_dict["px"])
+    px_pointer = data_dict["px"].ctypes.data_as(ctypes.c_void_p)
+    data_dict["py"] = CNICE(data_dict["py"])
+    py_pointer = data_dict["py"].ctypes.data_as(ctypes.c_void_p)
+    data_dict["pz"] = CNICE(data_dict["pz"])
+    pz_pointer = data_dict["pz"].ctypes.data_as(ctypes.c_void_p)
+    data_dict["beta"] = CNICE(data_dict["beta"])
+    beta_pointer = data_dict["beta"].ctypes.data_as(ctypes.c_void_p)
+    data_dict["phantom"] = CNICE(data_dict["phantom"])
+    phantom_pointer = data_dict["phantom"].ctypes.data_as(ctypes.c_void_p)
+
+
+    tomo_shape = (len(data_dict["beta"]), nv, nh)
+    tomo = np.empty(tomo_shape, dtype='float32')
+    tomo_pointer = tomo.ctypes.data_as(ctypes.c_void_p)
+
+    # creating the struct lab:
+    lab = Lab_CB(
+        x=data_dict["Lx"],
+        y=data_dict["Ly"],
+        z=data_dict["Lz"],
+        x0=data_dict["x0"],
+        y0=data_dict["y0"],
+        z0=data_dict["z0"],
+        nx=data_dict["phantom"].shape[2],
+        ny=data_dict["phantom"].shape[1],
+        nz=data_dict["phantom"].shape[0],
+        nbeta=data_dict["beta"].shape[0],
+        sx=data_dict["sx"],
+        sy=data_dict["sy"],
+        sz=data_dict["sz"],
+        n_detector=data_dict["n_detector"],
+        n_ray_points=data_dict["n_ray_points"])
+
+    gpus = np.arange(n_gpus, dtype='int32')
+    gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
+    n_gpus = ctypes.c_int(n_gpus)
+
+    status_code = libraft.cbradon_MultiGPU(gpus_ptr, n_gpus,
+                                           lab, px_pointer, py_pointer, pz_pointer,
+                                           beta_pointer, phantom_pointer, tomo_pointer)
+
     if save == "hdf5":
-        with h5py.File("tomo.h5", "w") as h5_tomo: 
-            h5_tomo.create_dataset("refractive_index", data=res)
+        with h5py.File("tomo.h5", "w") as h5_tomo:
+            h5_tomo.create_dataset("refractive_index", data=tomo)
     elif save == "npy":
         numpy.save("tomo.npy", res)
-        #print("Total time after saving: " + str(time.time()-t_start))
-    plt.imshow(res[nbeta//2])
+    plt.imshow(tomo[nbeta//2])
     plt.savefig("tomo_print.png")
     plt.close()
-    return res
+    return tomo
 
 class ConeBeamRadon:
     """Class to handle cone beam tomographies of samples/phantom.
