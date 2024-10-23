@@ -41,41 +41,33 @@ int ray_integral(
     std::cout << "Number of threads per block: " << NUM_THREADS << "\n";
     std::cout << "Number of blocks:            " << num_blocks << "\n";
 
-    malloc_float_on_gpu(&cuda_tomo, N_tomo, "tomography");
-    malloc_float_on_gpu(&cuda_phantom, N_phantom, "sample/phantom");
-    malloc_float_on_gpu(&cuda_px, lab.n_detector, "px");
-    malloc_float_on_gpu(&cuda_py, lab.n_detector, "py");
-    malloc_float_on_gpu(&cuda_pz, lab.n_detector, "pz");
-    malloc_float_on_gpu(&cuda_beta, lab.nbeta, "beta");
+    malloc_float_on_gpu(&cuda_tomo, N_tomo);
+    malloc_float_on_gpu(&cuda_phantom, N_phantom);
+    malloc_float_on_gpu(&cuda_px, lab.n_detector);
+    malloc_float_on_gpu(&cuda_py, lab.n_detector);
+    malloc_float_on_gpu(&cuda_pz, lab.n_detector);
+    malloc_float_on_gpu(&cuda_beta, lab.nbeta);
 
-    copy_float_array_from_cpu_to_gpu(cuda_phantom, phantom, N_phantom, "phantom/sample");
-    copy_float_array_from_cpu_to_gpu(cuda_px, px, lab.n_detector, "px");
-    copy_float_array_from_cpu_to_gpu(cuda_py, py, lab.n_detector, "py");
-    copy_float_array_from_cpu_to_gpu(cuda_pz, pz, lab.n_detector, "pz");
-    copy_float_array_from_cpu_to_gpu(cuda_beta, beta, lab.nbeta, "beta");
+    copy_float_array_from_cpu_to_gpu(cuda_phantom, phantom, N_phantom);
+    copy_float_array_from_cpu_to_gpu(cuda_px, px, lab.n_detector);
+    copy_float_array_from_cpu_to_gpu(cuda_py, py, lab.n_detector);
+    copy_float_array_from_cpu_to_gpu(cuda_pz, pz, lab.n_detector);
+    copy_float_array_from_cpu_to_gpu(cuda_beta, beta, lab.nbeta);
 
-    auto start = std::chrono::high_resolution_clock::now();
     switch (optimize_path) {
         case OPT_OFF:
             std::cout << "Running kernel...\n";
             kernel_OPT_OFF<<<num_blocks, NUM_THREADS>>>(cuda_px, cuda_py, cuda_pz, cuda_beta, cuda_phantom, cuda_tomo, lab);
-            cudaDeviceSynchronize(); //cudaDeviceSynchronize();
-            std::cout << cudaGetErrorString(cudaGetLastError()) << "\n\n";
             break;
         case OPT_ON:
             std::cout << "Running safely optimized kernel...\n";
             kernel_OPT_ON<<<num_blocks, NUM_THREADS>>>(cuda_px, cuda_py, cuda_pz, cuda_beta, cuda_phantom, cuda_tomo, lab);
-            cudaDeviceSynchronize(); //cudaDeviceSynchronize();
-            std::cout << cudaGetErrorString(cudaGetLastError()) << "\n\n";
             break;
         default:
             throw std::invalid_argument("Invalid argument. Variable 'optimize_path' must be of type 'enum OPTIMIZE'.");
     }
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-    std::cout << "Duração do kernel na função ray_integral para a GPU " << gpu_id << ": " << duration.count()/1000.0 << std::endl;
 
-    copy_float_array_from_gpu_to_cpu(tomo, cuda_tomo, N_tomo, "tomography");
+    copy_float_array_from_gpu_to_cpu(tomo, cuda_tomo, N_tomo);
 
     cudaFree(cuda_tomo);
     cudaFree(cuda_phantom);
@@ -83,39 +75,28 @@ int ray_integral(
     cudaFree(cuda_py);
     cudaFree(cuda_pz);
     cudaFree(cuda_beta);
-    //cudaStreamDestroy(s);
+
+    cudaDeviceSynchronize(); //cudaDeviceSynchronize();
+    std::cout << cudaGetErrorString(cudaGetLastError()) << "\n\n";
 
     return 0;
 }
 
-void malloc_float_on_gpu(float **cuda_pointer, size_t N, std::string name) 
-{
-    std::cout << "Allocating memory on GPU for " << name << "...\n";
+void malloc_float_on_gpu(float **cuda_pointer, size_t N) {
     cudaMalloc(cuda_pointer, N * sizeof(float));
-    cudaDeviceSynchronize(); //cudaDeviceSynchronize();
-    std::cout << cudaGetErrorString(cudaGetLastError()) << "\n";
-    if (cuda_pointer == NULL) {
+    if (*cuda_pointer == nullptr) {
         std::cout << "Failed to allocate memory on GPU.\n";
         std::cerr << "Failed to allocate memory on GPU.\n";
 	    throw std::bad_alloc();
     }
-    std::cout << "\n";
 }
 
-void copy_float_array_from_cpu_to_gpu(float *cuda_pointer, float *pointer, long long int N, std::string name) 
-{
-    std::cout << "Copying " << name << " from CPU to GPU.\n";
+void copy_float_array_from_cpu_to_gpu(float *cuda_pointer, float *pointer, long long int N) {
     cudaMemcpy(cuda_pointer, pointer, N * sizeof(float), cudaMemcpyHostToDevice);
-    cudaDeviceSynchronize(); //cudaDeviceSynchronize();
-    std::cout << cudaGetErrorString(cudaGetLastError()) << "\n\n";
 }
 
-void copy_float_array_from_gpu_to_cpu(float *pointer, float *cuda_pointer, long long int N, std::string name) 
-{
-    std::cout << "Copying " << name << " from GPU to CPU.\n";
+void copy_float_array_from_gpu_to_cpu(float *pointer, float *cuda_pointer, long long int N) {
     cudaMemcpy(pointer, cuda_pointer, N * sizeof(float), cudaMemcpyDeviceToHost);
-    cudaDeviceSynchronize(); // cudaStreamSynchronize(); 
-    std::cout << cudaGetErrorString(cudaGetLastError()) << "\n\n";
 }
 
 
