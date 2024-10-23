@@ -203,7 +203,7 @@ namespace opt{
     extern "C" {
 
         void flip_x(float *data, int sizex, int sizey, int sizez);
-        void transpose_cpu(float *data, int sizex, int sizey, int sizez);
+        void transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez);
     }
 }
 

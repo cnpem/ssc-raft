@@ -7,6 +7,7 @@
 #include <thread>
 #include <utility>
 #include <vector>
+#include <sys/mman.h>
 
 #include "common/complex.hpp"
 #include "common/configs.hpp"
@@ -30,22 +31,41 @@ void opt::flip_x(float *data, int sizex, int sizey, int sizez) {
     }
 }
 
-//this implementation is still quite naive, but can be faster than numpy for big arrays
-void opt::transpose_cpu(float *data, int sizex, int sizey, int sizez) {
+void _transpose_zyx2xyz_worker(float* out, float* in,
+        size_t i, size_t sizex, size_t sizey, size_t sizez) {
     const size_t sizexy = sizex * sizey;
-    const size_t sizexz = sizex * sizez;
+    const size_t sizezy = sizez * sizey;
+    for (size_t j = 0; j < sizey; ++j) {
+            for (size_t k = 0; k < sizez; ++k) {
+                out[i * sizezy + j * sizez + k] = in[k * sizexy + j * sizex + i];
+            }
+        }
+}
+
+void opt::transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez) {
+    const size_t sizexy = sizex * sizey;
+    const size_t sizezy = sizez * sizey;
     const size_t sizexyz = size_t(sizex) * size_t(sizey) * size_t(sizez);
 
     float *temp = (float *)aligned_alloc(64, sizeof(float) * sizexyz);
 
-    for (size_t j = 0; j < sizey; ++j) {
-        for (size_t k = 0; k < sizez; ++k) {
-            memcpy(temp + j * sizexz + k * sizex, data + j * sizex + k * sizexy,
-                    sizeof(float) * sizex);
-        }
+    mlock(data, sizeof(float) * sizexyz);
+
+    std::vector<std::thread> threads;
+    threads.reserve(sizex);
+
+    for(size_t i = 0; i < sizex; ++i) {
+        threads.emplace_back(_transpose_zyx2xyz_worker,
+                temp, data, i, sizex, sizey, sizez);
+    }
+
+    for(auto& t: threads) {
+        t.join();
     }
 
     memcpy(data, temp, sizeof(float) * sizexyz);
+
+    munlock(data, sizeof(float) * sizexyz);
 
     free(temp);
 }

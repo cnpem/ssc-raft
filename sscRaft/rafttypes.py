@@ -112,13 +112,13 @@ except:
 
 try:
     # Float transpose on CPU
-    libraft.transpose_cpu.argtypes = [
+    libraft.transpose_cpu_zyx2xyz.argtypes = [
         ctypes.c_void_p, ctypes.c_int, ctypes.c_int, ctypes.c_int
     ]
     
-    libraft.transpose_cpu.restype  = None
+    libraft.transpose_cpu_zyx2xyz.restype  = None
 except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_TRANSPOSE_CPU-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_TRANSPOSE_CPU_ZYX2XYZ-')
     pass
 
 ######## Parallel Raft ##########
