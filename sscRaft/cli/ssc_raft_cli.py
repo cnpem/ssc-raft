@@ -102,7 +102,7 @@ def tomcat_recon(
     dataPath : Annotated[str, Option(..., "--dataPath", "-dp", metavar="dataPath", help="Absolute path of the data")] = os.getcwd(),
     recOutputDir : Annotated[str, Option(..., "--recOutputDir", "-O", metavar="recOutputDir", help="Absolute path of the reconstruction to be saved")] = os.getcwd(),
     numberOfGPUs : Annotated[int, Option(..., "--numberOfGPUs", "-ngpu", metavar="numberOfGPUs", help="Total number of gpus for reconstruction. Example for 2 GPUs: 2")] = 1,
-    zeroPadding : Annotated[int, Option(..., "--zeroPadding", "-Z", metavar="zeroPadding", help="Data padding - Integer multiple of the data size (0,1,2, etc...)")] = 0,
+    zeroPadding : Annotated[int, Option(..., "--zeroPadding", "-Z", metavar="zeroPadding", help="Data padding - Integer multiple of the data size (0,1,2, etc...)")] = 2,
     correctionType : Annotated[int, Option(..., "--correctionType", "-g", metavar="correctionType", help="Flat-dark normalization + log: option 7 available")] = 7,
     ringRemoval : Annotated[int, Option(..., "--ringRemoval", "-L", metavar="ringRemoval", help="Apply rings: 0=unused, 1=used")] = 1,
     ringMethod : Annotated[str, Option(..., "--ringMethod", "-Lm", metavar="ringMethod", help="Choose rings method. Options:  \'titarenko\'. Not implemented yet: \'all_stripes\', \'all_stripes_multiaxis\', \'none\'")] = 'titarenko',
