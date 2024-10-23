@@ -1,6 +1,6 @@
 from ..rafttypes import *
 
-def transpose(data, axes=(0,1,2)):
+def transpose(data, axes=(1,0,2)):
     """CPU float function to apply transpose on a 3D array.
 
     Args:
