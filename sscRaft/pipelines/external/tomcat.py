@@ -39,7 +39,7 @@ def process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=False):
 
     alloc_output_start = time.time()
 
-    if is_stitching:
+    if is_stitching == 'T':
         recon_shape = (data.shape[1], 2 * data.shape[2], 2 * data.shape[2])
     else:
         recon_shape = (data.shape[1], data.shape[2], data.shape[2])
@@ -104,7 +104,7 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
     if is_stitching == 'F': 
         if deviation == -1:
             # Find automatic rotation axis deviation:
-            deviation = find_rotation_axis_auto(dic=dic, data=tomogram, flat=flat[0,:,:], dark=dark[0,:,:])
+            deviation = find_rotation_axis_auto(dic=dic, angles=angle_vector, data=tomogram, flat=flat[:,0,:], dark=dark)
             dic['axis offset'], dic['axis offset auto']  = deviation, False
 
     # Correction by flat-dark:
@@ -125,9 +125,9 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
 
     # Perform rotation axis deviation correction
     if is_stitching == 'F':
-        dic['offset'] = dic['axis offset']
+        dic['rotation axis offset'] = dic['axis offset']
     else:
-        dic['offset'] = 0
+        dic['rotation axis offset'] = 0
 
     # Perform tomography reconstruction
     recon = process_tomogram_volume(tomogram, recon, dic, reconstruction_methods)
