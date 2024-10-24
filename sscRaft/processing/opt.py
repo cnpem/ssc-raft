@@ -1,6 +1,6 @@
 from ..rafttypes import *
 
-def transpose(data):
+def transpose(data, axes=(1,0,2)):
     """CPU float function to apply transpose on a 3D array.
 
     Args:
@@ -20,16 +20,24 @@ def transpose(data):
     data     = CNICE(data)
     data_ptr = data.ctypes.data_as(ctypes.c_void_p)
 
-    libraft.transpose_cpu(data_ptr,
+    if axes == (1, 0, 2):
+        data = _transpose_cpu_zyx2yzx(data)
+    elif axes == (2, 1, 0):
+        libraft.transpose_cpu_zyx2xyz(data_ptr,
             ctypes.c_int(sizex),
             ctypes.c_int(sizey),
             ctypes.c_int(sizez))
+    else:
+        raise ValueError("Transpose {} not implemented".format(axes))
 
-    data = data.reshape((sizey, sizez, sizex))
+    old_shape = (sizez, sizey, sizex)
+    new_shape = tuple(old_shape[i] for i in axes)
+
+    data = data.reshape(new_shape)
 
     return data
 
-def transpose_np(data):
+def _transpose_cpu_zyx2yzx(data):
     # import pdb; pdb.set_trace()
     temp = numpy.swapaxes(data, 0, 1)
     data = data.reshape(temp.shape)
