@@ -436,7 +436,8 @@ def make_tomo_for_zoom_iterative(data_dict, n_gpus, save="hdf5", verbose=True):
 
 
     tomo_shape = (len(data_dict["beta"]), nv, nh)
-    tomo = np.empty(tomo_shape, dtype='float32')
+    #tomo = np.empty(tomo_shape, dtype='float32')
+    tomo = np.ones(tomo_shape, dtype='float32')
     tomo_pointer = tomo.ctypes.data_as(ctypes.c_void_p)
 
     # creating the struct lab:

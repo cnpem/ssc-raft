@@ -71,7 +71,7 @@ __device__ void apply_rotations(
     float cosb, 
     float sinb,  
     struct Lab lab);
-__device__ void set_tomo_idxs(long long int n, int *i_detector, short int *m, struct Lab lab);
+__device__ void set_tomo_idxs(long long int n, long int *i_detector, short int *m, struct Lab lab);
 __device__ void set_phantom_idxs(float x, float y, float z, long long int *i, long long int *j, long long int *k, struct Lab lab);
 __device__ bool not_inside_phantom(long long int i, long long int j, long long int k, struct Lab lab);
 

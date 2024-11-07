@@ -6,6 +6,7 @@
 #include <chrono>
 #include <future>
 #include <thread>
+#include <nvToolsExt.h>
 #include "common/configs.hpp"
 #include "geometries/conebeam/radon.cuh"
 

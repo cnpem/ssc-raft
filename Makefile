@@ -5,6 +5,9 @@ all: install
 install:
 	python3 -m pip install -v .
 
+pip-dev:
+	pip install . --no-deps --no-build-isolation
+
 dev:
 	python3 setup.py install
 

@@ -520,7 +520,7 @@ __device__ void apply_rotations(
     *tm = - (rot_sx*ray_versor[0] + rot_sy*ray_versor[1] + lab.sz*ray_versor[2]);
 }
 
-__device__ void set_tomo_idxs(long long int n, int *i_detector, short int *m, struct Lab lab)
+__device__ void set_tomo_idxs(long long int n, long int *i_detector, short int *m, struct Lab lab)
 {
     *m = n / lab.ndetc;
     *i_detector = n % lab.ndetc;

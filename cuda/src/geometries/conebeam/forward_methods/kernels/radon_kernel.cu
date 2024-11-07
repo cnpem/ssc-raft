@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include <stdexcept>
 #include <chrono>
 #include "geometries/conebeam/radon.cuh"
@@ -38,6 +39,8 @@ int ray_integral(
     N_tomo = (size_t)lab.n_detector * (size_t)lab.nbeta;
     num_blocks  = N_tomo / NUM_THREADS + (N_tomo % NUM_THREADS == 0 ? 0:1);
     std::cout << "nbeta = " << lab.nbeta << "\n";
+    std::cout << "ntomo = " << N_tomo << std::endl;
+    std::cout << "ntomo_sqrt = " << std::cbrt(N_tomo) << std::endl;
     std::cout << "Number of threads per block: " << NUM_THREADS << "\n";
     std::cout << "Number of blocks:            " << num_blocks << "\n";
 
@@ -53,6 +56,11 @@ int ray_integral(
     copy_float_array_from_cpu_to_gpu(cuda_py, py, lab.n_detector);
     copy_float_array_from_cpu_to_gpu(cuda_pz, pz, lab.n_detector);
     copy_float_array_from_cpu_to_gpu(cuda_beta, beta, lab.nbeta);
+
+    cudaError_t err = cudaGetLastError();
+    if (err != cudaSuccess) {
+        printf("CUDA error: %s\n", cudaGetErrorString(err));
+    }
 
     switch (optimize_path) {
         case OPT_OFF:
@@ -130,8 +138,8 @@ __global__ void kernel_OPT_OFF(float *px, float *py, float *pz, float *beta, flo
 
 __global__ void kernel_OPT_ON(float *px, float *py, float *pz, float *beta, float *phantom, float* tomo, struct Lab lab)
 {
-    size_t n = blockDim.x * blockIdx.x + threadIdx.x; // acho melhor trocar a variável pela conta explícita quando precisar para economizar memória.
-    int i_detector;
+    size_t n = size_t(blockDim.x) * size_t(blockIdx.x) + size_t(threadIdx.x); // acho melhor trocar a variável pela conta explícita quando precisar para economizar memória.
+    long int i_detector;
     short int m; // índices no tomograma.
     long long int i, j, k; // índices do raio na coordenada top. 
     float cosb, sinb; 
@@ -149,7 +157,7 @@ __global__ void kernel_OPT_ON(float *px, float *py, float *pz, float *beta, floa
     if (dist/2 < norm3df(xray(tm, ray_versor, lab, cosb, sinb)-lab.x0, yray(tm, ray_versor, lab, cosb, sinb)-lab.y0, zray(tm, ray_versor, lab.sz)-lab.z0)) {
         tomo[n] = 0;
         return;
-    }
+    } // verify if necessary
     dt = dist / (lab.n_ray_points + 1); // +1 para ficar simétrico em torno de tm e pegar até o último pedacito, dado que n_ray_points vai ser par para pessoas normais.
     t = tm - dist/2;
     for (int it = 0; it < lab.n_ray_points + 1; it++) {
@@ -228,7 +236,7 @@ inline __device__ void apply_rotations(
     *tm = - (rot_sx*ray_versor[0] + rot_sy*ray_versor[1] + lab.sz*ray_versor[2]);
 }
 
-inline __device__ void set_tomo_idxs(long long int n, int *i_detector, short int *m, struct Lab lab) 
+inline __device__ void set_tomo_idxs(long long int n, long int *i_detector, short int *m, struct Lab lab) 
 {
     *m = n / lab.n_detector;
     *i_detector = n % lab.n_detector;
@@ -241,9 +249,9 @@ inline __device__ void set_phantom_idxs(float x, float y, float z, long long int
     dx = 2*lab.x / (lab.nx); 
     dy = 2*lab.y / (lab.ny);
     dz = 2*lab.z / (lab.nz);
-    *i = __float2int_rn((x-lab.x0) / dx) + lab.nx/2; // arrumar para evitar overflow; no mínimo provar que não vai acontecer overflow não importa a entrada.
-    *j = __float2int_rn((y-lab.y0) / dy) + lab.ny/2; // arrumar para evitar overflow; no mínimo provar que não vai acontecer overflow não importa a entrada.
-    *k = __float2int_rn((z-lab.z0) / dz) + lab.nz/2; // arrumar para evitar overflow; no mínimo provar que não vai acontecer overflow não importa a entrada.
+    *i = std::round((x-lab.x0) / dx) + lab.nx/2; // arrumar para evitar overflow; no mínimo provar que não vai acontecer overflow não importa a entrada.
+    *j = std::round((y-lab.y0) / dy) + lab.ny/2; // arrumar para evitar overflow; no mínimo provar que não vai acontecer overflow não importa a entrada.
+    *k = std::round((z-lab.z0) / dz) + lab.nz/2; // arrumar para evitar overflow; no mínimo provar que não vai acontecer overflow não importa a entrada.
 }
 
 inline __device__ bool not_inside_phantom(long long int i, long long int j, long long int k, struct Lab lab) // criar uma not_inside usando floats x, y, z para evitar overflow dos indices i, j, k.

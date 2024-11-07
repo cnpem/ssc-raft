@@ -43,7 +43,8 @@ def radon_RT(phantom, angles, gpus, *args):
     angles      = CNICE(angles)
     angles_ptr  = angles.ctypes.data_as(ctypes.c_void_p)  
     
-    tomogram    = numpy.zeros((nslices,nangles,rays),dtype=numpy.float32)
+    tomogram    = numpy.ones((nslices,nangles,rays), dtype=numpy.float32)
+    tomogram *= -1
     tomogram      = CNICE(tomogram)
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
