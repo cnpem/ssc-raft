@@ -20,11 +20,40 @@ build_dgx:
       - ./dist/*whl
     expire_in: 1 day
 
+build_sdist:
+  stage: build
+  image: gccdockers/python-builder
+  script:
+    - make clean
+    - python3 -m build --sdist
+  tags:
+    - x86_64
+    - cuda11
+    - docker
+  artifacts:
+    paths:
+      - ./dist/*tar.gz
+    expire_in: 1 day
+
 deploy_dgx:
   stage: deploy
   image: gccdockers/python-builder
   script:
     - twine upload ./dist/*.whl  --repository-url="$GCC_PYPI_HOST"
+  tags:
+    - x86_64
+    - cuda11
+    - docker
+  dependencies:
+    - build_dgx
+  only:
+    - tags
+
+deploy_sdist:
+  stage: deploy
+  image: gccdockers/python-builder
+  script:
+    - twine upload ./dist/*.tar.gz  --repository-url="$GCC_PYPI_HOST"
   tags:
     - x86_64
     - cuda11
@@ -74,9 +103,9 @@ deploy_docs:
   stage: deploy
   image: ubuntu:latest
   script:
-    - mkdir -p /var/www/html/ssc/ssc-raft-300/
-    - rm -rf /var/www/html/ssc/ssc-raft-300/*
-    - cp -r ./docs/build/* /var/www/html/ssc/ssc-raft-300/
+    - mkdir -p /var/www/html/ssc/ssc-raft/
+    - rm -rf /var/www/html/ssc/ssc-raft/*
+    - cp -r ./docs/build/* /var/www/html/ssc/ssc-raft/
   tags:
     - wiki
   dependencies:

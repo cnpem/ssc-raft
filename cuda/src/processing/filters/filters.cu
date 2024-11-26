@@ -194,7 +194,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
 extern "C" {
 
-	void SinoFilter(float* sino, size_t nrays, size_t nangles, size_t blocksize, int csino, bool bRampFilter, Filter reg, bool bShiftCenter, float* sintable)
+	void SinoFilter(float* sino, size_t nrays, size_t nangles, size_t blocksize, int csino, bool bRampFilter, Filter reg, bool bShiftCenter, float* sintable, float pixel)
 	{	
 		cImage fft(nrays/2+1,nangles);
 		// cImage fft2(nrays/2+1,nangles);
@@ -215,7 +215,7 @@ extern "C" {
 			HANDLE_FFTERROR( cufftExecR2C(plan_r2c, sino+k*nrays*nangles, fft.gpuptr) );
 
 			if(bRampFilter)
-				BandFilterReg<<<blk,thr>>>(fft.gpuptr, nrays/2+1, csino, bShiftCenter, sintable, reg);
+				BandFilterReg<<<blk,thr>>>(fft.gpuptr, nrays/2+1, csino, bShiftCenter, sintable, reg, pixel);
 			else
 				std::cout << __FILE__ << " " << __LINE__ << " " << "Auto reg missing!" << std::endl;
 
@@ -226,14 +226,16 @@ extern "C" {
 		cufftDestroy(plan_c2r);
 	}
 
-	__global__ void BandFilterReg(complex* vec, size_t sizex, int icenter, bool bShiftCenter, float* sintable, Filter mfilter)
+	__global__ void BandFilterReg(complex* vec, size_t sizex, int icenter, bool bShiftCenter, float* sintable, Filter mfilter, float pixel)
 	{
 		int tx = blockIdx.x * blockDim.x + threadIdx.x;
 		int ty = blockIdx.y * blockDim.y + threadIdx.y;
 
-		float rampfilter = float(tx) / (float)sizex;
+		// float rampfilter = float(tx) / (float)sizex;
+        float x = ( fminf( tx, sizex - tx ) / (float)sizex );
+        // x       = x / pixel;
 
-		rampfilter = mfilter.apply(rampfilter);
+		float rampfilter = mfilter.apply(x);
 
 		float fcenter = 1.0f - (bShiftCenter ? (sintable[ty]) : 0);
 		fcenter = -2.0f*float(M_PI)/float(2*sizex-2) * fcenter * icenter;
@@ -297,17 +299,19 @@ extern "C" {
 	}
 	
 
-	__global__ void BandFilterC2C(complex* vec, size_t sizex, int center, Filter mfilter = Filter())
+	__global__ void BandFilterC2C(complex* vec, size_t sizex, int center, float pixel, Filter mfilter = Filter())
 	{
 		int tx = blockIdx.x * blockDim.x + threadIdx.x;
 		int ty = blockIdx.y * blockDim.y + threadIdx.y;
 
-		float rampfilter = 2.0f*fminf(tx,sizex-tx)/((float)sizex);
+        float x = ( 2.0f * fminf(tx, sizex - tx) / ( (float)sizex ) );
+		// float x = ( 2.0f * fminf(tx, sizex - tx) / ( (float)sizex ) ) / pixel;
 
-		rampfilter = mfilter.apply(rampfilter);
+		float rampfilter = mfilter.apply(x);
 
 		if(tx < sizex)
-			vec[ty*sizex + tx] *= exp1j(-2*float(M_PI)/float(sizex) * center * tx ) * rampfilter;
+            vec[ty*sizex + tx] *= exp1j(-2*float(M_PI)/float(sizex) * center * tx) * rampfilter;
+
 	}
 
     __global__ void SetX(complex* out, float* in, int sizex)
@@ -323,7 +327,7 @@ extern "C" {
         }
     }
 
-    __global__ void GetX(float* out, complex* in, int sizex)
+    __global__ void GetX(float* out, complex* in, int sizex, float pixel)
     {
         /* Complex (real part) to Float */
         size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -334,7 +338,7 @@ extern "C" {
         //}
 
         if(tx < sizex)
-            out[ty*sizex + tx] = in[ty*sizex + tx].x;
+            out[ty*sizex + tx] = in[ty*sizex + tx].x / pixel;
 
         //if (tx == 0) {
             //printf("**** %f %f\n", out[ty*sizex + tx], in[ty*sizex + tx].x);
@@ -355,7 +359,7 @@ extern "C" {
 
     void BSTFilter(cufftHandle plan,
             complex* filtersino, float* sinoblock,
-            size_t nrays, size_t nangles, int csino, Filter reg, cudaStream_t stream) {
+            size_t nrays, size_t nangles, int csino, Filter reg, float pixel, cudaStream_t stream) {
 
         dim3 filterblock((nrays+255)/256,nangles,1);
         dim3 filterthread(256,1,1);
@@ -364,11 +368,11 @@ extern "C" {
 
         HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_FORWARD));
 
-        BandFilterC2C<<<filterblock,filterthread, 0, stream>>>(filtersino, nrays, csino, reg);
+        BandFilterC2C<<<filterblock,filterthread, 0, stream>>>(filtersino, nrays, csino, pixel, reg);
 
         HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_INVERSE));
 
-        GetX<<<filterblock,filterthread, 0, stream>>>(sinoblock, filtersino, nrays);
+        GetX<<<filterblock,filterthread, 0, stream>>>(sinoblock, filtersino, nrays, 1.0f);
 
         //cudaMemset(sinoblock, 0, nrays*nangles*4);
     }
@@ -385,7 +389,7 @@ __host__ __device__ inline float Filter::apply(float input)
 	}
 	else if (type == EType::lorentz)
 	{
-		input *= ( 1.0f / ( 1.0f + reg * input * input ) ) * ( 1.0f / ( 1.0f + paganin * input * input ) );
+		input *= ( 1.0f / ( 1.0f + (reg + paganin) * input * input ) );
 	}
 	else if (type == EType::cosine)
 	{

@@ -15,6 +15,8 @@ import sys
 from pathlib import Path
 sys.path.insert(0, os.path.abspath('../'))
 
+from sscRaft import __version__
+
 # -- Project information -----------------------------------------------------
 
 project = 'ssc-raft'
@@ -22,8 +24,8 @@ copyright = '2022, GCC'
 author = 'GCC'
 
 # The full version, including alpha/beta/rc tags
-release = '3.0.1'
-version = '3.0.1'
+release = __version__
+version = __version__
 
 # -- General configuration ---------------------------------------------------
 

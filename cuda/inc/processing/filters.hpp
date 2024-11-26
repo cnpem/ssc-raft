@@ -48,11 +48,11 @@ struct Filter{
 
 
 extern "C"{
-	void SinoFilter(float* sino, size_t nrays, size_t nangles, size_t blocksize, int csino, bool bRampFilter, struct Filter reg, bool bShiftCenter, float* sintable);
+	void SinoFilter(float* sino, size_t nrays, size_t nangles, size_t blocksize, int csino, bool bRampFilter, struct Filter reg, bool bShiftCenter, float* sintable, float pixel);
 	
 	void Highpass(rImage& x, float wid);
 
-	__global__ void BandFilterReg(complex* vec, size_t sizex, int icenter, bool bShiftCenter, float* sintable, struct Filter mfilter);
+	__global__ void BandFilterReg(complex* vec, size_t sizex, int icenter, bool bShiftCenter, float* sintable, struct Filter mfilter, float pixel);
 
 	__global__ void KFilter(complex* x, size_t sizex, float wid);
 
@@ -60,13 +60,13 @@ extern "C"{
 
 	__global__ void SetX(complex* out, float* in, int sizex);
 
-	__global__ void GetX(float* out, complex* in, int sizex);
+	__global__ void GetX(float* out, complex* in, int sizex, float pixel);
 
 	__global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy);
 	
-	__global__ void BandFilterC2C(complex* vec, size_t sizex, int center, struct Filter mfilter);
+	__global__ void BandFilterC2C(complex* vec, size_t sizex, int center, float pixel, struct Filter mfilter);
 	
-	void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, struct Filter reg, cudaStream_t stream = 0);
+	void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, struct Filter reg, float pixel, cudaStream_t stream = 0);
 
 	void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad);

@@ -1,6 +1,7 @@
 from ...rafttypes import *
 
-from ...geometries.parallel import fbp_methods, radon_methods
+from ...geometries.methods import *
+from ...geometries.parallel.radon_methods import *
 
 try:
     import tomopy
@@ -155,7 +156,7 @@ def apply_shifts(data,shifts, method='scipy',cpus=32,turn_off_vertical=False,rem
 def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0]):
     print('Reprojecting...')
     if radon_method == 'raft':
-        tomogram = radon_methods(tomogram, angles, gpus)
+        tomogram = radon_RT(tomogram, angles, gpus)
         tomogram = numpy.swapaxes(tomogram,0,1)
     elif radon_method == 'tomopy':
         tomogram = tomopy.sim.project.project(tomogram,angles,ncore=cpus,pad=False)
@@ -166,7 +167,7 @@ def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0]):
 def reconstruct_and_reproject(data,angles,dic,tomo_method='raft',radon_method='raft',cpus=1,gpus=[0]):
     print('Reconstructing...')
     if tomo_method == 'raft':
-        tomo = fbp_method(numpy.swapaxes(data,0,1), dic["algorithm_dic"])
+        tomo = fbp(numpy.swapaxes(data,0,1), dic = dic["algorithm_dic"])
         # tomo = sscRaft.bst(numpy.swapaxes(data,0,1), dic["algorithm_dic"])
     elif tomo_method == 'tomopy':
         tomo = tomopy.recon(data,angles,algorithm='fbp',ncore=cpus,filter_name='ramlak')
@@ -285,7 +286,7 @@ def plot_iterative_reprojection(tomo,sinogram,angles,neighboor_shifts,cumulative
     plt.tight_layout()
     plt.show()
 
-def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_phase_derivative=False,threshold=1e-2, max_iterations=10, max_downsampling=1,fft_upsampling=100,turn_off_vertical=False,plot=False,plot_type='phase', FBP_filter='lorentz',find_shift_method='correlation',apply_shift_method='scipy',tomo_method='raft',radon_method='raft'):
+def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_phase_derivative=False,threshold=1e-2, max_iterations=10, max_downsampling=1,fft_upsampling=100,turn_off_vertical=False,plot=False,plot_type='phase', FBP_filter='ramp',find_shift_method='correlation',apply_shift_method='scipy',tomo_method='raft',radon_method='raft'):
 
     try:
         import tomopy
@@ -302,14 +303,16 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
     dic["algorithm_dic"] = {}
     dic["algorithm_dic"]['algorithm'] = "FBP"
     if 'regularization' not in dic["algorithm_dic"]:
-        dic["algorithm_dic"]['paganin regularization'] = 0 # regularization <= 1; use for smoothening
+        dic["algorithm_dic"]['beta/delta'] = 0 # regularization <= 1; use for smoothening
     if using_phase_derivative==False:
         dic["algorithm_dic"]['filter'] = FBP_filter
     else:
         dic["algorithm_dic"]['filter'] = "" # no filtering, i.e., doing backprojection only
 
+    dic["algorithm_dic"]['method'] =  'RT'
     dic["algorithm_dic"]['gpu'] =  gpus
     dic["algorithm_dic"]['angles'] =  angles # angles in radians
+    dic["algorithm_dic"]['angles[rad]'] =  angles # angles in radians
     # dic["algorithm_dic"]['angles'] -= dic["algorithm_dic"]['angles'].min()
     
     fig, ax0 = plt.subplots()
@@ -390,6 +393,6 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
         if reached_threshold.all() == True:
             break # exit for loop
 
-        aligned_tomo = fbp_method(numpy.swapaxes(sinogram,0,1), dic["algorithm_dic"])
+        aligned_tomo = fbp(numpy.swapaxes(sinogram,0,1), dic = dic["algorithm_dic"])
         
     return aligned_tomo, sinogram, cumulative_shifts, reprojected_sinogram

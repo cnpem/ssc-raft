@@ -3,8 +3,6 @@
 #include <cufft.h>
 #include <stdlib.h>
 
-# define vc 299792458           /* Velocity of Light [m/s] */ 
-
 extern "C"{
 __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process){
     int npad = lab.nph;

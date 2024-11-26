@@ -151,7 +151,7 @@ void EMFQ_BST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays
         cudaDeviceSynchronize();
 
         GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128>>>(blockRecon + outsize * zoff, cartesianblock.gpuptr,
-                                                                sizeimage);
+                                                                sizeimage, 1.0f);
 
         HANDLE_ERROR(cudaPeekAtLastError());
 
@@ -199,7 +199,7 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
         cudaDeviceSynchronize();
 
         GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128>>>(blockRecon + outsize * zoff, cartesianblock.gpuptr,
-                                                                sizeimage);
+                                                                sizeimage, 1.0f);
 
         HANDLE_ERROR(cudaPeekAtLastError());
 
@@ -215,16 +215,16 @@ void getBST(CFG configs, GPU gpus,
 
     int blocksize_bst = 1;
 
-    const int filter_type = configs.reconstruction_filter_type;
-    int Nrays = tomo_size.x;
-    int Nangles = tomo_size.y;
-    const int sizeimage = obj_size.x;
-    const float reg = configs.reconstruction_reg;
-    const float paganin = configs.reconstruction_paganin;
-    const int axis_offset = configs.rotation_axis_offset;
+    const int filter_type   = configs.reconstruction_filter_type;
+    int Nrays               = tomo_size.x;
+    int Nangles             = tomo_size.y;
+    const int sizeimage     = obj_size.x;
+    const float reg         = configs.reconstruction_reg;
+    const float paganin     = configs.reconstruction_paganin;
+    const int axis_offset   = configs.rotation_axis_offset;
     const int trueblocksize = tomo_size.z;
-    const int padding = configs.tomo.pad.x;
-    float pixel          = configs.geometry.obj_pixel_x;
+    const int padding       = configs.tomo.pad.x;
+    float pixel             = configs.geometry.obj_pixel_x;
 
     size_t insize = Nrays * Nangles;
     size_t outsize = sizeimage * sizeimage;
@@ -264,7 +264,7 @@ void getBST(CFG configs, GPU gpus,
         float* sinoblock = tomo + insize * zoff;
 
         if (filter.type != Filter::EType::none)
-            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, axis_offset, filter, stream);
+            BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, axis_offset, filter, pixel, stream);
 
         dim3 blocks((Nrays + 255) / 256, Nangles, blocksize_bst);
         dim3 threads(128, 1, 1);
@@ -293,7 +293,7 @@ void getBST(CFG configs, GPU gpus,
         // cudaDeviceSynchronize();
 
         GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(obj + outsize * zoff,
-                                                                           cartesianblock.gpuptr, sizeimage);
+                                                                           cartesianblock.gpuptr, sizeimage, 4.0f * Nangles * pixel);
 
         // HANDLE_ERROR(cudaPeekAtLastError());
 
@@ -324,7 +324,7 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, 
         float* sinoblock = wholesinoblock + insize * zoff;
 
         if (filter.type != Filter::EType::none)
-            BSTFilter(filterplan, filtersino->gpuptr, sinoblock, Nrays, Nangles, 0.0, filter, stream);
+            BSTFilter(filterplan, filtersino->gpuptr, sinoblock, Nrays, Nangles, offset, filter, pixel, stream);
 
         dim3 blocks((Nrays + 255) / 256, Nangles, blocksize_bst);
         dim3 threads(128, 1, 1);
@@ -353,7 +353,7 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, 
         // cudaDeviceSynchronize();
 
         GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(blockRecon + outsize * zoff,
-                                                                           cartesianblock->gpuptr, sizeimage);
+                                                                           cartesianblock->gpuptr, sizeimage,  4.0f * Nangles * pixel);
 
         // HANDLE_ERROR(cudaPeekAtLastError());
 

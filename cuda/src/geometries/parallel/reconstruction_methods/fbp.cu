@@ -6,7 +6,8 @@
 
 extern "C"{
     __global__ void BackProjection_SS(float *object, float *tomogram, 
-    float *angles, float *sine, float *cosine,
+    float *angles, float *sine, float *cosine, 
+    float pixel_size_x, float pixel_size_y,
     dim3 obj_size, dim3 tomo_size)
     {
         int i, j, k;
@@ -14,18 +15,26 @@ extern "C"{
         int t_index, angle_index;
         float t, sum;  
         // float cosk, sink;
-  
-        float xmin = -1.0;
-        float ymin = -1.0;
-        float dx = 2.0 / (obj_size.x - 1);
-        float dy = 2.0 / (obj_size.y - 1);
 
         int nrays   = tomo_size.x;
         int nangles = tomo_size.y;
+  
+        float xmin = -1.0;
+        float ymin = -1.0;
+        float dx   = 2.0 / (obj_size.x - 1);
+        float dy   = 2.0 / (obj_size.y - 1);
 
-        float dt    = 2.0 / (nrays - 1);
         float tmin = -1.0;
+        float dt   = 2.0 / (nrays - 1);
 
+        // float xmin = - obj_size.x / 2.0f;
+        // float ymin = - obj_size.y / 2.0f;
+        // float dx = 1.0;
+        // float dy = 1.0;
+
+        // float tmin = - nrays / 2.0f;
+        // float dt   = 1.0;
+        
         float dangle; // = angles[1] - angles[0];
         
         i = (blockDim.x * blockIdx.x + threadIdx.x);
@@ -63,7 +72,7 @@ extern "C"{
                 
             }
         
-            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = ( sum * dangle ); 
+            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = ( sum * dangle ) / (4.0f * float(nangles) *  pixel_size_x); 
         }
     }
 
@@ -78,11 +87,12 @@ extern "C"{
         float paganin_reg    = configs.reconstruction_paganin;
         float regularization = configs.reconstruction_reg;
         int axis_offset      = configs.rotation_axis_offset;
-        float pixel          = configs.geometry.obj_pixel_x;
+        float pixel_x        = configs.geometry.obj_pixel_x;
+        float pixel_y        = configs.geometry.obj_pixel_y;
 
         int nangles          = configs.tomo.size.y;
 
-        Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel);
+        Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel_x);
         
         float *sintable = opt::allocGPU<float>(nangles);
         float *costable = opt::allocGPU<float>(nangles);
@@ -97,10 +107,11 @@ extern "C"{
         if (filter.type != Filter::EType::none)
             SinoFilter(tomogram, 
                 (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
-                axis_offset, true, filter, false, sintable);
+                axis_offset, true, filter, false, sintable, pixel_x);
 
         BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, tomogram, angles,
                                                 sintable, costable, 
+                                                pixel_x, pixel_y,
                                                 obj_size, tomo_size);
 
         HANDLE_ERROR(cudaDeviceSynchronize());
