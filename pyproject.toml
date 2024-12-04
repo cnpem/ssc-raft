@@ -5,7 +5,7 @@ requires = [
     "scikit-build>=0.17",
     "cmake>=3.10",
     "wheel>=0.42.0",
-    "ninja>=1.10.2"
+    "ninja==1.10"
 ]
 
 [project]
