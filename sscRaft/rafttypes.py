@@ -436,10 +436,14 @@ def free_pinned_array(host):
     if result != CUDA_SUCCESS:
         raise RuntimeError(f"cudaFreeHost failed with error code {result}")
 
-def pinned_array(data):
-    pinned = pinned_empty(data.shape, data.dtype)
-    pinned[...] = data
-    return pinned
+def pin_array(data):
+    libcudart.cudaHostRegister(ctypes.c_void_p(data.ctypes.data),
+                               ctypes.c_size_t(data.size * data.dtype.itemsize),
+                               ctypes.c_uint(0))
+    return data
+
+def unpin_array(data):
+    libcudart.cudaHostUnregister(ctypes.c_void_p(data.ctypes.data))
 
 def CNICE(darray,dtype=numpy.float32):
         if darray.dtype != dtype:
