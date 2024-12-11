@@ -42,28 +42,16 @@ extern "C"
 
         Process *process = (Process *)malloc(sizeof(Process) * n_process);
         
-        if(lab.is_slice == 1){
-            // printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
+        for (i = 0; i < n_process; i++)
+            set_process(lab, i, &process[i], n_process, gpus, ndevs);
             
-            for (i = 0; i < n_process; i++)
-                set_process_slices_2(lab, i, &process[i], n_process, gpus, ndevs);
-        }else{
-            // printf("nangles = %d, Fourier = %d, reconstruct block of slices: %d \n", lab.nbeta, lab.fourier, lab.is_slice);
-
-            for (i = 0; i < n_process; i++)
-                set_process(lab, i, &process[i], n_process, gpus, ndevs);
-            
-        }
-
         // printf("Filter:\n");
         clock_t f_begin = clock();
 
-        if (lab.fourier == 1)
-        {
+        if (lab.fourier == 1){
             set_filtering_fft(lab, proj, n_process, ndevs, process);
         }
-        else
-        {
+        else{
             set_filtering_conv(lab, proj, n_process, ndevs, process);
         }
 
@@ -101,8 +89,7 @@ extern "C"
         float *c_recon[ndevs];
         float *c_beta[ndevs];
 
-        while (k < n_process)
-        {
+        while (k < n_process){
 
             if (k % ndevs == 0)
             {
