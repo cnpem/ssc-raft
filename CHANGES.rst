@@ -7,13 +7,9 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 
 Version 3.0.3 - 2024-12-11
 --------------------------
-*Added:*
-  - Fast transpose zyx2xyz on large data.
-  - CLI for reconstruction data pipeline og from PSI/TOMCAT beamline
-
 *Changed:*
-  - Fixed Paganin by slices version on ``FBP by RT`` and ``FBP by BST`` where the beta/delta parameter was missing a factor of pixel size squared - related to units
-  - Fixed Iterative alignment bug where the ``FBP`` method call was not updated form verion 2.Y.Z
+  - Fixed ``FDK`` blocksize bug for some dimension sizes.
+  - Fixed iterative alignment bug where the ``FBP`` method call not updated from version 2.Y.Z
 
 *Known Bugs:*
   - ``BST`` works for 180 degrees only on a regular angle mesh
@@ -21,10 +17,9 @@ Version 3.0.3 - 2024-12-11
   - Padding not working very well on ``FBP`` - turned-off
   - Memory issues on ``EM`` for cone-beam geometry
   - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
-  - Memory issues on ``FDK``: In reconstruction by slices
+  - Memory issues on ``FDK``: In reconstruction by slices. Supports only blocks divisible by 8.
   - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
   - Problem on Paganin by slices version in the methods ``FBP by RT`` and ``FBP by BST`` where the beta/delta parameter have a difference of 1e-11 of the same parameter for ``FDK`` method
-  - Iterative alignment bug: ``FBP`` method call was not updated
 
 *To be done:*
   - Refactoring ``FDK``
