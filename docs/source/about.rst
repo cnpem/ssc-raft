@@ -14,7 +14,7 @@ as long as they are tested and developed by the Scientific Computing Group.
 The ``ssc-raft`` package source code is available in `zenodo website <https://zenodo.org/>`_ under the 
 DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
 
-For more information on the ``ssc-raft`` package, visit the `website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ 
+For further information on the ``ssc-raft`` package, visit the `website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ 
 (needs to be inside the CNPEM network to access the website).
 
 Publications
@@ -83,4 +83,4 @@ Authors and Contributors
       - 
 
 
-**Contact:** `gcc@lnls.br <malito:gcc@lnls.br>`_
+**Contact:** Sirius Scientific Computing Team - `gcc@lnls.br <malito:gcc@lnls.br>`_

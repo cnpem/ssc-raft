@@ -1,5 +1,5 @@
-Examples
-=========
+Usage
+=====
 
 The ssc-raft algorithm is called as ``sscRaft`` python module.
 

@@ -35,7 +35,8 @@ Sirius Scientific Computing Team: [gcc@lnls.br](malito:gcc@lnls.br)
 
 ## Documentation
 
-`HTML` documentation can be found in the source directory `./docs/build/index.html` and can be opened with your preferred brownser.
+The package documentation can be found on the GCC website [https://gcc.lnls.br/ssc/ssc-raft/index.html](https://gcc.lnls.br/ssc/ssc-raft/index.html) inside the CNEPM network.
+Also, the `HTML` documentation can be found in the source directory `./docs/build/index.html` and can be opened with your preferred brownser.
 
 ## Install
 
@@ -44,7 +45,7 @@ See bellow for full requirements.
 
 The library `sscRaft` can be installed with form the source code or by `pip`/`git` if inside the CNPEM network.
 
-## Source code from Zenodo
+### Source code from Zenodo
 
 The source code can be downloaded from [zenodo website](https://zenodo.org/) under the DOI:[10.5281/zenodo.10988343](https://doi.org/10.5281/zenodo.10988343).
 
@@ -60,9 +61,41 @@ To compile the source files, enter the follwing command inside the folder
     make clean && make
 ```
 
+### PIP
+
+---
+> **Warning:** This installation option is compiled for the LNLS Tepui cluster DGX machines.
+---
+
+If one is inside the CNPEM network, they can install the latest version of sscRaft directly from the `pip server`
+
+```bash
+    pip install sscRaft==<version> --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+
+```
+
+Where `<version>` is the version number of the `sscRaft`
+
+```bash
+    pip install sscRaft==3.0.3 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+```
+
+
 ### GIT
 
-One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install with the following steps
+---
+> **Warning:** For this installation option is necessary to be on the CNPEM network.
+---
+
+One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install the latest version by:
+
+```bash
+git clone https://gitlab.cnpem.br/GCC/ssc-raft.git 
+cd ssc-raft
+make clean && make
+```
+
+For a specific version, one can use:
 
 ```bash
     git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
@@ -77,23 +110,6 @@ The `<version>` is the version of the `sscRaft` to be installed. Example, to ins
     cd ssc-raft 
     make clean && make
 ```
-
-### PIP
-
-If one is inside the CNPEM network, they can install the latest version of sscRaft directly from the `pip server`
-
-```bash
-    pip install sscRaft==version --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
-
-```
-
-Where `version` is the version number of the `sscRaft`
-
-```bash
-    pip install sscRaft==3.0.0 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
-```
-
-More information on the `sscRaft` package on [sscRaft website](https://gcc.lnls.br/wiki/docs/ssc-raft/) and [sscRaft documentation](https://gcc.lnls.br/ssc/ssc-raft/index.html) available inside the CNPEM network.
 
 ## Memory
 
