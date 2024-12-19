@@ -1,5 +1,5 @@
-Tutorials
-=========
+Usage
+=====
 
 The ssc-raft algorithm is called as ``sscRaft`` python module.
 
@@ -17,6 +17,7 @@ The ssc-raft algorithm is called as ``sscRaft`` python module.
 
     dic = {}
     ...
+
     '''
 
     output = sscRaft.function_name(input1, input2, dic)

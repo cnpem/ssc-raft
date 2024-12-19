@@ -1,7 +1,6 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
 from ...rafttypes import *
 
-
 def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
     tomogram using the Filtered Backprojection (FBP) method.

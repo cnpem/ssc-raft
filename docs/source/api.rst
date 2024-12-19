@@ -3,7 +3,6 @@ API Reference
 
 This page documents the API reference for the sscRaft. 
 
-
 .. - :ref:`apiio`
 .. - :ref:`apicorrection`
 .. - :ref:`apialignment`

@@ -6,7 +6,7 @@ Welcome to sscRaft documentation!
 
 .. toctree::
     :maxdepth: 1
-    :numbered:
+    :numbered: 1
     :caption: Contents
 
     source/install

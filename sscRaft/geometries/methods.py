@@ -26,7 +26,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
     Dictionary parameters:
 
         * ``dic['gpu']`` (ndarray): List of gpus  [required]
-        * ``dic['angles[rad]']`` (list): List of angles in radians [required]
+        * ``dic['angles[rad]']`` (list,optional): List of angles in radians [Default: None]
         * ``dic['method']`` (str,optional):  [Default: 'RT']
 
              #. Options = (\'RT\',\'BST\')
@@ -44,7 +44,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
             #. Related filters: \'gaussian\', \'lorentz\' and \'rectangle\'
 
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
-        * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatic)]
         * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
 
 
@@ -54,10 +54,10 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
     
     """
     required = ('gpu',)        
-    optional = ( 'filter','rotation axis offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method', 'detectorPixel[m]')
-    default  = (   'ramp',                     0,        2,             0.0,         0.0,          0,         1.0,    1.0,    'RT',                1.0)
+    optional = ('filter','rotation axis offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method', 'detectorPixel[m]')
+    default  = (  'ramp',                     0,        2,             0.0,         0.0,          0,         1.0,    1.0,    'RT',                1.0)
     
-    dic = SetDictionary(dic,required,optional,default)
+    dic = SetDictionary(dic,required,optional,default)  
 
     method                = dic['method']
     gpus                  = dic['gpu']

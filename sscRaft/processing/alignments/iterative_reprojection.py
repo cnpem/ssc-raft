@@ -311,12 +311,11 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
 
     dic["algorithm_dic"]['method'] =  'RT'
     dic["algorithm_dic"]['gpu'] =  gpus
-    dic["algorithm_dic"]['angles'] =  angles # angles in radians
     dic["algorithm_dic"]['angles[rad]'] =  angles # angles in radians
-    # dic["algorithm_dic"]['angles'] -= dic["algorithm_dic"]['angles'].min()
+    # dic["algorithm_dic"]['angles[rad]'] -= dic["algorithm_dic"]['angles'].min()
     
     fig, ax0 = plt.subplots()
-    ax0.plot(dic["algorithm_dic"]['angles'], 'o-')
+    ax0.plot(dic["algorithm_dic"]['angles[rad]'], 'o-')
     ax0.set_title('Make sure your angles are in radians')
     ax0.axhline(numpy.pi/2,label=r'$90^\circ = \pi/2$',color='red')
     ax0.axhline(-numpy.pi/2,label=r'$-90^\circ = -\pi/2$',color='red')
@@ -335,13 +334,13 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
         sinogram=phase_derivative_hilbert_transform(sinogram,pixel_size=1)
 
     print('Reconstructing and reprojecting from input data...')
-    tomo, reprojected_sinogram = reconstruct_and_reproject(sinogram,dic["algorithm_dic"]["angles"],dic,tomo_method=tomo_method,radon_method=radon_method,cpus=n_cpus,gpus=dic['algorithm_dic']['gpu'])
+    tomo, reprojected_sinogram = reconstruct_and_reproject(sinogram,dic["algorithm_dic"]["angles[rad]"],dic,tomo_method=tomo_method,radon_method=radon_method,cpus=n_cpus,gpus=dic['algorithm_dic']['gpu'])
 
     cumulative_shifts = numpy.empty((original_sinogram.shape[0],2),dtype=numpy.float32)
     cumulative_shifts[:,0] = 0  
     cumulative_shifts[:,1] = 0  
     
-    plot_iterative_reprojection(tomo,original_sinogram,dic["algorithm_dic"]['angles'],cumulative_shifts,cumulative_shifts,plot_type=plot_type) # plot initial recon
+    plot_iterative_reprojection(tomo,original_sinogram,dic["algorithm_dic"]['angles[rad]'],cumulative_shifts,cumulative_shifts,plot_type=plot_type) # plot initial recon
 
     
     iter_count = 0 
@@ -373,9 +372,9 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
             print('Reconstructing and reprojecting...')
             if using_phase_derivative:
                 phase_derivative_sinogram=phase_derivative_hilbert_transform(sinogram,pixel_size=1)
-                tomo, reprojected_sinogram = reconstruct_and_reproject(phase_derivative_sinogram,dic["algorithm_dic"]["angles"],dic,tomo_method=tomo_method,radon_method=radon_method)
+                tomo, reprojected_sinogram = reconstruct_and_reproject(phase_derivative_sinogram,dic["algorithm_dic"]["angles[rad]"],dic,tomo_method=tomo_method,radon_method=radon_method)
             else:
-                tomo, reprojected_sinogram = reconstruct_and_reproject(sinogram,dic["algorithm_dic"]["angles"],dic,tomo_method=tomo_method,radon_method=radon_method)
+                tomo, reprojected_sinogram = reconstruct_and_reproject(sinogram,dic["algorithm_dic"]["angles[rad]"],dic,tomo_method=tomo_method,radon_method=radon_method)
                 
             fig, ax = plt.subplots(1,3,figsize=(12,4),dpi=200)
             im0 = ax[0].imshow(sinogram[0])
@@ -386,7 +385,7 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
             fig.colorbar(im2,ax=ax[2])
             
             if plot:
-                plot_iterative_reprojection(tomo,sinogram,dic["algorithm_dic"]['angles'],shifts,cumulative_shifts,plot_type=plot_type)
+                plot_iterative_reprojection(tomo,sinogram,dic["algorithm_dic"]['angles[rad]'],shifts,cumulative_shifts,plot_type=plot_type)
                 
             iter_count += 1
             

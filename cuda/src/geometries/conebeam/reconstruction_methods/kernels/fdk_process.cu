@@ -10,66 +10,71 @@
 #include <iostream>
 
 
-extern "C"{
-void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs){   
+extern "C" {
+void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs) {   
 
-    long long int  n_filter, idx_filter, n_recon, idx_recon, n_proj, idx_proj;
-    float z_min, z_max, Z_min, Z_max, L;  
-    int nz_gpu,  zi_min, zi_max, Zi_max, Zi_min, zi_filter; 
-    long long int  n_filter_pad, idx_filter_pad;
-    int zi_filter_pad; 
+    // Variables for the reconstruction volume
+    int nz_gpu_recon, zi_min_recon, zi_max_recon;
+    long long int n_recon, idx_recon;
+    float z_min, z_max, L;
 
-    nz_gpu = (int) ceil( (float)lab.nv/n_process);
-    zi_min = i*nz_gpu;
-    zi_max = (int) std::min((i+1)*nz_gpu, lab.nv);
+    // Variables for the projection volume
+    float Z_min, Z_max;
+    int Zi_min, Zi_max;
+    long long int n_proj, idx_proj;
 
-    n_filter = (long long int) (zi_max - zi_min)*lab.nbeta*lab.nh;
-    idx_filter = (long long int) zi_min*lab.nbeta*lab.nh;
-    zi_filter = (int) (n_filter/(lab.nbeta*lab.nh));
+    // Variables for the filter volumes
+    int nv_gpu_filter, zi_min_filter, zi_max_filter;
+    long long int n_filter, idx_filter, n_filter_pad, idx_filter_pad;
+    int zi_filter, zi_filter_pad;
 
-    n_filter_pad = (long long int) (zi_max - zi_min)*lab.nbeta*lab.nph;
-    idx_filter_pad = (long long int) zi_min*lab.nbeta*lab.nph;
-    zi_filter_pad = (int) (n_filter_pad/(lab.nbeta*lab.nph));
+    // --- Divide the reconstruction volume among processes ---
+    nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
+    zi_min_recon = i * nz_gpu_recon;
+    zi_max_recon = std::min((i + 1) * nz_gpu_recon, lab.nz);
 
-    // printf("n_process = %d, nz = %d, %d \n",n_process,lab.nz,nz_gpu);
-    // printf("S0 = %d, S1 = %d, zi_max = %d , zi_min = %d \n",lab.slice_recon_start,lab.slice_recon_end,zi_max,zi_min);
+    n_recon = (long long int) (zi_max_recon - zi_min_recon) * lab.nx * lab.ny;
+    idx_recon = (long long int) zi_min_recon * lab.nx * lab.ny;
 
-    // printf("n_process = %d, nph = %d, padh %d \n",n_process,lab.nph,lab.padh);
-    // printf("Process = %d: n_filter = %lld, idx_filter = %lld, z_filter = %d, nbeta = %d, hbeta = %f \n", i, n_filter, idx_filter, zi_filter, lab.nbeta, lab.dbeta);
-    // printf("Process = %d: n_filter_pad = %lld, idx_filter_pad = %lld, z_filter_pad = %d \n", i, n_filter_pad, idx_filter_pad, zi_filter_pad);
-    
-    nz_gpu = (int) ceil( (float)lab.nz/n_process);
-    zi_min = i*nz_gpu;
-    zi_max = (int) std::min((i+1)*nz_gpu, lab.nz);
+    z_min = -lab.z + zi_min_recon * lab.dz;
+    z_max = -lab.z + zi_max_recon * lab.dz;
 
-    n_recon = (long long int) (zi_max - zi_min)*lab.nx*lab.ny;
-    idx_recon = (long long int) zi_min*lab.nx*lab.ny;
+    // --- Calculate the required range in the projection volume based on z_min and z_max ---
+    L = sqrt(lab.x * lab.x + lab.y * lab.y);
 
-    z_min = - lab.z + zi_min*lab.dz;
-    z_max = - lab.z + zi_max*lab.dz;
-    
-    // printf("Process = %d:  n_recon  = %lld,  idx_recon = %lld, z_ph = %f \n",  i, n_recon, idx_recon, z_min);
-    
-    L = sqrt(lab.x*lab.x + lab.y*lab.y);
-    // L = std::max(lab.x, lab.y);
-    // L = 3 * L;
-    
-    //variáveis de9tector
-   	Z_min = std::max(-lab.v, std::min(  lab.Dsd*z_min/(lab.D - L),  
-                                        lab.Dsd*z_min/(lab.D + L) ));
-    Z_max = std::min(+lab.v, std::max(  lab.Dsd*z_max/(lab.D + L),
-                                        lab.Dsd*z_max/(lab.D - L))); 
+    Z_min = std::max(-lab.v, std::min(
+        lab.Dsd * z_min / (lab.D - L),
+        lab.Dsd * z_min / (lab.D + L)
+    ));
+    Z_max = std::min(+lab.v, std::max(
+        lab.Dsd * z_max / (lab.D + L),
+        lab.Dsd * z_max / (lab.D - L)
+    ));
 
-    Zi_min = std::max(0, (int) floor((Z_min + lab.v)/lab.dv));
-    Zi_max = std::min(lab.nv, (int) ceil((Z_max + lab.v)/lab.dv));
+    Zi_min = std::max(0, (int) floor((Z_min + lab.v) / lab.dv));
+    Zi_max = std::min(lab.nv, (int) ceil((Z_max + lab.v) / lab.dv));
 
-    idx_proj = (long long int) (Zi_min)*(lab.nbeta*lab.nh);
-    n_proj = (long long int) (Zi_max-Zi_min)*(lab.nbeta*lab.nh);
+    idx_proj = (long long int) Zi_min * lab.nbeta * lab.nh;
+    n_proj = (long long int) (Zi_max - Zi_min) * lab.nbeta * lab.nh;
 
-    // printf("Zimax = %d, %d, %e, Zimin = %d, %d, %e \n",Zi_max,zi_max,z_max,Zi_min,zi_min,z_min);
+    // --- Calculate filter volumes based on the projection indices ---
 
+    nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
+    zi_min_filter = i * nv_gpu_filter;
+    zi_max_filter = std::min((i + 1) * nv_gpu_filter, lab.nv);
+
+    n_filter = (long long int) (zi_max_filter - zi_min_filter)*lab.nbeta*lab.nh;
+    idx_filter = (long long int) zi_min_filter*lab.nbeta*lab.nh;
+    zi_filter = zi_max_filter - zi_min_filter;
+
+    n_filter_pad = (long long int) (zi_max_filter - zi_min_filter) * lab.nbeta * lab.nph;
+    idx_filter_pad = (long long int) zi_min_filter * lab.nbeta * lab.nph;
+    zi_filter_pad = zi_max_filter - zi_min_filter;
+
+    // --- Populate the process structure ---
     (*process).i = i;
-    (*process).i_gpu = (int) gpus[i%ndevs];  
+    (*process).i_gpu = gpus[i % ndevs];  
+
     (*process).zi = Zi_min;
     (*process).idx_proj = idx_proj;
     (*process).n_proj = n_proj;
@@ -85,11 +90,10 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     (*process).n_recon = n_recon;
     (*process).idx_recon = idx_recon;
     (*process).z_ph = z_min;
-    (*process).z_det = - lab.v + Zi_min*lab.dv;
+    (*process).z_det = -lab.v + Zi_min * lab.dv;
+}
+}
 
-    // printf("Process = %lld:  n_proj = %lld,   idx_proj = %lld, Z_det = %f, z_det = %f, Zimin = %d, Zimax = %d\n\n",   (*process).i, (*process).n_proj, (*process).idx_proj, Z_min, (*process).z_det, (*process).zi, Zi_max);
-
-}}
 
 extern "C"{
 void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs){   
@@ -282,54 +286,43 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
 
 }}
 
-extern "C"{
-int memory(Lab lab, int ndev){
-    // long double mem_gpu, mem_recon, mem_proj;
-    int n_process;
-    // long long int n_proj, n_recon;
-    
-    int block = ( lab.slice_recon_end - lab.slice_recon_start );
+extern "C" {
+int memory(Lab lab, int ndev) {
+    int n_process = 1;  // Default to 1 process in case no other conditions are met
 
-    // n_proj = (long long int)(lab.nv)*(long long int)(lab.nbeta)*(long long int)(lab.nh); 
-    // n_proj = (long long int)(block)*(long long int)(lab.nbeta)*(long long int)(lab.nph);
+    int block = lab.nv;
 
-    // n_recon = (long long int)(lab.nx)*(long long int)(lab.ny)*(long long int)(lab.nz);
+    int blockgpu = (int) floor((float) block / ndev);
 
-    // mem_gpu = 40;
-    // mem_proj = 32*n_proj*1.16*(pow(10,-10));
-    // mem_recon = 32*n_recon*1.16*(pow(10,-10));
-
-    int blockgpu = (int) floor( (float)block / ndev ); 
-
-    if ( ( blockgpu <= 0 ) ) n_process = 1;
-
-
-    if( ( blockgpu >= 1 && ( blockgpu <= 64 ) ) ){
-
+    // Case: If the work per GPU block is less than or equal to zero, use a single process
+    if (blockgpu <= 0) {
+        n_process = 1;
+    } else if (blockgpu >= 1 && blockgpu <= 64) {
+        // Case: If each GPU can handle the block size reasonably, use all devices
         n_process = ndev;
-        // printf("A: n_process = %d, n_gpus = %d \n", n_process, ndev);
+    } else {
+        // Determine processes based on the size of the dimensions
+        if (lab.nh >= 1024 || lab.nbeta >= 1024) {
+            n_process = 16;  // Overwrites smaller division
+        }
+        if (lab.nbeta >= 2048 || lab.nh >= 4096) {
+            n_process = 32;
+        }
+        if (lab.nh >= 8000 || lab.nbeta >= 8000) {
+            n_process = 64;  // Larger blocks require more processes
+        }
+    }
 
-    }else{
+    // Ensure processes are distributed properly
+    int nz_gpu = (int) ceil((float) lab.nv / n_process);
 
-        // n_process = 2*n_process;
-        if(lab.nx > 1024 && lab.nbeta > 1024) n_process = 16;
-        if(lab.nx > 2048 && lab.nbeta > 2048) n_process = 32;
-        if(lab.nph >= 4096) n_process = 32;
-
-        //if(lab.nbeta >= 1900) n_process = 16;
-        // if (lab.nbeta >= 3900) n_process = 32;
-        if (lab.nh >= 4096 || lab.nbeta >= 4096) n_process = 64;
-        if (lab.nh >= 8000 || lab.nbeta >= 8000) n_process = 64;
-
-        
-    } 
-
-    int nz_gpu = (int) ceil( (float) ( lab.slice_recon_end - lab.slice_recon_start )/n_process); 
-
-    if ( nz_gpu * (n_process - 1) > block )
+    // Adjust n_process to ensure the workload fits within the block
+    if (nz_gpu * (n_process - 1) > block) {
         n_process = n_process - 1;
+    }
 
-    // printf("\n \n \n   N_PROCESS =  %d   MEM_PROJ = %Lf \n \n \n ", n_process, mem_proj);
+    // printf("\n \n \n   N_PROCESS =  %d  BLOCKGPU = %d \n \n \n ", n_process, blockgpu);
 
     return n_process;
-}}
+}
+}
