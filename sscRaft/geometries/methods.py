@@ -39,9 +39,12 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 1.0]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0 ]
-        * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 0.0]
+        * ``dic['regularization']`` (float,optional): Regularization value for some filters ( value >= 0 ) [Default: 0.0]
+
+            #. Related filters: \'gaussian\', \'lorentz\' and \'rectangle\'
+
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
-        * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatic)]
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
         * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
 
 
