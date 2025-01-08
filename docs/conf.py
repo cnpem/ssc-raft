@@ -28,9 +28,12 @@ autodoc_mock_imports = ["h5py", "SharedArray",
                         "scipy","skimage"] # list all modules to be ignored during compilation of the html
 
 
+env = {}
+with open('../sscRaft/_version.py') as f:
+    # far from ideal solution, but works as long as _version is a simple assignment script
+    exec(f.read(), env)
 
-from sscRaft._version import __version__
-version = release = __version__
+version = release = env['__version__']
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
