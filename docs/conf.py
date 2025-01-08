@@ -15,16 +15,11 @@ import sys
 from pathlib import Path
 sys.path.insert(0, os.path.abspath('../'))
 
-from sscRaft._version import __version__
-
 # -- Project information -----------------------------------------------------
 
 project = 'ssc-raft'
 copyright = '2022, GCC'
 author = 'GCC'
-
-# The full version, including alpha/beta/rc tags
-version = release = __version__
 
 # -- General configuration ---------------------------------------------------
 
@@ -32,6 +27,10 @@ autodoc_mock_imports = ["h5py", "SharedArray",
                         "sscRaft.rafttypes","numpy",
                         "scipy","skimage"] # list all modules to be ignored during compilation of the html
 
+
+
+from sscRaft._version import __version__
+version = release = __version__
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
