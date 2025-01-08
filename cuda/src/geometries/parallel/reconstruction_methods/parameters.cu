@@ -181,7 +181,9 @@ extern "C"{
         configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
         configs->geometry.wavelength         = (configs->beta_delta == 0.0 ? 1.0:( ( plank * vc ) / configs->geometry.energy ) );
 
-        configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta / (configs->geometry.obj_pixel_x * configs->geometry.obj_pixel_x); /* Reconstruction Paganin parameter. */
+        // configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta / (configs->geometry.obj_pixel_x * configs->geometry.obj_pixel_x); /* Reconstruction Paganin parameter. */
+        configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta; /* Reconstruction Paganin parameter. */
+
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
     
         /* Compute total memory used of FBP method on a singles slice */
@@ -265,7 +267,9 @@ extern "C"{
         configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
         configs->geometry.wavelength         = (configs->beta_delta == 0.0 ? 1.0:( ( plank * vc ) / configs->geometry.energy ) );
 
-        configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta / (configs->geometry.obj_pixel_x * configs->geometry.obj_pixel_x); /* Reconstruction Paganin parameter. */
+        // configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta / (configs->geometry.obj_pixel_x * configs->geometry.obj_pixel_x); /* Reconstruction Paganin parameter. */
+        configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta; /* Reconstruction Paganin parameter. */
+
         configs->reconstruction_reg          = parameters_float[1]; /* General regularization parameter */
 
         // printf("Dados: %e %e %e %e \n",configs->geometry.wavelength,configs->geometry.z2x,parameters_float[0],configs->reconstruction_paganin);

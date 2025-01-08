@@ -293,7 +293,7 @@ void getBST(CFG configs, GPU gpus,
         // cudaDeviceSynchronize();
 
         GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(obj + outsize * zoff,
-                                                                           cartesianblock.gpuptr, sizeimage, 4.0f * Nangles * pixel);
+                                                                           cartesianblock.gpuptr, sizeimage, 1.0);
 
         // HANDLE_ERROR(cudaPeekAtLastError());
 
@@ -353,7 +353,7 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, 
         // cudaDeviceSynchronize();
 
         GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(blockRecon + outsize * zoff,
-                                                                           cartesianblock->gpuptr, sizeimage,  4.0f * Nangles * pixel);
+                                                                           cartesianblock->gpuptr, sizeimage,  1.0);
 
         // HANDLE_ERROR(cudaPeekAtLastError());
 

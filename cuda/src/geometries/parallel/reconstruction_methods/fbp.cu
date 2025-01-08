@@ -72,7 +72,7 @@ extern "C"{
                 
             }
         
-            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = ( sum * dangle ) / (4.0f * float(nangles) *  pixel_size_x); 
+            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = ( sum * dangle );
         }
     }
 

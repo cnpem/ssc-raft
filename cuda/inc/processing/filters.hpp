@@ -38,7 +38,7 @@ struct Filter{
 
 	EType type      = EType::none;
 
-	float reg       = 1.0f;
+	float reg       = 0.0f;
 	float paganin   = 0.0f;
 	int axis_offset = 0.0f;
     float pixel     = 1.0f;
