@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "common/configs.hpp"
 #include "common/opt.hpp"
 #include "processing/processing.hpp"
@@ -11,12 +12,15 @@ dim3 size, dim3 pad, float value)
     int Npadx = size.x * ( 1 + pad.x );
     int Npady = size.y * ( 1 + pad.y );
 
+    int padx  = pad.x * size.x;
+    int pady  = pad.y * size.y;
+
     int i     = blockIdx.x*blockDim.x + threadIdx.x;
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
     int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - ( pad.x * size.x / 2 ) );
-    int jj     = (int)( j - ( pad.y * size.y / 2 ) );
+    int ii     = (int)( i - ( padx / 2 ) );
+    int jj     = (int)( j - ( pady / 2 ) );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
 
@@ -38,12 +42,15 @@ dim3 size, dim3 pad, float value)
     int Npadx = size.x * ( 1 + pad.x );
     int Npady = size.y * ( 1 + pad.y );
 
+    int padx  = pad.x * size.x;
+    int pady  = pad.y * size.y;
+
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int ii     = (int)( i - padx / 2 );
+    int jj     = (int)( j - pady / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
@@ -59,18 +66,21 @@ dim3 size, dim3 pad, float value)
     outpadded[indpad].y = in[index].y;
 }
 
-__global__ void opt::paddC2R(cufftComplex *in, float *outpadded, 
-dim3 size, dim3 pad, float value)
+__global__ void opt::paddC2R(cufftComplex *in, float *outpadded,
+        dim3 size, dim3 pad, float value)
 {
     int Npadx = size.x * ( 1 + pad.x );
     int Npady = size.y * ( 1 + pad.y );
+
+    int padx  = pad.x * size.x;
+    int pady  = pad.y * size.y;
 
     int i      = blockIdx.x*blockDim.x + threadIdx.x;
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int ii     = (int)( i - padx / 2 );
+    int jj     = (int)( j - pady / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
@@ -84,8 +94,8 @@ dim3 size, dim3 pad, float value)
     outpadded[indpad] = in[index].x;
 }
 
-__global__ void opt::paddR2R(float *in, float *outpadded, 
-dim3 size, dim3 pad, float value)
+__global__ void opt::paddR2R(float *in, float *outpadded,
+        dim3 size, dim3 pad, float value)
 {
     int Npadx = size.x * ( 1 + pad.x );
     int Npady = size.y * ( 1 + pad.y );
@@ -105,7 +115,7 @@ dim3 size, dim3 pad, float value)
     long long int indpad =  Npadx * k *  Npady +  Npadx * j +  i;
 
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
-    
+
     outpadded[indpad] = value;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) ) return;

@@ -1,52 +1,55 @@
+#include <cuda_runtime_api.h>
 #include <driver_types.h>
+#include <cstddef>
+#include <cstdio>
 #include "common/opt.hpp"
+#include "configs.hpp"
 #include "processing/filters.hpp"
 #include "common/complex.hpp"
 
 extern "C"{
 	
-__global__ void fbp_filtering_C2C(Filter filter, 
+__global__ void fbp_filtering_C2C(Filter filter,
     complex *kernel, dim3 size)
 	{
-        int i  = blockIdx.x*blockDim.x + threadIdx.x;
-        int j  = blockIdx.y*blockDim.y + threadIdx.y;
-        int k  = blockIdx.z*blockDim.z + threadIdx.z;
+        size_t i  = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j  = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k  = blockIdx.z*blockDim.z + threadIdx.z;
 
         size_t index = IND(i,j,k,size.x,size.y);
-        
-        if ( i >= size.x) return;
-        
-        float w =  2.0f * fminf( i, size.x - i ) / (float)size.x;
-        // float w =  2.0f * i / (float)size.x;
 
-        float expoent = 2.0f * float(M_PI)/(float)(size.x) * filter.axis_offset * i;
+        if ( i >= size.x || j >= size.y || k >= size.z) return;
+
+        float w = fminf( i, size.x - i ) / (float)size.x;
+        //float w = 2.0 * i / (float)size.x;
+
+        float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
 
         w = filter.apply( w );
 
         complex aux;
-        
-        if ( filter.type == Filter::EType::differential){ 
+
+        if ( filter.type == Filter::EType::differential) {
             aux.x = 0.0;
             aux.y = - w;
-        }else{
+        }else {
             aux.x = w;
             aux.y = 0.0;
         }
 
         kernel[index] *= exp1j(- expoent ) * aux;
-        
 	}
 
-    __global__ void fbp_filtering_R2C2R(Filter filter, 
+    __global__ void fbp_filtering_R2C2R(Filter filter,
     complex *kernel, dim3 size)
 	{
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        int j = blockIdx.y*blockDim.y + threadIdx.y;
-        int k = blockIdx.z*blockDim.z + threadIdx.z;
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
 
         size_t index = IND(i,j,k,size.x,size.y);
-        
-        if ( i >= size.x) return;
+
+        if ( i >= size.x || j >= size.y || k >= size.z) return;
 
         float w =  i / (float)size.x;
 
@@ -55,11 +58,11 @@ __global__ void fbp_filtering_C2C(Filter filter,
         w = filter.apply( w );
 
         complex aux;
-        
-        if ( filter.type == Filter::EType::differential){ 
+
+        if ( filter.type == Filter::EType::differential ) {
             aux.x = 0.0;
             aux.y = - w;
-        }else{
+        } else {
             aux.x = w;
             aux.y = 0.0;
         }
@@ -70,15 +73,16 @@ __global__ void fbp_filtering_C2C(Filter filter,
     void convolution_Real_C2C_1D(GPU gpus, cufftComplex *data, 
     dim3 size, Filter filter)
 	{
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 threadsPerBlock(TPBX, TPBY, 1);
         dim3 gridBlock( (int)ceil( size.x / threadsPerBlock.x ) + 1, 
                         (int)ceil( size.y / threadsPerBlock.y ) + 1, 
-                        (int)ceil( size.z / threadsPerBlock.z ) + 1);
+                        1);
+
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, data, data, CUFFT_FORWARD));
 
         // opt::fftshift1D<<<gridBlock,threadsPerBlock>>>(data,size);
-                
+
         fbp_filtering_C2C<<<gridBlock,threadsPerBlock>>>(filter, (complex*)data, size);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, data, data, CUFFT_INVERSE));
@@ -101,7 +105,6 @@ __global__ void fbp_filtering_C2C(Filter filter,
         HANDLE_FFTERROR(cufftExecR2C(gpus.mplan, data, fft));
 
         // opt::fftshift1D<<<gridBlock,threadsPerBlock>>>(fft,size);
-                
         fbp_filtering_R2C2R<<<gridBlock,threadsPerBlock>>>(filter, (complex*)fft, size);
 
         HANDLE_FFTERROR(cufftExecC2R(gpus.mplanI, fft, data));
@@ -114,29 +117,33 @@ __global__ void fbp_filtering_C2C(Filter filter,
         HANDLE_ERROR(cudaFree(fft));
 	}
 
-    void filterFBP_1(GPU gpus, Filter filter, 
+
+    void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }
             1: if plan 1D multiples cuffts
             2: if plan 2D multiples cuffts */
-        int dim = 1; 
+        int dim = 1;
 
-        dim3 gridBlock( (int)ceil( size_pad.x / gpus.BT.x ) + 1, 
-                        (int)ceil( size_pad.y / gpus.BT.y ) + 1, 
-                        (int)ceil( size_pad.z / gpus.BT.z ) + 1);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1,
+                        (int)ceil( size_pad.y / TPBY ) + 1,
+                        (int)ceil( size_pad.z / TPBZ ) + 1);
 
-
-        opt::MPlanFFT(&gpus.mplan, dim, size_pad, CUFFT_C2C);
+        cufftPlan1d(&gpus.mplan , size_pad.x, CUFFT_C2C, size_pad.y);
 
         size_t npad = opt::get_total_points(size_pad);
-        float scale = (float)( 1.0f / size_pad.x );
+        float scale = 0.5;
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
         opt::paddR2C<<<gridBlock,gpus.BT>>>(tomogram, dataPadded, size, pad, 0.0f);
 
-		convolution_Real_C2C_1D(gpus, dataPadded, size_pad, filter);
+        for (int k = 0; k < size.z; ++k) {
+            size_t offset = (size_t) k * size_pad.x * size_pad.y;
+            convolution_Real_C2C_1D( gpus, dataPadded + offset, size_pad, filter);
+        }
 
         opt::remove_paddC2R<<<gridBlock,gpus.BT>>>(dataPadded, tomogram, size, pad);
 
@@ -146,17 +153,17 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 
-	void filterFBP(GPU gpus, Filter filter, 
+	void filterFBP_old(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }
             1: if plan 1D multiples cuffts
             2: if plan 2D multiples cuffts */
-        // int dim = 1; 
+        // int dim = 1;
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1, 
-                        (int)ceil( size_pad.y / TPBY ) + 1, 
+        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1,
+                        (int)ceil( size_pad.y / TPBY ) + 1,
                         (int)ceil( size_pad.z / TPBZ ) + 1);
 
         dim3 fft_size = dim3( size_pad.x / 2 + 1, size.y, 1 );
