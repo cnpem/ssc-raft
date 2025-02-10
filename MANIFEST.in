@@ -1,5 +1,4 @@
-include sscRaft/*
-recursive-include cuda *.*
+recursive-include cuda/ * #on source dist
 include *.txt
 include *.rst
 recursive-include docs *.txt

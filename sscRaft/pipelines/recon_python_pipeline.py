@@ -59,8 +59,6 @@ def reconstruction_methods(tomogram: numpy.ndarray, recon: numpy.ndarray, dic:di
     """
     start = time.time()
 
-    save_name   = dic.get('reconstruct', 'Recon_' + dic['input_name'])
-
     # Perform the actual reconstruction
     recon = multiple_recon_methods_wrapper(tomogram, recon, dic)
 
@@ -72,8 +70,11 @@ def reconstruction_methods(tomogram: numpy.ndarray, recon: numpy.ndarray, dic:di
         recon = crop_circle_simple(recon, dic['detector_pixel[m]'],
                                    npixels=numpy.abs(dic['offset']))
 
-    # Save the tomogram asynchronously if specified
-    async_save_worker(recon, dic, save_name, 'save_recon')
+
+    if dic.get('save_recon', False):
+        save_name   = dic.get('reconstruct', 'Recon_' + dic['input_name'])
+        # Save the tomogram asynchronously if specified
+        async_save_worker(recon, dic, save_name, 'save_recon')
 
     return recon
 
