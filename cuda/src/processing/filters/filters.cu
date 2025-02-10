@@ -1,5 +1,9 @@
+#include <cuda_runtime_api.h>
 #include <driver_types.h>
+#include <cstddef>
+#include <cstdio>
 #include "common/opt.hpp"
+#include "configs.hpp"
 #include "processing/filters.hpp"
 #include "common/complex.hpp"
 
@@ -8,9 +12,9 @@ extern "C"{
 __global__ void fbp_filtering_C2C(Filter filter, 
     complex *kernel, dim3 size, float pixel)
 	{
-        int i  = blockIdx.x*blockDim.x + threadIdx.x;
-        int j  = blockIdx.y*blockDim.y + threadIdx.y;
-        int k  = blockIdx.z*blockDim.z + threadIdx.z;
+        size_t i  = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j  = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k  = blockIdx.z*blockDim.z + threadIdx.z;
 
         size_t index = IND(i,j,k,size.x,size.y);
         
@@ -18,7 +22,12 @@ __global__ void fbp_filtering_C2C(Filter filter,
         
         float w = 2.0f * fminf( i, size.x - i ) / ((float)size.x );
 
-        float expoent = 2.0f * float(M_PI)/(float)(size.x) * filter.axis_offset * i;
+        if ( i >= size.x || j >= size.y || k >= size.z) return;
+
+        float w = fminf( i, size.x - i ) / (float)size.x;
+        //float w = 2.0 * i / (float)size.x;
+
+        float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
 
         w = filter.apply( w );
 
@@ -26,12 +35,12 @@ __global__ void fbp_filtering_C2C(Filter filter,
         
 	}
 
-    __global__ void fbp_filtering_R2C2R(Filter filter, 
+    __global__ void fbp_filtering_R2C2R(Filter filter,
     complex *kernel, dim3 size)
 	{
-        int i = blockIdx.x*blockDim.x + threadIdx.x;
-        int j = blockIdx.y*blockDim.y + threadIdx.y;
-        int k = blockIdx.z*blockDim.z + threadIdx.z;
+        size_t i = blockIdx.x*blockDim.x + threadIdx.x;
+        size_t j = blockIdx.y*blockDim.y + threadIdx.y;
+        size_t k = blockIdx.z*blockDim.z + threadIdx.z;
 
         size_t index = IND(i,j,k,size.x,size.y);
         
@@ -49,10 +58,11 @@ __global__ void fbp_filtering_C2C(Filter filter,
     void convolution_Real_C2C_1D(GPU gpus, cufftComplex *data, 
     dim3 size, Filter filter, float pixel)
 	{
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 threadsPerBlock(TPBX, TPBY, 1);
         dim3 gridBlock( (int)ceil( size.x / threadsPerBlock.x ) + 1, 
                         (int)ceil( size.y / threadsPerBlock.y ) + 1, 
-                        (int)ceil( size.z / threadsPerBlock.z ) + 1);
+                        1);
+
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, data, data, CUFFT_FORWARD));
                 
@@ -88,11 +98,12 @@ __global__ void fbp_filtering_C2C(Filter filter,
         /* int dim = { 1, 2 }
             1: if plan 1D multiples cuffts
             2: if plan 2D multiples cuffts */
-        int dim = 1; 
+        int dim = 1;
 
-        dim3 gridBlock( (int)ceil( size_pad.x / gpus.BT.x ) + 1, 
-                        (int)ceil( size_pad.y / gpus.BT.y ) + 1, 
-                        (int)ceil( size_pad.z / gpus.BT.z ) + 1);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1,
+                        (int)ceil( size_pad.y / TPBY ) + 1,
+                        (int)ceil( size_pad.z / TPBZ ) + 1);
 
         opt::MPlanFFT(&gpus.mplan, dim, size_pad, CUFFT_C2C);
 
@@ -112,17 +123,17 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 
-	void filterFBP(GPU gpus, Filter filter, 
+	void filterFBP_old(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }
             1: if plan 1D multiples cuffts
             2: if plan 2D multiples cuffts */
-        // int dim = 1; 
+        // int dim = 1;
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1, 
-                        (int)ceil( size_pad.y / TPBY ) + 1, 
+        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1,
+                        (int)ceil( size_pad.y / TPBY ) + 1,
                         (int)ceil( size_pad.z / TPBZ ) + 1);
 
         dim3 fft_size = dim3( size_pad.x / 2 + 1, size.y, 1 );
@@ -162,8 +173,6 @@ extern "C" {
 	{	
 		cImage fft(nrays/2+1,nangles);
 		// cImage fft2(nrays/2+1,nangles);
-
-		// printf("FILTER: %ld %ld %ld %ld \n",nrays,nangles,blocksize,nrays/2+1);
 
 		cufftHandle plan_r2c, plan_c2r;
 		cufftPlan1d(&plan_r2c, nrays, CUFFT_R2C, nangles);

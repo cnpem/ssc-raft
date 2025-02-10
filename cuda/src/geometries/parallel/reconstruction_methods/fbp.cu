@@ -93,8 +93,6 @@ extern "C"{
         int nangles          = configs.tomo.size.y;
 
         Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel_x);
-
-        printf("Pixel: %e \n", filter.pixel);
         
         float *sintable = opt::allocGPU<float>(nangles);
         float *costable = opt::allocGPU<float>(nangles);

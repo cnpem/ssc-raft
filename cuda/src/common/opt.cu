@@ -98,9 +98,7 @@ void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TY
         batch = DATASIZE.z;
         idist *= DATASIZE.y;
         odist *= DATASIZE.y;
-    }
-
-    if (RANK >= 3) {
+    } else if (RANK >= 3) {
         n[2] = (int)DATASIZE.z;
         idist *= DATASIZE.z;
         odist *= DATASIZE.z;

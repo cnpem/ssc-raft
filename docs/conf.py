@@ -15,17 +15,11 @@ import sys
 from pathlib import Path
 sys.path.insert(0, os.path.abspath('../'))
 
-from sscRaft import __version__
-
 # -- Project information -----------------------------------------------------
 
 project = 'ssc-raft'
 copyright = '2022, GCC'
 author = 'GCC'
-
-# The full version, including alpha/beta/rc tags
-release = '3.0.3'
-version = '3.0.3'
 
 # -- General configuration ---------------------------------------------------
 
@@ -33,6 +27,13 @@ autodoc_mock_imports = ["h5py", "SharedArray",
                         "sscRaft.rafttypes","numpy",
                         "scipy","skimage"] # list all modules to be ignored during compilation of the html
 
+
+env = {}
+with open('../sscRaft/_version.py') as f:
+    # far from ideal solution, but works as long as _version is a simple assignment script
+    exec(f.read(), env)
+
+version = release = env['__version__']
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
