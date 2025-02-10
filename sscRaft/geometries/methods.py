@@ -44,7 +44,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
             #. Related filters: \'gaussian\', \'lorentz\' and \'rectangle\'
 
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
-        * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatic)]
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
         * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
 
 

@@ -38,19 +38,19 @@ build_sdist:
       - ./dist/*tar.gz
     expire_in: 1 day
 
-deploy_sdist:
-  stage: deploy
-  image: gccdockers/python-builder
-  script:
-    - twine upload ./dist/*.tar.gz  --repository-url="$GCC_PYPI_HOST"
-  tags:
-    - x86_64
-    - cuda11
-    - docker
-  dependencies:
-    - build_dgx
-  only:
-    - tags
+# deploy_sdist:
+#   stage: deploy
+#   image: gccdockers/python-builder
+#   script:
+#     - twine upload ./dist/*.tar.gz  --repository-url="$GCC_PYPI_HOST"
+#   tags:
+#     - x86_64
+#     - cuda11
+#     - docker
+#   dependencies:
+#     - build_dgx
+#   only:
+#     - tags
 
 deploy_dgx:
   stage: deploy
