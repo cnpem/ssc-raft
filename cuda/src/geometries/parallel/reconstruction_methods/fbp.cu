@@ -19,21 +19,21 @@ extern "C"{
         int nrays   = tomo_size.x;
         int nangles = tomo_size.y;
   
-        float xmin = -1.0;
-        float ymin = -1.0;
-        float dx   = 2.0 / (obj_size.x - 1);
-        float dy   = 2.0 / (obj_size.y - 1);
+        // float xmin = -1.0;
+        // float ymin = -1.0;
+        // float dx   = 2.0 / (obj_size.x - 1);
+        // float dy   = 2.0 / (obj_size.y - 1);
 
-        float tmin = -1.0;
-        float dt   = 2.0 / (nrays - 1);
+        // float tmin = -1.0;
+        // float dt   = 2.0 / (nrays - 1);
 
-        // float xmin = - obj_size.x / 2.0f;
-        // float ymin = - obj_size.y / 2.0f;
-        // float dx = 1.0;
-        // float dy = 1.0;
+        float xmin = - pixel_size_x * obj_size.x / 2.0f;
+        float ymin = - pixel_size_y * obj_size.y / 2.0f;
+        float dx   = pixel_size_x;
+        float dy   = pixel_size_y;
 
-        // float tmin = - nrays / 2.0f;
-        // float dt   = 1.0;
+        float tmin = - pixel_size_x * nrays / 2.0f;
+        float dt   = pixel_size_x;
         
         float dangle; // = angles[1] - angles[0];
         
@@ -68,11 +68,11 @@ extern "C"{
                 t_index = (int) ( ( t - tmin ) / dt);	     
 
                 if ( ( t_index > -1 ) && ( t_index < nrays) )
-                    sum += tomogram[ k * nrays * nangles  + angle_index * nrays + t_index];
+                    sum += tomogram[ k * nrays * nangles  + angle_index * nrays + t_index] * dangle;
                 
             }
         
-            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = ( sum * dangle );
+            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = sum;
         }
     }
 
@@ -93,6 +93,8 @@ extern "C"{
         int nangles          = configs.tomo.size.y;
 
         Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel_x);
+
+        printf("Pixel: %e \n", filter.pixel);
         
         float *sintable = opt::allocGPU<float>(nangles);
         float *costable = opt::allocGPU<float>(nangles);
@@ -100,14 +102,17 @@ extern "C"{
         int gridBlock = (int)ceil( nangles / TPBY ) + 1;
         setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
 
+        if (filter.type != Filter::EType::none)
+            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+
         // if (filter.type != Filter::EType::none)
-        //     filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+        //     filterFBP_Complex(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad, pixel_x);
 
         /* Old version - Gio */
-        if (filter.type != Filter::EType::none)
-            SinoFilter(tomogram, 
-                (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
-                axis_offset, true, filter, false, sintable, pixel_x);
+        // if (filter.type != Filter::EType::none)
+        //     SinoFilter(tomogram, 
+        //         (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
+        //         axis_offset, true, filter, false, sintable, pixel_x);
 
         BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, tomogram, angles,
                                                 sintable, costable, 

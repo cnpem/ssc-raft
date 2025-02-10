@@ -31,7 +31,7 @@ def radon_RT(phantom, angles, gpus, *args):
         nslices = phantom.shape[0]
 
     nrays       = phantom.shape[2]
-    rays        = numpy.ceil( a * nrays ).astype(numpy.intc)
+    # rays        = numpy.ceil( a * nrays ).astype(numpy.intc)
 
     _, img_sizey, img_sizex   = phantom.shape
     
@@ -43,16 +43,16 @@ def radon_RT(phantom, angles, gpus, *args):
     angles      = CNICE(angles)
     angles_ptr  = angles.ctypes.data_as(ctypes.c_void_p)  
     
-    tomogram    = numpy.ones((nslices,nangles,rays), dtype=numpy.float32)
-    tomogram *= -1
-    tomogram      = CNICE(tomogram)
+    tomogram    = numpy.ones((nslices,nangles,nrays), dtype=numpy.float32)
+    tomogram    *= -1
+    tomogram     = CNICE(tomogram)
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
 
     libraft.getRadonRTMultiGPU(gpusptr, ctypes.c_int(ngpus), 
         tomogram_ptr, phantom_ptr, angles_ptr, 
         ctypes.c_int(img_sizex), ctypes.c_int(img_sizey), 
-        ctypes.c_int(rays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
+        ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
         ctypes.c_float(a), ctypes.c_float(a)) 
     
     # dt = (2.0*a)/(rays-1)

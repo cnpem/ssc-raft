@@ -61,7 +61,6 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
         beta_delta     = 0.0
         z2             = 0.0
         energy         = 1.0
-        pixelx, pixely = 1.0, 1.0
 
     padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
@@ -164,8 +163,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         beta_delta     = 0.0
         z2             = 0.0
         energy         = 1.0
-        pixelx, pixely = 1.0, 1.0
-
+        
     padx, pady, padz  = dic['padding'] + 2,0,0 # (padx, pady, padz)
 
     # logger.info(f'Set BST pad value as {pad} x horizontal dimension ({padx}).')

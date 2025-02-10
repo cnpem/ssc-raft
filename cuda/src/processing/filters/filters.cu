@@ -6,7 +6,7 @@
 extern "C"{
 	
 __global__ void fbp_filtering_C2C(Filter filter, 
-    complex *kernel, dim3 size)
+    complex *kernel, dim3 size, float pixel)
 	{
         int i  = blockIdx.x*blockDim.x + threadIdx.x;
         int j  = blockIdx.y*blockDim.y + threadIdx.y;
@@ -14,26 +14,15 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         size_t index = IND(i,j,k,size.x,size.y);
         
-        if ( i >= size.x) return;
+        if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
         
-        float w =  2.0f * fminf( i, size.x - i ) / (float)size.x;
-        // float w =  2.0f * i / (float)size.x;
+        float w = 2.0f * fminf( i, size.x - i ) / ((float)size.x );
 
         float expoent = 2.0f * float(M_PI)/(float)(size.x) * filter.axis_offset * i;
 
         w = filter.apply( w );
 
-        complex aux;
-        
-        if ( filter.type == Filter::EType::differential){ 
-            aux.x = 0.0;
-            aux.y = - w;
-        }else{
-            aux.x = w;
-            aux.y = 0.0;
-        }
-
-        kernel[index] *= exp1j(- expoent ) * aux;
+        kernel[index] *= exp1j(- expoent ) * w;
         
 	}
 
@@ -46,29 +35,19 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         size_t index = IND(i,j,k,size.x,size.y);
         
-        if ( i >= size.x) return;
+        if ( i >= size.x  || (j >= size.y) ) return;
 
-        float w =  i / (float)size.x;
+        float w =  0.5f * fminf( i, size.x - i ) / ((float)size.x);
 
         float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
 
         w = filter.apply( w );
 
-        complex aux;
-        
-        if ( filter.type == Filter::EType::differential){ 
-            aux.x = 0.0;
-            aux.y = - w;
-        }else{
-            aux.x = w;
-            aux.y = 0.0;
-        }
-
-        kernel[index] *= exp1j(- expoent ) * aux;
+        kernel[index] *= exp1j(- expoent ) * w;
 	}
 
     void convolution_Real_C2C_1D(GPU gpus, cufftComplex *data, 
-    dim3 size, Filter filter)
+    dim3 size, Filter filter, float pixel)
 	{
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock( (int)ceil( size.x / threadsPerBlock.x ) + 1, 
@@ -76,14 +55,10 @@ __global__ void fbp_filtering_C2C(Filter filter,
                         (int)ceil( size.z / threadsPerBlock.z ) + 1);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, data, data, CUFFT_FORWARD));
-
-        // opt::fftshift1D<<<gridBlock,threadsPerBlock>>>(data,size);
                 
-        fbp_filtering_C2C<<<gridBlock,threadsPerBlock>>>(filter, (complex*)data, size);
+        fbp_filtering_C2C<<<gridBlock,threadsPerBlock>>>(filter, (complex*)data, size, pixel);
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, data, data, CUFFT_INVERSE));
-
-        // opt::fftshift1D<<<gridBlock,threadsPerBlock>>>(data,size);
 	}
 
     void convolution_R2C_C2R_1D(GPU gpus, float *data, 
@@ -99,23 +74,16 @@ __global__ void fbp_filtering_C2C(Filter filter,
                         1);
               
         HANDLE_FFTERROR(cufftExecR2C(gpus.mplan, data, fft));
-
-        // opt::fftshift1D<<<gridBlock,threadsPerBlock>>>(fft,size);
                 
         fbp_filtering_R2C2R<<<gridBlock,threadsPerBlock>>>(filter, (complex*)fft, size);
 
         HANDLE_FFTERROR(cufftExecC2R(gpus.mplanI, fft, data));
 
-        // float scale = (float)( 1.0f / size.x );
-        // opt::scale<<<gridBlock,threadsPerBlock>>>(data, size, scale);
-
-        // opt::fftshift1D<<<gridBlock,threadsPerBlock>>>(data,size);
-
         HANDLE_ERROR(cudaFree(fft));
 	}
 
-    void filterFBP_1(GPU gpus, Filter filter, 
-    float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
+    void filterFBP_Complex(GPU gpus, Filter filter, 
+    float *tomogram, dim3 size, dim3 size_pad, dim3 pad, float pixel)
 	{	
         /* int dim = { 1, 2 }
             1: if plan 1D multiples cuffts
@@ -126,21 +94,19 @@ __global__ void fbp_filtering_C2C(Filter filter,
                         (int)ceil( size_pad.y / gpus.BT.y ) + 1, 
                         (int)ceil( size_pad.z / gpus.BT.z ) + 1);
 
-
         opt::MPlanFFT(&gpus.mplan, dim, size_pad, CUFFT_C2C);
 
         size_t npad = opt::get_total_points(size_pad);
-        float scale = (float)( 1.0f / size_pad.x );
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
         opt::paddR2C<<<gridBlock,gpus.BT>>>(tomogram, dataPadded, size, pad, 0.0f);
 
-		convolution_Real_C2C_1D(gpus, dataPadded, size_pad, filter);
+		convolution_Real_C2C_1D(gpus, dataPadded, size_pad, filter, pixel);
 
         opt::remove_paddC2R<<<gridBlock,gpus.BT>>>(dataPadded, tomogram, size, pad);
 
-        opt::scale<<<gridBlock,gpus.BT>>>(tomogram, size, scale);
+        opt::scale<<<gridBlock,gpus.BT>>>(tomogram, size, (float)size_pad.x);
 
         HANDLE_ERROR(cudaFree(dataPadded));
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
@@ -162,10 +128,6 @@ __global__ void fbp_filtering_C2C(Filter filter,
         dim3 fft_size = dim3( size_pad.x / 2 + 1, size.y, 1 );
 
         size_t npad = opt::get_total_points(size_pad);
-        float scale = (float)( 1.0f / size_pad.x );
-
-        // opt::MPlanFFT(&gpus.mplan , dim, size_pad, CUFFT_R2C);
-        // opt::MPlanFFT(&gpus.mplanI, dim, size_pad, CUFFT_C2R);
 
 		cufftPlan1d(&gpus.mplan , size_pad.x, CUFFT_R2C, size_pad.y);
 		cufftPlan1d(&gpus.mplanI, size_pad.x, CUFFT_C2R, size_pad.y);
@@ -184,7 +146,9 @@ __global__ void fbp_filtering_C2C(Filter filter,
         
         opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
 
-        // opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
+        float scale = (float)(size_pad.x) * filter.pixel;
+
+        opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
 
         HANDLE_ERROR(cudaFree(dataPadded));
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
@@ -231,11 +195,9 @@ extern "C" {
 		int tx = blockIdx.x * blockDim.x + threadIdx.x;
 		int ty = blockIdx.y * blockDim.y + threadIdx.y;
 
-		// float rampfilter = float(tx) / (float)sizex;
-        float x = ( fminf( tx, sizex - tx ) / (float)sizex );
-        // x       = x / pixel;
+		float rampfilter = float(tx) / (float)sizex;
 
-		float rampfilter = mfilter.apply(x);
+		rampfilter = mfilter.apply(rampfilter);
 
 		float fcenter = 1.0f - (bShiftCenter ? (sintable[ty]) : 0);
 		fcenter = -2.0f*float(M_PI)/float(2*sizex-2) * fcenter * icenter;
@@ -280,7 +242,6 @@ extern "C" {
 	}
 
 	
-
 	__device__ complex DeltaFilter(complex* img, int sizeimage, float fx, float fy)
 	{
 		fx = fminf(fx, sizeimage/2-1E-4f);
@@ -304,10 +265,9 @@ extern "C" {
 		int tx = blockIdx.x * blockDim.x + threadIdx.x;
 		int ty = blockIdx.y * blockDim.y + threadIdx.y;
 
-        float x = ( 2.0f * fminf(tx, sizex - tx) / ( (float)sizex ) );
-		// float x = ( 2.0f * fminf(tx, sizex - tx) / ( (float)sizex ) ) / pixel;
+        float rampfilter = 1.0f * fminf(tx, sizex - tx) / (float)sizex;
 
-		float rampfilter = mfilter.apply(x);
+		rampfilter = mfilter.apply(rampfilter);
 
 		if(tx < sizex)
             vec[ty*sizex + tx] *= exp1j(-2*float(M_PI)/float(sizex) * center * tx) * rampfilter;
@@ -327,22 +287,15 @@ extern "C" {
         }
     }
 
-    __global__ void GetX(float* out, complex* in, int sizex, float pixel)
+    __global__ void GetX(float* out, complex* in, int sizex, float scale)
     {
         /* Complex (real part) to Float */
         size_t tx = blockIdx.x * blockDim.x + threadIdx.x;
         size_t ty = blockIdx.y + gridDim.y * blockIdx.z;
 
-        //if (tx == 0) {
-            //printf("** %f %f\n", out[ty*sizex + tx], in[ty*sizex + tx].x);
-        //}
-
         if(tx < sizex)
-            out[ty*sizex + tx] = in[ty*sizex + tx].x / pixel;
+            out[ty*sizex + tx] = in[ty*sizex + tx].x / scale;
 
-        //if (tx == 0) {
-            //printf("**** %f %f\n", out[ty*sizex + tx], in[ty*sizex + tx].x);
-        //}
     }
 
     __global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy)
@@ -372,7 +325,9 @@ extern "C" {
 
         HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_INVERSE));
 
-        GetX<<<filterblock,filterthread, 0, stream>>>(sinoblock, filtersino, nrays, 1.0f);
+        float scale = 1.0f; //(float)nrays * pixel;
+
+        GetX<<<filterblock,filterthread, 0, stream>>>(sinoblock, filtersino, nrays, scale);
 
         //cudaMemset(sinoblock, 0, nrays*nangles*4);
     }
@@ -389,7 +344,7 @@ __host__ __device__ inline float Filter::apply(float input)
 	}
 	else if (type == EType::lorentz)
 	{
-		input *= ( 1.0f / ( 1.0f + (reg + paganin) * input * input ) );
+		input *= ( 1.0f / ( 1.0f + reg * input * input ) ) * ( 1.0f / ( 1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::cosine)
 	{
@@ -398,7 +353,7 @@ __host__ __device__ inline float Filter::apply(float input)
 	else if (type == EType::rectangle)
 	{
 		param = fmaxf(input * reg * float(M_PI) * 0.5f, 1E-4f);
-		input *= ( sinf(param) / param ) * ( 1.0f / ( 1.0f + paganin * input * input) );
+		input *= ( sinf(param) / param ) * ( 1.0f / ( 1.0f + paganin * input * input ) );
 	}
 	else if (type == EType::hann)
 	{
@@ -410,7 +365,7 @@ __host__ __device__ inline float Filter::apply(float input)
 	}
 	else if (type == EType::ramp)
 	{
-		input *= 1.0f / (1.0f + paganin * input * input);
+		input *= ( 1.0f / ( 1.0f + paganin * input * input ) );
 	}
     else if (type == EType::differential)
 	{

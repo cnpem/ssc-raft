@@ -93,10 +93,12 @@ void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TY
 
     int batch = DATASIZE.y * DATASIZE.z; /* Number of batched executions */
 
-    if (RANK >= 2) n[1] = (int)DATASIZE.x;
-    batch = DATASIZE.z;
-    idist *= DATASIZE.y;
-    odist *= DATASIZE.y;
+    if (RANK >= 2) {
+        n[1] = (int)DATASIZE.x;
+        batch = DATASIZE.z;
+        idist *= DATASIZE.y;
+        odist *= DATASIZE.y;
+    }
 
     if (RANK >= 3) {
         n[2] = (int)DATASIZE.z;

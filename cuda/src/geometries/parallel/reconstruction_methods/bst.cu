@@ -292,14 +292,20 @@ void getBST(CFG configs, GPU gpus,
 
         // cudaDeviceSynchronize();
 
-        GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(obj + outsize * zoff,
-                                                                           cartesianblock.gpuptr, sizeimage, 1.0);
-
-        // HANDLE_ERROR(cudaPeekAtLastError());
-
         Nangles /= 2;
         Nrays *= 2;
         Nrays /= padding;
+
+        float scale = (float)Nrays * pixel * 4.0f;
+
+        GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(obj + outsize * zoff,
+                                                                           cartesianblock.gpuptr, sizeimage, scale);
+
+        // HANDLE_ERROR(cudaPeekAtLastError());
+
+        // Nangles /= 2;
+        // Nrays *= 2;
+        // Nrays /= padding;
     }
 
 }
@@ -351,15 +357,21 @@ void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, 
         HANDLE_FFTERROR(cufftExecC2C(plan2d, cartesianblock->gpuptr, cartesianblock->gpuptr, CUFFT_INVERSE));
 
         // cudaDeviceSynchronize();
-
-        GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(blockRecon + outsize * zoff,
-                                                                           cartesianblock->gpuptr, sizeimage,  1.0);
-
-        // HANDLE_ERROR(cudaPeekAtLastError());
-
         Nangles /= 2;
         Nrays *= 2;
         Nrays /= pad0;
+
+
+        float scale = (float)Nrays * pixel * 4.0f;
+
+        GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(blockRecon + outsize * zoff,
+                                                                           cartesianblock->gpuptr, sizeimage,  scale);
+
+        // HANDLE_ERROR(cudaPeekAtLastError());
+
+        // Nangles /= 2;
+        // Nrays *= 2;
+        // Nrays /= pad0;
     }
 
 }

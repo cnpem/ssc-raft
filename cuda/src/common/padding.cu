@@ -129,8 +129,7 @@ dim3 size, dim3 pad)
     long long int index  = size.x * k * size.y + size.x * jj + ii;
 
     long long int indpad =  Npadx * k *  Npady +  Npadx * j +  i;
-
-    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
+    
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
     out[index] = inpadded[indpad].x;

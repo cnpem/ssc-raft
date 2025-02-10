@@ -60,7 +60,7 @@ extern "C"{
 
 	__global__ void SetX(complex* out, float* in, int sizex);
 
-	__global__ void GetX(float* out, complex* in, int sizex, float pixel);
+	__global__ void GetX(float* out, complex* in, int sizex, float scale);
 
 	__global__ void GetXBST(void* out, complex* in, size_t sizex, float threshold, EType::TypeEnum raftDataType, int rollxy);
 	
@@ -70,6 +70,9 @@ extern "C"{
 
 	void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad);
+
+    void filterFBP_Complex(GPU gpus, Filter filter, 
+    float *tomogram, dim3 size, dim3 size_pad, dim3 pad, float pixel);
     
     // void convolution_Real_C2C(GPU gpus, 
     //     float *data, cufftComplex *kernel, 
