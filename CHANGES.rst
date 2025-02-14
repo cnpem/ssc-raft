@@ -1,3 +1,31 @@
+Version 3.0.4 - 2025-02-13
+--------------------------
+*Added:*
+  - Added pixel size as optional input argument on parallel Radon function ``Radon_RT``.
+  - Added an optimized version of conebeam Radon function.
+  - Added subpixel rotation axis correction function. 
+
+*Changed:*
+  - Fixed ``FBP`` units issues. Previously, the function returned a nondimensionalized reconstruction. This change adds dimension (in SI units) to the reconstruction [``1/m``].
+  - Fixed ``FBP`` padding bug. 
+  - Changed ``FBP`` filter R2C/C2R to add padding. 
+  - Fixed parallel radon funtion ``Radon_RT`` units issues. Previously, the function returned a nondimensionalized projection. This change adds dimension (in SI units) to the projection [``1/m``] if the user use as input the pixel size.
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh
+  - ``BST`` angles are hardcoded and not as input
+  - Memory issues on ``EM`` for cone-beam geometry
+  - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
+  - Memory issues on ``FDK``: In reconstruction by slices. Supports only blocks divisible by 8.
+  - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs
+
+*To be done:*
+  - Refactoring ``FDK``
+  - Refactoring ``EM`` conebeam ray tracing
+  - Refactoring ``FST`` frequency domain forward method for parallel beam
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam
+
+
 Version 3.0.3 - 2024-12-11
 --------------------------
 *Changed:*

@@ -32,6 +32,13 @@ extern "C"{
 extern "C" {
     void getCorrectRotationAxis(float* d_tomo_in, float* d_tomo_out,
             dim3 tomo_size, int deviation);
+
+    void getRotAxisCorrectionMultiGPU(int* gpus, int ngpus, 
+    float* tomogram, float axis_offset, 
+    int nrays, int nangles, int nslices);
+
+    void getRotAxisCorrectionGPU(GPU gpus, float *tomogram, 
+    float axis_offset, dim3 tomo_size, int ngpu);
 }
 
 /* Centersino - Find offset for 180 degrees parallel tomogram */

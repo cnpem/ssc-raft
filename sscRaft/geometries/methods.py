@@ -45,7 +45,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
 
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
-        * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
+        * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
 
     References:
@@ -55,7 +55,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
     """
     required = ('gpu',)        
     optional = ('filter','rotation axis offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method', 'detectorPixel[m]')
-    default  = (  'ramp',                     0,        2,             0.0,         0.0,          0,         1.0,    1.0,    'RT',                1.0)
+    default  = (  'ramp',                   0.0,        2,             0.0,         0.0,          0,         1.0,    1.0,    'RT',                1.0)
     
     dic = SetDictionary(dic,required,optional,default)  
 

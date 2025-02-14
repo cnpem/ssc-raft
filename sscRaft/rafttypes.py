@@ -184,6 +184,7 @@ except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_FBP-')
     pass
 
+######## Raft - Rotation Axis Correction ##########
 try:
     libraft.findcentersino.argtypes = [
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
@@ -193,6 +194,27 @@ try:
     libraft.findcentersino.restype = ctypes.c_int    
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_CENTERSINO-')
+    pass
+
+try:
+    libraft.correctRotationAxis.argtypes = [
+        ctypes.c_void_p, ctypes.c_int,
+        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int
+    ]
+    libraft.restype = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_CORRECTION_AXIS-')
+    pass
+
+try:
+    libraft.getRotAxisCorrectionMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int,
+        ctypes.c_void_p, ctypes.c_float, 
+        ctypes.c_int, ctypes.c_int, ctypes.c_int
+    ]
+    libraft.restype = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_CORRECTION_AXIS_SUB_PIXEL-')
     pass
 
 ######## Raft - Rings ##########
@@ -233,16 +255,6 @@ try:
     libraft.getOffsetStitch360GPU.restype  = ctypes.c_int
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_OFFSET_STITCHING360-')
-    pass
-
-try:
-    libraft.correctRotationAxis.argtypes = [
-        ctypes.c_void_p, ctypes.c_void_p,
-        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int
-    ]
-    libraft.restype = None
-except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_CORRECTION_AXIS-')
     pass
 
 ######## Raft - Stitch 360 to 180 ##########

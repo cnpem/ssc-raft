@@ -221,12 +221,12 @@ void getBST(CFG configs, GPU gpus,
     const int sizeimage     = obj_size.x;
     const float reg         = configs.reconstruction_reg;
     const float paganin     = configs.reconstruction_paganin;
-    const int axis_offset   = configs.rotation_axis_offset;
+    const float axis_offset = configs.rotation_axis_offset;
     const int trueblocksize = tomo_size.z;
     const int padding       = configs.tomo.pad.x;
     float pixel             = configs.geometry.obj_pixel_x;
 
-    size_t insize = Nrays * Nangles;
+    size_t insize  = Nrays * Nangles;
     size_t outsize = sizeimage * sizeimage;
 
 
@@ -311,7 +311,7 @@ void getBST(CFG configs, GPU gpus,
 }
 
 void getBST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, int Nangles, int trueblocksize,
-            int sizeimage, int pad0, float reg, float paganin, int filter_type, int offset, float pixel, cufftHandle plan1d,
+            int sizeimage, int pad0, float reg, float paganin, int filter_type, float offset, float pixel, cufftHandle plan1d,
             cufftHandle plan2d, cufftHandle filterplan, cImage* filtersino, cImage* cartesianblock, cImage* polarblock,
             cImage* realpolar, int gpu, cudaStream_t stream = 0) {
     
@@ -394,7 +394,7 @@ void getBSTGPU(CFG configs, float* obj, float* tomo, float* angles, int blockgpu
     int filter_type = configs.reconstruction_filter_type;
     float paganin_reg = configs.reconstruction_paganin;
     float regularization = configs.reconstruction_reg;
-    int axis_offset = configs.rotation_axis_offset;
+    float axis_offset = configs.rotation_axis_offset;
     float pixel          = configs.geometry.obj_pixel_x;
 
     int blocksize = configs.blocksize;

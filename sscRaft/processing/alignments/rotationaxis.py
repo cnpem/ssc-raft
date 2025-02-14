@@ -250,3 +250,43 @@ def correct_rotation_axis_cropped(data: numpy.ndarray, deviation: int) -> numpy.
         proj = proj[:,:,numpy.abs(deviation):-numpy.abs(deviation)]
 
     return proj
+
+
+def correct_rotation_axis_subpixel(data: numpy.ndarray, axis_offset: float, gpus: list = [0]) -> numpy.ndarray:
+    """Corrects the rotation axis of a data according to a deviation value from
+    the center of the data. Subpixel precision.
+
+    The deviation value, with sign, is computed through the sscRaft function ``Centersino()``.
+
+    Args:
+        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        axis_offset (float): Distnce in pixels representing the rotation axis deviation
+
+    Returns:
+        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, lenght] 
+
+    * CPU function
+    """
+    logger.info(f'Applying subpixel rotation axis correction with deviation value: {axis_offset}')
+
+    ngpus    = len(gpus)
+    gpus     = numpy.array(gpus)
+    gpus     = numpy.ascontiguousarray(gpus.astype(numpy.intc))
+    gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
+
+    nrays    = data.shape[-1]
+    nangles  = data.shape[-2]
+    
+    if len(data.shape) == 3:
+        nslices = data.shape[ 0]
+    if len(data.shape) == 2:
+        nslices = 1
+
+    data       = CNICE(data)
+    data_ptr   = data.ctypes.data_as(ctypes.c_void_p)
+
+    libraft.getRotAxisCorrectionMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
+                                         data_ptr, c_float(axis_offset),
+                                         c_int(nrays), c_int(nangles), c_int(nslices))
+
+    return data

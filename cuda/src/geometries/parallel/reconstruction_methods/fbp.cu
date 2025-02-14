@@ -86,7 +86,7 @@ extern "C"{
         int filter_type      = configs.reconstruction_filter_type;
         float paganin_reg    = configs.reconstruction_paganin;
         float regularization = configs.reconstruction_reg;
-        int axis_offset      = configs.rotation_axis_offset;
+        float axis_offset    = configs.rotation_axis_offset;
         float pixel_x        = configs.geometry.obj_pixel_x;
         float pixel_y        = configs.geometry.obj_pixel_y;
 

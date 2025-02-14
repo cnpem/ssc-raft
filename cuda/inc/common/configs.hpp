@@ -141,7 +141,9 @@ typedef struct config
     float rings_lambda, rings_lambda_computed;
 
     /* Rotation Axis Correction */
-    int rotation_axis_offset, rotation_axis_method, rotation_axis_offset_computed;
+    int rotation_axis_method;
+    float rotation_axis_offset, rotation_axis_offset_computed;
+
 
     /* Reconstruction method variables */
     int reconstruction_method;

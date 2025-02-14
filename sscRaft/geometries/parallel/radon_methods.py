@@ -1,6 +1,6 @@
 from ...rafttypes import *
 
-def radon_RT(phantom, angles, gpus, *args):
+def radon_RT(phantom, angles, gpus, pixel = 1.0):
     """ Radon transform using Ray Tracing for a given input phantom 
     on a parallel beam geometry.
     
@@ -8,17 +8,14 @@ def radon_RT(phantom, angles, gpus, *args):
         phantom (ndarray): digital squared input phantom. Axis are (slices, width, lenght) [required]
         angles (float list): list of angles in radians [required]
         gpus (int list): list of GPUs [required]
-        args (float, optional): support domain at the x-axis [default: 1.0] 
+        pixel (float, optional): pixel size in meters [default: 1.0] 
              
     Returns:
         (ndarray): Radon transform 2D or 3D. Axis are (slices, angles, lenght)
 
     * MultiGPU function 
     """
-    if not args:
-        a = 1.0
-    else:
-        a = args[0] #numpy.sqrt(2.0)
+    a = 1.0
 
     ngpus      = len(gpus)
     gpus       = numpy.array(gpus)
@@ -31,7 +28,6 @@ def radon_RT(phantom, angles, gpus, *args):
         nslices = phantom.shape[0]
 
     nrays       = phantom.shape[2]
-    # rays        = numpy.ceil( a * nrays ).astype(numpy.intc)
 
     _, img_sizey, img_sizex   = phantom.shape
     
@@ -58,6 +54,8 @@ def radon_RT(phantom, angles, gpus, *args):
     # dt = (2.0*a)/(rays-1)
     # itmin = ( numpy.ceil( (-1 + a)/dt) ).astype(numpy.intc) 
     # itmax = ( numpy.ceil( ( 1 + a)/dt) ).astype(numpy.intc) 
+    
+    tomogram = tomogram * nrays * pixel / 2
     
     logger.info(f'Finished Radon RT method')
     return tomogram

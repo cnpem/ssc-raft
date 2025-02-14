@@ -9,6 +9,7 @@
 #include "common/operations.hpp"
 #include "common/types.hpp"
 #include "processing/processing.hpp"
+#include "common/opt.hpp"
 
 extern "C"{
     __global__ void KCrossFrame16(complex* f, complex* g, const uint16_t* frame0, const uint16_t* frame1, const uint16_t* dark, const uint16_t* flat, size_t sizex)
@@ -125,7 +126,32 @@ extern "C"{
         }
     }
 
-    int getCentersino(float* frame0, float* frame180, 
+    float abs2Interp(complex* data,
+            size_t sizex, size_t sizey,
+            float posx, float posy) {
+        const int x0 = floor(posx);
+        const int x1 = x0 + 1;
+        const int y0 = floor(posy);
+        const int y1 = y0 + 1;
+
+        float v00 = 0.0f, v10 = 0.0f, v01 = 0.0f, v11 = 0.0f;
+
+        if (y0 >= 0 && y0 < sizey && x0 >= 0 && x0 < sizex)  v00 = data[y0 * sizex + x0].abs2();
+        if (y0 >= 0 && y0 < sizey && x0 >= 0 && x0 < sizex)  v01 = data[y0 * sizex + x1].abs2();
+        if (y0 >= 0 && y0 < sizey && x0 >= 0 && x0 < sizex)  v10 = data[y1 * sizex + x0].abs2();
+        if (y0 >= 0 && y0 < sizey && x0 >= 0 && x0 < sizex)  v11 = data[y1 * sizex + x1].abs2();
+
+        const float interp =
+            (float((x1 - posx) * (y1 - posy)) / float((x1 - x0) * (y1 - y0))) * v00 +
+            (float((x1 - posx) * (y0 - posy)) / float((x1 - x0) * (y0 - y1))) * v10 +
+            (float((x0 - posx) * (y1 - posy)) / float((x0 - x1) * (y1 - y0))) * v01 +
+            (float((x0 - posx) * (y0 - posy)) / float((x0 - x1) * (y1 - y0))) * v11;
+
+        return interp;
+    }
+
+
+    int getCentersino_old(float* frame0, float* frame180, 
     float* dark, float* flat, 
     size_t sizex, size_t sizey)
     {
@@ -187,6 +213,85 @@ extern "C"{
             
         return -posx/2;
     }
+
+    int getCentersino(float* frame0, float* frame180, 
+    float* dark, float* flat, 
+    size_t sizex, size_t sizey)
+    {
+
+        dim3 blocks((sizex+127)/128,sizey,1);
+        dim3 threads(fminf(sizex,128),1,1);
+
+        cImage f(sizex,sizey),g(sizex,sizey);
+
+        int n[] = {(int)sizey};
+        int inembed[] = {(int)sizey};
+
+        cufftHandle plan, plan2;
+        cufftPlan1d(&plan, sizex, CUFFT_C2C, sizey);
+        cufftPlanMany(&plan2, 1, n, inembed, sizex, 1, inembed, sizex, 1, CUFFT_C2C, sizex);
+
+        KCrossFrame<<<blocks,threads>>>(f.gpuptr, g.gpuptr, frame0, frame180, dark, flat, sizex);
+        
+        cufftExecC2C(plan, f.gpuptr, f.gpuptr, CUFFT_FORWARD);
+        cufftExecC2C(plan, g.gpuptr, g.gpuptr, CUFFT_FORWARD);
+
+        cufftExecC2C(plan2, f.gpuptr, f.gpuptr, CUFFT_FORWARD);
+        cufftExecC2C(plan2, g.gpuptr, g.gpuptr, CUFFT_FORWARD);
+
+        KCrossCorrelation<<<blocks,threads>>>(f.gpuptr, g.gpuptr, sizex);
+
+        cufftExecC2C(plan, f.gpuptr, f.gpuptr, CUFFT_INVERSE);
+        cufftExecC2C(plan2, f.gpuptr, f.gpuptr, CUFFT_INVERSE);
+        
+        f.LoadFromGPU();
+        cudaDeviceSynchronize();
+
+        cufftDestroy(plan);
+        cufftDestroy(plan2);
+        
+        float maxx = 0;
+        int posx = 0;
+        const size_t irange = (sizex>>2)<<2;
+
+        float bestpos = 0.0f;
+
+        const float di = 0.1f;
+        //const size_t irange = size_t(sizex * (1.0f/di));
+        for(size_t j=0; j<sizey; j++) {
+
+            for(float i=0; i < irange; ++i) {
+                const float bbs = abs2Interp(f.cpuptr, sizex, sizey, i * di, j);
+                if(bbs > maxx) {
+                    maxx = bbs;
+                    posx = int(round(i * di));
+                    bestpos = i * di;
+                }
+            }
+            printf("best I could make is %d %f\n", posx, bestpos);
+            for(size_t i=0; i<irange; i+=1){
+                float bbs = f.cpuptr[j*sizex + i].abs2();
+                if(bbs > maxx)
+                {
+                    maxx = bbs;
+                    posx = int(i);
+                }
+            }
+            for(size_t i=irange; i<sizex; i++){
+                float bbs = f.cpuptr[j*sizex + i].abs2();
+                if(bbs > maxx){
+                    maxx = bbs;
+                    posx = int(i);
+                }
+            }
+
+            printf("the old got %d\n", posx);
+        }
+        if(posx > (float)sizex/2)
+            posx -= sizex;
+        return -posx/2;
+    }
+
 
     __global__ void KCorrectRotationAxis(float* tomoin, float* tomoout,
             int sizex, int sizey, int sizez, int deviation) {
@@ -266,4 +371,183 @@ extern "C"{
         Image2D<float> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);
         return getCentersino(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
     }
+}
+
+__global__ void rot_axis_correction_kernel(complex *kernel, float axis_offset, dim3 size)
+{
+    size_t i = blockIdx.x*blockDim.x + threadIdx.x;
+    size_t j = blockIdx.y*blockDim.y + threadIdx.y;
+    size_t k = blockIdx.z*blockDim.z + threadIdx.z;
+
+    size_t index = IND(i,j,k,size.x,size.y);
+    
+    if ( i >= size.x  || (j >= size.y) ) return;
+
+    float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * axis_offset * i;
+
+    kernel[index] *= exp1j(- expoent );
+}
+
+extern "C"{
+    void getRotAxisCorrection(GPU gpus, float *tomogram, 
+    float axis_offset, dim3 tomo_size)
+    {
+        /* Projection data sizes */
+        int padx    = 0;
+        int nrays   = tomo_size.x * ( 1.0 + padx );
+        int nangles = tomo_size.y;
+        int nslices = tomo_size.z;
+
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( nrays   / TPBX ) + 1,
+                        (int)ceil( nangles / TPBY ) + 1,
+                        (int)ceil( nslices / TPBZ ) + 1);
+        
+        dim3 threadsPerBlockFFT(TPBX,TPBY,1);
+        dim3 gridBlockFFT( (int)ceil( nrays   / threadsPerBlock.x ) + 1, 
+                           (int)ceil( nangles / threadsPerBlock.y ) + 1, 
+                           1);
+
+        dim3 fft_size = dim3( nrays / 2 + 1, nangles, 1 );
+        size_t nfft   = opt::get_total_points(fft_size);
+        size_t npad   = nrays * nangles * nslices;
+
+		cufftPlan1d(&gpus.mplan , nrays, CUFFT_R2C, nangles);
+		cufftPlan1d(&gpus.mplanI, nrays, CUFFT_C2R, nangles);
+
+        cufftComplex *fft = opt::allocGPU<cufftComplex>(nfft);
+        float *dataPadded = opt::allocGPU<float>(npad);
+
+        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, tomo_size,
+                                                    dim3(padx,0,0), 0.0f);
+
+        size_t offset; 
+        for( int k = 0; k < nslices; k++){  
+            
+            offset = (size_t)k * nrays * nangles;
+
+            HANDLE_FFTERROR(cufftExecR2C(gpus.mplan, dataPadded + offset, fft));
+                    
+            rot_axis_correction_kernel<<<gridBlockFFT,threadsPerBlockFFT>>>((complex*)fft, axis_offset, fft_size);
+
+            HANDLE_FFTERROR(cufftExecC2R(gpus.mplanI, fft, dataPadded + offset));
+
+        }
+        
+        opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, 
+                                                            tomo_size, dim3(padx,0,0));
+
+        float scale = (float)(nrays);
+
+        opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, tomo_size, scale);
+
+        HANDLE_ERROR(cudaFree(dataPadded));
+        HANDLE_ERROR(cudaFree(fft));
+		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
+        HANDLE_FFTERROR(cufftDestroy(gpus.mplanI));
+
+        HANDLE_ERROR(cudaDeviceSynchronize());   
+    }
+}
+
+extern "C"{   
+
+    void getRotAxisCorrectionGPU(GPU gpus, float *tomogram, 
+    float axis_offset, dim3 tomo_size, int ngpu)
+    {
+        HANDLE_ERROR(cudaSetDevice(ngpu));
+
+        /* Projection data sizes */
+        int nrays   = tomo_size.x;
+        int nangles = tomo_size.y;
+        int sizez   = tomo_size.z;
+
+        int i; int blocksize = 1;
+
+        int ind_block = (int)ceil( (float) sizez / blocksize );
+
+        float *dtomo  = opt::allocGPU<float>((size_t) nrays * nangles * blocksize);
+
+        /* Loop for each batch of size 'batch' in threads */
+		int ptr = 0, subblock; size_t ptr_block_tomo = 0;
+
+        for (i = 0; i < ind_block; i++){
+
+			subblock       = min(sizez - ptr, blocksize);
+
+			ptr_block_tomo = (size_t)nrays * nangles * ptr;
+
+			/* Update pointer */
+			ptr = ptr + subblock;
+			
+            opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
+                                (size_t)nrays * nangles * subblock);
+
+            getRotAxisCorrection(gpus, dtomo, axis_offset, 
+                                dim3(nrays, nangles, subblock));  /* Tomogram size */
+
+            opt::GPUToCPU<float>(tomogram + ptr_block_tomo, dtomo, 
+                                (size_t)nrays * nangles * subblock);
+
+        }
+        HANDLE_ERROR(cudaDeviceSynchronize());
+
+        HANDLE_ERROR(cudaFree(dtomo));
+    }
+
+    void getRotAxisCorrectionMultiGPU(int* gpus, int ngpus, 
+    float* tomogram, float axis_offset, 
+    int nrays, int nangles, int nslices)
+    {
+        int i, Maxgpudev;
+
+		/* Multiples devices */
+		HANDLE_ERROR(cudaGetDeviceCount(&Maxgpudev));
+
+		/* If devices input are larger than actual devices on GPU, exit */
+		for(i = 0; i < ngpus; i++) 
+			assert(gpus[i] < Maxgpudev && "Invalid device number.");
+
+		GPU gpu_parameters;
+
+        dim3 tomo_size = dim3(nrays, nangles, nslices);
+
+        setGPUParameters(&gpu_parameters, tomo_size, ngpus, gpus);
+
+		int subvolume = (nslices + ngpus - 1) / ngpus;
+		int subblock, ptr = 0; 
+
+		if (ngpus == 1){ /* 1 device */
+
+			getRotAxisCorrectionGPU(gpu_parameters, tomogram, axis_offset, tomo_size, gpus[0]);
+
+		}else{
+		/* Launch async Threads for each device.
+			Each device solves a block of 'nrays * nangles' size.
+		*/
+			// See future c++ async launch
+			std::vector<std::future<void>> threads = {};
+            threads.reserve(ngpus);
+
+			for (i = 0; i < ngpus; i++){
+				
+				subblock   = min(nslices - ptr, subvolume);
+
+				threads.push_back( std::async( std::launch::async, 
+                    getRotAxisCorrectionGPU, 
+                    gpu_parameters, 
+                    tomogram + (size_t)nrays * nangles * ptr, 
+                    axis_offset,
+                    dim3(nrays, nangles, subblock),
+                    gpus[i]));
+
+                /* Update pointer */
+				ptr = ptr + subblock;		
+
+			}
+			for (i = 0; i < ngpus; i++)
+				threads[i].get();
+		}
+    }
+
 }

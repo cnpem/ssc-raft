@@ -175,7 +175,7 @@ extern "C"{
                 
         /* Set Reconstruction method variables */
         configs->reconstruction_filter_type  = parameters_int[7];  /* Reconstruction Filter type */
-        configs->rotation_axis_offset        = parameters_int[8];  /* Rotation Axis offset */
+        configs->rotation_axis_offset        = parameters_float[6]; /* Rotation Axis offset */
         configs->geometry.energy             = parameters_float[2]; /* Energy parameter in eV*/
         configs->geometry.z2x                = parameters_float[3]; /* Distance sample to detector in x direction [meters]; z2x = z2y in PARALLEL geometry;*/
         configs->geometry.z2y                = parameters_float[3]; /* Distance sample to detector in y direction [meters]; z2x = z2y in PARALLEL geometry;*/
@@ -260,7 +260,7 @@ extern "C"{
                 
         /* Set Reconstruction method variables */
         configs->reconstruction_filter_type  = parameters_int[7];  /* Reconstruction Filter type */
-        configs->rotation_axis_offset        = parameters_int[8];  /* Rotation Axis offset */
+        configs->rotation_axis_offset        = parameters_float[6]; /* Rotation Axis offset */
 
         configs->geometry.energy             = parameters_float[2]; /* Energy parameter in eV*/
         configs->geometry.z2x                = parameters_float[3]; /* Distance sample to detector in x direction [meters]; z2x = z2y in PARALLEL geometry;*/

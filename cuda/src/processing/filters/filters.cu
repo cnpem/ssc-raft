@@ -18,14 +18,9 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         size_t index = IND(i,j,k,size.x,size.y);
         
-        if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
-        
-        float w = 2.0f * fminf( i, size.x - i ) / ((float)size.x );
-
         if ( i >= size.x || j >= size.y || k >= size.z) return;
 
         float w = fminf( i, size.x - i ) / (float)size.x;
-        //float w = 2.0 * i / (float)size.x;
 
         float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
 
@@ -62,7 +57,6 @@ __global__ void fbp_filtering_C2C(Filter filter,
         dim3 gridBlock( (int)ceil( size.x / threadsPerBlock.x ) + 1, 
                         (int)ceil( size.y / threadsPerBlock.y ) + 1, 
                         1);
-
 
         HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, data, data, CUFFT_FORWARD));
                 
@@ -123,7 +117,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 
-	void filterFBP_old(GPU gpus, Filter filter, 
+	void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
 	{	
         /* int dim = { 1, 2 }

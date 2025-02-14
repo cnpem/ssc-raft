@@ -28,7 +28,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
-        * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
+        * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
     """        
     ngpus    = len(gpus)
@@ -80,12 +80,12 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
 
     param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, filter_type, offset, blocksize]
+                     padx, pady, padz, filter_type, 0, blocksize]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
 
-    param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely]
+    param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely, offset]
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
@@ -126,7 +126,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
-        * ``dic['rotation axis offset']`` (int,optional): Rotation axis deviation value [Default: 0]
+        * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
     References:
 
@@ -181,12 +181,12 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
     angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
 
     param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, filter_type, offset, blocksize]
+                     padx, pady, padz, filter_type, 0, blocksize]
     param_int     = numpy.array(param_int)
     param_int     = CNICE(param_int,numpy.int32)
     param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
 
-    param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely]
+    param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely, offset]
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
