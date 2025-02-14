@@ -214,7 +214,7 @@ extern "C"{
         return -posx/2;
     }
 
-    int getCentersino(float* frame0, float* frame180, 
+    float getCentersino(float* frame0, float* frame180, 
     float* dark, float* flat, 
     size_t sizex, size_t sizey)
     {
@@ -256,7 +256,7 @@ extern "C"{
 
         float bestpos = 0.0f;
 
-        const float di = 0.1f;
+        const float di = 0.01f;
         //const size_t irange = size_t(sizex * (1.0f/di));
         for(size_t j=0; j<sizey; j++) {
 
@@ -268,28 +268,28 @@ extern "C"{
                     bestpos = i * di;
                 }
             }
-            printf("best I could make is %d %f\n", posx, bestpos);
-            for(size_t i=0; i<irange; i+=1){
-                float bbs = f.cpuptr[j*sizex + i].abs2();
-                if(bbs > maxx)
-                {
-                    maxx = bbs;
-                    posx = int(i);
-                }
-            }
-            for(size_t i=irange; i<sizex; i++){
-                float bbs = f.cpuptr[j*sizex + i].abs2();
-                if(bbs > maxx){
-                    maxx = bbs;
-                    posx = int(i);
-                }
-            }
+            // printf("best I could make is %d %f\n", posx, bestpos);
+            // for(size_t i=0; i<irange; i+=1){
+            //     float bbs = f.cpuptr[j*sizex + i].abs2();
+            //     if(bbs > maxx)
+            //     {
+            //         maxx = bbs;
+            //         posx = int(i);
+            //     }
+            // }
+            // for(size_t i=irange; i<sizex; i++){
+            //     float bbs = f.cpuptr[j*sizex + i].abs2();
+            //     if(bbs > maxx){
+            //         maxx = bbs;
+            //         posx = int(i);
+            //     }
+            // }
 
-            printf("the old got %d\n", posx);
+            // printf("the old got %d\n", posx);
         }
-        if(posx > (float)sizex/2)
-            posx -= sizex;
-        return -posx/2;
+        if(bestpos > (float)sizex/2.0f)
+            bestpos -= (float)sizex;
+        return -bestpos/2.0f;
     }
 
 
@@ -365,7 +365,7 @@ extern "C"{
         return getCentersino16(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
     }
 
-    int findcentersino(float* frame0, float* frame180,
+    float findcentersino(float* frame0, float* frame180,
     float* dark, float* flat, int sizex, int sizey)
     {
         Image2D<float> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);

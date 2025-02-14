@@ -39,7 +39,7 @@ def Centersino(frame0, frame1, flat, dark):
         offset = libraft.findcentersino(frame0ptr, frame1ptr, darkptr, flatptr, 
                                         ctypes.c_int(nrays), ctypes.c_int(nslices))
         
-        return int(offset)
+        return offset
 
 def correct_rotation_axis360(data: numpy.ndarray, dic: dict) -> numpy.ndarray:
     """CPU (python) function: Corrects the rotation axis of a sample measured on more then 180 degrees.

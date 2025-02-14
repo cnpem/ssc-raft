@@ -191,7 +191,7 @@ try:
         ctypes.c_int, ctypes.c_int
     ]
 
-    libraft.findcentersino.restype = ctypes.c_int    
+    libraft.findcentersino.restype = ctypes.c_float    
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_CENTERSINO-')
     pass

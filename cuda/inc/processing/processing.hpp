@@ -44,10 +44,10 @@ extern "C" {
 /* Centersino - Find offset for 180 degrees parallel tomogram */
 extern "C"{
 
-    int findcentersino(float* frame0, float* frame180, 
+    float findcentersino(float* frame0, float* frame180, 
     float* dark, float* flat, int sizex, int sizey);
 
-    int getCentersino(float* frame0, float* frame180, 
+    float getCentersino(float* frame0, float* frame180, 
     float* dark, float* flat, size_t sizex, size_t sizey);
 }
 
