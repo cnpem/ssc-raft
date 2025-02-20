@@ -11,14 +11,20 @@ extern "C"{
     dim3 obj_size, dim3 tomo_size)
     {
         int i, j, k;
-        float x, y;
+        float x, y, scale;
         int t_index, angle_index;
         float t, sum;  
         // float cosk, sink;
 
         int nrays   = tomo_size.x;
         int nangles = tomo_size.y;
-  
+
+        if ( angles[nangles - 1] > float(M_PI) ){
+            scale = float(M_PI) / angles[nangles - 1];
+        }else{  
+            scale = 1.0f;
+        }
+
         // float xmin = -1.0;
         // float ymin = -1.0;
         // float dx   = 2.0 / (obj_size.x - 1);
@@ -72,7 +78,7 @@ extern "C"{
                 
             }
         
-            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = sum;
+            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = sum * scale;
         }
     }
 

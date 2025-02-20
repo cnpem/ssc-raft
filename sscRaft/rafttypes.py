@@ -159,7 +159,7 @@ except:
     pass
 
 try:
-    # FBP 
+    # BST 
     libraft.getBSTMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
@@ -172,7 +172,7 @@ except:
     pass
 
 try:
-    # BST 
+    # FBP 
     libraft.getFBPMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
@@ -184,14 +184,37 @@ except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_FBP-')
     pass
 
+try:
+    # FBP Filter only 
+    libraft.getFilterLowPassMultiGPU.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, 
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+    ]
+    
+    libraft.getFilterLowPassMultiGPU.restype  = None
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_LOW_PASS-')
+    pass
+
 ######## Raft - Rotation Axis Correction ##########
+try:
+    libraft.findcentersino_subpixel.argtypes = [
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_int, ctypes.c_int
+    ]
+
+    libraft.findcentersino_subpixel.restype = ctypes.c_float    
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_CENTERSINO_SUBPIXEL-')
+    pass
+
 try:
     libraft.findcentersino.argtypes = [
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
         ctypes.c_int, ctypes.c_int
     ]
 
-    libraft.findcentersino.restype = ctypes.c_float    
+    libraft.findcentersino.restype = ctypes.c_int    
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_CENTERSINO-')
     pass
@@ -210,7 +233,7 @@ try:
     libraft.getRotAxisCorrectionMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int,
         ctypes.c_void_p, ctypes.c_float, 
-        ctypes.c_int, ctypes.c_int, ctypes.c_int
+        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int
     ]
     libraft.restype = None
 except:

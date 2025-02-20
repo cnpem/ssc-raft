@@ -1,35 +1,21 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
 from ..rafttypes import *
 from ..processing.io import *
-from .parallel.fbp_methods import *
-from .parallel.em_methods import *
 
-def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
-    """Computes the reconstruction of a parallel beam tomogram using the Filtered Backprojection (RT) method 
-    or the Backprojection Slice Theorem (BST) method [1]_.
+def lowpass(tomogram, dic = None, **kwargs):
+    """Low pass filter of the Filtered BackProjection method.
     
+
     Args:
         tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
-        angles (float list, optional):  List of angles in radians [default: None]
-        obj (ndarray, optional): Reconstructed 3D object array [default: None]
         dic (dict, optional): Dictionary with the experiment info [default: None
 
     Returns:
-        (ndarray): Reconstructed sample 3D object. The axes are [z, y, x]
-
-    * One or MultiGPUs. 
-    * Calls function ``bstGPU()``
-    * Calls function ``fbpGPU()``
-
+        (ndarray): Filtered tomogram. The axes are [slices, angles, lenght]
 
     Dictionary parameters:
 
         * ``dic['gpu']`` (ndarray): List of gpus  [required]
-        * ``dic['angles[rad]']`` (list,optional): List of angles in radians [Default: None]
-        * ``dic['method']`` (str,optional):  [Default: 'RT']
-
-             #. Options = (\'RT\',\'BST\')
-
         * ``dic['filter']`` (str,optional): Filter type [Default: \'ramp\']
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
@@ -44,41 +30,63 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
 
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
-        * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
-    References:
-
-        .. [1] Miqueles, X. E. and Koshev, N. and Helou, E. S. (2018). A Backprojection Slice Theorem for Tomographic Reconstruction. IEEE Transactions on Image Processing, 27(2), p. 894-906. DOI: https://doi.org/10.1109/TIP.2017.2766785.
-    
     """
     required = ('gpu',)        
-    optional = ('filter','rotation axis offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method','detectorPixel[m]')
-    default  = (  'ramp',                   0.0,        2,             0.0,         0.0,          0,         1.0,    1.0,    'RT',               1.0)
+    optional = ('filter','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','detectorPixel[m]')
+    default  = (  'ramp',        2,             0.0,         0.0,          0,         1.0,    1.0,               1.0)
     
-    dic = SetDictionary(dic,required,optional,default)  
+    dic      = SetDictionary(dic,required,optional,default)  
 
-    method                = dic['method']
-    gpus                  = dic['gpu']
+    ngpus    = len(dic['gpu'])
+    gpus     = numpy.array(dic['gpu'])
+    gpus     = numpy.ascontiguousarray(gpus.astype(numpy.intc))
+    gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
-    if method == 'RT':
-        try:
-            angles = dic['angles[rad]']
-        except:
-            if angles is None:
-                logger.error(f'Missing angles list!! Finishing run...') 
-                raise ValueError(f'Missing angles list!!')
-
-        output = fbpGPU( tomogram, angles, gpus, dic, obj=obj)
-
-        return output
+    nrays    = tomogram.shape[-1]
+    nangles  = tomogram.shape[-2]
     
-    if method == 'BST':
+    if len(tomogram.shape) == 2:
+        nslices = 1
+    else:
+        nslices = tomogram.shape[0]
+    
+    filter_type    = FilterNumber(dic['filter'])
+    beta_delta     = dic['beta/delta']
+    regularization = dic['regularization']
+    offset         = 0.0
+    blocksize      = dic['blocksize']
+    energy         = dic['energy[eV]']
+    z2             = dic['z2[m]']
+    pixelx, pixely = dic['detectorPixel[m]'],dic['detectorPixel[m]']
 
-        angles = numpy.linspace(0.0, numpy.pi, tomogram.shape[-2], endpoint=False)
+    if beta_delta != 0.0:
+        beta_delta = 1.0 / beta_delta
+    else:
+        beta_delta     = 0.0
+        z2             = 0.0
+        energy         = 1.0
 
-        output = bstGPU( tomogram, angles, gpus, dic, obj=obj)
+    padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
-        return output
+    tomogram     = CNICE(tomogram) 
+    tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
+
+    param_int     = [nrays, nangles, nslices, nrays, 
+                     padx, pady, padz, filter_type, 0, blocksize]
+    param_int     = numpy.array(param_int)
+    param_int     = CNICE(param_int,numpy.int32)
+    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+
+    param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely, offset]
+    param_float     = numpy.array(param_float)
+    param_float     = CNICE(param_float,numpy.float32)
+    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+
+    libraft.getFilterLowPassMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
+                                    tomogram_ptr, param_float_ptr, param_int_ptr)
+    
+    return tomogram
 
 def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
     """ Expectation maximization (EM) for 3D tomographic reconstructions for parallel, 

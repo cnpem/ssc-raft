@@ -73,6 +73,9 @@ extern "C"{
 
     void filterFBP_Complex(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad, float pixel);
+
+    void getFilterLowPassMultiGPU(int* gpus, int ngpus, 
+    float* tomogram, float *paramf, int *parami);
     
     // void convolution_Real_C2C(GPU gpus, 
     //     float *data, cufftComplex *kernel, 

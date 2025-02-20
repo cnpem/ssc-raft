@@ -4,7 +4,7 @@ import numpy
 import ctypes
 
 def Centersino(frame0, frame1, flat, dark):
-        """ Find the offset of a 180 tomogam to correctly align it, computed by cross correlation.
+        """ Find the offset of a 180 tomogram to correctly align it, computed by cross correlation.
         It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
         on the intensity data :math:`I` inside function
 
@@ -18,7 +18,7 @@ def Centersino(frame0, frame1, flat, dark):
             dark (ndarray): Dark
 
         Returns:
-            (int): offset
+            (int): Offset
         """        
 
         nrays = frame0.shape[-1]
@@ -37,6 +37,44 @@ def Centersino(frame0, frame1, flat, dark):
         flatptr = flat.ctypes.data_as(ctypes.c_void_p)
 
         offset = libraft.findcentersino(frame0ptr, frame1ptr, darkptr, flatptr, 
+                                        ctypes.c_int(nrays), ctypes.c_int(nslices))
+        
+        return offset
+
+def Centersino_subpixel(frame0, frame1, flat, dark):
+        """ Find the subpixel offset of a 180 tomogram to correctly align it, computed by cross correlation.
+        It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
+        on the intensity data :math:`I` inside function
+
+        .. math:: 
+            -\log( \\frac{I - d_{0}}{I_{0}} ) 
+
+        Args:
+            frame0 (ndarray): First frame of intensity data obtained by detector
+            frame1 (ndarray): Last frame of intensity data obtained by detector
+            flat (ndarray): Flat
+            dark (ndarray): Dark
+
+        Returns:
+            (float): Subpixel offset
+        """        
+
+        nrays = frame0.shape[-1]
+        nslices = frame0.shape[-2]
+
+        frame0 = numpy.ascontiguousarray(frame0.astype(numpy.float32))
+        frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
+
+        frame1 = numpy.ascontiguousarray(frame1.astype(numpy.float32))
+        frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
+
+        dark = numpy.ascontiguousarray(dark.astype(numpy.float32))
+        darkptr = dark.ctypes.data_as(ctypes.c_void_p)
+
+        flat = numpy.ascontiguousarray(flat.astype(numpy.float32))
+        flatptr = flat.ctypes.data_as(ctypes.c_void_p)
+
+        offset = libraft.findcentersino_subpixel(frame0ptr, frame1ptr, darkptr, flatptr, 
                                         ctypes.c_int(nrays), ctypes.c_int(nslices))
         
         return offset
@@ -252,7 +290,7 @@ def correct_rotation_axis_cropped(data: numpy.ndarray, deviation: int) -> numpy.
     return proj
 
 
-def correct_rotation_axis_subpixel(data: numpy.ndarray, axis_offset: float, gpus: list = [0]) -> numpy.ndarray:
+def correct_rotation_axis_subpixel(data: numpy.ndarray, axis_offset: float, gpus: list = [0], blocksize: int = 0) -> numpy.ndarray:
     """Corrects the rotation axis of a data according to a deviation value from
     the center of the data. Subpixel precision.
 
@@ -260,7 +298,7 @@ def correct_rotation_axis_subpixel(data: numpy.ndarray, axis_offset: float, gpus
 
     Args:
         data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
-        axis_offset (float): Distnce in pixels representing the rotation axis deviation
+        axis_offset (float): Distance in pixels representing the rotation axis deviation
 
     Returns:
         (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, lenght] 
@@ -282,11 +320,72 @@ def correct_rotation_axis_subpixel(data: numpy.ndarray, axis_offset: float, gpus
     if len(data.shape) == 2:
         nslices = 1
 
-    data       = CNICE(data)
-    data_ptr   = data.ctypes.data_as(ctypes.c_void_p)
+    data     = CNICE(data)
+    data_ptr = data.ctypes.data_as(ctypes.c_void_p)
 
     libraft.getRotAxisCorrectionMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
                                          data_ptr, c_float(axis_offset),
-                                         c_int(nrays), c_int(nangles), c_int(nslices))
+                                         c_int(nrays), c_int(nangles), c_int(nslices),
+                                         c_int(blocksize))
+
+    return data
+
+
+def Centersino_block(frame0, frame1, flat, dark, block_of_slices):
+    """ Find the offset by block of slices of a 180 tomogram 
+    to correctly align it, computed by cross correlation.
+    It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
+    on the intensity data :math:`I` inside function
+
+    .. math:: 
+        -\log( \\frac{I - d_{0}}{I_{0}} ) 
+
+    Args:
+        frame0 (ndarray): First frame of intensity data obtained by detector. The axes are [slices, lenght]
+        frame1 (ndarray): Last frame of intensity data obtained by detector - The axes are [slices, lenght]
+        flat (ndarray): Flat. The axes are [slices, lenght]
+        dark (ndarray): Dark. The axes are [slices, lenght]
+        block_of_slices (int): Number of slices in a block
+
+    Returns:
+        (int list): List of offset values
+    """   
+    
+    nslices =  frame0.shape[0]
+
+    rotation_axis = []
+
+    for i in range(0,nslices,block_of_slices):
+    
+        deviation = Centersino(frame0[i:i+block_of_slices], frame1[i:i+block_of_slices], flat[i:i+block_of_slices], dark[i:i+block_of_slices])
+    
+        rotation_axis.append(deviation)
+        
+    return rotation_axis
+
+
+def correct_rotation_axis_block(data, rotation_axis_list, block_of_slices):
+    """Corrects the rotation axis by blocks of a data according to a deviation value defined 
+    by the number of pixels translated form the center of the data.
+
+    The rotation_axis_list, with signs, is computed through the sscRaft function ``Centersino_block()``.
+
+    Args:
+        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        rotation_axis_list (int list): List of rotation axis deviation by blocks
+        block_of_slices (int): Number of slices in a block
+
+    Returns:
+        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, lenght] 
+
+    * CPU function
+    """
+    nslices = data.shape[0]
+
+    j = 0
+    for i in range(0,nslices,block_of_slices):
+
+        data[i:i+block_of_slices] = correct_rotation_axis_cropped(data[i:i+block_of_slices], rotation_axis_list[j])
+        j = j + 1
 
     return data

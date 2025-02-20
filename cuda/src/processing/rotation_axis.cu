@@ -128,7 +128,8 @@ extern "C"{
 
     float abs2Interp(complex* data,
             size_t sizex, size_t sizey,
-            float posx, float posy) {
+            float posx, float posy) 
+    {
         const int x0 = floor(posx);
         const int x1 = x0 + 1;
         const int y0 = floor(posy);
@@ -151,7 +152,73 @@ extern "C"{
     }
 
 
-    int getCentersino_old(float* frame0, float* frame180, 
+    float abs2InterpCubic(complex* data,
+            size_t sizex, size_t sizey,
+            float posx, float posy) 
+    {
+        // Lagrange polinomials
+        const int x0 = floor(posx);
+        const int x1 = x0 + 1;
+        const int x2 = x0 + 2;
+        const int x3 = x0 + 3;
+        const int y0 = floor(posy);
+        const int y1 = y0 + 1;
+        const int y2 = y0 + 2;
+        const int y3 = y0 + 3;
+
+        float v00 = 0.0f, v10 = 0.0f, v20 = 0.0f, v30 = 0.0f;
+        float v01 = 0.0f, v11 = 0.0f, v21 = 0.0f, v31 = 0.0f;
+        float v02 = 0.0f, v12 = 0.0f, v22 = 0.0f, v32 = 0.0f;
+        float v03 = 0.0f, v13 = 0.0f, v23 = 0.0f, v33 = 0.0f;
+
+        if (y0 >= 0 && y0 < sizey && x0 >= 0 && x0 < sizex)  v00 = data[y0 * sizex + x0].abs2();
+        if (y0 >= 0 && y0 < sizey && x1 >= 0 && x1 < sizex)  v01 = data[y0 * sizex + x1].abs2();
+        if (y0 >= 0 && y0 < sizey && x2 >= 0 && x2 < sizex)  v02 = data[y0 * sizex + x2].abs2();
+        if (y0 >= 0 && y0 < sizey && x3 >= 0 && x3 < sizex)  v03 = data[y0 * sizex + x3].abs2();
+
+        if (y1 >= 0 && y1 < sizey && x0 >= 0 && x0 < sizex)  v10 = data[y1 * sizex + x0].abs2();
+        if (y1 >= 0 && y1 < sizey && x1 >= 0 && x1 < sizex)  v11 = data[y1 * sizex + x1].abs2();
+        if (y1 >= 0 && y1 < sizey && x2 >= 0 && x2 < sizex)  v12 = data[y1 * sizex + x2].abs2();
+        if (y1 >= 0 && y1 < sizey && x3 >= 0 && x3 < sizex)  v13 = data[y1 * sizex + x3].abs2();
+
+        if (y2 >= 0 && y2 < sizey && x0 >= 0 && x0 < sizex)  v20 = data[y2 * sizex + x0].abs2();
+        if (y2 >= 0 && y2 < sizey && x1 >= 0 && x1 < sizex)  v21 = data[y2 * sizex + x1].abs2();
+        if (y2 >= 0 && y2 < sizey && x2 >= 0 && x2 < sizex)  v22 = data[y2 * sizex + x2].abs2();
+        if (y2 >= 0 && y2 < sizey && x3 >= 0 && x3 < sizex)  v23 = data[y2 * sizex + x3].abs2();
+
+        if (y3 >= 0 && y3 < sizey && x0 >= 0 && x0 < sizex)  v30 = data[y3 * sizex + x0].abs2();
+        if (y3 >= 0 && y3 < sizey && x1 >= 0 && x1 < sizex)  v31 = data[y3 * sizex + x1].abs2();
+        if (y3 >= 0 && y3 < sizey && x2 >= 0 && x2 < sizex)  v32 = data[y3 * sizex + x2].abs2();
+        if (y3 >= 0 && y3 < sizey && x3 >= 0 && x3 < sizex)  v33 = data[y3 * sizex + x3].abs2();
+
+
+        const float interp =
+            (float((x1 - posx) * (x2 - posx) * (x3 - posx) * (y1 - posy) * (y2 - posy) * (y3 - posy) ) / float((x1 - x0) * (x2 - x0) * (x3 - x0) * (y1 - y0) * (y2 - y0) * (y3 - y0) )) * v00 +
+            (float((x1 - posx) * (x2 - posx) * (x3 - posx) * (y0 - posy) * (y2 - posy) * (y3 - posy) ) / float((x1 - x0) * (x2 - x0) * (x3 - x0) * (y0 - y1) * (y2 - y1) * (y3 - y1) )) * v10 +
+            (float((x1 - posx) * (x2 - posx) * (x3 - posx) * (y0 - posy) * (y1 - posy) * (y3 - posy) ) / float((x1 - x0) * (x2 - x0) * (x3 - x0) * (y0 - y2) * (y1 - y2) * (y3 - y2) )) * v20 +
+            (float((x1 - posx) * (x2 - posx) * (x3 - posx) * (y0 - posy) * (y1 - posy) * (y2 - posy) ) / float((x1 - x0) * (x2 - x0) * (x3 - x0) * (y0 - y3) * (y1 - y3) * (y2 - y3) )) * v30 +
+
+            (float((x0 - posx) * (x2 - posx) * (x3 - posx) * (y1 - posy) * (y2 - posy) * (y3 - posy) ) / float((x0 - x1) * (x2 - x1) * (x3 - x1) * (y1 - y0) * (y2 - y0) * (y3 - y0) )) * v01 +
+            (float((x0 - posx) * (x2 - posx) * (x3 - posx) * (y0 - posy) * (y2 - posy) * (y3 - posy) ) / float((x0 - x1) * (x2 - x1) * (x3 - x1) * (y0 - y1) * (y2 - y1) * (y3 - y1) )) * v11 +
+            (float((x0 - posx) * (x2 - posx) * (x3 - posx) * (y0 - posy) * (y1 - posy) * (y3 - posy) ) / float((x0 - x1) * (x2 - x1) * (x3 - x1) * (y0 - y2) * (y1 - y2) * (y3 - y2) )) * v21 +
+            (float((x0 - posx) * (x2 - posx) * (x3 - posx) * (y0 - posy) * (y1 - posy) * (y2 - posy) ) / float((x0 - x1) * (x2 - x1) * (x3 - x1) * (y0 - y3) * (y1 - y3) * (y2 - y3) )) * v31 +
+
+            (float((x0 - posx) * (x1 - posx) * (x3 - posx) * (y1 - posy) * (y2 - posy) * (y3 - posy) ) / float((x0 - x2) * (x1 - x2) * (x3 - x2) * (y1 - y0) * (y2 - y0) * (y3 - y0) )) * v02 +
+            (float((x0 - posx) * (x1 - posx) * (x3 - posx) * (y0 - posy) * (y2 - posy) * (y3 - posy) ) / float((x0 - x2) * (x1 - x2) * (x3 - x2) * (y0 - y1) * (y2 - y1) * (y3 - y1) )) * v12 +
+            (float((x0 - posx) * (x1 - posx) * (x3 - posx) * (y0 - posy) * (y1 - posy) * (y3 - posy) ) / float((x0 - x2) * (x1 - x2) * (x3 - x2) * (y0 - y2) * (y1 - y2) * (y3 - y2) )) * v22 +
+            (float((x0 - posx) * (x1 - posx) * (x3 - posx) * (y0 - posy) * (y1 - posy) * (y2 - posy) ) / float((x0 - x2) * (x1 - x2) * (x3 - x2) * (y0 - y3) * (y1 - y3) * (y2 - y3) )) * v32 +
+
+            (float((x0 - posx) * (x1 - posx) * (x2 - posx) * (y1 - posy) * (y2 - posy) * (y3 - posy) ) / float((x0 - x3) * (x1 - x3) * (x2 - x3) * (y1 - y0) * (y2 - y0) * (y3 - y0) )) * v03 +
+            (float((x0 - posx) * (x1 - posx) * (x2 - posx) * (y0 - posy) * (y2 - posy) * (y3 - posy) ) / float((x0 - x3) * (x1 - x3) * (x2 - x3) * (y0 - y1) * (y2 - y1) * (y3 - y1) )) * v13 +
+            (float((x0 - posx) * (x1 - posx) * (x2 - posx) * (y0 - posy) * (y1 - posy) * (y3 - posy) ) / float((x0 - x3) * (x1 - x3) * (x2 - x3) * (y0 - y2) * (y1 - y2) * (y3 - y2) )) * v23 +
+            (float((x0 - posx) * (x1 - posx) * (x2 - posx) * (y0 - posy) * (y1 - posy) * (y2 - posy) ) / float((x0 - x3) * (x1 - x3) * (x2 - x3) * (y0 - y3) * (y1 - y3) * (y2 - y3) )) * v33;
+
+
+        return interp;
+    }
+
+
+    int getCentersino(float* frame0, float* frame180, 
     float* dark, float* flat, 
     size_t sizex, size_t sizey)
     {
@@ -214,7 +281,7 @@ extern "C"{
         return -posx/2;
     }
 
-    float getCentersino(float* frame0, float* frame180, 
+    float getCentersino_subpixel(float* frame0, float* frame180, 
     float* dark, float* flat, 
     size_t sizex, size_t sizey)
     {
@@ -260,35 +327,37 @@ extern "C"{
         //const size_t irange = size_t(sizex * (1.0f/di));
         for(size_t j=0; j<sizey; j++) {
 
-            for(float i=0; i < irange; ++i) {
-                const float bbs = abs2Interp(f.cpuptr, sizex, sizey, i * di, j);
+            for(float i=0; i < irange; i++) {
+                // const float bbs = abs2Interp(f.cpuptr, sizex, sizey, i * di, j);
+                const float bbs = abs2InterpCubic(f.cpuptr, sizex, sizey, i * di, j);
+
                 if(bbs > maxx) {
                     maxx = bbs;
                     posx = int(round(i * di));
                     bestpos = i * di;
                 }
             }
-            // printf("best I could make is %d %f\n", posx, bestpos);
-            // for(size_t i=0; i<irange; i+=1){
-            //     float bbs = f.cpuptr[j*sizex + i].abs2();
-            //     if(bbs > maxx)
-            //     {
-            //         maxx = bbs;
-            //         posx = int(i);
-            //     }
-            // }
-            // for(size_t i=irange; i<sizex; i++){
-            //     float bbs = f.cpuptr[j*sizex + i].abs2();
-            //     if(bbs > maxx){
-            //         maxx = bbs;
-            //         posx = int(i);
-            //     }
-            // }
 
-            // printf("the old got %d\n", posx);
+            for(float i=irange; i < sizex; i++) {
+                // const float bbs = abs2Interp(f.cpuptr, sizex, sizey, i * di, j);
+                const float bbs = abs2InterpCubic(f.cpuptr, sizex, sizey, i * di, j);
+
+                if(bbs > maxx) {
+                    maxx = bbs;
+                    posx = int(round(i * di));
+                    bestpos = i * di;
+                }
+            }
         }
-        if(bestpos > (float)sizex/2.0f)
+        // printf("bestpos = %f \n", bestpos);
+        fflush(stdout);
+        if(bestpos > (float)sizex/2.0f) // look into it!
             bestpos -= (float)sizex;
+
+        // printf("After bestpos = %f \n", bestpos);
+        fflush(stdout);
+        // printf("bestpos/2 = %f \n", bestpos/2.0f);
+        fflush(stdout);
         return -bestpos/2.0f;
     }
 
@@ -365,7 +434,14 @@ extern "C"{
         return getCentersino16(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
     }
 
-    float findcentersino(float* frame0, float* frame180,
+    float findcentersino_subpixel(float* frame0, float* frame180,
+    float* dark, float* flat, int sizex, int sizey)
+    {
+        Image2D<float> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);
+        return getCentersino_subpixel(fr0.gpuptr, fr180.gpuptr, dk.gpuptr, ft.gpuptr, sizex, sizey);
+    }
+
+    int findcentersino(float* frame0, float* frame180,
     float* dark, float* flat, int sizex, int sizey)
     {
         Image2D<float> fr0(frame0,sizex,sizey), fr180(frame180,sizex,sizey), dk(dark,sizex,sizey), ft(flat,sizex,sizey);
@@ -393,7 +469,7 @@ extern "C"{
     float axis_offset, dim3 tomo_size)
     {
         /* Projection data sizes */
-        int padx    = 0;
+        int padx    = 2;
         int nrays   = tomo_size.x * ( 1.0 + padx );
         int nangles = tomo_size.y;
         int nslices = tomo_size.z;
@@ -453,7 +529,7 @@ extern "C"{
 extern "C"{   
 
     void getRotAxisCorrectionGPU(GPU gpus, float *tomogram, 
-    float axis_offset, dim3 tomo_size, int ngpu)
+    float axis_offset, dim3 tomo_size, int ngpu, int blocksize)
     {
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
@@ -462,7 +538,12 @@ extern "C"{
         int nangles = tomo_size.y;
         int sizez   = tomo_size.z;
 
-        int i; int blocksize = 1;
+        int i; 
+
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(sizez, nangles * nrays * 6, true, A100_MEM);
+            blocksize          = min(sizez, blocksize_aux);
+        }
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
@@ -497,7 +578,7 @@ extern "C"{
 
     void getRotAxisCorrectionMultiGPU(int* gpus, int ngpus, 
     float* tomogram, float axis_offset, 
-    int nrays, int nangles, int nslices)
+    int nrays, int nangles, int nslices, int blocksize)
     {
         int i, Maxgpudev;
 
@@ -519,7 +600,7 @@ extern "C"{
 
 		if (ngpus == 1){ /* 1 device */
 
-			getRotAxisCorrectionGPU(gpu_parameters, tomogram, axis_offset, tomo_size, gpus[0]);
+			getRotAxisCorrectionGPU(gpu_parameters, tomogram, axis_offset, tomo_size, gpus[0], blocksize);
 
 		}else{
 		/* Launch async Threads for each device.
@@ -539,7 +620,8 @@ extern "C"{
                     tomogram + (size_t)nrays * nangles * ptr, 
                     axis_offset,
                     dim3(nrays, nangles, subblock),
-                    gpus[i]));
+                    gpus[i],
+                    blocksize));
 
                 /* Update pointer */
 				ptr = ptr + subblock;		

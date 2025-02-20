@@ -35,19 +35,22 @@ extern "C" {
 
     void getRotAxisCorrectionMultiGPU(int* gpus, int ngpus, 
     float* tomogram, float axis_offset, 
-    int nrays, int nangles, int nslices);
+    int nrays, int nangles, int nslices, int blocksize);
 
     void getRotAxisCorrectionGPU(GPU gpus, float *tomogram, 
-    float axis_offset, dim3 tomo_size, int ngpu);
+    float axis_offset, dim3 tomo_size, int ngpu, int blocksize);
 }
 
 /* Centersino - Find offset for 180 degrees parallel tomogram */
 extern "C"{
 
-    float findcentersino(float* frame0, float* frame180, 
+    float findcentersino_subpixel(float* frame0, float* frame180, 
     float* dark, float* flat, int sizex, int sizey);
 
-    float getCentersino(float* frame0, float* frame180, 
+    float getCentersino_subpixel(float* frame0, float* frame180, 
+    float* dark, float* flat, size_t sizex, size_t sizey);
+
+    int getCentersino(float* frame0, float* frame180, 
     float* dark, float* flat, size_t sizex, size_t sizey);
 }
 
