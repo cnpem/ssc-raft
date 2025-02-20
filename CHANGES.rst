@@ -4,7 +4,7 @@ Version 3.1.0 - 2025-02-20
   - Added pixel size as optional input argument on parallel Radon function ``Radon_RT``.
   - Added an optimized version of conebeam Radon function.
   - Added rotation axis correction and Centersino by blocks function.
-  - Added CLI for parallel pipeline with excentric tomography. 
+  - Added CLI for parallel pipeline with excentric tomography for SLS/TOMCAT data. 
 
 *Changed:*
   - Fixed ``FBP`` units issues. Previously, the function returned a nondimensionalized reconstruction. This change adds dimension (in SI units) to the reconstruction [``1/m``].
