@@ -35,8 +35,8 @@ extern "C"{
 
         float xmin = - pixel_size_x * obj_size.x / 2.0f;
         float ymin = - pixel_size_y * obj_size.y / 2.0f;
-        float dx   = pixel_size_x;
-        float dy   = pixel_size_y;
+        float dx   =   pixel_size_x;
+        float dy   =   pixel_size_y;
 
         float tmin = - pixel_size_x * nrays / 2.0f;
         float dt   = pixel_size_x;
@@ -67,7 +67,7 @@ extern "C"{
 
                     dangle = angles[angle_index + 1] - angles[angle_index];
                 
-                t = x * cosine[angle_index] + y * sine[angle_index];
+                t = x * cosine[angle_index] - y * sine[angle_index]; // here
                 
                 // t = x * cosk + y * sink;
                 
