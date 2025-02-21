@@ -1,0 +1,22 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Upload source to GitHub Releases
+        uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
