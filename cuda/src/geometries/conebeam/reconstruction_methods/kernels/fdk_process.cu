@@ -2,6 +2,8 @@
 #include <cufft.h>
 #include <stdlib.h>
 #include "geometries/conebeam/fdk.hpp"
+#include <cmath>
+#include <cstdio>
 #include <fstream>
 #include <future>
 #include <thread>
@@ -313,15 +315,7 @@ int memory(Lab lab, int ndev) {
         }
     }
 
-    // Ensure processes are distributed properly
-    int nz_gpu = (int) ceil((float) lab.nv / n_process);
-
-    // Adjust n_process to ensure the workload fits within the block
-    if (nz_gpu * (n_process - 1) > block) {
-        n_process = n_process - 1;
-    }
-
-    // printf("\n \n \n   N_PROCESS =  %d  BLOCKGPU = %d \n \n \n ", n_process, blockgpu);
+    n_process = std::min(n_process, (int)ceil(float(block) / n_process));
 
     return n_process;
 }
