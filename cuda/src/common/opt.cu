@@ -45,8 +45,6 @@ void _transpose_zyx2xyz_worker(float* out, float* in,
 }
 
 void opt::transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez) {
-    const size_t sizexy = sizex * sizey;
-    const size_t sizezy = sizez * sizey;
     const size_t sizexyz = size_t(sizex) * size_t(sizey) * size_t(sizez);
 
     float *temp = (float *)aligned_alloc(64, sizeof(float) * sizexyz);

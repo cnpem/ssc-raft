@@ -60,7 +60,7 @@ inline void SaveLog(){};
 
 #define Warning(statement, message){ if(!(statement)){ std::cerr << __LINE__ << " in " << __FILE__ << ": " << message << "\n" << std::endl; Log(message); SaveLog(); } }
 
-#define HANDLE_CUBLASERROR(errexp){ cublasStatus_t cublaserror = errexp; ErrorAssert( cublaserror == CUBLAS_STATUS_SUCCESS, "Cublas error: " << std::string(cublasGetStatusString( cublaserror )) ) }
+#define HANDLE_CUBLASERROR(errexp){ cublasStatus_t cublaserror = errexp; ErrorAssert( cublaserror == CUBLAS_STATUS_SUCCESS, "Cublas error: " <<  cublaserror ) }
 
 #define HANDLE_ERROR(errexp){ cudaError_t cudaerror = errexp; ErrorAssert( cudaerror == cudaSuccess, "Cuda error: " << std::string(cudaGetErrorString( cudaerror )) ) }
 
