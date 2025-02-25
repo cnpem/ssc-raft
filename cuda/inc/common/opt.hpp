@@ -204,6 +204,7 @@ namespace opt{
 
         void flip_x(float *data, int sizex, int sizey, int sizez);
         void transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez);
+        void transpose_zyx2yzx(int* gpus, int ngpus, float *data, int sizex, int sizey, int sizez, int blockx);
     }
 }
 

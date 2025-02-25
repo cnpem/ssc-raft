@@ -1,5 +1,6 @@
 #include <driver_types.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
@@ -8,6 +9,7 @@
 #include <utility>
 #include <vector>
 #include <sys/mman.h>
+#include <cublas.h>
 
 #include "common/complex.hpp"
 #include "common/configs.hpp"
@@ -69,6 +71,79 @@ void opt::transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez) {
 
     free(temp);
 }
+
+void _transpose_zyx2yzx_worker(int gpu, float *data, size_t start_x, size_t end_x,
+        size_t sizex, size_t sizey, size_t sizez, size_t blocksize) {
+
+    float alpha = 1.0f, beta = 0.0f;
+
+    cudaSetDevice(gpu);
+
+    cublasHandle_t handle;
+    float *d_data_block_in, *d_data_block_out;
+
+    cudaMalloc(&d_data_block_in, sizez * sizey * blocksize * sizeof(float));
+    cudaMalloc(&d_data_block_out, sizez * sizey * blocksize * sizeof(float));
+    cublasCreate_v2(&handle);
+
+    for (size_t i = start_x; i < end_x; i += blocksize) {
+
+        const size_t cur_blocksize = std::min(long(blocksize), long(sizex - i));
+        float* datablock = data + i;
+
+        cudaMemcpy2DAsync(d_data_block_in, cur_blocksize * sizeof(float), datablock, sizex * sizeof(float),
+                cur_blocksize * sizeof(float), sizez * sizey, cudaMemcpyHostToDevice);
+
+
+        //block transposition (ZY,X) -> (X,ZY)
+        HANDLE_CUBLASERROR(cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+                sizez * sizey, cur_blocksize, &alpha, d_data_block_in, cur_blocksize, &beta, nullptr,
+                sizez * sizey, d_data_block_out, sizez * sizey));
+
+        cudaMemcpyAsync(d_data_block_in, d_data_block_out,
+                cur_blocksize * sizez * sizey * sizeof(float), cudaMemcpyDeviceToDevice);
+        for (int b = 0; b < cur_blocksize; ++b) {
+            const size_t offset = sizez * sizey * b;
+            //ZY transposition (Z,Y) -> (Y,Z)
+            HANDLE_CUBLASERROR(cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+                    sizez, sizey, &alpha, d_data_block_in + offset, sizey, &beta, nullptr,
+                    sizez, d_data_block_out + offset, sizez));
+        }
+        cudaMemcpyAsync(d_data_block_in, d_data_block_out,
+                cur_blocksize * sizez * sizey * sizeof(float), cudaMemcpyDeviceToDevice);
+
+        //block transposition (X,ZY) -> (ZY,X)
+        HANDLE_CUBLASERROR(cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_N,
+                cur_blocksize, sizez * sizey, &alpha, d_data_block_in, sizez * sizey, &beta, nullptr,
+                cur_blocksize, d_data_block_out, cur_blocksize));
+
+        cudaMemcpy2DAsync(datablock, sizex * sizeof(float), d_data_block_out, cur_blocksize * sizeof(float),
+                cur_blocksize * sizeof(float),  sizez * sizey, cudaMemcpyDeviceToHost);
+
+    }
+
+    cudaDeviceSynchronize();
+    cublasDestroy_v2(handle);
+    cudaFree(d_data_block_in);
+    cudaFree(d_data_block_out);
+}
+
+
+void opt::transpose_zyx2yzx(int* gpus, int ngpus, float *data, int sizex, int sizey, int sizez, int blockx) {
+    std::vector<std::thread> threads;
+    threads.reserve(ngpus);
+    const size_t gpu_blocksize = sizex / ngpus;
+    for (int g = 0; g < ngpus; ++g) {
+        const size_t gpu_offset = g * gpu_blocksize;
+        threads.emplace_back(_transpose_zyx2yzx_worker,
+                    gpus[g], data, gpu_offset, std::min(gpu_offset + gpu_blocksize, (size_t)sizex),
+                    sizex, sizey, sizez, blockx);
+    }
+    for (int g = 0; g < ngpus; ++g) {
+        threads[g].join();
+    }
+}
+
 
 void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE) {
     /* rank:
