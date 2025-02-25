@@ -98,6 +98,45 @@ __global__ void polar2cartesian_fourier(complex* cartesian, complex* polar, floa
     }
 }
 
+__global__ void polar2cartesian_fourier_angle(complex* cartesian, complex* polar, float* angles, 
+                                                size_t nrays, size_t nangles, size_t sizeimage) 
+{
+    int tx = blockIdx.x * blockDim.x + threadIdx.x;
+    int ty = blockIdx.y;
+
+    if (tx < sizeimage) {
+        size_t cartplane = blockIdx.z * sizeimage * sizeimage;
+        polar += blockIdx.z * nrays * nangles;
+
+        int posx = tx - sizeimage / 2;
+        int posy = ty - sizeimage / 2;
+
+        float rho = nrays * hypotf(posx, posy) / sizeimage;
+        float angle = (nangles) * (0.5f * atan2f(posy, posx) / float(M_PI) + 0.5f);
+
+        size_t irho = size_t(rho);
+        int iarc = int(angle);
+        complex interped = complex(0.0f);
+
+        if (irho < nrays / 2 - 1) {
+            float pfrac = rho - irho;
+            float tfrac = iarc - angle;
+
+            iarc = iarc % (nangles);
+
+            int uarc = (iarc + 1) % (nangles);
+
+            complex interp0 = polar[iarc * nrays + irho] * (1.0f - pfrac) + polar[iarc * nrays + irho + 1] * pfrac;
+            complex interp1 = polar[uarc * nrays + irho] * (1.0f - pfrac) + polar[uarc * nrays + irho + 1] * pfrac;
+
+            interped = interp0 * tfrac + interp1 * (1.0f - tfrac);
+        }
+
+        cartesian[cartplane + sizeimage * ((ty + sizeimage / 2) % sizeimage) + (tx + sizeimage / 2) % sizeimage] =
+            interped * (4 * (tx % 2 - 0.5f) * (ty % 2 - 0.5f));
+    }
+}
+
 void EMFQ_BST(float* blockRecon, float* wholesinoblock, float* angles, int Nrays, int Nangles, int trueblocksize,
               int sizeimage, int pad0) {
     int blocksize = 1;
