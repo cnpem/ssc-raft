@@ -344,7 +344,8 @@ class Lab(ctypes.Structure):
                 ("nph", ctypes.c_int),
                 ("padh", ctypes.c_int),
                 ("energy", ctypes.c_float),
-                ("rotation_axis_offset", ctypes.c_int)
+                ("rotation_axis_offset", ctypes.c_int),
+                ("blocksize", ctypes.c_int)
                 ]
 
 try:

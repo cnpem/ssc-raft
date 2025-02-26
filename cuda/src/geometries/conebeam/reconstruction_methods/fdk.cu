@@ -23,17 +23,16 @@ extern "C"
     {
         int i, n_process;
 
-        int block    = ( lab.slice_recon_end - lab.slice_recon_start );
-        int blockgpu = (int) floor( (float)block / ndevs ); 
+        // int block    = ( lab.slice_recon_end - lab.slice_recon_start );
+        int blockgpu = (int) floor( (float)lab.nv / ndevs ); 
 
-        if ( ( blockgpu <= 0 ) ) ndevs = 1;
-
-        // printf("B: ndevs = %d, blockgpu = %d \n", ndevs, blockgpu);
-
+        if ( ( blockgpu <= ndevs) ) ndevs = 1;
         // printf("Rot axis = %d \n", lab.rotation_axis_offset);
         
         n_process = memory(lab, ndevs);
-        
+
+        printf("B: ndevs = %d, blockgpu = %d, n_process = %d \n", ndevs, blockgpu, n_process);
+
         // printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);
         // printf("nh = %d, nv = %d, nx = %d, ny = %d, nz = %d \n",  lab.nh,  lab.nv, lab.nx, lab.ny, lab.nz);
         // printf("dh = %e, dv = %e, dx = %e, dy = %e, dz = %e \n",  lab.dh,  lab.dv, lab.dx, lab.dy, lab.dz);

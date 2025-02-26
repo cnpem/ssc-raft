@@ -37,6 +37,51 @@ def transpose(data, axes=(1,0,2)):
 
     return data
 
+
+def transpose_gpu(data, gpus=[0], axes=(1,0,2)):
+    """CPU float function to apply transpose on a 3D array.
+
+    Args:
+        data (ndarray): data. Axes are [z,y,x].
+
+    Returns:
+        (ndarray): data. Axes are [z,y,x].
+    """
+    sizex = data.shape[-1]
+    sizey = data.shape[-2]
+
+    if len(data.shape) == 2:
+        sizez = 1
+    else:
+        sizez = data.shape[0]
+
+    data     = CNICE(data)
+    data_ptr = data.ctypes.data_as(ctypes.c_void_p)
+
+    ngpus = ctypes.c_int(len(gpus))
+    gpus = np.array(gpus, 'int32')
+    gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
+    blockx = ctypes.c_int(256)
+
+    if axes == (1, 0, 2):
+        libraft.transpose_zyx2yzx(
+            gpus_ptr, ngpus,
+            data_ptr,
+            ctypes.c_int(sizex),
+            ctypes.c_int(sizey),
+            ctypes.c_int(sizez),
+            ngpus, blockx)
+    else:
+        raise ValueError("Transpose {} not implemented".format(axes))
+
+    old_shape = (sizez, sizey, sizex)
+    new_shape = tuple(old_shape[i] for i in axes)
+
+    data = data.reshape(new_shape)
+
+    return data
+
+
 def _transpose_cpu_zyx2yzx(data):
     # import pdb; pdb.set_trace()
     temp = numpy.swapaxes(data, 0, 1)

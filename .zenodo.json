@@ -1,0 +1,110 @@
+{
+    "upload_type": "software",
+    "title": "ssc-raft",
+    "access_right": "open",
+    "communities": [
+    ],
+    "contributors": [
+        {
+            "name": "X. Miqueles, Eduardo",
+            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "orcid": "0000-0001-6576-4288",
+            "type": "projectleader"
+        },
+        {
+            "name": "Ferraz, Paola",
+            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "orcid": "0000-0002-1457-705X",
+            "type": "researcher"
+        },
+        {
+            "name": "Macul Moreno, Larissa",
+            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "orcid": "0000-0003-1627-093X",
+            "type": "projectmember"
+        },
+        {
+            "name": "Oliveira, João",
+            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "orcid": "0000-0003-3053-9608",
+            "type": "projectmember"
+        },
+        {
+            "name": "Z. Peixinho, Alan",
+            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "orcid": "0009-0002-6983-2342",
+            "type": "projectmember"
+        },
+        {
+            "name": "M. Paiano, Otavio",
+            "type": "other"
+        },
+        {
+            "name": "Vaqueiro Ferreira Filho, Janito",
+            "type": "other"
+        },
+        {
+            "name": "Koshev, Nikolay",
+            "type": "other"
+        },
+        {
+            "name": "Helou, Elias",
+            "type": "other"
+        },
+        {
+            "name": "Furusato, Fernando S.",
+            "type": "other"
+        },
+        {
+            "name": "Sarmento, Matheus Fernandez",
+            "type": "other"
+        },
+        {
+            "name": "Martinez Jr, Gilberto",
+            "type": "other"
+        },
+        {
+            "name": "L. Baraldi, Giovanni",
+            "type": "other"
+        }
+    ],
+    "creators": [
+        {
+            "name": "Ferraz, Paola",
+            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "orcid": "0000-0002-1457-705X"
+        },
+        {
+            "name": "X. Miqueles, Eduardo",
+            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "orcid": "0000-0001-6576-4288"
+        }
+    ],
+    "description": "<h1><strong>SSC-RAFT</strong></h1>\n<h2>Reconstruction Algorithms For Tomography</h2>\n<h3>Sirius Scientific Computing approach for image reconstruction</h3>\n<div>RAFT is an acronym to <em>Reconstruction Algorithms For Tomography</em>, and is being developed for more than 10 years,&nbsp;as an effort to support imaging beamlines from Sirius - the 4th generation Brazilian synchrotron.&nbsp;Implemented in low/high level languages, has the purpose of fast and robust image reconstruction for large data-sets.&nbsp;This package was initially implemented for the IMX beamline from old storage ring UVX/LNLS.It is now being readapted for future tomographic beamlines using new&nbsp;coding strategies and recent mathematical developments regarding image reconstruction,&nbsp;which is the case needed for LNLS/Sirius computational imaging.&nbsp;Codes and public prototypes are being increasingly included within this project,&nbsp;as long as they are tested and developed by the Scientific Computing Group.</div>\n<div>&nbsp;</div>\n<div><strong>Acknowledgements:</strong></div>\n<div>&nbsp;</div>\n<div>We would like to acknowledge the Brazilian Ministry of Science, Technology, and Innovation MCTI for supporting this work through the Brazilian Center for Research in Energy and Materials (CNPEM). We want to thank Petrobras (Manhattan Project) - 2021/00018-3&nbsp; for funding part of this project - and Mogno beamline from Sirius, for many fruitful discussion about the reconstruction strategies. We also thank FAPESP/CEPID 2013/07375-0 for funding Nikolay Koshev, and FAPESP 2016/16238-4 for funding Gilberto Martinez Jr.</div>\n<div>\n<p>&nbsp;</p>\n<p><strong>Authors:</strong></p>\n<ul>\n<li>Eduardo X. Miqueles, LNLS/CNPEM</li>\n<li>Paola Ferraz, LNLS/CNPEM</li>\n</ul>\n<p><strong>Contributors:</strong></p>\n<ul>\n<li>Larissa M. Moreno, LNLS/CNPEM</li>\n<li>Jo&atilde;o F. G. de Albuquerque Oliveira, LNLS/CNPEM</li>\n<li>Alan Zanoni Peixinho, LNLS/CNPEM</li>\n<li>Yuri Rossi Tonin, LNLS/CNPEM</li>\n</ul>\n<p><strong>Past contributors:</strong></p>\n<ul>\n<li>Ot&aacute;vio M. Paiano</li>\n<li>Gilberto Martinez Jr.</li>\n<li>Giovanni Baraldi</li>\n<li>Janito Vaqueiro Ferreira Filho</li>\n<li>Fernando S. Furusato</li>\n<li>Matheus F. Sarmento, LNLS/CNPEM</li>\n<li>Nikoley Koshev</li>\n<li>Elias Helou</li>\n</ul>\n<p><strong>Contact:</strong></p>\n<p>gcc@lnls.br</p>\n<p><strong>Documentation:</strong></p>\n<p>HTML documentation can be found in the source directory and can be opened with your preferred browser&nbsp;</p>\n<pre><code>./docs/build/index.html</code></pre>\n<p>&nbsp;</p>\n</div>",
+    "keywords": [
+        "X-Rays",
+        "Imaging",
+        "Tomography",
+        "Synchrotron",
+        "CUDA",
+        "C++",
+        "GPGPU"
+    ],
+    "language": "eng",
+    "license": "gpl-3.0-or-later",
+    "notes": "<ul><li><strong>Programming languages:</strong> Python, C++, Cuda, Jupyter Notebook</li><li><strong>Alternative titles:</strong> sscCdi, ssc-cdi</li></ul>",
+    "related_identifiers": [
+        {
+            "relation": "isPublishedIn",
+            "identifier":"https://doi.org/10.1137/1.9781611976137.3"
+        },
+        {
+            "relation": "isPartOf",
+            "identifier":"https://doi.org/10.1107/S1600577514016919"
+        },
+        {
+            "relation": "isPartOf",
+            "identifier": "https://doi.org/10.1109/TIP.2017.2766785"
+        }
+    ]
+}

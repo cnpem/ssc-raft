@@ -2,6 +2,8 @@
 #include <cufft.h>
 #include <stdlib.h>
 #include "geometries/conebeam/fdk.hpp"
+#include <cmath>
+#include <cstdio>
 #include <fstream>
 #include <future>
 #include <thread>
@@ -29,7 +31,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     int zi_filter, zi_filter_pad;
 
     // --- Divide the reconstruction volume among processes ---
-    nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
+    // nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
+    nz_gpu_recon = (lab.nz + n_process - 1) / n_process;
     zi_min_recon = i * nz_gpu_recon;
     zi_max_recon = std::min((i + 1) * nz_gpu_recon, lab.nz);
 
@@ -59,7 +62,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
 
     // --- Calculate filter volumes based on the projection indices ---
 
-    nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
+    // nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
+    nv_gpu_filter = (lab.nv + n_process - 1) / n_process;
     zi_min_filter = i * nv_gpu_filter;
     zi_max_filter = std::min((i + 1) * nv_gpu_filter, lab.nv);
 
@@ -190,7 +194,7 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
 
     // Reconstructed object 
     // printf("block = %d, n_z = %e, vzz = %d \n",( lab.slice_recon_end - lab.slice_recon_start ), (float)( lab.slice_recon_end - lab.slice_recon_start ) / n_process, (int)ceil( (float)( lab.slice_recon_end - lab.slice_recon_start ) / n_process ) );
-
+    
     nz_gpu = (int) ceil( (float)( lab.slice_recon_end - lab.slice_recon_start ) / n_process ); 
 
     zi_min = lab.slice_recon_start + i*nz_gpu;
@@ -287,42 +291,27 @@ void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* 
 }}
 
 extern "C" {
-int memory(Lab lab, int ndev) {
-    int n_process = 1;  // Default to 1 process in case no other conditions are met
+    int memory(Lab lab, int ndev) {
 
-    int block = lab.nv;
+        int blockgpu = (lab.nv + ndev - 1) / ndev;
 
-    int blockgpu = (int) floor((float) block / ndev);
+        size_t total_required_mem_per_slice_bytes = (
+                static_cast<float>(sizeof(float)) * lab.nh  * lab.nbeta + // Tomo slice
+                static_cast<float>(sizeof(float)) * lab.nh  * lab.nh    + // Reconstructed object slice
+                static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // FFT slice
+                static_cast<float>(sizeof(float)) * lab.nh              + // FBP filter kernel
+                static_cast<float>(sizeof(float)) * lab.nbeta             // angles
+                ); 
 
-    // Case: If the work per GPU block is less than or equal to zero, use a single process
-    if (blockgpu <= 0) {
-        n_process = 1;
-    } else if (blockgpu >= 1 && blockgpu <= 64) {
-        // Case: If each GPU can handle the block size reasonably, use all devices
-        n_process = ndev;
-    } else {
-        // Determine processes based on the size of the dimensions
-        if (lab.nh >= 1024 || lab.nbeta >= 1024) {
-            n_process = 16;  // Overwrites smaller division
+        int blocksize = lab.blocksize;
+
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(blockgpu, total_required_mem_per_slice_bytes, true, A100_MEM);
+            blocksize          = min(blockgpu, blocksize_aux);
         }
-        if (lab.nbeta >= 2048 || lab.nh >= 4096) {
-            n_process = 32;
-        }
-        if (lab.nh >= 8000 || lab.nbeta >= 8000) {
-            n_process = 64;  // Larger blocks require more processes
-        }
+
+        int n_process = (int)ceil( (float) blockgpu / blocksize ) * ndev;
+
+        return n_process;
     }
-
-    // Ensure processes are distributed properly
-    int nz_gpu = (int) ceil((float) lab.nv / n_process);
-
-    // Adjust n_process to ensure the workload fits within the block
-    if (nz_gpu * (n_process - 1) > block) {
-        n_process = n_process - 1;
-    }
-
-    // printf("\n \n \n   N_PROCESS =  %d  BLOCKGPU = %d \n \n \n ", n_process, blockgpu);
-
-    return n_process;
-}
 }
