@@ -27,8 +27,13 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
-    """
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
 
+    """
+    try:
+        blocksize = dic['blocksize']
+    except:
+        blocksize = 0
     # recon = data 
     try:
         regularization = dic['beta/delta']
@@ -159,7 +164,8 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
                 slice_recon_start = start_recon_slice, slice_recon_end = end_recon_slice,  
                 slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice,
                 nph = nph, padh = padh,
-                energy = energy, rotation_axis_offset = offset)
+                energy = energy, rotation_axis_offset = offset,
+                blocksize = blocksize)
 
     time = numpy.zeros(2)
     time = numpy.ascontiguousarray(time.astype(numpy.float64))

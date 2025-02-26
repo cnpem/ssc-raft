@@ -36,6 +36,7 @@ typedef struct {
     int nph, padh;
     float energy;
     int rotation_axis_offset;
+    int blocksize;
 
     /* Filter Types definitions
     enum EType
