@@ -6,12 +6,13 @@ Version 3.1.1 - 2025-02-26
 *Changed:*
   - Fixed Memory issues on ``FDK``: limitation for number of processes as it is hard-coded.
   - Fixed Memory issues on ``FDK``: In reconstruction by slices. Supports only blocks divisible by 8.
+  - Fixed ``iterative_reprojection()`` alignment function with ciclic imports.
 
 *Known Bugs:*
   - ``BST`` works for 180 degrees only on a regular angle mesh.
   - ``BST`` angles are hardcoded and not as input.
   - Memory issues on ``EM`` for cone-beam geometry.
-  - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs.
+  - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension.
 
 *To be done:*
   - Refactoring ``FDK``.
