@@ -38,7 +38,7 @@ def transpose(data, axes=(1,0,2)):
     return data
 
 
-def transpose_gpu(data, gpus=[0], axes=(1,0,2)):
+def transpose_gpu(data, gpus=[0], blocksize = 512, axes=(1,0,2)):
     """CPU float function to apply transpose on a 3D array.
 
     Args:
@@ -61,7 +61,7 @@ def transpose_gpu(data, gpus=[0], axes=(1,0,2)):
     ngpus = ctypes.c_int(len(gpus))
     gpus = np.array(gpus, 'int32')
     gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
-    blockx = ctypes.c_int(256)
+    blockx = ctypes.c_int(blocksize)
 
     if axes == (1, 0, 2):
         libraft.transpose_zyx2yzx(
@@ -70,7 +70,7 @@ def transpose_gpu(data, gpus=[0], axes=(1,0,2)):
             ctypes.c_int(sizex),
             ctypes.c_int(sizey),
             ctypes.c_int(sizez),
-            ngpus, blockx)
+            blockx)
     else:
         raise ValueError("Transpose {} not implemented".format(axes))
 
