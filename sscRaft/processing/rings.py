@@ -1,5 +1,5 @@
 from ..rafttypes import *
-from .io import *
+from ..io.io_ import *
 from .rings_methods.titarenko import * 
 
 def rings(tomogram, dic, **kwargs):

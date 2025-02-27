@@ -1,6 +1,6 @@
 from ...rafttypes import *
 
-from ...processing.io import *
+from ...io.io_ import *
 from ...phase_retrieval.phase import *
 from ...processing.alignments.rotationaxis import *
 from ...processing.rings import *
@@ -9,18 +9,18 @@ from ..constructors import process_tomogram_volume
 from ...processing.background_correction import *
 from ..recon_python_pipeline import reconstruction_methods
 from ..pre_process import (select_slices_to_reconstruct,angle_verification,fix_rotation_axis,
-                          find_stitching_auto,calculate_transposed_volumes,
+                          find_offset_excentric_tomo,calculate_transposed_volumes,
                           update_paganin_regularization,find_rotation_axis_auto,
-                          fix_stitching)
+                          fix_stitching_excentric_tomo)
 
 from ..filters_pipeline import multiple_filters
-from ...processing.opt import transpose, flip_x, flip_x_np
+from ...processing.opt import transpose, transpose_gpu, flip_x, flip_x_np
 
 numpy.seterr(divide='ignore', invalid='ignore') #to ignore divde by zero warning
 
 import time
 
-def process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=False):
+def process_tomcat_data(is_stitching, filepaths, h5path, gpus, pin_memory=False):
     start_read = time.time()
 
     data_path    = filepaths[0]
@@ -32,7 +32,7 @@ def process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=False):
     h5flat_post  = h5path[2]
     h5dark       = h5path[3]
 
-    data         = read_hdf5(data_path, h5data, d_type=numpy.float32, pin_memory=pin_memory)
+    data         = read_hdf5_measure(data_path, h5data, d_type=numpy.float32, pin_memory=pin_memory)
     flat_pre     = read_hdf5(flat_path, h5flat_pre, d_type=numpy.float32)
     flat_post    = read_hdf5(flat_path, h5flat_post, d_type=numpy.float32)
     dark         = read_hdf5(dark_path, h5dark, d_type=numpy.float32)
@@ -63,16 +63,30 @@ def process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=False):
     else:
         flats = numpy.empty((flat_pre.shape[-2], 2, flat_pre.shape[-1]),
                             dtype=numpy.float32)
+    elapsed = time.time() - start_pre
+    logger.info(f"Alloc TOMCAT flat for RAFT: {elapsed:.2f} seconds.")
 
+    start_read_mean = time.time()
     flats[:, 0, :] = numpy.mean(flat_pre, axis=0)
     flats[:, 1, :] = numpy.mean(flat_post, axis=0)
     darks          = numpy.mean(dark, axis=0)
+    elapsed = time.time() - start_read_mean
+    logger.info(f"Mean TOMCAT flat and dark for RAFT: {elapsed:.2f} seconds.")
 
-    data = transpose(data[:-1, :, :])
+    start_read_tp = time.time()
+    data = transpose_gpu(data, gpus)
+    elapsed = time.time() - start_read_tp
+    logger.info(f"GPU Transpose TOMCAT data for RAFT: {elapsed:.2f} seconds.")
 
+    start_read_flipD = time.time()
     data  = flip_x(data)
+    elapsed = time.time() - start_read_flipD
+    logger.info(f"Flip TOMCAT data for RAFT: {elapsed:.2f} seconds.")
+    start_read_flipFD = time.time()
     flats = flip_x_np(flats)
     darks = flip_x_np(darks)
+    elapsed = time.time() - start_read_flipFD
+    logger.info(f"Flip TOMCAT flat and dark for RAFT: {elapsed:.2f} seconds.")
 
     logger.info(f'Data shape (nangles,nslices,nrays): {data.shape}')
 
@@ -115,9 +129,9 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
 
     # Stitching
     if is_stitching == 'T':
-        offset = find_stitching_auto(dic=dic, tomogram=tomogram)
+        offset = find_offset_excentric_tomo(dic=dic, tomogram=tomogram)
         dic['stitching overlap'] = offset
-        tomogram = process_tomogram_volume(tomogram, recon, dic, fix_stitching)
+        tomogram = process_tomogram_volume(tomogram, recon, dic, fix_stitching_excentric_tomo)
         dic['angles[rad]'] = numpy.linspace(0.0, numpy.pi, tomogram.shape[1], endpoint=False)
 
     tomogram = process_tomogram_volume(tomogram, recon, dic, multiple_filters)
@@ -143,7 +157,8 @@ def tomcat_free_pinned_memory(tomogram: numpy.ndarray, flats: numpy.ndarray, rec
     free_pinned_array(recon)
 
 def tomcat_pipeline(dic: dict) -> None:
-
+    
+    gpus         = dic.get('gpu',[0])
     pin_memory   = dic.get('pin_memory',False)
     is_stitching = dic.get('stitching','F')
 
@@ -163,7 +178,7 @@ def tomcat_pipeline(dic: dict) -> None:
     filepaths    = [datafile,flat_path,dark_path]
     h5path       = [h5data,h5flat_pre,h5flat_pos,h5dark]
 
-    tomogram, flat, dark, recon = process_tomcat_data(is_stitching, filepaths, h5path, pin_memory=pin_memory)
+    tomogram, flat, dark, recon = process_tomcat_data(is_stitching, filepaths, h5path, gpus = gpus, pin_memory=pin_memory)
 
     recon = tomcat_reconstruction_pipeline(tomogram, flat, dark, recon, dic)
 

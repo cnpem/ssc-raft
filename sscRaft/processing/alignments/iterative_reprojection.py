@@ -1,7 +1,7 @@
 from ...rafttypes import *
 
-from ...geometries.methods import *
-from ...geometries.parallel.radon_methods import *
+from ...geometries.methods import fbp
+from ...geometries.parallel.radon_methods import radon_RT
 
 try:
     import tomopy
@@ -82,6 +82,8 @@ def find_shift(data,reprojected_data, cumulative_shifts, downsampling,method='co
             
             slice1, slice2 = downsampled_data[i], downsampled_reprojected_data[i]
 
+            # print("Shapes:", slice1.shape, slice2.shape)
+
             shift, error, _ = skimage.registration.phase_cross_correlation(slice2,slice1,upsample_factor=fft_upsampling,normalization=None)
             
             shifts[i,0:2] = shift*downsampling
@@ -153,10 +155,11 @@ def apply_shifts(data,shifts, method='scipy',cpus=32,turn_off_vertical=False,rem
 
     return data
 
-def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0]):
+def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0], pixel = 1):
     print('Reprojecting...')
     if radon_method == 'raft':
-        tomogram = radon_RT(tomogram, angles, gpus)
+        ang = -1*numpy.copy(angles)
+        tomogram = radon_RT(tomogram, angles, gpus, pixel)
         tomogram = numpy.swapaxes(tomogram,0,1)
     elif radon_method == 'tomopy':
         tomogram = tomopy.sim.project.project(tomogram,angles,ncore=cpus,pad=False)
@@ -173,7 +176,7 @@ def reconstruct_and_reproject(data,angles,dic,tomo_method='raft',radon_method='r
         tomo = tomopy.recon(data,angles,algorithm='fbp',ncore=cpus,filter_name='ramlak')
     else:
         raise ValueError('Select a proper method for tomographic reconstruction: raft or tomopy')
-    reprojected_data = reproject(tomo,angles,radon_method,cpus,gpus)
+    reprojected_data = reproject(tomo,angles,radon_method,cpus,gpus, dic["algorithm_dic"]["detectorPixel[m]"])
     return tomo, reprojected_data
 
 def remove_black_borders(volume):
@@ -286,7 +289,7 @@ def plot_iterative_reprojection(tomo,sinogram,angles,neighboor_shifts,cumulative
     plt.tight_layout()
     plt.show()
 
-def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_phase_derivative=False,threshold=1e-2, max_iterations=10, max_downsampling=1,fft_upsampling=100,turn_off_vertical=False,plot=False,plot_type='phase', FBP_filter='ramp',find_shift_method='correlation',apply_shift_method='scipy',tomo_method='raft',radon_method='raft'):
+def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=32, using_phase_derivative=False,threshold=1e-2, max_iterations=10, max_downsampling=1,fft_upsampling=100,turn_off_vertical=False,plot=False,plot_type='phase', FBP_filter='ramp',find_shift_method='correlation',apply_shift_method='scipy',tomo_method='raft',radon_method='raft'):
 
     try:
         import tomopy
@@ -302,6 +305,7 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
     dic = {}
     dic["algorithm_dic"] = {}
     dic["algorithm_dic"]['algorithm'] = "FBP"
+    dic["algorithm_dic"]["detectorPixel[m]"] = pixel
     if 'regularization' not in dic["algorithm_dic"]:
         dic["algorithm_dic"]['beta/delta'] = 0 # regularization <= 1; use for smoothening
     if using_phase_derivative==False:
@@ -366,7 +370,7 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
                 break # exit while loop
             
             print('Applying shifts...')
-            sinogram = apply_shifts(original_sinogram.copy(),cumulative_shifts,method=apply_shift_method,turn_off_vertical=turn_off_vertical)
+            sinogram = apply_shifts(original_sinogram.copy(),cumulative_shifts,method=apply_shift_method,turn_off_vertical=turn_off_vertical, remove_null_borders=True)
             sinogram = check_sinogram_shape(sinogram)
 
             print('Reconstructing and reprojecting...')
@@ -392,6 +396,6 @@ def iterative_reprojection(original_sinogram,angles,gpus=[0],n_cpus=32, using_ph
         if reached_threshold.all() == True:
             break # exit for loop
 
-        aligned_tomo = fbp(numpy.swapaxes(sinogram,0,1), dic = dic["algorithm_dic"])
+    aligned_tomo = fbp(numpy.swapaxes(sinogram,0,1), dic = dic["algorithm_dic"])
         
     return aligned_tomo, sinogram, cumulative_shifts, reprojected_sinogram

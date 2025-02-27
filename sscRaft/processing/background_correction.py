@@ -1,7 +1,7 @@
 # Authors: Paola Ferraz, Giovanni L. Baraldi, Gilberto Martinez
 
 from ..rafttypes import *
-from .io import *
+from ..io.io_ import *
 
 def _background_correctionGPU(frames, flat, dark, gpus, is_log):
     """ GPU function to correct tomography projections (or frames) background 

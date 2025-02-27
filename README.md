@@ -45,9 +45,35 @@ See bellow for full requirements.
 
 The library `sscRaft` can be installed with form the source code or by `pip`/`git` if inside the CNPEM network.
 
+### GITHUB
+
+One can clone our public [github](https://github.com/cnpem/ssc-raft/) repository and install the latest version by:
+
+```bash
+git clone https://github.com/cnpem/ssc-raft.git 
+cd ssc-raft
+make clean && make
+```
+
+For a specific version, one can use:
+
+```bash
+    git clone https://github.com/cnpem/ssc-raft.git --branch v<version> --single-branch
+    cd ssc-raft 
+    make clean && make
+```
+
+The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 3.1.1
+
+```bash
+    git clone https://github.com/cnpem/ssc-raft.git --branch v3.1.1 --single-branch
+    cd ssc-raft 
+    make clean && make
+```
+
 ### Source code from Zenodo
 
-The source code can be downloaded from [zenodo website](https://zenodo.org/) under the DOI:[10.5281/zenodo.10988343](https://doi.org/10.5281/zenodo.10988343).
+The source code can be downloaded from [zenodo website](https://zenodo.org/) under the DOI:[10.5281/zenodo.10988342](https://doi.org/10.5281/zenodo.10988342).
 
 After download the `ssc-raft-v<version>.tar.gz` with the source files, one can decompress by
 
@@ -64,10 +90,10 @@ To compile the source files, enter the follwing command inside the folder
 ### PIP
 
 ---
-> **Warning:** This installation option is compiled for the LNLS Tepui cluster DGX machines.
+> **Warning:** This installation option is available only inside the CNPEM network.
 ---
 
-If one is inside the CNPEM network, they can install the latest version of sscRaft directly from the `pip server`
+One can install the latest version of sscRaft directly from the `pip server`
 
 ```bash
     pip install sscRaft==<version> --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
@@ -80,11 +106,10 @@ Where `<version>` is the version number of the `sscRaft`
     pip install sscRaft==3.0.3 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 ```
 
-
-### GIT
+### GITLAB
 
 ---
-> **Warning:** For this installation option is necessary to be on the CNPEM network.
+> **Warning:** For this installation option is available only inside the CNPEM network.
 ---
 
 One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install the latest version by:
@@ -98,15 +123,15 @@ make clean && make
 For a specific version, one can use:
 
 ```bash
-    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
+    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
     cd ssc-raft 
     make clean && make
 ```
 
-The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 3.0.0
+The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 3.1.1
 
 ```bash
-    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.0.0 --single-branch
+    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.1.1 --single-branch
     cd ssc-raft 
     make clean && make
 ```

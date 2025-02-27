@@ -1,5 +1,5 @@
 from ...rafttypes import *
-from ...processing.io import *
+from ...io.io_ import *
 
 def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
     """ Rings artifacts reduction by Generalized Titarenko\'s algorithm [1]_.  

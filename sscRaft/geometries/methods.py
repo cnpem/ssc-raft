@@ -1,6 +1,6 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
 from ..rafttypes import *
-from ..processing.io import *
+from ..io import SetDictionary
 from .parallel.fbp_methods import *
 from .parallel.em_methods import *
 

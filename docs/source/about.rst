@@ -12,7 +12,7 @@ Codes and public prototypes are being increasingly included within this project,
 as long as they are tested and developed by the Scientific Computing Group.  
 
 The ``ssc-raft`` package source code is available in `zenodo website <https://zenodo.org/>`_ under the 
-DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
+DOI: `10.5281/zenodo.10988342 <https://doi.org/10.5281/zenodo.10988342>`_.
 
 For further information on the ``ssc-raft`` package, visit the `website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ 
 (needs to be inside the CNPEM network to access the website).

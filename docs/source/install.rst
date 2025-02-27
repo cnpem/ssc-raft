@@ -15,17 +15,52 @@ This package supports nvidia ``GPUs`` with capabilities ``7.0`` or superior and 
 
 See bellow for build requirements and dependencies.
 
-The library sscRaft can be installed from the source code at `zenodo website <https://zenodo.org/>`_ or by ``pip``/ ``git``
+The library sscRaft can be installed from the source code at `zenodo website <https://zenodo.org/>`_, by our public github or by ``pip``/ ``gitlab``
 if inside the CNPEM network. More information on the ``sscRaft`` package on 
 `sscRaft website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_
 available inside the CNPEM network.
+
+Documentation
+*************
+
+The ``sscRaft`` package information can be found on the `sscRaft website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ inside the CNEPM network.
+Also, the `HTML` documentation can be found in the source directory `./docs/build/index.html` and can be opened in your preferred brownser.
+
+
+GITHUB
+******
+
+The latest package version can be cloned from our public `github <https://github.com/cnpem/ssc-raft/>`_ repository and installed locally with:
+
+.. code-block:: bash
+
+    git clone https://github.com/cnpem/ssc-raft.git
+    cd ssc-raft 
+    make clean && make
+
+To install a specific version (``<version>``), one can use:
+
+.. code-block:: bash
+
+    git clone  https://github.com/cnpem/ssc-raft.git --branch v<version> --single-branch
+    cd ssc-raft 
+    make clean && make
+
+
+Example, to install version 3.1.1:
+
+.. code-block:: bash
+
+    git clone https://github.com/cnpem/ssc-raft.git --branch v3.1.1 --single-branch
+    cd ssc-raft 
+    make clean && make
 
 
 Source code from Zenodo
 ***********************
 
 The source code can be downloaded from `zenodo website <https://zenodo.org/>`_ under the 
-DOI: `10.5281/zenodo.10988343 <https://doi.org/10.5281/zenodo.10988343>`_.
+DOI: `10.5281/zenodo.10988342 <https://doi.org/10.5281/zenodo.10988342>`_.
 
 After download the ``ssc-raft-v<version>.tar.gz`` with the source files, one can decompress by
 
@@ -48,7 +83,7 @@ One can install the latest version of sscRaft directly from our ``pip server`` i
 
 .. warning::
 
-    This installation option is compiled for the LNLS Tepui cluster DGX machines.
+    This installation option is available only inside the CNPEM network.
 
 .. code-block:: bash
 
@@ -62,14 +97,14 @@ Where ``version`` is the version number of the ``sscRaft``. Example:
     pip install sscRaft==3.0.0 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 
 
-GIT
-***
+GITLAB
+******
 
 .. warning::
 
-    For this installation option is necessary to be on the CNPEM network.
+    For this installation option is available only inside the CNPEM network.
 
-The latest package version can be cloned from CNPEM's `gitlab <https://gitlab.cnpem.br/>`_ and installed locally with your user:
+The latest package version can be cloned from CNPEM's `gitlab <https://gitlab.cnpem.br/>`_ and installed locally with:
 
 .. code-block:: bash
 
@@ -90,7 +125,7 @@ Example, to install version 3.0.3:
 
 .. code-block:: bash
 
-    git clone --recursive https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.0.3 --single-branch
+    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.0.3 --single-branch
     cd ssc-raft 
     make clean && make
 

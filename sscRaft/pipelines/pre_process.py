@@ -4,7 +4,7 @@ from ..rafttypes import *
 
 from ..processing.background_correction import *
 from ..processing.alignments.rotationaxis import *
-from ..processing.alignments.stitching360 import *
+from ..processing.alignments.excentric_tomo import *
 
 from ..processing.opt import transpose
 
@@ -39,13 +39,13 @@ def update_paganin_regularization(dic: dict) -> dict:
     
     return dic
 
-def fix_stitching(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
+def fix_stitching_excentric_tomo(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
     start = time.time()
 
     deviation    = dic.get('stitching overlap', 0)
     gpus         = dic.get('gpu',[0])
 
-    tomogram = stitch360To180(tomogram, deviation, gpus=gpus)
+    tomogram = stitchExcentricTomo(tomogram, deviation, gpus=gpus)
 
     # Calculate and log the elapsed time
     elapsed = time.time() - start
@@ -142,10 +142,10 @@ def find_rotation_axis_auto(dic:dict, angles: numpy.ndarray, data: numpy.ndarray
 
     return deviation
 
-def find_stitching_auto(dic: dict, tomogram: numpy.ndarray) -> int:
+def find_offset_excentric_tomo(dic: dict, tomogram: numpy.ndarray) -> int:
     gpus  = dic.get('gpu',[0])
 
-    deviation = getOffsetStitching360(tomogram[:2, :, :], gpus=gpus)
+    deviation = getOffsetExcentricTomo(tomogram[:2, :, :], gpus=gpus)
 
     logger.info(f'Stitching overlap computed: {deviation}')
 

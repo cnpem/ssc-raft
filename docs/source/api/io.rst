@@ -3,7 +3,7 @@
 Input/Output API
 ################
 
-.. automodule:: sscRaft.processing.io
+.. automodule:: sscRaft.io.io_
      :members:
      :undoc-members:
      :show-inheritance:

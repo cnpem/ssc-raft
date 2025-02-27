@@ -270,28 +270,28 @@ except:
 
 ######## Raft - Stitching Offset 360 ##########
 try:
-    libraft.getOffsetStitch360GPU.argtypes = [
+    libraft.getOffsetExcentricTomoGPU.argtypes = [
         ctypes.c_int, ctypes.c_void_p,  
         ctypes.c_int, ctypes.c_int, ctypes.c_int
     ]
     
-    libraft.getOffsetStitch360GPU.restype  = ctypes.c_int
+    libraft.getOffsetExcentricTomoGPU.restype  = ctypes.c_int
 except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_OFFSET_STITCHING360-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_OFFSET_EXCENTRIC_TOMO-')
     pass
 
-######## Raft - Stitch 360 to 180 ##########
+######## Raft - Excentric Tomography Stitch ##########
 try:
-    libraft.stitch360To180MultiGPU.argtypes = [
+    libraft.getExcentricTomoMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int,
         ctypes.c_void_p, 
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
         ctypes.c_int
     ]
     
-    libraft.stitch360To180MultiGPU.restype  = None
+    libraft.getExcentricTomoMultiGPU.restype  = None
 except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_STITCH_360TO180-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_EXCENTRIC_TOMO_STITCH-')
     pass
 
 ######## Raft - Phase Retrieval Paganin method and similar methods ##########

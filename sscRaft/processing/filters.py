@@ -1,6 +1,6 @@
 # Authors: Giovanni L. Baraldi, Gilberto Martinez
 from ..rafttypes import *
-from ..processing.io import *
+from ..io.io_ import *
 
 def lowpass(tomogram, dic = None, **kwargs):
     """Low pass filter of the Filtered BackProjection method.

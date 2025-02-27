@@ -1,3 +1,24 @@
+Version 3.1.1 - 2025-02-26
+--------------------------
+*Added:*
+  - Added GPU transpose function ``transpose_gpu()``.
+
+*Changed:*
+  - Fixed Memory issues on ``FDK``: limitation for number of processes as it is hard-coded.
+  - Fixed Memory issues on ``FDK``: In reconstruction by slices. Supports only blocks divisible by 8.
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+  - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs.
+
+*To be done:*
+  - Refactoring ``FDK``.
+  - Refactoring ``EM`` conebeam ray tracing.
+  - Refactoring ``FST`` frequency domain forward method for parallel beam.
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
+
 Version 3.1.0 - 2025-02-20
 --------------------------
 *Added:*
@@ -9,14 +30,13 @@ Version 3.1.0 - 2025-02-20
 *Changed:*
   - Fixed ``FBP`` units issues. Previously, the function returned a nondimensionalized reconstruction. This change adds dimension (in SI units) to the reconstruction [``1/m``].
   - Fixed ``FBP`` padding bug. 
-  - Changed ``FBP by RT`` ``y-direction`` to be compatible with ``FDK``.
+  - Changed ``FBP by RT`` values to be compatible with ``FDK`` for all angles.
+  - Changed ``FBP by BST`` values to be compatible with ``FDK`` for 180 degree angles.
   - Changed ``FBP`` filter R2C/C2R to add padding. 
   - Fixed parallel radon funtion ``Radon_RT`` units issues. Previously, the function returned a nondimensionalized projection. This change adds dimension (in SI units) to the projection [``1/m``] if the user use as input the pixel size.
 
 *Known Bugs:*
   - ``BST`` works for 180 degrees only on a regular angle mesh.
-  - ``BST`` angles are hardcoded and not as input.
-  - ``BST by RT`` ``y-direction`` is not compatible with ``FDK``.
   - Memory issues on ``EM`` for cone-beam geometry.
   - Memory issues on ``FDK``: limitation for number of processes as it is hard-coded
   - Memory issues on ``FDK``: In reconstruction by slices. Supports only blocks divisible by 8.

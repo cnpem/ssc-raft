@@ -2,5 +2,5 @@ from .common import *
 from .wiggle import *
 from .alignment import *
 from .rotationaxis import *
-from .stitching360 import *
+from .excentric_tomo import *
 from .iterative_reprojection import *
