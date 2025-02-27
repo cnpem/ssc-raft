@@ -22,7 +22,7 @@ jobs:
       - name: Upload Zenodo
         uses: zenodraft/action@0.13.3
         with:
-          concept: 150735
+          concept: 10988343
           compression: tar.gz
           metadata: .zenodo.json
           publish: false
