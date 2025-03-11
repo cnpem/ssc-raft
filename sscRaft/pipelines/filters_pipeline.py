@@ -8,73 +8,6 @@ from ..phase_retrieval.phase import *
 
 import time
 
-try:
-    import sscRings
-
-    # Specific implementation of the Rings All Stripes removal of `ssc-rings`
-    def remove_rings_all_stripes(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
-        rings_parameters = dic.get('rings_parameters')
-        number_of_gpus = len(dic.get('gpu', [0]))
-
-        snr     = rings_parameters[0]
-        la_size = rings_parameters[1]
-        sm_size = rings_parameters[2]
-        dim     = rings_parameters[3]
-
-        tomogram = sscRings.rings_remove_all_stripes(tomogram, number_of_gpus,
-                                                    settings = {'size_median':sm_size, 
-                                                        'large_stripes_size':la_size, 
-                                                        'background_ratio':snr, 
-                                                        'drop_ratio':0.1, 
-                                                        'dim':dim})
-
-        return tomogram
-
-    remove_rings_all_stripes = partial(
-        apply_filter_constructor,
-        process_fn=remove_rings_all_stripes,
-        process_name='remove rings all stripes',
-    )
-
-    # Specific implementation of the Rings All Stripes removal of `ssc-rings` for multiaxis
-    def remove_rings_all_stripes_multiaxis(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
-        rings_parameters = dic.get('rings_parameters')
-        number_of_gpus = len(dic.get('gpu', [0]))
-
-        snr     = rings_parameters[0]
-        la_size = rings_parameters[1]
-        sm_size = rings_parameters[2]
-        dim     = 1
-
-        tomogram = sscRings.rings_remove_all_stripes(tomogram, 
-                                            number_of_gpus,
-                                            settings = {'size_median':sm_size, 
-                                                        'large_stripes_size':la_size, 
-                                                        'background_ratio':snr, 
-                                                        'drop_ratio':0.1, 
-                                                        'dim':dim})
-
-        tomogram = tomogram.transpose(2, 1, 0)
-        tomogram = sscRings.rings_remove_all_stripes(tomogram, 
-                                            number_of_gpus,
-                                            settings = {'size_median':sm_size, 
-                                                        'large_stripes_size':la_size, 
-                                                        'background_ratio':snr, 
-                                                        'drop_ratio':0.1, 
-                                                        'dim':dim})
-
-        tomogram = tomogram.transpose(2, 1, 0)
-
-        return tomogram
-
-    remove_rings_all_stripes_multiaxis = partial(
-        apply_filter_constructor,
-        process_fn=remove_rings_all_stripes_multiaxis,
-        process_name='remove rings all stripes multiaxis',
-    )
-except KeyError as e:
-    logger.error(f"Cannot find package sscRings: {str(e)}. Rings method `all_stripes` and `all_stripes_multiaxis` cannot be loaded.")
-
 # Specific implementation of the Rings removal Titarenko
 def remove_rings_titarenko(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
     dic['regularization'] = dic.get('rings_regularization', -1)
@@ -113,8 +46,8 @@ paganin_methods = {
 
 rings_methods = {
     'titarenko': remove_rings_titarenko,
-    'all_stripes': remove_rings_all_stripes,
-    'all_stripes_multiaxis': remove_rings_all_stripes_multiaxis,
+    # 'all_stripes': remove_rings_all_stripes,
+    # 'all_stripes_multiaxis': remove_rings_all_stripes_multiaxis,
     'none': dont_process
 }
 
