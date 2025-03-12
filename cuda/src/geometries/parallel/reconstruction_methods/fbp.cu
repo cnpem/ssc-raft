@@ -185,11 +185,8 @@ extern "C"{
                     dim3(nrayspad  ,    nangles, subblock),  /* Tomogram padded size */
                     dim3(sizeImagex, sizeImagey, subblock)); /* Object (reconstruction) size */
 
-            opt::GPUToCPU<float>(tomogram + ptr_block_tomo, dtomo, 
-                                (size_t)nrays * nangles * subblock);
-
-            // opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
-            //                     (size_t)sizeImagex * sizeImagey * subblock);
+            opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
+                                (size_t)sizeImagex * sizeImagey * subblock);
 
         }
         HANDLE_ERROR(cudaDeviceSynchronize());

@@ -97,8 +97,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
         obj_ptr, tomogram_ptr, angles_ptr, 
         param_float_ptr, param_int_ptr)
 
-    # return obj
-    return tomogram
+    return obj
 
 def bstGPU(tomogram, angles, gpus, dic, obj = None):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 

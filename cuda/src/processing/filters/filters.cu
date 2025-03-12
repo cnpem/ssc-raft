@@ -149,7 +149,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
             convolution_R2C_C2R_1D( gpus, dataPadded + offset, fft_size, filter);
         }
         
-        // opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
+        opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
 
         float scale = (float)(size_pad.x) * filter.pixel;
 
