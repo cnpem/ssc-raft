@@ -20,7 +20,7 @@ numpy.seterr(divide='ignore', invalid='ignore') #to ignore divde by zero warning
 
 import time
 
-def process_tomcat_data(is_stitching, filepaths, h5path, gpus, pin_memory=False):
+def process_tomcat_data(is_stitching, filepaths, h5path, gpus, pin_memory=False, slices=None):
     start_read = time.time()
 
     data_path    = filepaths[0]
@@ -32,10 +32,10 @@ def process_tomcat_data(is_stitching, filepaths, h5path, gpus, pin_memory=False)
     # h5flat_post  = h5path[2]
     h5dark       = h5path[3]
 
-    data         = read_hdf5_measure(data_path, h5data, d_type=numpy.float32, pin_memory=pin_memory)
-    flat_pre     = read_hdf5(flat_path, h5flat_pre, d_type=numpy.float32)
+    data         = read_hdf5_measure(data_path, h5data, d_type=numpy.float32, pin_memory=pin_memory, slices=slices)
+    flat_pre     = read_hdf5(flat_path, h5flat_pre, d_type=numpy.float32, slices=slices)
     # flat_post    = read_hdf5(flat_path, h5flat_post, d_type=numpy.float32)
-    dark         = read_hdf5(dark_path, h5dark, d_type=numpy.float32)
+    dark         = read_hdf5(dark_path, h5dark, d_type=numpy.float32, slices=slices)
 
     alloc_output_start = time.time()
 
@@ -161,6 +161,7 @@ def tomcat_pipeline(dic: dict) -> None:
     gpus         = dic.get('gpu',[0])
     pin_memory   = dic.get('pin_memory',False)
     is_stitching = dic.get('stitching','F')
+    slices       = dic.get('slices', None)
 
     filepath     = dic.get('input_path','') 
     filename     = dic.get('input_name','')
@@ -178,7 +179,7 @@ def tomcat_pipeline(dic: dict) -> None:
     filepaths    = [datafile,flat_path,dark_path]
     h5path       = [h5data,h5flat_pre,h5flat_pos,h5dark]
 
-    tomogram, flat, dark, recon = process_tomcat_data(is_stitching, filepaths, h5path, gpus = gpus, pin_memory=pin_memory)
+    tomogram, flat, dark, recon = process_tomcat_data(is_stitching, filepaths, h5path, gpus = gpus, pin_memory=pin_memory, slices=slices)
 
     recon = tomcat_reconstruction_pipeline(tomogram, flat, dark, recon, dic)
 

@@ -120,6 +120,7 @@ def tomcat_recon(
     paganinFilterParams : Annotated[Tuple[float,float,float,float,float], Option(..., "--paganinFilterParams", "-Y",  metavar="paganinFilterParams", help="paganin filter arguments, 5 entries: energy[keV],pixelSize[m],delta,beta,distance[m]")] = [1,1,1,0,1],
     paganinMethod : Annotated[str, Option(..., "--paganinMethod", "-Ym", metavar="paganinMethod", help="Choose Paganin method. Options: \'paganin_by_frames\', \'paganin_by_slices\', \'none\'")] = 'paganin_by_slices',
     reconstruct : Annotated[str, Option(..., "--reconstruct", "-R", metavar="reconstruct", help="do reconstruction of sinograms, argument is a string ID name of the output file in hdf5")] = 'Recon.h5',
+    slices_recon : Annotated[Tuple[int,int], Option(..., "--slices", "-Rs", metavar="slices", help="Select slices to reconstruct, takes 2 args: start slice, end slice")] = [0, None],
     reconstructMethod : Annotated[str, Option(..., "--reconstructMethod", "-Rm", metavar="reconstructMethod", help="Choose the reconstruction method: \'fbp_RT\' and \'fbp_BST\'")] = "fbp_BST",
     filter : Annotated[str, Option(..., "--filter", "-F", metavar="filter", help="Choose reconstruction filter. Options: \'ramp\', \'gaussian\', \'hamming\', \'hann\', \'cosine\', \'lorentz\', \'rectangle\', \'none\'")] = "hamming",
     pinnedMem : Annotated[int, Option(..., "--pinnedMem", "-pm", metavar="pinnedMem", help="Use pinned memory on GPUs: 0=False, 1=True")] = 0
@@ -157,7 +158,7 @@ def tomcat_recon(
     │                                                             [default: 10, 121, 21]                                                                                                                                                                                                     │
     │ --centerOfRotation     -c         centerOfRotation          Center of rotation or overlap for stitching [default: -1]                                                                                                                                                                  │
     │ --stitching            -S         centestitchingOfRotation  Compute stitching. Option available: T = do stitching, F = no stitching [default: F]                                                                                                                                       │
-    │ --paganinFilterParams  -Y         paganinFilterParams       paganin filter argument string, needs: energy[keV],pixelSize[m],delta,beta,distance[m] [default: 1, 1, 1, 0, 1]                                                                                                            │
+    │ --paganinFilterParams  -Y         paganinFilterParams       paganin filter argument string, needs: energy[keV],pixelSize[m],delta,beta,distance[m] [default: 1.0, 1.0, 1.0, 0.0, 1.0]                                                                                                            │
     │ --paganinMethod        -Ym        paganinMethod             Choose Paganin method. Options: 'paganin_by_frames', 'paganin_by_slices', 'none' [default: paganin_by_slices]                                                                                                              │
     │ --reconstruct          -R         reconstruct               do reconstruction of sinograms, argument is a string ID name of the output file in hdf5 [default: Recon_]                                                                                                                  │
     │ --reconstructMethod    -Rm        reconstructMethod         Choose the reconstruction method: 'fbp_RT' and 'fbp_BST' [default: fbp_BST]                                                                                                                                                │
@@ -171,7 +172,9 @@ def tomcat_recon(
 
     gpus_list = [i for i in range(numberOfGPUs)]
 
-    
+    if slices_recon[1] is None:
+        slices_recon = None
+
     dic = {
         "pin_memory":pinnedMem,
         "input_path": dataPath, 
@@ -200,6 +203,7 @@ def tomcat_recon(
         "stitching":stitching,
         "axis offset": centerOfRotation, 
         "reconstruct": reconstruct, 
+        "slices": slices_recon,
         "method": reconstructMethod, 
         "filter": filter,
         "save_recon": True,
@@ -207,7 +211,7 @@ def tomcat_recon(
         "blocksize": 0
     }
 
-    dic['reconstruct'] = 'Recon_' + data_name
+    dic['reconstruct'] = 'Recon_' + OutID + '_' + data_name
 
     tomcat_pipeline_cli(dic)
 
