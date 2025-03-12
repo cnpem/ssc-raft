@@ -213,6 +213,7 @@ def tomcat_recon(
         "blocksize": 0
     }
 
+    logger.info(f'Reconstruction method: {reconstructMethod}')
     dic['reconstruct'] = 'Recon_' + OutID + '_' + data_name
 
     tomcat_pipeline_cli(dic)
