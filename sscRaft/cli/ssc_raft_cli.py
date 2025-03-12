@@ -99,8 +99,14 @@ def __cli_commands(
 @app.command(name="tomcat_recon", help="TOMCAT beamline reconstruction pipeline function")
 def tomcat_recon(
     data_name : Annotated[str, Argument(..., metavar="data_name", help="Name of the raw data hdf5 file")],
-    dataPath : Annotated[str, Option(..., "--dataPath", "-dp", metavar="dataPath", help="Absolute path of the data")] = os.getcwd(),
+    dataPath : Annotated[str, Option(..., "--dataPath", "-dp", metavar="dataPath", help="Absolute data path")] = os.getcwd(),
+    data_dataset : Annotated[str, Option(..., "--dataDataset", "-dd", metavar="dataDataset", help="Data hdf5 dataset")] = 'exchange/data',
+    flat_path : Annotated[str, Option(..., "--flatPath", "-fp", metavar="flatPath", help="Absolute flat path")] = os.getcwd(),
+    flat_dataset : Annotated[str, Option(..., "--flatDataset", "-fd", metavar="flatDataset", help="Flat hdf5 dataset")] = 'exchange/data_white_pre',
+    dark_path : Annotated[str, Option(..., "--darkPath", "-da", metavar="darkPath", help="Absolute dark path")] = os.getcwd(),
+    dark_dataset : Annotated[str, Option(..., "--darkDataset", "-dad", metavar="darkDataset", help="Dark hdf5 dataset")] = 'exchange/data_dark',
     recOutputDir : Annotated[str, Option(..., "--recOutputDir", "-O", metavar="recOutputDir", help="Absolute path of the reconstruction to be saved")] = os.getcwd(),
+    OutID : Annotated[str, Option(..., "--OutID", "-Oid", metavar="OutID", help="Reconstruction ID name (user input)")] = 'default',
     numberOfGPUs : Annotated[int, Option(..., "--numberOfGPUs", "-ngpu", metavar="numberOfGPUs", help="Total number of gpus for reconstruction. Example for 2 GPUs: 2")] = 1,
     zeroPadding : Annotated[int, Option(..., "--zeroPadding", "-Z", metavar="zeroPadding", help="Data padding - Integer multiple of the data size (0,1,2, etc...)")] = 2,
     correctionType : Annotated[int, Option(..., "--correctionType", "-g", metavar="correctionType", help="Flat-dark normalization + log: option 7 available")] = 7,
@@ -164,12 +170,20 @@ def tomcat_recon(
     """
 
     gpus_list = [i for i in range(numberOfGPUs)]
+
     
     dic = {
         "pin_memory":pinnedMem,
         "input_path": dataPath, 
         "input_name": data_name, 
+        "input_data_hdf5_path": data_dataset,
+        "flat_path": os.path.join(flat_path,data_name),
+        "flat_pre_dataset": flat_dataset,
+        "flat_pos_dataset": 'exchange/data_white_post',
+        "dark_path": os.path.join(dark_path,data_name),
+        "dark_dataset":dark_dataset,
         "output_path": recOutputDir,
+        "id": OutID,
         "gpu": gpus_list,  
         "paganin_method": paganinMethod,
         "z2[m]": paganinFilterParams[4],

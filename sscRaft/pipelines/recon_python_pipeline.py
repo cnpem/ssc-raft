@@ -72,7 +72,7 @@ def reconstruction_methods(tomogram: numpy.ndarray, recon: numpy.ndarray, dic:di
 
 
     if dic.get('save_recon', False):
-        save_name   = dic.get('reconstruct', 'Recon_' + dic['input_name'])
+        save_name   = dic.get('reconstruct', 'Recon_' + dic['id'] + '_' + dic['input_name'])
         # Save the tomogram asynchronously if specified
         async_save_worker(recon, dic, save_name, 'save_recon')
 
