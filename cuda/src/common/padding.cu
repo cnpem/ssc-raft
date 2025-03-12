@@ -19,8 +19,8 @@ dim3 size, dim3 pad, float value)
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
     int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - ( padx / 2 ) );
-    int jj     = (int)( j - ( pady / 2 ) );
+    int ii     = (int)( i - ( (int)padx / 2 ) );
+    int jj     = (int)( j - ( (int)pady / 2 ) );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
 
@@ -33,10 +33,10 @@ dim3 size, dim3 pad, float value)
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (j >= size.y)) return;
 
-    if ( ( j <          pady ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
-    if ( ( j > size.y + pady ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
-    if ( ( i <          padx ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii];
-    if ( ( i > size.x + padx ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
+    if ( ( j <          (int)pady/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
+    if ( ( j > size.y + (int)pady/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii];
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
 
     outpadded[indpad].x = in[index];
 }
@@ -54,8 +54,8 @@ dim3 size, dim3 pad, float value)
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx / 2 );
-    int jj     = (int)( j - pady / 2 );
+    int ii     = (int)( i - (int)padx / 2 );
+    int jj     = (int)( j - (int)pady / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
@@ -67,10 +67,10 @@ dim3 size, dim3 pad, float value)
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    if ( ( j <          pady ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0].x;
-    if ( ( j > size.y + pady ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
-    if ( ( i <          padx ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii].x;
-    if ( ( i > size.x + padx ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)].x;
+    if ( ( j <          (int)pady/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0].x;
+    if ( ( j > size.y + (int)pady/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii].x;
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)].x;
 
     outpadded[indpad].x = in[index].x;
     outpadded[indpad].y = in[index].y;
@@ -89,8 +89,8 @@ __global__ void opt::paddC2R(cufftComplex *in, float *outpadded,
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx / 2 );
-    int jj     = (int)( j - pady / 2 );
+    int ii     = (int)( i - (int)padx / 2 );
+    int jj     = (int)( j - (int)pady / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
@@ -101,10 +101,10 @@ __global__ void opt::paddC2R(cufftComplex *in, float *outpadded,
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    if ( ( j <          pady ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0].x;
-    if ( ( j > size.y + pady ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
-    if ( ( i <          padx ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *          0 +          ii].x;
-    if ( ( i > size.x + padx ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         ii + (size.x -1)].x;
+    if ( ( j <          (int)pady/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0].x;
+    if ( ( j > size.y + (int)pady/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *          0 +          ii].x;
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         ii + (size.x -1)].x;
 
     outpadded[indpad] = in[index].x;
 }
@@ -131,10 +131,10 @@ __global__ void opt::paddR2R(float *in, float *outpadded,
 
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
-    if ( ( j <          pady ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0];
-    if ( ( j > size.y + pady ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
-    if ( ( i <          padx ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *          0 +          ii];
-    if ( ( i > size.x + padx ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
+    if ( ( j <          (int)pady/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0];
+    if ( ( j > size.y + (int)pady/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *          0 +          ii];
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
 
     outpadded[indpad] = value;
 
@@ -273,10 +273,10 @@ __global__ void contrast_enhance::padding(float *in, cufftComplex *inpadded, dim
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    if ( ( j <          padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
-    if ( ( j > size.y + padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
-    if ( ( i <          padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii];
-    if ( ( i > size.x + padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
+    if ( ( j <          (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
+    if ( ( j > size.y + (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
+    if ( ( i <          (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii];
+    if ( ( i > size.x + (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
 
     inpadded[indpad].x = in[index];
 }
