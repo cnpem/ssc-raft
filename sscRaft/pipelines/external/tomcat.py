@@ -114,6 +114,7 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
     logger.debug(f"Tomogram shape: {tomogram.shape}, Flat shape: {flat.shape}, Dark shape: {dark.shape}")
     
     deviation = dic.get('axis offset', -1)
+    offset    = dic.get('stitching overlap', -1)
 
     if is_stitching == 'F': 
         if deviation == -1:
@@ -129,8 +130,10 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
 
     # Stitching
     if is_stitching == 'T':
-        offset = find_offset_excentric_tomo(dic=dic, tomogram=tomogram)
-        dic['stitching overlap'] = offset
+        if offset == -1:
+            offset = find_offset_excentric_tomo(dic=dic, tomogram=tomogram)
+            dic['stitching overlap'] = offset
+
         tomogram = process_tomogram_volume(tomogram, recon, dic, fix_stitching_excentric_tomo)
         dic['angles[rad]'] = numpy.linspace(0.0, numpy.pi, tomogram.shape[1], endpoint=False)
 
