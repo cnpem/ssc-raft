@@ -39,14 +39,14 @@ def read_hdf5_measure(filepath, hdf5path, d_type = numpy.float32, pin_memory=Fal
 
     if slices is not None:
         if nangles % 2 != 0:
-            data[...] = dataset[:,slices[0]:slices[1],:]
-        else:
             data[...] = dataset[:-1,slices[0]:slices[1],:]
+        else:
+            data[...] = dataset[:,slices[0]:slices[1],:]
     else:
         if nangles % 2 != 0:
-            data[...] = dataset[:]
-        else:
             data[...] = dataset[:-1]
+        else:
+            data[...] = dataset[:]
 
     return data
 
