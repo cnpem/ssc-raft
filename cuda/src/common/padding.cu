@@ -19,8 +19,8 @@ dim3 size, dim3 pad, float value)
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
     int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - ( padx / 2 ) );
-    int jj     = (int)( j - ( pady / 2 ) );
+    int ii     = (int)( i - ( (int)padx / 2 ) );
+    int jj     = (int)( j - ( (int)pady / 2 ) );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
 
@@ -33,8 +33,8 @@ dim3 size, dim3 pad, float value)
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (j >= size.y)) return;
 
-    // if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
-    // if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
 
     outpadded[indpad].x = in[index];
 }
@@ -52,8 +52,8 @@ dim3 size, dim3 pad, float value)
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx / 2 );
-    int jj     = (int)( j - pady / 2 );
+    int ii     = (int)( i - (int)padx / 2 );
+    int jj     = (int)( j - (int)pady / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
@@ -65,8 +65,8 @@ dim3 size, dim3 pad, float value)
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    // if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0].x;
-    // if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0].x;
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
 
     outpadded[indpad].x = in[index].x;
     outpadded[indpad].y = in[index].y;
@@ -85,8 +85,8 @@ __global__ void opt::paddC2R(cufftComplex *in, float *outpadded,
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx / 2 );
-    int jj     = (int)( j - pady / 2 );
+    int ii     = (int)( i - (int)padx / 2 );
+    int jj     = (int)( j - (int)pady / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
@@ -97,8 +97,8 @@ __global__ void opt::paddC2R(cufftComplex *in, float *outpadded,
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    // if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0].x;
-    // if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0].x;
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
 
     outpadded[indpad] = in[index].x;
 }
@@ -116,8 +116,8 @@ __global__ void opt::paddR2R(float *in, float *outpadded,
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
     int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - padx / 2 );
-    int jj     = (int)( j - pady / 2 );
+    int ii     = (int)( i - (int)padx / 2 );
+    int jj     = (int)( j - (int)pady / 2 );
 
     long long int index  = IND(ii,jj,k,size.x,size.y);
 
@@ -129,8 +129,8 @@ __global__ void opt::paddR2R(float *in, float *outpadded,
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) ) return;
 
-    // if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0];
-    // if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0];
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
 
     outpadded[indpad] = in[index];
 }
@@ -145,8 +145,8 @@ dim3 size, dim3 pad)
     int j     = blockIdx.y*blockDim.y + threadIdx.y;
     int k     = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int ii     = (int)( i - (int)pad.x * size.x / 2 );
+    int jj     = (int)( j - (int)pad.y * size.y / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
 
@@ -167,8 +167,8 @@ dim3 size, dim3 pad)
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int ii     = (int)( i - (int)pad.x * size.x / 2 );
+    int jj     = (int)( j - (int)pad.y * size.y / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
@@ -189,8 +189,8 @@ dim3 size, dim3 pad)
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
-    int ii     = (int)( i - pad.x * size.x / 2 );
-    int jj     = (int)( j - pad.y * size.y / 2 );
+    int ii     = (int)( i - (int)pad.x * size.x / 2 );
+    int jj     = (int)( j - (int)pad.y * size.y / 2 );
 
     long long int index  = size.x * k * size.y + size.x * jj + ii;
     long long int indpad =  Npadx * k *  Npady +  Npadx *  j +  i;
