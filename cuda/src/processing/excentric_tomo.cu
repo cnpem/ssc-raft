@@ -424,9 +424,16 @@ __global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, 
         size_t indx = offset > 0 ? outdx : (sizex-1-outdx);
         offset = abs(offset);
 
+        float val   = 0.5f + ((int)outdx-offset)*0.5f/(offset+1E-3f);
         float coef  = fminf(0.5f+((int)outdx-offset)*0.5f/(offset+1E-3f),1.0f);
-        float coef1 = 0.5f;
-        float coef2 = 0.5f;
+
+        float coef1 = 1.0f, coef2 = 1.0f;
+
+        if (val < 1.0f){
+            coef2 = 0.0f;
+        }else{
+            coef2 = 1.0f;
+        }
 
         // atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef*temp1[blockIdx.y*sizex + indx]);
         // atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
