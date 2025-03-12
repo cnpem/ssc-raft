@@ -431,11 +431,11 @@ __global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, 
 
         if(outdx <= offset)
         {   // Modified by Paola on June 10h 2024: Added 0* (zero multiplication)
-            sinogram[blockIdx.y*sizex*2 + outdx] = 0 * temp2[blockIdx.y*sizex + 0];
-            sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = 0 * temp1[blockIdx.y*sizex + 0];
+            // sinogram[blockIdx.y*sizex*2 + outdx] = 0 * temp2[blockIdx.y*sizex + 0];
+            // sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = 0 * temp1[blockIdx.y*sizex + 0];
 
-            // sinogram[blockIdx.y*sizex*2 + outdx] = temp2[blockIdx.y*sizex + 0];
-            // sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp1[blockIdx.y*sizex + 0];
+            sinogram[blockIdx.y*sizex*2 + outdx] = temp2[blockIdx.y*sizex + 0];
+            sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp1[blockIdx.y*sizex + 0];
         }
     }
 }
