@@ -435,11 +435,11 @@ __global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, 
             coef2 = 1.0f;
         }
 
-        // atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef*temp1[blockIdx.y*sizex + indx]);
-        // atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
+        atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef*temp1[blockIdx.y*sizex + indx]);
+        atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
 
-        atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef1*temp1[blockIdx.y*sizex + indx]);
-        atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef2*temp2[blockIdx.y*sizex + indx]);
+        // atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef1*temp1[blockIdx.y*sizex + indx]);
+        // atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef2*temp2[blockIdx.y*sizex + indx]);
 
         if(outdx <= offset)
         {   // Modified by Paola on June 10h 2024: Added 0* (zero multiplication)
