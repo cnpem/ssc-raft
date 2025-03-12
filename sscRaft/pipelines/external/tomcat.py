@@ -133,7 +133,9 @@ def tomcat_reconstruction_pipeline(tomogram: numpy.ndarray, flat: numpy.ndarray,
         if offset == -1:
             offset = find_offset_excentric_tomo(dic=dic, tomogram=tomogram)
             dic['stitching overlap'] = offset
-
+        else:
+            logger.info(f'Stitching overlap user input: {offset}')
+            
         tomogram = process_tomogram_volume(tomogram, recon, dic, fix_stitching_excentric_tomo)
         dic['angles[rad]'] = numpy.linspace(0.0, numpy.pi, tomogram.shape[1], endpoint=False)
 
