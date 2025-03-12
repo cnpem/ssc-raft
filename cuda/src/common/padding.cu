@@ -33,10 +33,8 @@ dim3 size, dim3 pad, float value)
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (j >= size.y)) return;
 
-    // if ( ( j <          (int)pady/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
-    // if ( ( j > size.y + (int)pady/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
-    if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii];
-    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
 
     outpadded[indpad].x = in[index];
 }
@@ -67,10 +65,8 @@ dim3 size, dim3 pad, float value)
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    // if ( ( j <          (int)pady/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0].x;
-    // if ( ( j > size.y + (int)pady/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
-    if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii].x;
-    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)].x;
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0].x;
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
 
     outpadded[indpad].x = in[index].x;
     outpadded[indpad].y = in[index].y;
@@ -101,10 +97,8 @@ __global__ void opt::paddC2R(cufftComplex *in, float *outpadded,
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    // if ( ( j <          (int)pady/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0].x;
-    // if ( ( j > size.y + (int)pady/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
-    if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *          0 +          ii].x;
-    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         ii + (size.x -1)].x;
+    if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0].x;
+    if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)].x;
 
     outpadded[indpad] = in[index].x;
 }
@@ -133,8 +127,6 @@ __global__ void opt::paddR2R(float *in, float *outpadded,
 
     if ( ( i <           (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj +           0];
     if ( ( i >= size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
-    // if ( ( i <          (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *          0 +          ii];
-    // if ( ( i > size.x + (int)padx/2 ) ) outpadded[indpad] = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
 
     outpadded[indpad] = value;
 
@@ -245,7 +237,6 @@ __global__ void contrast_enhance::copy(float *projection, float *kernel, dim3 si
     if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
 
     projection[index] = kernel[ind];
-
 }
 
 __global__ void contrast_enhance::padding(float *in, cufftComplex *inpadded, dim3 size, dim3 pad)
@@ -273,10 +264,10 @@ __global__ void contrast_enhance::padding(float *in, cufftComplex *inpadded, dim
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) || (k >= size.z) ) return;
 
-    if ( ( j <          (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
-    if ( ( j > size.y + (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
-    if ( ( i <          (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii];
-    if ( ( i > size.x + (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
+    if ( ( i <          (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj +           0];
+    if ( ( i > size.x + (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         jj + (size.x -1)];
+    if ( ( j <          (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *          0 +          ii];
+    if ( ( j > size.y + (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *         ii + (size.x -1)];
 
     inpadded[indpad].x = in[index];
 }
