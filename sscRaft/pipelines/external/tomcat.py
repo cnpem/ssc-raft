@@ -37,7 +37,7 @@ def process_tomcat_data(is_stitching, filepaths, h5path, gpus, pin_memory=False,
     dark         = read_hdf5(dark_path, h5dark, d_type=numpy.float32, slices=slices)
 
     try:
-        flat_post = read_hdf5(flat_path, h5flat_post, d_type=numpy.float32)
+        flat_post = read_hdf5(flat_path, h5flat_post, d_type=numpy.float32, slices=slices)
     except:
         flat_post = numpy.copy(flat_pre)
 
