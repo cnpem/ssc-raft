@@ -15,7 +15,6 @@ extern "C"{
 
     void getFBP(CFG configs, GPU gpus, float *recon, float *tomogram, float *angles, dim3 tomo_size, dim3 tomo_pad, dim3 recon_size);
 
-
 }
 
 

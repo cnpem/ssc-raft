@@ -106,25 +106,32 @@ extern "C"{
         int gridBlock = (int)ceil( nangles / TPBY ) + 1;
         setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
 
+        /* Padding */
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( tomo_pad.x / TPBX ) + 1,
+                        (int)ceil( tomo_pad.y / TPBY ) + 1,
+                        (int)ceil( tomo_pad.z / TPBZ ) + 1);
+
+        size_t npad       = opt::get_total_points(tomo_pad);
+        float *dataPadded = opt::allocGPU<float>(npad);
+
+        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, tomo_size, configs.tomo.pad, 0.0f);
+
+        /* Filter */
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+            filterFBP(gpus, filter, dataPadded, tomo_size);
 
-        // if (filter.type != Filter::EType::none)
-        //     filterFBP_Complex(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad, pixel_x);
-
-        /* Old version - Gio */
-        // if (filter.type != Filter::EType::none)
-        //     SinoFilter(tomogram, 
-        //         (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
-        //         axis_offset, true, filter, false, sintable, pixel_x);
-
-        BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, tomogram, angles,
+        /* Backproection */
+        BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, dataPadded, angles,
                                                 sintable, costable, 
                                                 pixel_x, pixel_y,
-                                                obj_size, tomo_size);
+                                                obj_size, tomo_pad);
+
+        // opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
+
 
         HANDLE_ERROR(cudaDeviceSynchronize());
-        
+        HANDLE_ERROR(cudaFree(dataPadded));
         HANDLE_ERROR(cudaFree(sintable));
         HANDLE_ERROR(cudaFree(costable));    
     }
@@ -144,8 +151,8 @@ extern "C"{
         int nrayspad = configs.tomo.padsize.x;
 
         /* Reconstruction sizes */
-        int sizeImagex = configs.obj.size.x;
-        int sizeImagey = configs.obj.size.y;
+        int sizeImagex = nrayspad; //configs.obj.size.x;
+        int sizeImagey = nrayspad; //configs.obj.size.y;
 
         int i;
 

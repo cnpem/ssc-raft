@@ -162,7 +162,9 @@ extern "C"{
         configs->obj.size      = dim3(parameters_int[3],parameters_int[3],configs->tomo.size.z); 
 
         /* Compute memory in bytes of a single slice for Tomogram */
-        configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->obj.size.x * configs->obj.size.y;
+        // configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->obj.size.x * configs->obj.size.y;
+        configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->tomo.padsize.x * configs->tomo.padsize.y;
+
 
         /* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
         configs->geometry.magnitude_x        = 1.0;
