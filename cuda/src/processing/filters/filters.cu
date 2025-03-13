@@ -163,11 +163,6 @@ __global__ void fbp_filtering_C2C(Filter filter,
     void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size)
 	{	
-        /* int dim = { 1, 2 }
-            1: if plan 1D multiples cuffts
-            2: if plan 2D multiples cuffts */
-        // int dim = 1;
-
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock( (int)ceil( size.x / TPBX ) + 1,
                         (int)ceil( size.y / TPBY ) + 1,

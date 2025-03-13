@@ -145,8 +145,8 @@ extern "C"{
         int nrayspad = configs.tomo.padsize.x;
 
         /* Reconstruction sizes */
-        int sizeImagex = nrayspad; //configs.obj.size.x;
-        int sizeImagey = nrayspad; //configs.obj.size.y;
+        int sizeImagex = configs.tomo.padsize.x; //configs.obj.size.x;
+        int sizeImagey = configs.tomo.padsize.x; //configs.obj.size.y;
 
         int i;
 
@@ -190,7 +190,7 @@ extern "C"{
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
 
-            opt::paddR2R<<<gridBlock,threadsPerBlock>>>(dtomo, dataPadded, configs.tomo.size, configs.tomo.pad, 0.0f);
+            opt::paddR2R<<<gridBlock,threadsPerBlock>>>(dtomo, dataPadded, configs.tomo.size, configs.tomo.pad, 1.0f);
 
             getFBP( configs, gpus, dobj, dataPadded, dangles, 
                     dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
