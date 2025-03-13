@@ -25,21 +25,21 @@ extern "C"{
             scale = 1.0f;
         }
 
-        float xmin = -1.0;
-        float ymin = -1.0;
-        float dx   = 2.0 / (obj_size.x - 1);
-        float dy   = 2.0 / (obj_size.y - 1);
+        // float xmin = -1.0;
+        // float ymin = -1.0;
+        // float dx   = 2.0 / (obj_size.x - 1);
+        // float dy   = 2.0 / (obj_size.y - 1);
 
-        float tmin = -1.0;
-        float dt   = 2.0 / (nrays - 1);
+        // float tmin = -1.0;
+        // float dt   = 2.0 / (nrays - 1);
 
-        // float xmin = - pixel_size_x * obj_size.x / 2.0f;
-        // float ymin = - pixel_size_y * obj_size.y / 2.0f;
-        // float dx   =   pixel_size_x;
-        // float dy   =   pixel_size_y;
+        float xmin = - pixel_size_x * obj_size.x / 2.0f;
+        float ymin = - pixel_size_y * obj_size.y / 2.0f;
+        float dx   =   pixel_size_x;
+        float dy   =   pixel_size_y;
 
-        // float tmin = - pixel_size_x * nrays / 2.0f;
-        // float dt   = pixel_size_x;
+        float tmin = - pixel_size_x * nrays / 2.0f;
+        float dt   = pixel_size_x;
         
         float dangle; // = angles[1] - angles[0];
         
