@@ -163,6 +163,15 @@ extern "C"{
         float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagey * blocksize);
         float *dangles = opt::allocGPU<float>( nangles );
 
+        /* Padding */
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
+                        (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
+                        (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
+
+        size_t npad       = opt::get_total_points(configs.tomo.padsize);
+        float *dataPadded = opt::allocGPU<float>(npad);
+
         opt::CPUToGPU<float>(angles, dangles, nangles);
 
         /* Loop for each batch of size 'batch' in threads */
@@ -180,15 +189,6 @@ extern "C"{
 			
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
-
-            /* Padding */
-            dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-            dim3 gridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
-                            (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
-                            (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
-
-            size_t npad       = opt::get_total_points(configs.tomo.padsize);
-            float *dataPadded = opt::allocGPU<float>(npad);
 
             opt::paddR2R<<<gridBlock,threadsPerBlock>>>(dtomo, dataPadded, configs.tomo.size, configs.tomo.pad, 0.0f);
 
