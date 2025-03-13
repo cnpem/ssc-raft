@@ -36,10 +36,10 @@ def process_tomcat_data(is_stitching, filepaths, h5path, gpus, pin_memory=False,
     flat_pre     = read_hdf5(flat_path, h5flat_pre, d_type=numpy.float32, slices=slices)
     dark         = read_hdf5(dark_path, h5dark, d_type=numpy.float32, slices=slices)
 
-    # try:
-    #     flat_post = read_hdf5(flat_path, h5flat_post, d_type=numpy.float32, slices=slices)
-    # except:
-    #     flat_post = numpy.copy(flat_pre)
+    try:
+        flat_post = read_hdf5(flat_path, h5flat_post, d_type=numpy.float32, slices=slices)
+    except:
+        flat_post = numpy.copy(flat_pre)
 
     alloc_output_start = time.time()
 
@@ -62,10 +62,10 @@ def process_tomcat_data(is_stitching, filepaths, h5path, gpus, pin_memory=False,
     start_pre = time.time()
 
     if pin_memory:
-        flats = pinned_empty((flat_pre.shape[-2], 1, flat_pre.shape[-1]),
+        flats = pinned_empty((flat_pre.shape[-2], 2, flat_pre.shape[-1]),
                                     dtype=numpy.float32)
     else:
-        flats = numpy.empty((flat_pre.shape[-2], 1, flat_pre.shape[-1]),
+        flats = numpy.empty((flat_pre.shape[-2], 2, flat_pre.shape[-1]),
                             dtype=numpy.float32)
         
     elapsed = time.time() - start_pre
@@ -73,7 +73,7 @@ def process_tomcat_data(is_stitching, filepaths, h5path, gpus, pin_memory=False,
 
     start_read_mean = time.time()
     flats[:, 0, :] = numpy.mean(flat_pre, axis=0)
-    # flats[:, 1, :] = numpy.mean(flat_post, axis=0)
+    flats[:, 1, :] = numpy.mean(flat_post, axis=0)
     darks          = numpy.mean(dark, axis=0)
     elapsed = time.time() - start_read_mean
     logger.info(f"Mean TOMCAT flat and dark for RAFT: {elapsed:.2f} seconds.")
