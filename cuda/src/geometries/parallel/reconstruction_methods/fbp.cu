@@ -115,7 +115,7 @@ extern "C"{
 
         /* Filter */
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_pad);
+            filterFBP(gpus, filter, dataPadded, tomo_pad);
 
         /* Backproection */
         // BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, dataPadded, angles,
@@ -201,7 +201,7 @@ extern "C"{
             // opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
             //                     (size_t)sizeImagex * sizeImagey * subblock);
 
-            opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
+            opt::GPUToCPU<float>(obj + ptr_block_obj, dataPadded, 
                                 (size_t)nrayspad * nangles * subblock);
 
         }
