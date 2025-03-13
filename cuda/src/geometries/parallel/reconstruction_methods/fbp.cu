@@ -115,10 +115,10 @@ extern "C"{
 
         /* Filter */
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_pad);
+            filterFBP(gpus, filter, dataPadded, tomo_pad);
 
         /* Backproection */
-        // BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, tomogram, angles,
+        // BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, dataPadded, angles,
         //                                                 sintable, costable, 
         //                                                 pixel_x, pixel_y,
         //                                                 obj_size, tomo_pad);
