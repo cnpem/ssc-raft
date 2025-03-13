@@ -118,10 +118,10 @@ extern "C"{
             filterFBP(gpus, filter, dataPadded, tomo_pad);
 
         /* Backproection */
-        // BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, dataPadded, angles,
-        //                                                 sintable, costable, 
-        //                                                 pixel_x, pixel_y,
-        //                                                 obj_size, tomo_pad);
+        BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, dataPadded, angles,
+                                                        sintable, costable, 
+                                                        pixel_x, pixel_y,
+                                                        obj_size, tomo_pad);
 
         // opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
 
@@ -184,8 +184,8 @@ extern "C"{
 			subblock       = min(sizez - ptr, blocksize);
 
 			ptr_block_tomo = (size_t)     nrays *    nangles * ptr;
-            // ptr_block_obj  = (size_t)sizeImagex * sizeImagey * ptr;
-            ptr_block_obj  = (size_t)nrayspad * nangles * ptr;
+            ptr_block_obj  = (size_t)sizeImagex * sizeImagey * ptr;
+            // ptr_block_obj  = (size_t)nrayspad * nangles * ptr;
 
 			/* Update pointer */
 			ptr = ptr + subblock;
@@ -198,11 +198,11 @@ extern "C"{
                     dim3(nrayspad  ,    nangles, subblock),  /* Tomogram padded size */
                     dim3(sizeImagex, sizeImagey, subblock)); /* Object (reconstruction) size */
 
-            // opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
-            //                     (size_t)sizeImagex * sizeImagey * subblock);
+            opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
+                                (size_t)sizeImagex * sizeImagey * subblock);
 
-            opt::GPUToCPU<float>(obj + ptr_block_obj, dataPadded, 
-                                (size_t)nrayspad * nangles * subblock);
+            // opt::GPUToCPU<float>(obj + ptr_block_obj, dataPadded, 
+            //                     (size_t)nrayspad * nangles * subblock);
 
         }
         HANDLE_ERROR(cudaDeviceSynchronize());

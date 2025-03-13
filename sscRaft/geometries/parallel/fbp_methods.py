@@ -74,8 +74,8 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     if obj is None:
-        # obj      = numpy.zeros([nslices, objsize + pad, objsize + pad], dtype=numpy.float32)
-        obj      = numpy.zeros([nslices, nangles, nrays * (padx+1)], dtype=numpy.float32)
+        obj      = numpy.zeros([nslices, objsize + pad, objsize + pad], dtype=numpy.float32)
+        # obj      = numpy.zeros([nslices, nangles, nrays * (padx+1)], dtype=numpy.float32)
         obj      = CNICE(obj)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
