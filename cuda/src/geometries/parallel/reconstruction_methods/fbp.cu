@@ -203,11 +203,10 @@ extern "C"{
         }
         HANDLE_ERROR(cudaDeviceSynchronize());
 
-        HANDLE_ERROR(cudaFree(dataPadded));
         HANDLE_ERROR(cudaFree(dangles));
         HANDLE_ERROR(cudaFree(dtomo));
         HANDLE_ERROR(cudaFree(dobj));
-
+        HANDLE_ERROR(cudaFree(dataPadded));
     }
 
     void getFBPMultiGPU(int* gpus, int ngpus, 
