@@ -106,32 +106,26 @@ extern "C"{
         int grid = (int)ceil( nangles / TPBY ) + 1;
         setSinCosTable<<<grid,TPBY>>>(sintable, costable, angles, nangles);
 
-        /* Padding */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock( (int)ceil( tomo_pad.x / TPBX ) + 1,
                         (int)ceil( tomo_pad.y / TPBY ) + 1,
                         (int)ceil( tomo_pad.z / TPBZ ) + 1);
 
-        size_t npad       = opt::get_total_points(tomo_pad);
-        float *dataPadded = opt::allocGPU<float>(npad);
-
-        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, tomo_size, configs.tomo.pad, 0.0f);
-
         /* Filter */
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, dataPadded, tomo_pad);
+            filterFBP(gpus, filter, tomogram, tomo_pad);
 
         /* Backproection */
-        BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, dataPadded, angles,
-                                                sintable, costable, 
-                                                pixel_x, pixel_y,
-                                                obj_size, tomo_pad);
+        BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, tomogram, angles,
+                                                        sintable, costable, 
+                                                        pixel_x, pixel_y,
+                                                        obj_size, tomo_pad);
 
         // opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
 
 
         HANDLE_ERROR(cudaDeviceSynchronize());
-        HANDLE_ERROR(cudaFree(dataPadded));
+        
         HANDLE_ERROR(cudaFree(sintable));
         HANDLE_ERROR(cudaFree(costable));    
     }
@@ -187,7 +181,18 @@ extern "C"{
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
 
-            getFBP( configs, gpus, dobj, dtomo, dangles, 
+            /* Padding */
+            dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+            dim3 gridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
+                            (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
+                            (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
+
+            size_t npad       = opt::get_total_points(configs.tomo.padsize);
+            float *dataPadded = opt::allocGPU<float>(npad);
+
+            opt::paddR2R<<<gridBlock,threadsPerBlock>>>(dtomo, dataPadded, configs.tomo.size, configs.tomo.pad, 0.0f);
+
+            getFBP( configs, gpus, dobj, dataPadded, dangles, 
                     dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
                     dim3(nrayspad  ,    nangles, subblock),  /* Tomogram padded size */
                     dim3(sizeImagex, sizeImagey, subblock)); /* Object (reconstruction) size */
@@ -198,6 +203,7 @@ extern "C"{
         }
         HANDLE_ERROR(cudaDeviceSynchronize());
 
+        HANDLE_ERROR(cudaFree(dataPadded));
         HANDLE_ERROR(cudaFree(dangles));
         HANDLE_ERROR(cudaFree(dtomo));
         HANDLE_ERROR(cudaFree(dobj));

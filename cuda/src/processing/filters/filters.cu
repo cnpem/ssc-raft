@@ -186,12 +186,10 @@ __global__ void fbp_filtering_C2C(Filter filter,
             convolution_R2C_C2R_1D( gpus, tomogram + offset, fft_size, filter);
         }
         
-
         float scale = (float)(size.x) * filter.pixel;
 
         opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
 
-        
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
         HANDLE_FFTERROR(cufftDestroy(gpus.mplanI));
 	}
