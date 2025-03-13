@@ -176,6 +176,8 @@ extern "C"{
         /* Loop for each batch of size 'batch' in threads */
 		int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_obj = 0;
 
+        printf("Size image %d, %d \n", sizeImagex, sizeImagey);
+        
         for (i = 0; i < ind_block; i++){
 
 			subblock       = min(sizez - ptr, blocksize);
