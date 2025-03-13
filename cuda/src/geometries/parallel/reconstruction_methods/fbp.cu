@@ -117,6 +117,11 @@ extern "C"{
         if (filter.type != Filter::EType::none)
             filterFBP(gpus, filter, dataPadded, tomo_pad);
 
+        printf("Size image %d, %d, %d \n", obj_size.x, obj_size.y,obj_size.z);
+        printf("Size image %d, %d, %d \n", tomo_pad.z, tomo_pad.y,tomo_pad.x);
+
+        fflush(stdout);
+
         /* Backproection */
         BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, dataPadded, angles,
                                                         sintable, costable, 
@@ -196,10 +201,10 @@ extern "C"{
             getFBP( configs, gpus, dobj, dtomo, dataPadded, dangles, 
                     dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
                     dim3(nrayspad  ,    nangles, subblock),  /* Tomogram padded size */
-                    dim3(nrayspad, nrayspad, subblock)); /* Object (reconstruction) size */
+                    dim3(sizeImagex, sizeImagey, subblock)); /* Object (reconstruction) size */
 
             opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
-                                (size_t)nrayspad * nrayspad * subblock);
+                                (size_t)sizeImagex * sizeImagey * subblock);
 
             // opt::GPUToCPU<float>(obj + ptr_block_obj, dataPadded, 
             //                     (size_t)nrayspad * nangles * subblock);
