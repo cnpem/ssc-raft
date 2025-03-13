@@ -86,7 +86,7 @@ extern "C"{
 
 extern "C"{
     void getFBP(CFG configs, GPU gpus, 
-    float *obj, float *tomogram, float *angles, 
+    float *obj, float *tomogram, float *dataPadded, float *angles, 
     dim3 tomo_size, dim3 tomo_pad, dim3 obj_size)
     {
         int filter_type      = configs.reconstruction_filter_type;
@@ -110,6 +110,8 @@ extern "C"{
         dim3 gridBlock( (int)ceil( tomo_pad.x / TPBX ) + 1,
                         (int)ceil( tomo_pad.y / TPBY ) + 1,
                         (int)ceil( tomo_pad.z / TPBZ ) + 1);
+
+        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, tomo_size, configs.tomo.pad, 0.0f);
 
         /* Filter */
         if (filter.type != Filter::EType::none)
@@ -164,11 +166,6 @@ extern "C"{
         float *dangles = opt::allocGPU<float>( nangles );
 
         /* Padding */
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
-                        (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
-                        (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
-
         float *dataPadded = opt::allocGPU<float>((size_t)nrayspad * nangles * blocksize);
 
         opt::CPUToGPU<float>(angles, dangles, nangles);
@@ -178,6 +175,8 @@ extern "C"{
 
         printf("Size image %d, %d \n", sizeImagex, sizeImagey);
         printf("Size image %d, %d, %d \n", configs.tomo.size.z, configs.tomo.size.y,configs.tomo.size.x);
+        printf("Size image %d, %d, %d \n", configs.tomo.padsize.z, configs.tomo.padsize.y,configs.tomo.padsize.x);
+
         fflush(stdout);
 
         for (i = 0; i < ind_block; i++){
@@ -194,11 +193,7 @@ extern "C"{
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
 
-            HANDLE_ERROR(cudaDeviceSynchronize());
-
-            opt::paddR2R<<<gridBlock,threadsPerBlock>>>(dtomo, dataPadded, configs.tomo.size, configs.tomo.pad, 1.0f);
-
-            getFBP( configs, gpus, dobj, dataPadded, dangles, 
+            getFBP( configs, gpus, dobj, dtomo, dataPadded, dangles, 
                     dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
                     dim3(nrayspad  ,    nangles, subblock),  /* Tomogram padded size */
                     dim3(sizeImagex, sizeImagey, subblock)); /* Object (reconstruction) size */
