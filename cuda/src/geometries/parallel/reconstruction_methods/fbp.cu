@@ -169,8 +169,7 @@ extern "C"{
                         (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
                         (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
 
-        size_t npad       = opt::get_total_points(configs.tomo.padsize);
-        float *dataPadded = opt::allocGPU<float>(npad);
+        float *dataPadded = opt::allocGPU<float>((size_t)nrayspad * nangles * blocksize);
 
         opt::CPUToGPU<float>(angles, dangles, nangles);
 
