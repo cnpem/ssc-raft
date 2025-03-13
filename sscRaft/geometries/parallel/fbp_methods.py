@@ -64,14 +64,14 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
     padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
-    pad = padx * nrays
+    pad = (padx + 1) * nrays
     logger.info(f'Set FBP RT pad value as {padx} x horizontal dimension = ({pad}).')
 
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     if obj is None:
-        obj      = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+        obj      = numpy.zeros([nslices, objsize + pad, objsize + pad], dtype=numpy.float32)
         obj      = CNICE(obj)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
@@ -166,7 +166,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         
     padx, pady, padz  = dic['padding'] + 2,0,0 # (padx, pady, padz)
 
-    pad = padx * nrays
+    pad = (padx + 2) * nrays
     logger.info(f'Set BST pad value as {padx} x horizontal dimension = ({pad}).')
 
     tomogram     = CNICE(tomogram) 
