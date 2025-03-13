@@ -25,6 +25,10 @@ extern "C"{
             scale = 1.0f;
         }
 
+        printf("Size image %d, %d \n", nrays, nangles);
+        printf("Size image %d, %d \n", obj_size.x, obj_size.y);
+        fflush(stdout);
+
         // float xmin = -1.0;
         // float ymin = -1.0;
         // float dx   = 2.0 / (obj_size.x - 1);
