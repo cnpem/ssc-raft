@@ -115,7 +115,7 @@ extern "C"{
 
         /* Filter */
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, dataPadded, tomo_pad);
+            filterFBP(gpus, filter, tomogram, tomo_pad);
 
         printf("Size image %d, %d, %d \n", obj_size.x, obj_size.y,obj_size.z);
         printf("Size image %d, %d, %d \n", tomo_pad.z, tomo_pad.y,tomo_pad.x);
@@ -123,7 +123,7 @@ extern "C"{
         fflush(stdout);
 
         /* Backproection */
-        BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, dataPadded, angles,
+        BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, tomogram, angles,
                                                         sintable, costable, 
                                                         pixel_x, pixel_y,
                                                         obj_size, tomo_pad);
