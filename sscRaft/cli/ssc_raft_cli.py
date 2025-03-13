@@ -214,7 +214,7 @@ def tomcat_recon(
     }
 
     logger.info(f'Reconstruction method: {reconstructMethod}')
-    dic['reconstruct'] = 'Recon_' + OutID + '_' + data_name
+    dic['reconstruct'] = dic.get('reconstruct', 'Recon_' + data_name)
 
     tomcat_pipeline_cli(dic)
 
