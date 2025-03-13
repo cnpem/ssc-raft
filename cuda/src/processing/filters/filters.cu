@@ -117,48 +117,48 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
 	}
 
-	// void filterFBP(GPU gpus, Filter filter, 
-    // float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
-	// {	
-    //     /* int dim = { 1, 2 }
-    //         1: if plan 1D multiples cuffts
-    //         2: if plan 2D multiples cuffts */
-    //     // int dim = 1;
+	void filterFBPpad(GPU gpus, Filter filter, 
+    float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
+	{	
+        /* int dim = { 1, 2 }
+            1: if plan 1D multiples cuffts
+            2: if plan 2D multiples cuffts */
+        // int dim = 1;
 
-    //     dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-    //     dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1,
-    //                     (int)ceil( size_pad.y / TPBY ) + 1,
-    //                     (int)ceil( size_pad.z / TPBZ ) + 1);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1,
+                        (int)ceil( size_pad.y / TPBY ) + 1,
+                        (int)ceil( size_pad.z / TPBZ ) + 1);
 
-    //     dim3 fft_size = dim3( size_pad.x / 2 + 1, size.y, 1 );
+        dim3 fft_size = dim3( size_pad.x / 2 + 1, size.y, 1 );
 
-    //     size_t npad = opt::get_total_points(size_pad);
+        size_t npad = opt::get_total_points(size_pad);
 
-	// 	cufftPlan1d(&gpus.mplan , size_pad.x, CUFFT_R2C, size_pad.y);
-	// 	cufftPlan1d(&gpus.mplanI, size_pad.x, CUFFT_C2R, size_pad.y);
+		cufftPlan1d(&gpus.mplan , size_pad.x, CUFFT_R2C, size_pad.y);
+		cufftPlan1d(&gpus.mplanI, size_pad.x, CUFFT_C2R, size_pad.y);
 
-    //     float *dataPadded = opt::allocGPU<float>(npad);
+        float *dataPadded = opt::allocGPU<float>(npad);
 
-    //     opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, size, pad, 0.0f);
+        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, size, pad, 0.0f);
 
-    //     size_t offset; 
-    //     for( int k = 0; k < size.z; k++){  
+        size_t offset; 
+        for( int k = 0; k < size.z; k++){  
             
-    //         offset = (size_t)k * size_pad.x * size_pad.y;
+            offset = (size_t)k * size_pad.x * size_pad.y;
 
-    //         convolution_R2C_C2R_1D( gpus, dataPadded + offset, fft_size, filter);
-    //     }
+            convolution_R2C_C2R_1D( gpus, dataPadded + offset, fft_size, filter);
+        }
         
-    //     opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
+        opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
 
-    //     float scale = (float)(size_pad.x) * filter.pixel;
+        float scale = (float)(size_pad.x) * filter.pixel;
 
-    //     opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
+        opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
 
-    //     HANDLE_ERROR(cudaFree(dataPadded));
-	// 	HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
-    //     HANDLE_FFTERROR(cufftDestroy(gpus.mplanI));
-	// }
+        HANDLE_ERROR(cudaFree(dataPadded));
+		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
+        HANDLE_FFTERROR(cufftDestroy(gpus.mplanI));
+	}
 
     void filterFBP(GPU gpus, Filter filter, 
     float *tomogram, dim3 size)

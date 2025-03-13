@@ -22,7 +22,7 @@ extern "C"{
         Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel_x);
 
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+            filterFBPpad(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         HANDLE_ERROR(cudaDeviceSynchronize());
 

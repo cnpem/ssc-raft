@@ -103,8 +103,8 @@ extern "C"{
         float *sintable = opt::allocGPU<float>(nangles);
         float *costable = opt::allocGPU<float>(nangles);
 
-        int gridBlock = (int)ceil( nangles / TPBY ) + 1;
-        setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
+        int grid = (int)ceil( nangles / TPBY ) + 1;
+        setSinCosTable<<<grid,TPBY>>>(sintable, costable, angles, nangles);
 
         /* Padding */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
@@ -122,7 +122,7 @@ extern "C"{
             filterFBP(gpus, filter, dataPadded, tomo_size);
 
         /* Backproection */
-        BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, dataPadded, angles,
+        BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, dataPadded, angles,
                                                 sintable, costable, 
                                                 pixel_x, pixel_y,
                                                 obj_size, tomo_pad);
