@@ -196,10 +196,10 @@ extern "C"{
             getFBP( configs, gpus, dobj, dtomo, dataPadded, dangles, 
                     dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
                     dim3(nrayspad  ,    nangles, subblock),  /* Tomogram padded size */
-                    dim3(sizeImagex, sizeImagey, subblock)); /* Object (reconstruction) size */
+                    dim3(nrayspad, nrayspad, subblock)); /* Object (reconstruction) size */
 
             opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
-                                (size_t)sizeImagex * sizeImagey * subblock);
+                                (size_t)nrayspad * nrayspad * subblock);
 
             // opt::GPUToCPU<float>(obj + ptr_block_obj, dataPadded, 
             //                     (size_t)nrayspad * nangles * subblock);
