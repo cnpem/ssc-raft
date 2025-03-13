@@ -235,8 +235,8 @@ extern "C"{
         int nslices  = configs.tomo.size.z;
 
         /* Reconstruction sizes */
-        int sizeImagex = configs.obj.size.x;
-        int sizeImagey = configs.obj.size.y;
+        int sizeImagex = configs.tomo.padsize.x; //configs.obj.size.x;
+        int sizeImagey = configs.tomo.padsize.x; //configs.obj.size.y;
 
 		int subvolume = (nslices + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; 
