@@ -177,6 +177,7 @@ extern "C"{
 		int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_obj = 0;
 
         printf("Size image %d, %d \n", sizeImagex, sizeImagey);
+        printf("Size image %d, %d, %d \n", configs.tomo.size.z, configs.tomo.size.y,configs.tomo.size.x);
         fflush(stdout);
 
         for (i = 0; i < ind_block; i++){
@@ -192,6 +193,8 @@ extern "C"{
 			
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
+
+            HANDLE_ERROR(cudaDeviceSynchronize());
 
             opt::paddR2R<<<gridBlock,threadsPerBlock>>>(dtomo, dataPadded, configs.tomo.size, configs.tomo.pad, 1.0f);
 
