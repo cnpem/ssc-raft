@@ -64,7 +64,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
     padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
-    pad = (padx + 1) * nrays
+    pad = (padx) * nrays
     logger.info(f'Set FBP RT pad value as {padx} x horizontal dimension = ({pad}).')
 
     tomogram     = CNICE(tomogram) 
