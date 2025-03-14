@@ -105,7 +105,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
-        opt::paddR2C<<<gridBlock,gpus.BT>>>(tomogram, dataPadded, size, pad, 0.0f);
+        opt::paddR2C<<<gridBlock,gpus.BT>>>(tomogram, dataPadded, size, pad);
 
 		convolution_Real_C2C_1D(gpus, dataPadded, size_pad, filter, pixel);
 
@@ -139,7 +139,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         float *dataPadded = opt::allocGPU<float>(npad);
 
-        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, size, pad, 0.0f);
+        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, size, pad);
 
         size_t offset; 
         for( int k = 0; k < size.z; k++){  

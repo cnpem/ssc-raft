@@ -147,8 +147,6 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
             nslices = 1
     else:
             nslices = tomogram.shape[0]
-    
-    objsize        = nrays
 
     filter_type    = FilterNumber(dic['filter'])
     beta_delta     = dic['beta/delta']
@@ -168,8 +166,12 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         
     padx, pady, padz  = dic['padding'] + 2,0,0 # (padx, pady, padz)
 
-    pad = (padx + 2) * nrays
-    logger.info(f'Set BST pad value as {padx} x horizontal dimension = ({pad}).')
+    pad    = (padx) * nrays
+    logger.info(f'Set FBP BST pad value as {padx} x horizontal dimension = ({pad}).')
+
+    # Object (reconstruction)
+    objsize = nrays
+    logger.info(f'Object size: (nslices, ny, nx) = ({nslices},{objsize},{objsize}).')
 
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)

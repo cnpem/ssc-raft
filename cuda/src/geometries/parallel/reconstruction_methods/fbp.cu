@@ -206,8 +206,7 @@ extern "C"{
             /* Padding the tomogram data */
             opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomoPadded, 
                                                                 configs.tomo.size, 
-                                                                configs.tomo.pad, 
-                                                                0.0f);
+                                                                configs.tomo.pad);
 
             getFBP( configs, gpus, dobjPadded, dtomoPadded, dangles, 
                     dim3(nrayspad ,   nangles, subblock),  /* Tomogram padded size */

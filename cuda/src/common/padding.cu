@@ -7,7 +7,7 @@
 /* namespace opt (in 'inc/commons/opt.hpp') functions definitions */
 
 __global__ void opt::paddR2C(float *in, cufftComplex *outpadded, 
-dim3 size, dim3 pad, float value)
+dim3 size, dim3 pad)
 {
     int Npadx = size.x * ( 1 + pad.x );
     int Npady = size.y * ( 1 + pad.y );
@@ -50,7 +50,7 @@ dim3 size, dim3 pad, float value)
 }
 
 __global__ void opt::paddC2C(cufftComplex *in, cufftComplex *outpadded,
-dim3 size, dim3 pad, float value)
+dim3 size, dim3 pad)
 {
     int Npadx = size.x * ( 1 + pad.x );
     int Npady = size.y * ( 1 + pad.y );
@@ -99,7 +99,7 @@ dim3 size, dim3 pad, float value)
 }
 
 __global__ void opt::paddC2R(cufftComplex *in, float *outpadded,
-        dim3 size, dim3 pad, float value)
+        dim3 size, dim3 pad)
 {
     int Npadx = size.x * ( 1 + pad.x );
     int Npady = size.y * ( 1 + pad.y );
@@ -138,7 +138,7 @@ __global__ void opt::paddC2R(cufftComplex *in, float *outpadded,
 }
 
 __global__ void opt::paddR2R(float *in, float *outpadded,
-        dim3 size, dim3 pad, float value)
+        dim3 size, dim3 pad)
 {
     int Npadx = size.x * ( 1 + pad.x );
     int Npady = size.y * ( 1 + pad.y );

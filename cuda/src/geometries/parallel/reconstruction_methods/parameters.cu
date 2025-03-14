@@ -161,7 +161,7 @@ extern "C"{
         /* Set Reconstruction variables */
         configs->obj.size      = dim3(parameters_int[3],parameters_int[3],configs->tomo.size.z); 
 
-                /* Set padding */
+        /* Set padding */
         
         /* Pad is the integer number such that the total padding is = ( pad + 1 ) * dimension 
         Example: 
@@ -169,7 +169,7 @@ extern "C"{
             - The padx = 1;
             - The new dimension is nx_pad = nx * (1 + padx) = 4096
         */
-        configs->obj.pad      = dim3(configs->tomo.pad.x,configs->tomo.pad.x,configs->tomo.pad.z); //dim3(parameters_int[4],parameters_int[5],parameters_int[6]);
+        configs->obj.pad      = dim3(configs->tomo.pad.x,configs->tomo.pad.x,configs->tomo.pad.z); 
 
         /* Padsize is the final dimension with padding. 
         Example:
@@ -266,8 +266,27 @@ extern "C"{
         /* Set Reconstruction variables */
         configs->obj.size      = dim3(parameters_int[3],parameters_int[3],configs->tomo.size.z); 
 
-        /* Compute memory in bytes of a single slice for Tomogram */
-        configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->obj.size.x * configs->obj.size.y;
+        /* Set padding */
+        
+        /* Pad is the integer number such that the total padding is = ( pad + 1 ) * dimension 
+        Example: 
+            - Data have dimension on x-axis of nx = 2048;
+            - The padx = 1;
+            - The new dimension is nx_pad = nx * (1 + padx) = 4096
+        */
+        configs->obj.pad      = dim3(configs->tomo.pad.x,configs->tomo.pad.x,configs->tomo.pad.z); 
+
+        /* Padsize is the final dimension with padding. 
+        Example:
+            - Data have dimension on x-axis of nx = 2048 and padx = 1
+            - padsizex = nx_pad = nx * (1 + padx) = 4096
+            - See Pad example above. 
+        */
+        configs->obj.padsize  = dim3(configs->obj.size.x * ( 1 + configs->obj.pad.x ),configs->obj.size.y * ( 1 + configs->obj.pad.y ),configs->obj.size.z);
+
+        /* Compute memory in bytes of a single slice for Object */
+        configs->obj.slice_memory_bytes      = static_cast<float>(sizeof(float)) * configs->obj.size.x * configs->obj.size.y;
+        configs->obj.slice_padd_memory_bytes = static_cast<float>(sizeof(float)) * configs->obj.padsize.x * configs->obj.padsize.y;
 
         /* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
         configs->geometry.magnitude_x        = 1.0;
@@ -298,7 +317,8 @@ extern "C"{
         configs->total_required_mem_per_slice_bytes = (
                 configs->tomo.slice_memory_bytes          + // Tomo slice
                 2 * configs->obj.slice_memory_bytes       + // Reconstructed object slice
-                2 * configs->tomo.slice_padd_memory_bytes + // FFT slice tomo
+                2 * configs->obj.slice_padd_memory_bytes  + // Reconstructed object padded slice
+                2 * configs->tomo.slice_padd_memory_bytes + // Tomo padded slice 
                 configs->tomo.width_memory_bytes           // angles
                 ); 
 
