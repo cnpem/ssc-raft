@@ -177,12 +177,11 @@ extern "C"{
             - padsizex = nx_pad = nx * (1 + padx) = 4096
             - See Pad example above. 
         */
-        configs->obj.padsize  = dim3(configs->tomo.size.x * ( 1 + configs->obj.pad.x ),configs->tomo.size.x * ( 1 + configs->obj.pad.y ),configs->obj.size.z);
+        configs->obj.padsize  = dim3(configs->obj.size.x * ( 1 + configs->obj.pad.x ),configs->obj.size.y * ( 1 + configs->obj.pad.y ),configs->obj.size.z);
 
-        /* Compute memory in bytes of a single slice for Tomogram */
-        // configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->obj.size.x * configs->obj.size.y;
-        configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->tomo.padsize.x * configs->tomo.padsize.y;
-
+        /* Compute memory in bytes of a single slice for Object */
+        configs->obj.slice_memory_bytes      = static_cast<float>(sizeof(float)) * configs->obj.size.x * configs->obj.size.y;
+        configs->obj.slice_padd_memory_bytes = static_cast<float>(sizeof(float)) * configs->obj.padsize.x * configs->obj.padsize.y;
 
         /* Set magnitude [(z1+z2)/z1] according to the beam geometry (Parallel) */
         configs->geometry.magnitude_x        = 1.0;
@@ -210,7 +209,8 @@ extern "C"{
         configs->total_required_mem_per_slice_bytes = (
                 configs->tomo.slice_memory_bytes      + // Tomo slice
                 configs->obj.slice_memory_bytes       + // Reconstructed object slice
-                configs->tomo.slice_padd_memory_bytes + // FFT slice
+                configs->obj.slice_padd_memory_bytes  + // Reconstructed padded object slice
+                configs->tomo.slice_padd_memory_bytes + // Tomo padded slice
                 configs->tomo.lenght_memory_bytes     + // FBP filter kernel
                 configs->tomo.width_memory_bytes        // angles
                 ); 
