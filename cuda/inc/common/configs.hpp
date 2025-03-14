@@ -57,7 +57,7 @@ typedef struct dimension
     int yslice0, yslice1; /* Slices Y: start (0)  and end slice (1)*/
     int zslice0, zslice1; /* Slices Z: start (0)  and end slice (1)*/
 
-    dim3  padsize; /* Padded dimensions: (size + 2 * pad) */
+    dim3  padsize; /* Padded dimensions: (size * (1 + pad)) */
     dim3  pad;     /* Pad value */
 
     dim3 batchsize;

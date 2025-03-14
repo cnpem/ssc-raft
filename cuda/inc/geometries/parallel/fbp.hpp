@@ -13,7 +13,7 @@ extern "C"{
 
     void getFBPGPU(CFG configs, GPU gpus, float* recon, float* tomogram, float* angles, int sizez, int ngpu);
 
-    void getFBP(CFG configs, GPU gpus, float *recon, float *tomogram, float *dataPadded, float *angles, dim3 tomo_size, dim3 tomo_pad, dim3 recon_size);
+    void getFBP(CFG configs, GPU gpus, float *recon, float *tomogram, float *angles, dim3 tomo_size, dim3 recon_size);
 
 }
 

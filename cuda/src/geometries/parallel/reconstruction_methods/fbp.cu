@@ -86,8 +86,8 @@ extern "C"{
 
 extern "C"{
     void getFBP(CFG configs, GPU gpus, 
-    float *obj, float *tomogram, float *dataPadded, float *angles, 
-    dim3 tomo_size, dim3 tomo_pad, dim3 obj_size)
+    float *obj, float *tomogram, float *angles, 
+    dim3 tomo_size, dim3 obj_size)
     {
         int filter_type      = configs.reconstruction_filter_type;
         float paganin_reg    = configs.reconstruction_paganin;
@@ -95,8 +95,12 @@ extern "C"{
         float axis_offset    = configs.rotation_axis_offset;
         float pixel_x        = configs.geometry.obj_pixel_x;
         float pixel_y        = configs.geometry.obj_pixel_y;
+        int nangles          = tomo_size.y;
 
-        int nangles          = configs.tomo.size.y;
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( obj_size.x / TPBX ) + 1,
+                        (int)ceil( obj_size.y / TPBY ) + 1,
+                        (int)ceil( obj_size.z / TPBZ ) + 1);
 
         Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel_x);
         
@@ -106,30 +110,15 @@ extern "C"{
         int grid = (int)ceil( nangles / TPBY ) + 1;
         setSinCosTable<<<grid,TPBY>>>(sintable, costable, angles, nangles);
 
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock( (int)ceil( tomo_pad.x / TPBX ) + 1,
-                        (int)ceil( tomo_pad.y / TPBY ) + 1,
-                        (int)ceil( tomo_pad.z / TPBZ ) + 1);
-
-        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, tomo_size, configs.tomo.pad, 0.0f);
-
         /* Filter */
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_pad);
-
-        printf("Size image %d, %d, %d \n", obj_size.x, obj_size.y,obj_size.z);
-        printf("Size image %d, %d, %d \n", tomo_pad.z, tomo_pad.y,tomo_pad.x);
-
-        fflush(stdout);
+            filterFBP(gpus, filter, tomogram, tomo_size);
 
         /* Backproection */
         BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, tomogram, angles,
                                                         sintable, costable, 
                                                         pixel_x, pixel_y,
-                                                        obj_size, tomo_pad);
-
-        // opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
-
+                                                        obj_size, tomo_size);
 
         HANDLE_ERROR(cudaDeviceSynchronize());
         
@@ -152,8 +141,15 @@ extern "C"{
         int nrayspad = configs.tomo.padsize.x;
 
         /* Reconstruction sizes */
-        int sizeImagex = configs.tomo.padsize.x; //configs.obj.size.x;
-        int sizeImagey = configs.tomo.padsize.x; //configs.obj.size.y;
+        int sizeImagex = configs.obj.size.x;
+        int sizeImagey = configs.obj.size.y;
+
+        dim3 objsize_aux     = dim3(configs.tomo.size.x, configs.tomo.size.x, configs.obj.size.z); /* No padded obj size auxiliar */
+
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
+                        (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
+                        (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
 
         int i;
 
@@ -198,13 +194,23 @@ extern "C"{
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
 
-            getFBP( configs, gpus, dobj, dtomo, dataPadded, dangles, 
-                    dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
+
+            opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, 
+                                                        configs.tomo.size, 
+                                                        configs.tomo.pad, 
+                                                        0.0f);
+
+            getFBP( configs, gpus, dobj, dtomo, dangles, 
                     dim3(nrayspad  ,    nangles, subblock),  /* Tomogram padded size */
                     dim3(sizeImagex, sizeImagey, subblock)); /* Object (reconstruction) size */
 
+
+            // opt::remove_paddR2R<<<gpus.Grd,gpus.BT>>>(dataPadded, tomogram, configs.obj.size, configs.obj.pad);
+
+
             opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
                                 (size_t)sizeImagex * sizeImagey * subblock);
+
 
             // opt::GPUToCPU<float>(obj + ptr_block_obj, dataPadded, 
             //                     (size_t)nrayspad * nangles * subblock);
@@ -244,8 +250,8 @@ extern "C"{
         int nslices  = configs.tomo.size.z;
 
         /* Reconstruction sizes */
-        int sizeImagex = configs.tomo.padsize.x; //configs.obj.size.x;
-        int sizeImagey = configs.tomo.padsize.x; //configs.obj.size.y;
+        int sizeImagex = configs.obj.size.x;
+        int sizeImagey = configs.obj.size.y;
 
 		int subvolume = (nslices + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; 

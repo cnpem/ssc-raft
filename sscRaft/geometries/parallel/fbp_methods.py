@@ -43,8 +43,6 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
         nslices = 1
     else:
         nslices = tomogram.shape[0]
-    
-    objsize        = nrays
 
     filter_type    = FilterNumber(dic['filter'])
     beta_delta     = dic['beta/delta']
@@ -64,18 +62,17 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
     padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
-    pad = (padx) * nrays
+    pad    = (padx) * nrays
     logger.info(f'Set FBP RT pad value as {padx} x horizontal dimension = ({pad}).')
-    aux = objsize + pad
-    logger.info(f'Ob size {aux}.')
 
-
+    objsize = nrays * ( padx + 1 )
+    logger.info(f'Object size: (nslices, ny, nx) = ({nslices},{objsize},{objsize}).')
+    
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     if obj is None:
-        # obj      = numpy.zeros([nslices, objsize + pad, objsize + pad], dtype=numpy.float32)
-        obj      = numpy.zeros([nslices, nrays * (padx+1), nrays * (padx+1)], dtype=numpy.float32)
+        obj      = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
         # obj      = numpy.zeros([nslices, nangles, nrays * (padx+1)], dtype=numpy.float32)
         obj      = CNICE(obj)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
@@ -94,7 +91,6 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
-
 
     # bShiftCenter = dic['shift center']
 

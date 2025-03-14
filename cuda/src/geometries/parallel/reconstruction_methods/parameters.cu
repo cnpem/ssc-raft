@@ -161,6 +161,24 @@ extern "C"{
         /* Set Reconstruction variables */
         configs->obj.size      = dim3(parameters_int[3],parameters_int[3],configs->tomo.size.z); 
 
+                /* Set padding */
+        
+        /* Pad is the integer number such that the total padding is = ( pad + 1 ) * dimension 
+        Example: 
+            - Data have dimension on x-axis of nx = 2048;
+            - The padx = 1;
+            - The new dimension is nx_pad = nx * (1 + padx) = 4096
+        */
+        configs->obj.pad      = dim3(configs->tomo.pad.x,configs->tomo.pad.x,configs->tomo.pad.z); //dim3(parameters_int[4],parameters_int[5],parameters_int[6]);
+
+        /* Padsize is the final dimension with padding. 
+        Example:
+            - Data have dimension on x-axis of nx = 2048 and padx = 1
+            - padsizex = nx_pad = nx * (1 + padx) = 4096
+            - See Pad example above. 
+        */
+        configs->obj.padsize  = dim3(configs->tomo.size.x * ( 1 + configs->obj.pad.x ),configs->tomo.size.x * ( 1 + configs->obj.pad.y ),configs->obj.size.z);
+
         /* Compute memory in bytes of a single slice for Tomogram */
         // configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->obj.size.x * configs->obj.size.y;
         configs->obj.slice_memory_bytes = static_cast<float>(sizeof(float)) * configs->tomo.padsize.x * configs->tomo.padsize.y;
