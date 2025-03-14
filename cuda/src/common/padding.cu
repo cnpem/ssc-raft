@@ -125,12 +125,12 @@ __global__ void opt::paddR2R(float *in, float *outpadded,
 
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
+    if ( ( i <=          (int)padx/2 ) ) outpadded[indpad] = 10; //in[size.x * k * size.y + size.x * jj +           0];
+    if ( ( i >= size.x + (int)padx/2 ) ) outpadded[indpad] = 10; //in[size.x * k * size.y + size.x * jj + (size.x -1)];
+
     // outpadded[indpad] = value;
 
     if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) ) return;
-
-    if ( ( i <=          (int)padx/2 ) ) outpadded[indpad] = 10; //in[size.x * k * size.y + size.x * jj +           0];
-    if ( ( i >= size.x + (int)padx/2 ) ) outpadded[indpad] = 10; //in[size.x * k * size.y + size.x * jj + (size.x -1)];
 
     outpadded[indpad] = in[index];
 }
