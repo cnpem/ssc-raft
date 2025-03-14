@@ -429,8 +429,8 @@ __global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, 
         atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
 
         if(outdx <= offset){   
-            sinogram[blockIdx.y*sizex*2 + outdx] = temp2[blockIdx.y*sizex + 0];
-            sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp1[blockIdx.y*sizex + 0];
+            sinogram[blockIdx.y*sizex*2 + outdx] = temp1[blockIdx.y*sizex + 0];
+            sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp2[blockIdx.y*sizex + 0];
         }
     }
 }
