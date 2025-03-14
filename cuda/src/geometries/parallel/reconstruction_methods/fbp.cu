@@ -110,10 +110,10 @@ extern "C"{
         setSinCosTable<<<grid,TPBY>>>(sintable, costable, angles, nangles);
 
         /* Backprojection */
-        // BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, tomogram, angles,
-        //                                                 sintable, costable, 
-        //                                                 pixel_x, pixel_y,
-        //                                                 obj_size, tomo_size);
+        BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, tomogram, angles,
+                                                        sintable, costable, 
+                                                        pixel_x, pixel_y,
+                                                        obj_size, tomo_size);
 
         HANDLE_ERROR(cudaDeviceSynchronize());
         
@@ -194,8 +194,8 @@ extern "C"{
 			subblock       = min(sizez - ptr, blocksize);
 
 			ptr_block_tomo = (size_t)     nrays *    nangles * ptr;
-            // ptr_block_obj  = (size_t)sizeImagex * sizeImagey * ptr;
-            ptr_block_obj  = (size_t)nrayspad * nangles * ptr;
+            ptr_block_obj  = (size_t)sizeImagex * sizeImagey * ptr;
+            // ptr_block_obj  = (size_t)nrayspad * nangles * ptr;
 
 			/* Update pointer */
 			ptr = ptr + subblock;
@@ -214,17 +214,15 @@ extern "C"{
                     dim3(padImagex, padImagey, subblock)); /* Object (reconstruction) padded size */
 
             /* Remove padd from the object (reconstruction) */
-            // opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(dobjPadded, dobj, 
-            //                                                         configs.obj.size, 
-            //                                                         configs.obj.pad);
+            opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(dobjPadded, dobj, 
+                                                                    configs.obj.size, 
+                                                                    configs.obj.pad);
 
+            opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
+                                (size_t)sizeImagex * sizeImagey * subblock);
 
-            // opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
-            //                     (size_t)sizeImagex * sizeImagey * subblock);
-
-
-            opt::GPUToCPU<float>(obj + ptr_block_obj, dtomoPadded, 
-                                (size_t)nrayspad * nangles * subblock);
+            // opt::GPUToCPU<float>(obj + ptr_block_obj, dtomoPadded, 
+            //                     (size_t)nrayspad * nangles * subblock);
 
         }
         HANDLE_ERROR(cudaDeviceSynchronize());
