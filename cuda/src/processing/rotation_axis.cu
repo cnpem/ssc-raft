@@ -495,7 +495,7 @@ extern "C"{
         float *dataPadded = opt::allocGPU<float>(npad);
 
         opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, tomo_size,
-                                                    dim3(padx,0,0), 0.0f);
+                                                    dim3(padx,0,0));
 
         size_t offset; 
         for( int k = 0; k < nslices; k++){  

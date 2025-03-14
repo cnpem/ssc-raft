@@ -51,7 +51,7 @@ extern "C"{
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
-        float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
+        float *dtomo   = opt::allocGPU<float>((size_t)nrays * nangles * blocksize);
 
         /* Loop for each batch of size 'batch' in threads */
 		int ptr = 0, subblock; size_t ptr_block_tomo = 0;
@@ -69,8 +69,8 @@ extern "C"{
                                 (size_t)nrays * nangles * subblock);
 
             getFilterLowPass( configs, gpus, dtomo,  
-                            dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
-                            dim3(nrayspad  ,    nangles, subblock)); /* Tomogram padded size */
+                            dim3(nrays     , nangles, subblock),  /* Tomogram size */
+                            dim3(nrayspad  , nangles, subblock)); /* Tomogram padded size */
 
             opt::GPUToCPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
