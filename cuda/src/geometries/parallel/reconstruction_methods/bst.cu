@@ -531,8 +531,8 @@ extern "C" {
 
             /* Remove padd from the object (reconstruction) */
             opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock,0,stream>>>(dobjPadded[st], dobj[st], 
-                                                                            configs.obj.size, 
-                                                                            configs.obj.pad);
+                                                                                configs.obj.size, 
+                                                                                configs.obj.pad);
 
             opt::GPUToCPU<float>(obj + ptr * size_t(configs.obj.size.x * configs.obj.size.y), 
                                 dobj[st],
