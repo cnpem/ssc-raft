@@ -153,7 +153,7 @@ extern "C"{
         dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 TomogridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
                             (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
-                            (int)ceil(              blocksize / TPBZ ) + 1);
+                            (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
 
         /* Reconstruction sizes */
         /* Reconstruction size */
@@ -168,7 +168,7 @@ extern "C"{
         dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 ObjgridBlock(  (int)ceil( configs.obj.padsize.x / TPBX ) + 1,
                             (int)ceil( configs.obj.padsize.y / TPBY ) + 1,
-                            (int)ceil(             blocksize / TPBZ ) + 1);
+                            (int)ceil( configs.obj.padsize.z / TPBZ ) + 1);
 
         float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
         float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagey * blocksize);
