@@ -430,7 +430,8 @@ extern "C" {
                             (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
 
         /* Reconstruction sizes */
-        int sizeImagex = configs.obj.padsize.x;
+        // int sizeImagex = configs.obj.padsize.x;
+        int sizeImagex = configs.obj.size.x;
 
         /* Reconstruction GPUs padded Grd and Blocks */
         dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
@@ -517,7 +518,7 @@ extern "C" {
             opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock,0,stream>>>(   dtomo[st], dtomoPadded[st], 
                                                                             dim3(configs.tomo.size.x, configs.tomo.size.x, subblock),
                                                                             configs.tomo.pad);
-            getBST( dobjPadded[st], dtomoPadded[st],
+            getBST( dobj[st], dtomoPadded[st],
                     dangles, nrays, nangles, subblock, sizeImagex, 
                     bst_padd, regularization, paganin_reg,
                     filter_type, axis_offset, pixel, 
@@ -526,12 +527,12 @@ extern "C" {
                     gpu, stream);
 
             /* Remove padd from the object (reconstruction) */
-            ObjgridBlock.z = TomogridBlock.z;
-            opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock,0,stream>>>(  dobjPadded[st], dobj[st], 
-                                                                                dim3(configs.obj.size.x, configs.obj.size.x, subblock), 
-                                                                                configs.obj.pad);
+            // ObjgridBlock.z = TomogridBlock.z;
+            // opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock,0,stream>>>(  dobjPadded[st], dobj[st], 
+            //                                                                     dim3(configs.obj.size.x, configs.obj.size.x, subblock), 
+            //                                                                     configs.obj.pad);
 
-            opt::GPUToCPU<float>(obj + ptr * size_t(configs.obj.size.x * configs.obj.size.y), 
+            opt::GPUToCPU<float>(obj +  size_t(ptr * configs.obj.size.x * configs.obj.size.y), 
                                 dobj[st],
                                 size_t(configs.obj.size.x * configs.obj.size.y * subblock), 
                                 stream);
