@@ -207,12 +207,11 @@ extern "C"{
     
         /* Compute total memory used of FBP method on a singles slice */
         configs->total_required_mem_per_slice_bytes = (
-                configs->tomo.slice_memory_bytes      + // Tomo slice
-                configs->obj.slice_memory_bytes       + // Reconstructed object slice
-                configs->obj.slice_padd_memory_bytes  + // Reconstructed padded object slice
-                configs->tomo.slice_padd_memory_bytes + // Tomo padded slice
-                configs->tomo.lenght_memory_bytes     + // FBP filter kernel
-                configs->tomo.width_memory_bytes        // angles
+                configs->tomo.slice_memory_bytes          + // Tomo slice
+                configs->obj.slice_memory_bytes           + // Reconstructed object slice
+                configs->obj.slice_padd_memory_bytes      + // Reconstructed padded object slice
+                2 * configs->tomo.slice_padd_memory_bytes + // Tomo padded slice
+                configs->tomo.width_memory_bytes            // angles
                 ); 
 
         /* GPU blocksize */
