@@ -199,7 +199,7 @@ def tomcat_pipeline(dic: dict) -> None:
 def tomcat_api_pipeline(tomogram: numpy.ndarray, 
                         flat: numpy.ndarray, 
                         dark: numpy.ndarray,
-                        recon: numpy.ndarray,
+                        recon: None,
                         angle_vector: numpy.ndarray, 
                         dic: dict) -> numpy.ndarray:
 
@@ -245,6 +245,7 @@ def tomcat_api_pipeline(tomogram: numpy.ndarray,
     else:
         dic['rotation axis offset'] = 0
 
+    dic['save_recon'] = False
     # Perform tomography reconstruction
     recon = process_tomogram_volume(tomogram, recon, dic, reconstruction_methods)
 
