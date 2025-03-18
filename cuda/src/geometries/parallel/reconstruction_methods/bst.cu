@@ -463,7 +463,7 @@ extern "C" {
         int dimms2d[]     = {(int)sizeImagex, (int)sizeImagex};
         int beds[]        = {nrays};
 
-        const int nstreams = 1;
+        const int nstreams = 2;
         float* dtomo[nstreams];
         float* dobj[nstreams];
         float* dtomoPadded[nstreams];
