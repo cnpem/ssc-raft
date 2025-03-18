@@ -474,7 +474,6 @@ extern "C" {
         cufftHandle filterplans[nstreams];
 
         cImage* filtersino[nstreams];
-
         cImage* cartesianblock[nstreams];
         cImage* polarblock[nstreams];
         cImage* realpolar[nstreams];
@@ -484,22 +483,21 @@ extern "C" {
 
             HANDLE_FFTERROR(cufftPlanMany(&plans1d[st], 1, dimms1d, beds, 1, nrays * bst_padd / 2, beds, 1,
                                         nrays * bst_padd / 2, CUFFT_C2C, nangles * blocksize_bst * 2));
-            HANDLE_FFTERROR(
-                cufftPlanMany(&plans2d[st], 2, dimms2d, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize_bst));
+            HANDLE_FFTERROR(cufftPlanMany(&plans2d[st], 2, dimms2d, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize_bst));
             HANDLE_FFTERROR(cufftPlanMany(&filterplans[st], 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C,
                                         nangles * blocksize_bst));
 
-            cufftSetStream(plans1d[st], streams[st]);
-            cufftSetStream(plans2d[st], streams[st]);
+            cufftSetStream(    plans1d[st], streams[st]);
+            cufftSetStream(    plans2d[st], streams[st]);
             cufftSetStream(filterplans[st], streams[st]);
 
-            filtersino[st] = new cImage(nrays, nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
-            cartesianblock[st] = new cImage(sizeImagex, sizeImagex * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
-            polarblock[st] = new cImage(nrays * bst_padd, nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
-            realpolar[st] = new cImage(nrays * bst_padd, nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
+            filtersino[st]     = new cImage(           nrays,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
+            cartesianblock[st] = new cImage(      sizeImagex, sizeImagex * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
+            polarblock[st]     = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
+            realpolar[st]      = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
         }
-
-        for (int i = 0; i < ind_block; ++i) {
+ 
+        for (int i = 0; i < ind_block; ++i){
             int st = i % nstreams;
             cudaStream_t stream = streams[i % nstreams];
 
@@ -517,9 +515,10 @@ extern "C" {
                                 stream);
 
             /* Padding the tomogram data */
-            opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock,0,stream>>>(dtomo[st], dtomoPadded[st], 
-                                                                        configs.tomo.size, 
-                                                                        configs.tomo.pad);
+            TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
+            opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock,0,stream>>>(   dtomo[st], dtomoPadded[st], 
+                                                                            dim3(configs.tomo.size.x, configs.tomo.size.x, subblock),
+                                                                            configs.tomo.pad);
 
             getBST( dobjPadded[st], dtomoPadded[st],
                     dangles, nrays, nangles, subblock, sizeImagex, 
@@ -530,8 +529,9 @@ extern "C" {
                     gpu, stream);
 
             /* Remove padd from the object (reconstruction) */
-            opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock,0,stream>>>(dobjPadded[st], dobj[st], 
-                                                                                configs.obj.size, 
+            ObjgridBlock.z = TomogridBlock.z;
+            opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock,0,stream>>>(  dobjPadded[st], dobj[st], 
+                                                                                dim3(configs.obj.size.x, configs.obj.size.x, subblock), 
                                                                                 configs.obj.pad);
 
             opt::GPUToCPU<float>(obj + ptr * size_t(configs.obj.size.x * configs.obj.size.y), 
@@ -551,9 +551,9 @@ extern "C" {
         for (int st = 0; st < nstreams; ++st) {
             cudaStreamSynchronize(streams[st]);
 
-            cufftDestroy(plans1d[st]);
-            cufftDestroy(plans2d[st]);
-            cufftDestroy(filterplans[st]);
+            HANDLE_FFTERROR(cufftDestroy(plans1d[st]));
+            HANDLE_FFTERROR(cufftDestroy(plans2d[st]));
+            HANDLE_FFTERROR(cufftDestroy(filterplans[st]));
 
             delete filtersino[st];
             delete cartesianblock[st];
