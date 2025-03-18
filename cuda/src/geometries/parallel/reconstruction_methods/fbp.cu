@@ -130,6 +130,17 @@ extern "C"{
     {
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
+        int i;
+
+        int blocksize = configs.blocksize;
+
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            blocksize          = min(sizez, blocksize_aux);
+        }
+
+        int ind_block = (int)ceil( (float) sizez / blocksize );
+
         /* Projection data sizes */
         /* Projection size */
         int nrays    = configs.tomo.size.x;
@@ -142,7 +153,7 @@ extern "C"{
         dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 TomogridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
                             (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
-                            (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
+                            (int)ceil(              blocksize / TPBZ ) + 1);
 
         /* Reconstruction sizes */
         /* Reconstruction size */
@@ -157,18 +168,9 @@ extern "C"{
         dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 ObjgridBlock(  (int)ceil( configs.obj.padsize.x / TPBX ) + 1,
                             (int)ceil( configs.obj.padsize.y / TPBY ) + 1,
-                            (int)ceil( configs.obj.padsize.z / TPBZ ) + 1);
+                            (int)ceil(             blocksize / TPBZ ) + 1);
 
-        int i;
-
-        int blocksize = configs.blocksize;
-
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
-            blocksize          = min(sizez, blocksize_aux);
-        }
-
-        int ind_block = (int)ceil( (float) sizez / blocksize );
+        
 
         float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
         float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagey * blocksize);
