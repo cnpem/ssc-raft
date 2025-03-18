@@ -170,8 +170,6 @@ extern "C"{
                             (int)ceil( configs.obj.padsize.y / TPBY ) + 1,
                             (int)ceil(             blocksize / TPBZ ) + 1);
 
-        
-
         float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
         float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagey * blocksize);
         float *dangles = opt::allocGPU<float>( nangles );
@@ -206,8 +204,9 @@ extern "C"{
                                 (size_t)nrays * nangles * subblock);
 
             /* Padding the tomogram data */
+            TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
             opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomoPadded, 
-                                                                configs.tomo.size, 
+                                                                dim3(nrays, nangles, subblock), 
                                                                 configs.tomo.pad);
 
             getFBP( configs, gpus, dobjPadded, dtomoPadded, dangles, 
@@ -215,8 +214,9 @@ extern "C"{
                     dim3(padImagex, padImagey, subblock)); /* Object (reconstruction) padded size */
 
             /* Remove padd from the object (reconstruction) */
+            ObjgridBlock.z = TomogridBlock.z;
             opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(dobjPadded, dobj, 
-                                                                    configs.obj.size, 
+                                                                    dim3(sizeImagex, sizeImagey, subblock), 
                                                                     configs.obj.pad);
 
             opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
