@@ -376,12 +376,12 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
             sino2p<<<blocks, threads, 0, stream>>>(realpolar->gpuptr, sinoblock, Nrays, Nangles, pad0, 0);
 
             Nangles *= 2;
-            Nrays *= pad0;
-            Nrays /= 2;
+            // Nrays *= pad0;
+            // Nrays /= 2;
 
             blocks.y *= 2;
-            blocks.x *= pad0;
-            blocks.x /= 2;
+            // blocks.x *= pad0;
+            // blocks.x /= 2;
 
             HANDLE_FFTERROR(cufftExecC2C(plan1d, realpolar->gpuptr, polarblock->gpuptr, CUFFT_FORWARD));
             convBST<<<blocks, threads, 0, stream>>>(polarblock->gpuptr, Nrays, Nangles);
@@ -396,14 +396,14 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
 
             // cudaDeviceSynchronize();
             Nangles /= 2;
-            Nrays *= 2;
-            Nrays /= pad0;
+            // Nrays *= 2;
+            // Nrays /= pad0;
 
             float scale = (float)Nrays * pixel * 4.0f;
 
-            GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(blockRecon + outsize * zoff,
-                                                                            cartesianblock->gpuptr, 
-                                                                            sizeimage,  scale);
+            GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>( blockRecon + outsize * zoff,
+                                                                                cartesianblock->gpuptr, 
+                                                                                sizeimage,  scale);
 
             HANDLE_ERROR(cudaPeekAtLastError());
         }
@@ -459,11 +459,11 @@ extern "C" {
         opt::CPUToGPU<float>(angles, dangles, nangles);
 
         int dimmsfilter[] = {nrays};
-        int dimms1d[] = {(int)nrays * bst_padd / 2};
-        int dimms2d[] = {(int)sizeImagex, (int)sizeImagex};
-        int beds[] = {nrays * bst_padd / 2};
+        int dimms1d[]     = {(int)nrays};
+        int dimms2d[]     = {(int)sizeImagex, (int)sizeImagex};
+        int beds[]        = {nrays};
 
-        const int nstreams = 2;
+        const int nstreams = 1;
         float* dtomo[nstreams];
         float* dobj[nstreams];
         float* dtomoPadded[nstreams];
@@ -481,11 +481,9 @@ extern "C" {
         for (int st = 0; st < nstreams; ++st) {
             cudaStreamCreate(&streams[st]);
 
-            HANDLE_FFTERROR(cufftPlanMany(&plans1d[st], 1, dimms1d, beds, 1, nrays * bst_padd / 2, beds, 1,
-                                        nrays * bst_padd / 2, CUFFT_C2C, nangles * blocksize_bst * 2));
+            HANDLE_FFTERROR(cufftPlanMany(&plans1d[st], 1, dimms1d, beds, 1, nrays, beds, 1, nrays, CUFFT_C2C, nangles * blocksize_bst * 2));
             HANDLE_FFTERROR(cufftPlanMany(&plans2d[st], 2, dimms2d, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize_bst));
-            HANDLE_FFTERROR(cufftPlanMany(&filterplans[st], 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C,
-                                        nangles * blocksize_bst));
+            HANDLE_FFTERROR(cufftPlanMany(&filterplans[st], 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, nangles * blocksize_bst));
 
             cufftSetStream(    plans1d[st], streams[st]);
             cufftSetStream(    plans2d[st], streams[st]);
