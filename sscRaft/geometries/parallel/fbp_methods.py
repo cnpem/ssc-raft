@@ -164,7 +164,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         z2             = 0.0
         energy         = 1.0
         
-    padx, pady, padz  = dic['padding'] + 2,0,0 # (padx, pady, padz)
+    padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
     pad    = (padx) * nrays
     logger.info(f'Set FBP BST pad value as {padx} x horizontal dimension = ({pad}).')
