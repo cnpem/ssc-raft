@@ -495,6 +495,12 @@ extern "C" {
             cartesianblock[st] = new cImage(      sizeImagex, sizeImagex * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
             polarblock[st]     = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
             realpolar[st]      = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
+
+            dtomo[st] = opt::allocGPU<float>((size_t)configs.tomo.size.x *            nangles * blocksize, streams[st]);
+            dobj[st]  = opt::allocGPU<float>((size_t) configs.obj.size.x * configs.obj.size.y * blocksize, streams[st]);
+
+            dtomoPadded[st] = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize, streams[st]);
+            dobjPadded[st]  = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize, streams[st]);
         }
  
         for (int i = 0; i < ind_block; ++i){
@@ -502,12 +508,6 @@ extern "C" {
             cudaStream_t stream = streams[i % nstreams];
 
             subblock = min(blockgpu - ptr, (int)blocksize);
-
-            dtomo[st] = opt::allocGPU<float>((size_t)configs.tomo.size.x *            nangles * blocksize, stream);
-            dobj[st]  = opt::allocGPU<float>((size_t) configs.obj.size.x * configs.obj.size.y * blocksize, stream);
-
-            dtomoPadded[st] = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize, stream);
-            dobjPadded[st]  = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize, stream);
 
             opt::CPUToGPU<float>(tomo + (size_t)ptr * configs.tomo.size.x * nangles, 
                                 dtomo[st], 
@@ -519,7 +519,6 @@ extern "C" {
             opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock,0,stream>>>(   dtomo[st], dtomoPadded[st], 
                                                                             dim3(configs.tomo.size.x, configs.tomo.size.x, subblock),
                                                                             configs.tomo.pad);
-
             getBST( dobjPadded[st], dtomoPadded[st],
                     dangles, nrays, nangles, subblock, sizeImagex, 
                     bst_padd, regularization, paganin_reg,
@@ -539,11 +538,6 @@ extern "C" {
                                 size_t(configs.obj.size.x * configs.obj.size.y * subblock), 
                                 stream);
 
-            HANDLE_ERROR(cudaFreeAsync(dtomo[st], stream));
-            HANDLE_ERROR(cudaFreeAsync(dobj[st], stream));
-            HANDLE_ERROR(cudaFreeAsync(dtomoPadded[st], stream));
-            HANDLE_ERROR(cudaFreeAsync(dobjPadded[st], stream));
-
             /* Update pointer */
             ptr = ptr + subblock;
         }
@@ -554,6 +548,11 @@ extern "C" {
             HANDLE_FFTERROR(cufftDestroy(plans1d[st]));
             HANDLE_FFTERROR(cufftDestroy(plans2d[st]));
             HANDLE_FFTERROR(cufftDestroy(filterplans[st]));
+
+            HANDLE_ERROR(cudaFreeAsync(dtomo[st], streams[st]));
+            HANDLE_ERROR(cudaFreeAsync(dobj[st], streams[st]));
+            HANDLE_ERROR(cudaFreeAsync(dtomoPadded[st], streams[st]));
+            HANDLE_ERROR(cudaFreeAsync(dobjPadded[st], streams[st]));
 
             delete filtersino[st];
             delete cartesianblock[st];
@@ -585,7 +584,7 @@ extern "C" {
         // printBSTParameters(&configs);
 
         /* Projection data sizes */
-        int nrays = configs.tomo.size.x;
+        int nrays   = configs.tomo.size.x;
         int nangles = configs.tomo.size.y;
         int nslices = configs.tomo.size.z;
 
@@ -601,8 +600,8 @@ extern "C" {
             subblock = min(nslices - ptr, blockgpu);
 
             threads.push_back(std::async(std::launch::async, getBSTGPU, configs,
-                                        obj + (size_t)ptr * sizeImagex * sizeImagex,
-                                        tomogram + (size_t)ptr * nrays * nangles, 
+                                        obj      + (size_t)ptr * sizeImagex * sizeImagex,
+                                        tomogram + (size_t)ptr *      nrays * nangles, 
                                         angles, subblock, gpus[i]));
 
             /* Update pointer */

@@ -312,7 +312,7 @@ extern "C"{
 
         // printf("Dados: %e %e %e %e \n",configs->geometry.wavelength,configs->geometry.z2x,parameters_float[0],configs->reconstruction_paganin);
     
-        /* Compute total memory used of FBP method on a singles slice */
+        /* Compute total memory used of BST method on a singles slice */
         configs->total_required_mem_per_slice_bytes = (
                 configs->tomo.slice_memory_bytes          + // Tomo slice
                 2 * configs->obj.slice_memory_bytes       + // Reconstructed object slice
