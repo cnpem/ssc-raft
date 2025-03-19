@@ -196,19 +196,32 @@ def tomcat_pipeline(dic: dict) -> None:
     if pin_memory:
         tomcat_free_pinned_memory(tomogram, flat, recon)
 
-def tomcat_api_pipeline(tomogram: numpy.ndarray, 
-                        flat: numpy.ndarray, 
-                        dark: numpy.ndarray,
-                        recon: None,
-                        angle_vector: numpy.ndarray, 
-                        dic: dict) -> numpy.ndarray:
+def tomcat_api_pipeline_slice(tomogram: numpy.ndarray, 
+                            flat: numpy.ndarray, 
+                            dark: numpy.ndarray,
+                            recon: None,
+                            angle_vector: numpy.ndarray, 
+                            dic: dict) -> numpy.ndarray:
 
     start = time.time()
 
     gpus         = dic.get('gpu',[0])
     is_stitching = dic.get('stitching', 'F')
+    
+    _, nslices, _ = tomogram.shape
 
-    # logger.debug(f"Tomogram shape: {tomogram.shape}, Flat shape: {flat.shape}, Dark shape: {dark.shape}")
+    # flip data slow
+    if is_stitching == 'F':
+        tomogram = flip_x(tomogram)
+        flat     = flip_x_np(flat[0,:,:])
+        dark     = flip_x_np(dark[0,:,:])
+
+    if nslices == 1:
+        tomogram = tomogram[:,0,:]
+    else:
+        tomogram = transpose_gpu(tomogram, gpus)
+
+    logger.debug(f"Tomogram shape: {tomogram.shape}, Flat shape: {flat.shape}, Dark shape: {dark.shape}")
     
     deviation = dic.get('axis offset', None)
     offset    = dic.get('stitching overlap', None)
