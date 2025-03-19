@@ -210,11 +210,11 @@ def tomcat_api_pipeline(tomogram: numpy.ndarray,
 
     # logger.debug(f"Tomogram shape: {tomogram.shape}, Flat shape: {flat.shape}, Dark shape: {dark.shape}")
     
-    deviation = dic.get('axis offset', -1)
-    offset    = dic.get('stitching overlap', -1)
+    deviation = dic.get('axis offset', None)
+    offset    = dic.get('stitching overlap', None)
 
     if is_stitching == 'F': 
-        if deviation == -1:
+        if deviation is None:
             # Find automatic rotation axis deviation:
             deviation = find_rotation_axis_auto(dic=dic, angles=angle_vector, data=tomogram, flat=flat[:,0,:], dark=dark)
             dic['axis offset'], dic['axis offset auto']  = deviation, False
@@ -227,7 +227,7 @@ def tomcat_api_pipeline(tomogram: numpy.ndarray,
 
     # Stitching
     if is_stitching == 'T':
-        if offset == -1:
+        if offset is None:
             offset = find_offset_excentric_tomo(dic=dic, tomogram=tomogram)
             dic['stitching overlap'] = offset
         else:
