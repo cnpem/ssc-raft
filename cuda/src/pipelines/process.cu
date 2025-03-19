@@ -19,15 +19,15 @@ extern "C"{
         long blocksize_exp = 1; // to store which power of 2 will be used. 
         long blocksize;
 
-        std::cout << "Calculating blocksize..." << std::endl;
+        // std::cout << "Calculating blocksize..." << std::endl;
 
         // std::cout << gpu_memory << ", " << BYTES_TO_GB << ", " << total_required_mem_per_slice << "\n";
 
         raw_blocksize = static_cast<long>(-epsilon + (gpu_memory)/(BYTES_TO_GB*total_required_mem_per_slice) );
         
         // std::cout << "\t  total_required_mem_per_slice: " << total_required_mem_per_slice << std::endl;
-        std::cout << "\t  total_required_mem_per_slice GB: " << BYTES_TO_GB*total_required_mem_per_slice << std::endl;
-        std::cout << "\t  gpu_memory: " << gpu_memory << std::endl;
+        // std::cout << "\t  total_required_mem_per_slice GB: " << BYTES_TO_GB*total_required_mem_per_slice << std::endl;
+        // std::cout << "\t  gpu_memory: " << gpu_memory << std::endl;
         // std::cout << "\t  before - Raw blocksize: " << raw_blocksize << std::endl;
         // std::cout << "\t  empiric_const: " << empiric_const << std::endl;
 
@@ -48,7 +48,7 @@ extern "C"{
             blocksize = 1 << blocksize_exp;
         }
         // }
-        std::cout << "\t  Blocksize: " << blocksize << std::endl;
+        // std::cout << "\t  Blocksize: " << blocksize << std::endl;
 
         return blocksize;
     }
@@ -75,6 +75,7 @@ extern "C"{
 extern "C"{
     void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
     {
+        /* 20/03/2025 - NEEDS TO FIX THIS FUNCTION BLOCKSIZE - LOOK INTO FDK */
         /* Processes to parallelize the data z-axis by independent blocks */
         /* Declare variables */
         long long int  n_obj, n_tomo, ind_obj, ind_tomo;
@@ -117,6 +118,7 @@ extern "C"{
 extern "C"{
     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
     {   
+        /* 20/03/2025 - NEEDS TO FIX THIS FUNCTION BLOCKSIZE - LOOK INTO FDK */
         /* Processes to parallelize the data z-axis by independent blocks */
         
         /* Declare variables */
