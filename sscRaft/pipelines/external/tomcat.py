@@ -211,7 +211,7 @@ def tomcat_api_pipeline_slice(tomogram: numpy.ndarray,
     _, nslices, _ = tomogram.shape
 
     # flip data slow
-    if is_stitching == 'F':
+    if is_stitching == 'T':
         tomogram = flip_x(tomogram)
         flat     = flip_x_np(flat)
         dark     = flip_x_np(dark)
