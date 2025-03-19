@@ -234,7 +234,7 @@ def tomcat_api_pipeline_slice(tomogram: numpy.ndarray,
     if is_stitching == 'F': 
         if deviation is None:
             # Find automatic rotation axis deviation:
-            deviation = find_rotation_axis_auto(dic=dic, angles=angle_vector, data=tomogram, flat=flat[:,0,:], dark=dark)
+            deviation = find_rotation_axis_auto(dic=dic, angles=angle_vector, data=tomogram, flat=flat, dark=dark)
             dic['axis offset'], dic['axis offset auto']  = deviation, False
 
     # Correction by flat-dark:
