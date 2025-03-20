@@ -564,8 +564,6 @@ extern "C"{
 
             cudaStreamDestroy(streams[st]);
         }
-
-        HANDLE_ERROR(cudaFree(tomogram));
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 }
