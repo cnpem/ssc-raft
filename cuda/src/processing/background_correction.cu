@@ -71,7 +71,8 @@ extern "C"{
         size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 3 * size.x );
 
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(size.z, total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
+            int blocksize_aux  = compute_GPU_blocksize(size.z, total_required_mem_per_slice_bytes, 
+                                                        true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(size.z, blocksize_aux);
         }
 

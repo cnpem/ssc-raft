@@ -177,29 +177,31 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     if obj is None:
-        obj      = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
-        obj      = CNICE(obj)
-    obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
+        obj = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+        obj = CNICE(obj)
+    obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
-    angles       = numpy.array(angles)
-    angles       = CNICE(angles) 
-    angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
+    angles          = numpy.array(angles)
+    angles          = CNICE(angles) 
+    angles_ptr      = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, filter_type, 0, blocksize]
-    param_int     = numpy.array(param_int)
-    param_int     = CNICE(param_int,numpy.int32)
-    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+    param_int       = [nrays, nangles, nslices, objsize, 
+                        padx, pady, padz, filter_type, 0, blocksize]
+    param_int       = numpy.array(param_int)
+    param_int       = CNICE(param_int,numpy.int32)
+    param_int_ptr   = param_int.ctypes.data_as(ctypes.c_void_p)
 
     param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely, offset]
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
 
+    nstreams        = 2
 
     libraft.getBSTMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
         obj_ptr, tomogram_ptr, angles_ptr, 
-        param_float_ptr, param_int_ptr)
+        param_float_ptr, param_int_ptr,
+        ctypes.c_int(nstreams))
 
     return obj
 

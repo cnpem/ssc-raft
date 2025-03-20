@@ -378,7 +378,7 @@ extern "C" {
 
     void getBSTGPU_stream(CFG configs, 
     float* obj, float* tomo, float* angles, 
-    int blockgpu, int gpu) 
+    int blockgpu, int gpu, int nstreams) 
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
 
@@ -428,7 +428,7 @@ extern "C" {
         int dimms2d[]     = {(int)sizeImagex, (int)sizeImagex};
         int beds[]        = {nrays * bst_padd / 2};
 
-        const int nstreams = 2;
+        nstreams = 2;
         float* dtomo[nstreams];
         float* dobj[nstreams];
         float* dtomoPadded[nstreams];
@@ -666,7 +666,7 @@ void getBSTGPU(CFG configs,
 
     void getBSTMultiGPU(int* gpus, int ngpus, 
     float* obj, float* tomogram, float* angles, 
-    float* paramf, int* parami) 
+    float* paramf, int* parami, int nstreams) 
     {
         int i, Maxgpudev;
 
@@ -694,18 +694,35 @@ void getBSTGPU(CFG configs,
         std::vector<std::future<void>> threads;
         threads.reserve(ngpus);
 
-        for (i = 0; i < ngpus; i++) {
-            subblock = min(nslices - ptr, blockgpu);
+        if ( nstreams > 1 ){
+            for (i = 0; i < ngpus; i++) {
+                subblock = min(nslices - ptr, blockgpu);
 
-            threads.push_back(std::async(std::launch::async, getBSTGPU, configs,
-                                        obj      + (size_t)ptr * sizeImagex * sizeImagex,
-                                        tomogram + (size_t)ptr *      nrays * nangles, 
-                                        angles, subblock, gpus[i]));
+                threads.push_back(std::async(std::launch::async, getBSTGPU, configs,
+                                            obj      + (size_t)ptr * sizeImagex * sizeImagex,
+                                            tomogram + (size_t)ptr *      nrays * nangles, 
+                                            angles, subblock, gpus[i]));
 
-            /* Update pointer */
-            ptr = ptr + subblock;
+                /* Update pointer */
+                ptr = ptr + subblock;
+            }
+            for (i = 0; i < ngpus; i++) threads[i].get();
+        
+        }else{
+            
+            for (i = 0; i < ngpus; i++) {
+                subblock = min(nslices - ptr, blockgpu);
+
+                threads.push_back(std::async(std::launch::async, getBSTGPU_stream, configs,
+                                            obj      + (size_t)ptr * sizeImagex * sizeImagex,
+                                            tomogram + (size_t)ptr *      nrays * nangles, 
+                                            angles, subblock, gpus[i], nstreams));
+
+                /* Update pointer */
+                ptr = ptr + subblock;
+            }
+            for (i = 0; i < ngpus; i++) threads[i].get();
         }
-        for (i = 0; i < ngpus; i++) threads[i].get();
     }
 }
 
