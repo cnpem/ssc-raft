@@ -67,8 +67,10 @@ extern "C"{
 		// Supports 2 flats max
 		HANDLE_ERROR(cudaSetDevice(gpu));
 
+        const size_t nstreams = 2;
+
 		int i;
-        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 6 * size.x );
+        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 3 * size.x ) * nstreams;
 
         if ( blocksize == 0 ){
             int blocksize_aux  = compute_GPU_blocksize(size.z, total_required_mem_per_slice_bytes, 
@@ -85,7 +87,6 @@ extern "C"{
         opt::CPUToGPU<float>(flat, d_flat, (size_t)size.z * size.x * numflats);
         opt::CPUToGPU<float>(dark, d_dark, (size_t)size.z * size.x);
 
-        const size_t nstreams = 2;
         float *d_frames[nstreams];
         cudaStream_t streams[nstreams];
 

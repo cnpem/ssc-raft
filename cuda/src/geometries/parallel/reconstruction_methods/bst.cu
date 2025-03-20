@@ -382,6 +382,8 @@ extern "C" {
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
 
+        nstreams = 2;
+
         const int blocksize_bst = 1;
 
         /* Projection data sizes */
@@ -413,7 +415,7 @@ extern "C" {
         int blocksize = configs.blocksize;
 
         if (blocksize == 0) {
-            int blocksize_aux = compute_GPU_blocksize(blockgpu, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            int blocksize_aux = compute_GPU_blocksize(blockgpu, nstreams * configs.total_required_mem_per_slice_bytes, true, A100_MEM);
             blocksize = min(blockgpu, blocksize_aux);
         }
         int ind_block = (int)ceil((float)blockgpu / blocksize);
@@ -428,7 +430,6 @@ extern "C" {
         int dimms2d[]     = {(int)sizeImagex, (int)sizeImagex};
         int beds[]        = {nrays * bst_padd / 2};
 
-        nstreams = 2;
         float* dtomo[nstreams];
         float* dobj[nstreams];
         float* dtomoPadded[nstreams];
