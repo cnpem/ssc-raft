@@ -68,7 +68,7 @@ extern "C"{
 		HANDLE_ERROR(cudaSetDevice(gpu));
 
 		int i;
-        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 3 * size.x );
+        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 6 * size.x );
 
         if ( blocksize == 0 ){
             int blocksize_aux  = compute_GPU_blocksize(size.z, total_required_mem_per_slice_bytes, 
@@ -119,8 +119,10 @@ extern "C"{
 
         for (int st = 0; st < nstreams; ++st) {
             cudaStreamSynchronize(streams[st]);
-            cudaStreamDestroy(streams[st]);
+
             HANDLE_ERROR(cudaFreeAsync(d_frames[st], streams[st]));
+
+            cudaStreamDestroy(streams[st]);
         }
 
         HANDLE_ERROR(cudaFree(d_flat));

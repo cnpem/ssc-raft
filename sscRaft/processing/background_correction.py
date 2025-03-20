@@ -104,8 +104,6 @@ def _background_correctionGPU(frames, flat, dark, gpus = [0], is_log = False, bl
     frames     = CNICE(frames)
     frames_ptr = frames.ctypes.data_as(ctypes.c_void_p)
 
-    print('Blocksize: ', blocksize)
-
     libraft.getBackgroundCorrectionMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
             frames_ptr, flat_ptr, dark_ptr, 
             ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 

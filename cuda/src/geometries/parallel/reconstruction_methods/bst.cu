@@ -694,7 +694,7 @@ void getBSTGPU(CFG configs,
         std::vector<std::future<void>> threads;
         threads.reserve(ngpus);
 
-        if ( nstreams > 1 ){
+        if ( nstreams == 1 ){
             for (i = 0; i < ngpus; i++) {
                 subblock = min(nslices - ptr, blockgpu);
 
