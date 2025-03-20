@@ -342,9 +342,11 @@ extern "C" {
         BasicOps::set_pixel(out, fpixel, tx, ty, sizex, threshold, raftDataType);
     }
 
-    void BSTFilter(cufftHandle plan,
-            complex* filtersino, float* sinoblock,
-            size_t nrays, size_t nangles, int csino, Filter reg, float pixel, cudaStream_t stream) {
+    void BSTFilter_stream(cufftHandle plan,
+    complex* filtersino, float* sinoblock,
+    size_t nrays, size_t nangles, int csino, Filter reg, float pixel, 
+    cudaStream_t stream) 
+    {
 
         dim3 filterblock((nrays+255)/256,nangles,1);
         dim3 filterthread(256,1,1);

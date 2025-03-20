@@ -333,7 +333,7 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
             float* sinoblock = wholesinoblock + insize * zoff;
 
             if (filter.type != Filter::EType::none)
-                BSTFilter(filterplan, filtersino->gpuptr, sinoblock, Nrays, Nangles, offset, filter, pixel, stream);
+                BSTFilter_stream(filterplan, filtersino->gpuptr, sinoblock, Nrays, Nangles, offset, filter, pixel, stream);
 
             dim3 blocks((Nrays + 255) / 256, Nangles, blocksize_bst);
             dim3 threads(128, 1, 1);

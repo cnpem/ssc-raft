@@ -66,7 +66,15 @@ extern "C"{
 	
 	__global__ void BandFilterC2C(complex* vec, size_t sizex, int center, float pixel, struct Filter mfilter);
 	
-	void BSTFilter(cufftHandle plan, complex* filtersino, float* sinoblock, size_t nrays, size_t nangles, int csino, struct Filter reg, float pixel, cudaStream_t stream = 0);
+	void BSTFilter(cufftHandle plan, 
+    complex* filtersino, float* sinoblock, 
+    size_t nrays, size_t nangles, int csino, 
+    struct Filter reg, float pixel);
+
+    void BSTFilter_stream(cufftHandle plan,
+    complex* filtersino, float* sinoblock,
+    size_t nrays, size_t nangles, int csino, Filter reg, float pixel, 
+    cudaStream_t stream) ;
 
 	void filterFBPpad(GPU gpus, Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad);
