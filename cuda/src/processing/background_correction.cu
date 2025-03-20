@@ -86,7 +86,6 @@ extern "C"{
 
         const size_t nstreams = 2;
         float *d_frames[nstreams];
-        float *d_flat[nstreams], *d_dark[nstreams];
         cudaStream_t streams[nstreams];
 
         for (int st = 0; st < nstreams; ++st) {
