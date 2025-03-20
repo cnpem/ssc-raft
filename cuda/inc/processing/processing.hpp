@@ -10,11 +10,14 @@
 /* Background Correction */
 extern "C"{
 
-	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nangles, int nslices, int numflats, int is_log);
+	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, 
+    int nrays, int nangles, int nslices, int numflats, int is_log, int blocksize);
 
-	void getBackgroundCorrectionGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, dim3 size, int numflats, int is_log);
+	void getBackgroundCorrectionGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, 
+    dim3 size, int numflats, int is_log, int blocksize);
 
-	void getBackgroundCorrection(GPU gpus, float* frames, float* flat, float* dark, dim3 size, int numflats, cudaStream_t stream = 0);
+	void getBackgroundCorrection(GPU gpus, float* frames, float* flat, float* dark, 
+    dim3 size, int numflats, cudaStream_t stream = 0);
 }
 
 /* Rings */

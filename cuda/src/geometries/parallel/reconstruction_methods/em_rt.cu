@@ -94,7 +94,7 @@ extern "C" {
         int i; 
         int blocksize        = configs.blocksize;
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
         int ind_block = (int)ceil( (float) sizez / blocksize );
@@ -268,7 +268,7 @@ extern "C"{
         int i; 
         int blocksize        = configs.blocksize;
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
         int ind_block = (int)ceil( (float) sizez / blocksize );

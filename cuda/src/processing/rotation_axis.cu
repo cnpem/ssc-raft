@@ -541,7 +541,7 @@ extern "C"{
         int i; 
 
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, nangles * nrays * 6, true, A100_MEM);
+            int blocksize_aux  = compute_GPU_blocksize(sizez, nangles * nrays * 6, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
 

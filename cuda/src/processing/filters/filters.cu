@@ -364,6 +364,30 @@ extern "C" {
         //cudaMemset(sinoblock, 0, nrays*nangles*4);
     }
 
+    void BSTFilter(cufftHandle plan,
+    complex* filtersino, float* sinoblock,
+    size_t nrays, size_t nangles, int csino, 
+    Filter reg, float pixel) 
+    {
+
+        dim3 filterblock((nrays+255)/256,nangles,1);
+        dim3 filterthread(256,1,1);
+
+        SetX<<<filterblock,filterthread>>>(filtersino, sinoblock, nrays);
+
+        HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_FORWARD));
+
+        BandFilterC2C<<<filterblock,filterthread>>>(filtersino, nrays, csino, pixel, reg);
+
+        HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_INVERSE));
+
+        float scale = 1.0f; 
+
+        GetX<<<filterblock,filterthread>>>(sinoblock, filtersino, nrays, scale);
+
+    }
+
+
 }
 
 __host__ __device__ inline float Filter::apply(float input)

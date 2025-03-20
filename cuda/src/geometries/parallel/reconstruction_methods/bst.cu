@@ -248,105 +248,70 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
     }
 }
 
-// void getBST(CFG configs, GPU gpus,
-//         float* obj, float* tomo, float* angles,
-//         dim3 tomo_size, dim3 tomo_pad, dim3 obj_size, cudaStream_t stream) {
-
-//     int blocksize_bst = 1;
-
-//     const int filter_type   = configs.reconstruction_filter_type;
-//     int Nrays               = tomo_size.x;
-//     int Nangles             = tomo_size.y;
-//     const int sizeimage     = obj_size.x;
-//     const float reg         = configs.reconstruction_reg;
-//     const float paganin     = configs.reconstruction_paganin;
-//     const float axis_offset = configs.rotation_axis_offset;
-//     const int trueblocksize = tomo_size.z;
-//     const int padding       = configs.tomo.pad.x;
-//     float pixel             = configs.geometry.obj_pixel_x;
-
-//     size_t insize  = Nrays * Nangles;
-//     size_t outsize = sizeimage * sizeimage;
-
-
-//     int dimmsfilter[] = {Nrays};
-//     int dimms1d[] = {(int)Nrays * padding / 2};
-//     int dimms2d[] = {(int)sizeimage, (int)sizeimage};
-//     int beds[] = {Nrays * padding / 2};
-
-
-//     cufftHandle plan1d;
-//     cufftHandle plan2d;
-//     cufftHandle filterplan;
-
-//     HANDLE_FFTERROR(cufftPlanMany(&plan1d, 1, dimms1d, beds, 1, Nrays * padding / 2, beds, 1,
-//                                   Nrays * padding / 2, CUFFT_C2C, Nangles * blocksize_bst * 2));
-//     HANDLE_FFTERROR(
-//         cufftPlanMany(&plan2d, 2, dimms2d, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize_bst));
-//     HANDLE_FFTERROR(cufftPlanMany(&filterplan, 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C,
-//                                   Nangles * blocksize_bst));
-
-//     cufftSetStream(plan1d, stream);
-//     cufftSetStream(plan2d, stream);
-//     cufftSetStream(filterplan, stream);
-
-//     cImage filtersino(Nrays, Nangles * blocksize_bst, 1, MemoryType::EAllocGPU, stream);
-//     cImage cartesianblock(sizeimage, sizeimage * blocksize_bst, 1, MemoryType::EAllocGPU, stream);
-//     cImage polarblock(Nrays * padding, Nangles * blocksize_bst, 1, MemoryType::EAllocGPU, stream);
-//     cImage realpolar(Nrays * padding, Nangles * blocksize_bst, 1, MemoryType::EAllocGPU, stream);
-
-//     Filter filter(filter_type, paganin, reg, axis_offset, pixel);
-
-//     // BST initialization finishes here.
-
-//     for (size_t zoff = 0; zoff < (size_t)trueblocksize; zoff += blocksize_bst) {
-//         float* sinoblock = tomo + insize * zoff;
-
-//         if (filter.type != Filter::EType::none)
-//             BSTFilter(filterplan, filtersino.gpuptr, sinoblock, Nrays, Nangles, axis_offset, filter, pixel, stream);
-
-//         dim3 blocks((Nrays + 255) / 256, Nangles, blocksize_bst);
-//         dim3 threads(128, 1, 1);
-
-//         sino2p<<<blocks, threads, 0, stream>>>(realpolar.gpuptr, sinoblock, Nrays, Nangles, padding, 0);
-
-//         Nangles *= 2;
-//         Nrays *= padding;
-//         Nrays /= 2;
-
-//         blocks.y *= 2;
-//         blocks.x *= padding;
-//         blocks.x /= 2;
-
-//         HANDLE_FFTERROR(cufftExecC2C(plan1d, realpolar.gpuptr, polarblock.gpuptr, CUFFT_FORWARD));
-//         convBST<<<blocks, threads, 0, stream>>>(polarblock.gpuptr, Nrays, Nangles);
-
-//         blocks = dim3((sizeimage + 255) / 256, sizeimage, blocksize_bst);
-//         threads = dim3(256, 1, 1);
-
-//         polar2cartesian_fourier<<<blocks, threads, 0, stream>>>(cartesianblock.gpuptr, polarblock.gpuptr, angles,
-//                                                                 Nrays, Nangles, sizeimage);
-
-//         HANDLE_FFTERROR(cufftExecC2C(plan2d, cartesianblock.gpuptr, cartesianblock.gpuptr, CUFFT_INVERSE));
-
-//         // cudaDeviceSynchronize();
-
-//         Nangles /= 2;
-//         Nrays *= 2;
-//         Nrays /= padding;
-
-//         float scale = (float)Nrays * pixel * 4.0f;
-
-//         GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128, 0, stream>>>(obj + outsize * zoff,
-//                                                                            cartesianblock.gpuptr, 
-//                                                                            sizeimage, scale);
-
-//         HANDLE_ERROR(cudaPeekAtLastError());
-//     }
-
-// }
-
     void getBST(float* blockRecon, float* wholesinoblock, float* angles, 
+    int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0, 
+    float reg, float paganin, int filter_type, float offset, float pixel, 
+    cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan, 
+    cImage* filtersino, cImage* cartesianblock, cImage* polarblock, cImage* realpolar, 
+    int gpu) 
+    {
+        // HANDLE_ERROR(cudaSetDevice(gpu));
+
+        int blocksize_bst = 1;
+
+        size_t insize  =     Nrays *   Nangles;
+        size_t outsize = sizeimage * sizeimage;
+
+        Filter filter(filter_type, paganin, reg, offset, pixel);
+
+        /* BST initialization finishes here */
+
+        for (size_t zoff = 0; zoff < (size_t)trueblocksize; zoff += blocksize_bst) {
+            float* sinoblock = wholesinoblock + insize * zoff;
+
+            if (filter.type != Filter::EType::none)
+                BSTFilter(filterplan, filtersino->gpuptr, sinoblock, Nrays, Nangles, offset, filter, pixel);
+
+            dim3 blocks((Nrays + 255) / 256, Nangles, blocksize_bst);
+            dim3 threads(128, 1, 1);
+
+            sino2p<<<blocks, threads>>>(realpolar->gpuptr, sinoblock, Nrays, Nangles, pad0, 0);
+
+            Nangles *= 2;
+            Nrays *= pad0;
+            Nrays /= 2;
+
+            blocks.y *= 2;
+            blocks.x *= pad0;
+            blocks.x /= 2;
+
+            HANDLE_FFTERROR(cufftExecC2C(plan1d, realpolar->gpuptr, polarblock->gpuptr, CUFFT_FORWARD));
+            convBST<<<blocks, threads>>>(polarblock->gpuptr, Nrays, Nangles);
+
+            blocks = dim3((sizeimage + 255) / 256, sizeimage, blocksize_bst);
+            threads = dim3(256, 1, 1);
+
+            polar2cartesian_fourier<<<blocks, threads>>>(cartesianblock->gpuptr, polarblock->gpuptr, angles,
+                                                                    Nrays, Nangles, sizeimage);
+
+            HANDLE_FFTERROR(cufftExecC2C(plan2d, cartesianblock->gpuptr, cartesianblock->gpuptr, CUFFT_INVERSE));
+
+            // cudaDeviceSynchronize();
+            Nangles /= 2;
+            Nrays *= 2;
+            Nrays /= pad0;
+
+            float scale = (float)Nrays * pixel * 4.0f;
+
+            GetX<<<dim3((sizeimage + 127) / 128, sizeimage), 128>>>( blockRecon + outsize * zoff,
+                                                                                cartesianblock->gpuptr, 
+                                                                                sizeimage,  scale);
+
+            HANDLE_ERROR(cudaPeekAtLastError());
+        }
+    }
+
+    void getBST_stream(float* blockRecon, float* wholesinoblock, float* angles, 
     int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0, 
     float reg, float paganin, int filter_type, float offset, float pixel, 
     cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan, 
@@ -411,7 +376,7 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
 
 extern "C" {
 
-    void getBSTGPU(CFG configs, 
+    void getBSTGPU_stream(CFG configs, 
     float* obj, float* tomo, float* angles, 
     int blockgpu, int gpu) 
     {
@@ -517,7 +482,7 @@ extern "C" {
             opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock,0,stream>>>(   dtomo[st], dtomoPadded[st], 
                                                                             dim3(configs.tomo.size.x, configs.tomo.size.x, subblock),
                                                                             configs.tomo.pad);
-            getBST( dobjPadded[st], dtomoPadded[st],
+            getBST_stream( dobjPadded[st], dtomoPadded[st],
                     dangles, nrays, nangles, subblock, sizeImagex, 
                     bst_padd, regularization, paganin_reg,
                     filter_type, axis_offset, pixel, 
@@ -559,6 +524,141 @@ extern "C" {
 
             cudaStreamDestroy(streams[st]);
         }
+
+        HANDLE_ERROR(cudaFree(dangles));
+        HANDLE_ERROR(cudaDeviceSynchronize());
+    }
+
+void getBSTGPU(CFG configs, 
+    float* obj, float* tomo, float* angles, 
+    int blockgpu, int gpu) 
+    {
+        HANDLE_ERROR(cudaSetDevice(gpu));
+
+        const int blocksize_bst = 1;
+
+        /* Projection data sizes */
+        int nrays   = configs.tomo.padsize.x;
+        int nangles = configs.tomo.padsize.y;
+
+        /* Projection GPUs padded Grd and Blocks */
+        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 TomogridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
+                            (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
+                            (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
+
+        /* Reconstruction sizes */
+        int sizeImagex = configs.obj.padsize.x;
+
+        /* Reconstruction GPUs padded Grd and Blocks */
+        dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 ObjgridBlock(  (int)ceil( configs.obj.padsize.x / TPBX ) + 1,
+                            (int)ceil( configs.obj.padsize.y / TPBY ) + 1,
+                            (int)ceil( configs.obj.padsize.z / TPBZ ) + 1);
+
+        int bst_padd         = 2; /* Fix this padding for we will padd the data before this */
+        int filter_type      = configs.reconstruction_filter_type;
+        float paganin_reg    = configs.reconstruction_paganin;
+        float regularization = configs.reconstruction_reg;
+        float axis_offset    = configs.rotation_axis_offset;
+        float pixel          = configs.geometry.obj_pixel_x;
+
+        int blocksize = configs.blocksize;
+
+        if (blocksize == 0) {
+            int blocksize_aux = compute_GPU_blocksize(blockgpu, configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
+            blocksize = min(blockgpu, blocksize_aux);
+        }
+        int ind_block = (int)ceil((float)blockgpu / blocksize);
+        int ptr = 0, subblock;
+
+        float* dangles = opt::allocGPU<float>(nangles);
+
+        opt::CPUToGPU<float>(angles, dangles, nangles);
+
+        int dimmsfilter[] = {nrays};
+        int dimms1d[]     = {(int)nrays * bst_padd / 2};
+        int dimms2d[]     = {(int)sizeImagex, (int)sizeImagex};
+        int beds[]        = {nrays * bst_padd / 2};
+
+        float* dtomo;
+        float* dobj;
+        float* dtomoPadded;
+        float* dobjPadded;
+        cufftHandle plans1d;
+        cufftHandle plans2d;
+        cufftHandle filterplans;
+
+        cImage* filtersino;
+        cImage* cartesianblock;
+        cImage* polarblock;
+        cImage* realpolar;
+
+
+        HANDLE_FFTERROR(cufftPlanMany(&plans1d, 1, dimms1d, beds, 1, nrays * bst_padd / 2, beds, 1, nrays * bst_padd / 2, CUFFT_C2C, nangles * blocksize_bst * 2));
+        HANDLE_FFTERROR(cufftPlanMany(&plans2d, 2, dimms2d, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, blocksize_bst));
+        HANDLE_FFTERROR(cufftPlanMany(&filterplans, 1, dimmsfilter, nullptr, 0, 0, nullptr, 0, 0, CUFFT_C2C, nangles * blocksize_bst));
+
+        filtersino     = new cImage(           nrays,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU);
+        cartesianblock = new cImage(      sizeImagex, sizeImagex * blocksize_bst, 1, MemoryType::EAllocGPU);
+        polarblock     = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU);
+        realpolar      = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU);
+
+        dtomo = opt::allocGPU<float>((size_t)configs.tomo.size.x *            nangles * blocksize);
+        dobj  = opt::allocGPU<float>((size_t) configs.obj.size.x * configs.obj.size.y * blocksize);
+
+        dtomoPadded = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
+        dobjPadded  = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize);
+
+ 
+        for (int i = 0; i < ind_block; ++i){
+
+            subblock = min(blockgpu - ptr, (int)blocksize);
+
+            opt::CPUToGPU<float>(tomo + (size_t)ptr * configs.tomo.size.x * nangles, 
+                                dtomo, 
+                                (size_t)configs.tomo.size.x * nangles * subblock);
+
+            /* Padding the tomogram data */
+            TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
+            opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomoPadded, 
+                                                                dim3(configs.tomo.size.x, configs.tomo.size.x, subblock),
+                                                                configs.tomo.pad);
+            getBST( dobjPadded, dtomoPadded,
+                    dangles, nrays, nangles, subblock, sizeImagex, 
+                    bst_padd, regularization, paganin_reg,
+                    filter_type, axis_offset, pixel, 
+                    plans1d, plans2d, filterplans,
+                    filtersino, cartesianblock, polarblock, realpolar,
+                    gpu);
+
+            /* Remove padd from the object (reconstruction) */
+            ObjgridBlock.z = TomogridBlock.z;
+            opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(   dobjPadded, dobj, 
+                                                                        dim3(configs.obj.size.x, configs.obj.size.x, subblock), 
+                                                                        configs.obj.pad);
+
+            opt::GPUToCPU<float>(obj +  size_t(ptr * configs.obj.size.x * configs.obj.size.y), 
+                                dobj,
+                                size_t(configs.obj.size.x * configs.obj.size.y * subblock));
+
+            /* Update pointer */
+            ptr = ptr + subblock;
+        }
+
+        HANDLE_FFTERROR(cufftDestroy(plans1d));
+        HANDLE_FFTERROR(cufftDestroy(plans2d));
+        HANDLE_FFTERROR(cufftDestroy(filterplans));
+
+        HANDLE_ERROR(cudaFree(dtomo));
+        HANDLE_ERROR(cudaFree(dobj));
+        HANDLE_ERROR(cudaFree(dtomoPadded));
+        HANDLE_ERROR(cudaFree(dobjPadded));
+
+        delete filtersino;
+        delete cartesianblock;
+        delete polarblock;
+        delete realpolar;
 
         HANDLE_ERROR(cudaFree(dangles));
         HANDLE_ERROR(cudaDeviceSynchronize());
