@@ -1,7 +1,7 @@
 from ...rafttypes import *
 from ...io.io_ import *
 
-def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
+def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block, blocksize = 0):
     """ Rings artifacts reduction by Generalized Titarenko\'s algorithm [1]_.  
 
     Args:
@@ -9,6 +9,8 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
         gpus (int list): List of GPUs
         rings_lambda (float): Titarenko\'s regularization value. Values between [0,1]. The value -1 compute this parameter automatically
         rings_block (int): Blocks of sinograms to be used. Even values between [1,20]
+        blocksize (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [Default: 0]
+
 
     Returns:
         (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
@@ -49,7 +51,8 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block):
 
     libraft.getTitarenkoRingsMultiGPU(gpusptr, ctypes.c_int(ngpus), tomogram_ptr, 
             ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
-            ctypes.c_float(rings_lambda), ctypes.c_int(rings_block))
+            ctypes.c_float(rings_lambda), ctypes.c_int(rings_block),
+            ctypes.c_int(blocksize))
 
     return tomogram
 

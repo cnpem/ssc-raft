@@ -505,43 +505,53 @@ extern "C"{
     }
 
     void getTitarenkoRingsGPU(GPU gpus, int gpu,
-        float *data, dim3 size, float lambda_rings, int ring_blocks)
+        float *data, dim3 size, 
+        float lambda_rings, int ring_blocks,
+        int blocksize)
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
+
+        const int nstreams = 3;
 
         /* Projection data sizes */
         int nrays    = size.x;
         int nangles  = size.y;
         int nslices  = size.z;
 
-        int i;
-        int blocksize = min(nslices, 32); // Herança do Giovanni -> Mudar
+		int i;
+        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( nrays * nangles ) * nstreams;
 
-        int nblock = (int)ceil((float)nslices / blocksize);
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(nslices, total_required_mem_per_slice_bytes, 
+                                                        true, BYTES_TO_GB * getTotalDeviceMemory());
+            blocksize          = min(nslices, blocksize_aux);
+        }
+
+        int nblock = (int)ceil( (float) nslices / blocksize );
         int ptr = 0, subblock;
 
-        float *tomogram = opt::allocGPU<float>((size_t) nrays * nangles * blocksize);
-
-        const int nstreams = 3;
+        float *tomogram[nstreams];
         cudaStream_t streams[nstreams];
 
         for (int st = 0; st < nstreams; ++st) {
             cudaStreamCreate(&streams[st]);
+
+            tomogram[st] = opt::allocGPU<float>((size_t) nrays * nangles * blocksize, streams[st]);
         }
 
         for (i = 0; i < nblock; i++){
-
+            int st = i % nstreams;
             cudaStream_t stream = streams[i % nstreams];
 
             subblock = min(nslices - ptr, blocksize);
 
-            opt::CPUToGPU<float>(data + (size_t)ptr * nrays * nangles, tomogram, (size_t)subblock * nrays * nangles, stream);
+            opt::CPUToGPU<float>(data + (size_t)ptr * nrays * nangles, tomogram[st], (size_t)subblock * nrays * nangles, stream);
 
-            getTitarenkoRings(gpus, tomogram,
+            getTitarenkoRings(gpus, tomogram[st],
                                     dim3(nrays, nangles, subblock),
                                     lambda_rings, ring_blocks, stream);
 
-            opt::GPUToCPU<float>(data + (size_t)ptr * nrays * nangles, tomogram, (size_t)subblock * nrays * nangles, stream);
+            opt::GPUToCPU<float>(data + (size_t)ptr * nrays * nangles, tomogram[st], (size_t)subblock * nrays * nangles, stream);
 
             /* Update pointer */
             ptr = ptr + subblock;
@@ -549,6 +559,9 @@ extern "C"{
 
         for(int st = 0; st < nstreams; ++st) {
             cudaStreamSynchronize(streams[st]);
+
+            HANDLE_ERROR(cudaFreeAsync(tomogram[st], streams[st]));
+
             cudaStreamDestroy(streams[st]);
         }
 
@@ -561,17 +574,12 @@ extern "C"{
 
     void getTitarenkoRingsMultiGPU(int *gpus, int ngpus,
     float *data, int nrays, int nangles, int nslices,
-    float lambda_rings, int ring_blocks)
+    float lambda_rings, int ring_blocks,
+    int blocksize)
     {
         int i;
         int blockgpu = (nslices + ngpus - 1) / ngpus;
         int ptr = 0, subblock;
-
-        //float* h_data = nullptr;
-
-        //cudaMallocHost(&h_data,  sizeof(float) * size_t(nrays) * size_t(nangles) * size_t(nslices));
-        //cudaMemcpy(h_data, data, sizeof(float) * size_t(nrays) * size_t(nangles) * size_t(nslices),
-                //cudaMemcpyHostToHost);
 
         GPU gpu_parameters;
 
@@ -590,7 +598,8 @@ extern "C"{
                 gpus[i],
                 data + (size_t)ptr * nrays * nangles,
                 dim3(nrays, nangles, subblock),
-                lambda_rings, ring_blocks));
+                lambda_rings, ring_blocks,
+                blocksize));
 
             /* Update pointer */
             ptr = ptr + subblock;
@@ -598,10 +607,6 @@ extern "C"{
 
         for (auto &t : threads)
             t.get();
-
-        //cudaMemcpy(data, h_data, sizeof(float) * size_t(nrays) * size_t(nangles) * size_t(nslices),
-                //cudaMemcpyHostToHost);
-        //cudaFreeHost(h_data);
 
     }
 }

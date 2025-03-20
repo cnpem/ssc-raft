@@ -246,7 +246,7 @@ try:
     libraft.getTitarenkoRingsMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p,  
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-        ctypes.c_float, ctypes.c_int
+        ctypes.c_float, ctypes.c_int, ctypes.c_int
     ]
     
     libraft.getTitarenkoRingsMultiGPU.restype  = None

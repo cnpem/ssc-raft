@@ -23,11 +23,15 @@ extern "C"{
 /* Rings */
 extern "C"{
     
-    void getTitarenkoRingsMultiGPU(int *gpus, int ngpus, float *data, int nrays, int nangles, int nslices, float lambda_rings, int ring_blocks);
+    void getTitarenkoRingsMultiGPU(int *gpus, int ngpus, float *data, 
+    int nrays, int nangles, int nslices, 
+    float lambda_rings, int ring_blocks, int blocksize);
 
-    void getTitarenkoRingsGPU(GPU gpus, int gpu, float *data, dim3 size, float lambda_rings, int ring_blocks);
+    void getTitarenkoRingsGPU(GPU gpus, int gpu, float *data, dim3 size, 
+    float lambda_rings, int ring_blocks, int blocksize);
 
-    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, float lambda_rings, int ring_blocks, cudaStream_t stream = 0);
+    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, 
+    float lambda_rings, int ring_blocks, cudaStream_t stream = 0);
 }
 
 /* Rotation Axis */
