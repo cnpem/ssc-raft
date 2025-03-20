@@ -382,7 +382,7 @@ extern "C" {
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
 
-        nstreams = 2;
+        // nstreams = 2;
 
         const int blocksize_bst = 1;
 
@@ -415,7 +415,10 @@ extern "C" {
         int blocksize = configs.blocksize;
 
         if (blocksize == 0) {
-            int blocksize_aux = compute_GPU_blocksize(blockgpu, nstreams * configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
+            int blocksize_aux = compute_GPU_blocksize(  blockgpu, 
+                                                        nstreams * configs.total_required_mem_per_slice_bytes, 
+                                                        true, 
+                                                        BYTES_TO_GB * getTotalDeviceMemory());
             blocksize = min(blockgpu, blocksize_aux);
         }
         int ind_block = (int)ceil((float)blockgpu / blocksize);
@@ -567,7 +570,10 @@ void getBSTGPU(CFG configs,
         int blocksize = configs.blocksize;
 
         if (blocksize == 0) {
-            int blocksize_aux = compute_GPU_blocksize(blockgpu, configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
+            int blocksize_aux = compute_GPU_blocksize(  blockgpu, 
+                                                        configs.total_required_mem_per_slice_bytes, 
+                                                        true, 
+                                                        BYTES_TO_GB * getTotalDeviceMemory());
             blocksize = min(blockgpu, blocksize_aux);
         }
         int ind_block = (int)ceil((float)blockgpu / blocksize);
@@ -695,7 +701,8 @@ void getBSTGPU(CFG configs,
         std::vector<std::future<void>> threads;
         threads.reserve(ngpus);
 
-        if ( nstreams == 1 ){
+        if ( nstreams == 0 ){
+
             for (i = 0; i < ngpus; i++) {
                 subblock = min(nslices - ptr, blockgpu);
 
