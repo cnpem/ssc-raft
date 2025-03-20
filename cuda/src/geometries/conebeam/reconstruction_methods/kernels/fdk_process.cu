@@ -306,7 +306,7 @@ extern "C" {
         int blocksize = lab.blocksize;
 
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(blockgpu, total_required_mem_per_slice_bytes, true, A100_MEM);
+            int blocksize_aux  = compute_GPU_blocksize(blockgpu, total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(blockgpu, blocksize_aux);
         }
 
