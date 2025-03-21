@@ -7,7 +7,7 @@ import time
 
 # Define the supported tomogram reconstruction methods
 def set_fbp_method(method_name: str):
-    return lambda tomogram, recon, dic: fbp(tomogram=tomogram, obj=recon, dic={**dic, 'method': method_name})
+    return lambda tomogram, recon, dic: fbp(tomogram=tomogram, obj=recon, nstreams=1, dic={**dic, 'method': method_name})
 
 # Define the supported tomogram reconstruction methods
 def set_em_method(method_name: str):
@@ -39,7 +39,7 @@ def multiple_recon_methods_wrapper(tomogram: numpy.ndarray, recon: numpy.ndarray
     """
     recon_method   = dic.get('method', 'fbp_BST')
     if recon_method in recon_function_methods:
-        reconstruction = recon_function_methods[recon_method](tomogram=tomogram, recon=recon, nstreams = 1, dic=dic)
+        reconstruction = recon_function_methods[recon_method](tomogram=tomogram, recon=recon, dic=dic)
     else:
         raise ValueError(f"Unknown reconstruction method `{recon_method}` is not implemented!")
 
