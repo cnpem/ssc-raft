@@ -363,13 +363,8 @@ def tomcat_api_pipeline_stream(tomogram: numpy.ndarray,
     # flip data slow
     if is_stitching == 'T':
         tomogram = flip_x(tomogram)
-        flat     = flip_x_np(flat)
-        dark     = flip_x_np(dark)
-    
-    flat = flat[0]
-    dark = dark[0]
 
-    logger.debug(f"Tomogram shape before: {tomogram.shape}, Flat shape: {flat.shape}, Dark shape: {dark.shape}")
+    logger.debug(f"Tomogram shape before: {tomogram.shape}")
     
     deviation = dic.get('axis offset', None)
     offset    = dic.get('stitching overlap', None)
