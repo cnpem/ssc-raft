@@ -7,7 +7,7 @@ import time
 
 # Define the supported tomogram reconstruction methods
 def set_fbp_method(method_name: str):
-    return lambda tomogram, recon, dic: fbp(tomogram=tomogram, obj=recon, nstreams=1, dic={**dic, 'method': method_name})
+    return lambda tomogram, recon, dic: fbp(tomogram=tomogram, obj=recon, nstreams=2, dic={**dic, 'method': method_name})
 
 # Define the supported tomogram reconstruction methods
 def set_em_method(method_name: str):
