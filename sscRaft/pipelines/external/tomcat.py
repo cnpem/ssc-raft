@@ -343,6 +343,8 @@ def tomcat_api_pipeline(tomogram: numpy.ndarray,
     # Perform tomography reconstruction
     recon = process_tomogram_volume(tomogram, recon, dic, reconstruction_methods)
 
+    recon = convert_uint16(recon)
+
     elapsed = time.time() - start
     logger.info(f'Finished TOMCAT Reconstruction Pipeline! Total Time: {elapsed:.2f} seconds')
 
