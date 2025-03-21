@@ -39,7 +39,7 @@ def multiple_recon_methods_wrapper(tomogram: numpy.ndarray, recon: numpy.ndarray
     """
     recon_method   = dic.get('method', 'fbp_BST')
     if recon_method in recon_function_methods:
-        reconstruction = recon_function_methods[recon_method](tomogram=tomogram, recon=recon, dic=dic)
+        reconstruction = recon_function_methods[recon_method](tomogram=tomogram, recon=recon, nstreams = 1, dic=dic)
     else:
         raise ValueError(f"Unknown reconstruction method `{recon_method}` is not implemented!")
 
