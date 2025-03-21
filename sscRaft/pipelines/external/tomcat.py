@@ -205,6 +205,8 @@ def tomcat_api_pipeline_slice(tomogram: numpy.ndarray,
 
     start = time.time()
 
+    dic['angles[rad]'] = angle_vector
+
     gpus         = dic.get('gpu',[0])
     is_stitching = dic.get('stitching', 'F')
     
@@ -280,6 +282,8 @@ def tomcat_api_pipeline_shm(tomogram: numpy.ndarray,
                             dic: dict) -> numpy.ndarray:
 
     start = time.time()
+
+    dic['angles[rad]'] = angle_vector
 
     gpus         = dic.get('gpu',[0])
     is_stitching = dic.get('stitching', 'F')
