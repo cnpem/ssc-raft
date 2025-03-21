@@ -72,16 +72,14 @@ extern "C"{
     void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
     int memory(Lab lab, int ndev);
 
-
     void set_filtering_fft(Lab lab, float* proj, int n_process,  int ndevs, Process* process);
     void set_filtering_conv(Lab lab, float* proj, int n_process,  int ndevs, Process* process);
     void set_backprojection(Lab lab, float* recon, float* proj, float *angles, int n_process,  int ndevs, Process* process);
-
     
     void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float** c_proj, float** c_recon, float** c_beta, Process process);
     void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta, Process process);
     void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process);
-    void copy_cpu_filter_fft(float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process);
+    void copy_cpu_filter_fft(Lab lab, float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process);
     void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Process process) ;
     void copy_cpu_filter_conv(float* proj, float* c_proj, float* c_Q, Process process);
     
@@ -89,17 +87,11 @@ extern "C"{
     __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process);
     __global__ void set_beta(Lab lab, float *dangles, float* beta);
     __device__ void set_recon_idxs(long long int n, int* i, int*j, int* k, Lab lab);
-    __device__ void set_filter_idxs_pad(long long int n, int* i, int*j, int* k, Lab lab, Process process);
-
 
     __host__ void fft(Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
-    __host__ void fft_nopad(Lab lab, float* proj, cufftComplex* signal, float* W, Process process);
 
-    
     __global__ void signal_save(Lab lab, float* proj, cufftComplex* signal, Process process);
-    __global__ void signal_save_pad(Lab lab, float* proj, cufftComplex* signal, Process process);
     __global__ void signal_filter(Lab lab, float* W, cufftComplex* signal, Process process);
-    __global__ void signal_filter_pad(Lab lab, float* W, cufftComplex* signal, Process process);
     __global__ void filt_W(Lab lab, float* W);
     __global__ void filt_Ramp(Lab lab, float* W);
     __global__ void filt_Gaussian(Lab lab, float* W);
@@ -109,10 +101,8 @@ extern "C"{
     __global__ void filt_Hann(Lab lab, float* W);
     __global__ void filt_Hamming(Lab lab, float* W);
     __global__ void signal_inv(Lab lab, float* Q, cufftComplex* signal, Process process);
-    __global__ void signal_inv_pad(Lab lab, float* Q, cufftComplex* signal, Process process);
 
     __device__ void set_filter_idxs(long long int n, int* i, int*j, int* k, Lab lab, Process process);
-    __device__ void set_filter_idxs_pad(long long int n, int* i, int*j, int* k, Lab lab, Process process);
 
     void filtering_conv(Lab lab, float* proj, float* Q, Process process);
     __global__ void calc_Q(float* Q, float* proj, Lab lab, Process process);

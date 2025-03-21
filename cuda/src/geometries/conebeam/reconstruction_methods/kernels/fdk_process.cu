@@ -298,8 +298,9 @@ extern "C" {
         size_t total_required_mem_per_slice_bytes = (
                 static_cast<float>(sizeof(float)) * lab.nh  * lab.nbeta + // Tomo slice
                 static_cast<float>(sizeof(float)) * lab.nh  * lab.nh    + // Reconstructed object slice
-                static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // FFT slice
-                static_cast<float>(sizeof(float)) * lab.nh              + // FBP filter kernel
+                static_cast<float>(sizeof(float)) * lab.nph * lab.nph   + // Reconstructed object padded slice
+                static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // Tomo padded slice
+                static_cast<float>(sizeof(float)) * lab.nph             + // FBP filter kernel
                 static_cast<float>(sizeof(float)) * lab.nbeta             // angles
                 ); 
 
