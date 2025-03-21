@@ -73,11 +73,11 @@ extern "C"{
     int memory(Lab lab, int ndev);
 
     void set_filtering_fft(Lab lab, float* proj, int n_process,  int ndevs, Process* process);
-    void set_filtering_conv(Lab lab, float* proj, int n_process,  int ndevs, Process* process);
+    // void set_filtering_conv(Lab lab, float* proj, int n_process,  int ndevs, Process* process);
     void set_backprojection(Lab lab, float* recon, float* proj, float *angles, int n_process,  int ndevs, Process* process);
     
     void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float** c_proj, float** c_recon, float** c_beta, Process process);
-    void copy_to_cpu_back(float* recon, float* c_proj, float* c_recon, float* c_beta, Process process);
+    void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, float* c_beta, Process process);
     void copy_gpu_filter_fft(Lab lab, float* proj, float** c_proj, cufftComplex** c_signal, float** W, Process process);
     void copy_cpu_filter_fft(Lab lab, float* proj, float* c_proj, cufftComplex* c_signal, float* c_W,  Process process);
     void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Process process) ;

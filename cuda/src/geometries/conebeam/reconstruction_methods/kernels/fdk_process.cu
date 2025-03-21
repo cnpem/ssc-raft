@@ -16,14 +16,16 @@ extern "C" {
 void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs) {   
 
     // Variables for the reconstruction volume
-    int nz_gpu_recon, zi_min_recon, zi_max_recon;
+    int nz_gpu_recon, zi_min_recon, zi_max_recon, zi_recon;
     long long int n_recon, idx_recon;
-    float z_min, z_max, L;
+    long long int n_recon_pad, idx_recon_pad;
+    float z_min, z_max, L, Lx;
 
     // Variables for the projection volume
     float Z_min, Z_max;
-    int Zi_min, Zi_max;
+    int Zi_min, Zi_max, zi_proj;
     long long int n_proj, idx_proj;
+    long long int n_proj_pad, idx_proj_pad;
 
     // Variables for the filter volumes
     int nv_gpu_filter, zi_min_filter, zi_max_filter;
@@ -36,8 +38,12 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     zi_min_recon = i * nz_gpu_recon;
     zi_max_recon = std::min((i + 1) * nz_gpu_recon, lab.nz);
 
-    n_recon = (long long int) (zi_max_recon - zi_min_recon) * lab.nx * lab.ny;
-    idx_recon = (long long int) zi_min_recon * lab.nx * lab.ny;
+    n_recon       = (long long int) (zi_max_recon - zi_min_recon) * lab.nx * lab.ny;
+    idx_recon     = (long long int) zi_min_recon * lab.nx * lab.ny;
+    n_recon_pad   = (long long int) (zi_max_recon - zi_min_recon) * lab.nx * (1 + lab.padh) * lab.ny;
+    idx_recon_pad = (long long int) zi_min_recon * lab.nx * (1 + lab.padh) * lab.ny;
+
+    zi_recon      = (zi_max_recon - zi_min_recon);
 
     z_min = -lab.z + zi_min_recon * lab.dz;
     z_max = -lab.z + zi_max_recon * lab.dz;
@@ -60,6 +66,10 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     idx_proj = (long long int) Zi_min * lab.nbeta * lab.nh;
     n_proj = (long long int) (Zi_max - Zi_min) * lab.nbeta * lab.nh;
 
+    idx_proj_pad = (long long int) Zi_min * lab.nbeta * lab.nph;
+    n_proj_pad   = (long long int) (Zi_max - Zi_min) * lab.nbeta * lab.nph;
+    zi_proj      = (Zi_max - Zi_min);
+
     // --- Calculate filter volumes based on the projection indices ---
 
     // nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
@@ -80,8 +90,12 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     (*process).i_gpu = gpus[i % ndevs];  
 
     (*process).zi = Zi_min;
+    (*process).z_proj = zi_proj;
     (*process).idx_proj = idx_proj;
     (*process).n_proj = n_proj;
+    (*process).idx_proj = idx_proj_pad;
+    (*process).n_proj = n_proj_pad;
+
 
     (*process).n_filter = n_filter;
     (*process).idx_filter = idx_filter;
@@ -92,12 +106,14 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     (*process).z_filter_pad = zi_filter_pad; 
 
     (*process).n_recon = n_recon;
+    (*process).z_recon = zi_recon;
     (*process).idx_recon = idx_recon;
     (*process).z_ph = z_min;
     (*process).z_det = -lab.v + Zi_min * lab.dv;
+    (*process).n_recon = n_recon_pad;
+    (*process).idx_recon = idx_recon_pad;
 }
 }
-
 
 extern "C"{
 void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs){   

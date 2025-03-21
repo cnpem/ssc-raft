@@ -103,7 +103,7 @@ extern "C"
                 HANDLE_ERROR(cudaDeviceSynchronize());
 
                 for (i = 0; i < ndevs; i++)
-                    copy_to_cpu_back(recon, c_proj[i], c_recon[i], c_beta[i], process[k - ndevs + i]);
+                    copy_to_cpu_back(lab, recon, c_proj[i], c_recon[i], c_beta[i], process[k - ndevs + i]);
             }
         }
     }

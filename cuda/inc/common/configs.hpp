@@ -250,10 +250,10 @@ struct Process{
     long long int objptr_index, objptr_size;
     float obj_posz;
 
-    long long int n_recon, n_tomo, n_filter; 
-    int i, i_gpu, zi, z_filter, z_filter_pad;
-    long long int n_proj, n_filter_pad;
-    long long int idx_proj, idx_proj_max, idx_recon, idx_filter, idx_filter_pad;
+    long long int n_recon, n_recon_pad, n_tomo, n_filter; 
+    int i, i_gpu, zi, z_filter, z_filter_pad, z_proj, z_recon;
+    long long int n_proj, n_proj_pad, n_filter_pad;
+    long long int idx_proj, idx_proj_pad, idx_proj_max, idx_recon, idx_recon_pad, idx_filter, idx_filter_pad;
     float z_ph, z_det;
 };
 
