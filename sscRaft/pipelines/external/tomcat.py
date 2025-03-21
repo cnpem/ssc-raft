@@ -273,11 +273,11 @@ def tomcat_api_pipeline_slice(tomogram: numpy.ndarray,
     return recon
 
 def tomcat_api_pipeline_shm(tomogram: numpy.ndarray, 
-                        flat: numpy.ndarray, 
-                        dark: numpy.ndarray,
-                        recon: numpy.ndarray,
-                        angle_vector: numpy.ndarray, 
-                        dic: dict) -> numpy.ndarray:
+                            flat: numpy.ndarray, 
+                            dark: numpy.ndarray,
+                            recon: None,
+                            angle_vector: numpy.ndarray, 
+                            dic: dict) -> numpy.ndarray:
 
     start = time.time()
 
@@ -341,8 +341,10 @@ def tomcat_api_pipeline_shm(tomogram: numpy.ndarray,
 
     dic['save_recon'] = False
     # Perform tomography reconstruction
-    recon_data = process_tomogram_volume(tomogram, None, dic, reconstruction_methods)
-    recon      =  convert_uint16(recon_data)
+    recon = process_tomogram_volume(tomogram, None, dic, reconstruction_methods)
+    recon = convert_uint16(recon)
 
     elapsed = time.time() - start
     logger.info(f'Finished TOMCAT Reconstruction Pipeline! Total Time: {elapsed:.2f} seconds')
+
+    return recon
