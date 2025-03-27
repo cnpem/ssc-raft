@@ -77,7 +77,6 @@ extern "C"{
                                                         true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(size.z, blocksize_aux);
         }
-
         int nblock = (int)ceil( (float) size.z / blocksize );
 		int ptr = 0, subblock;
 

@@ -78,15 +78,11 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     is_slice          = 0
     logger.info(f'Reconstruct all slices: {start_recon_slice} to {end_recon_slice}.')  
 
-    blockslices_recon = end_recon_slice - start_recon_slice
-
-    nx, ny, nz = int(nrays), int(nrays), int(blockslices_recon)
+    nx, ny, nz = int(nrays), int(nrays), int(nslices)
     logger.info(f'Set default reconstruction size ({nx},{ny},{nz}) = (x,y,z).')
 
     start_tomo_slice  = 0
     end_tomo_slice    = nslices
-
-    logger.info(f'Reconstructing {blockslices_recon} slices of {nslices}.')
 
     nh, nv = int(nrays), int(nslices)
     h, v   = nh*dh/2, nv*dv/2

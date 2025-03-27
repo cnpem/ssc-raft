@@ -19,6 +19,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
     int i, j, k, m;
 
     float Rxpad = lab.dx * (float)lab.nph / 2.0f;
+    float Rypad = lab.dy * (float)lab.nph / 2.0f;
     float Hxpad = lab.dh * (float)lab.nph / 2.0f;
     float    x, y, z;
     float u, v, X, Z;
@@ -30,7 +31,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
 
     set_recon_idxs(n, &i, &j, &k, lab);
     x = -Rxpad + i*lab.dx;
-    y = -lab.y + j*lab.dy;
+    y = -Rypad + j*lab.dy;
     z = process.z_ph + k*lab.dz;
 
     int block = process.z_proj;
@@ -90,7 +91,7 @@ float** c_proj, float** c_recon, float** c_beta, Process process)
 
     HANDLE_ERROR(cudaDeviceSynchronize()); 
 
-    // printf("Allocating gpu memory... c_recon N = %lld \n",N);
+    // printf("Allocating gpu memory... c_recon Npad = %lld \n",Npad);
     HANDLE_ERROR(cudaMalloc(c_recon, Npad * sizeof(float)));
 
     // printf("Allocating gpu memory... c_proj M = %lld \n",M);
@@ -139,11 +140,11 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
     
     /* Copy GPU sinograms to padded GPU sinograms *c_proj*/
     opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(c_recon, c_rec,
-                                                        dim3(lab.nh, lab.nh, process.z_recon),
+                                                        dim3(lab.nx, lab.ny, process.z_recon),
                                                         dim3(lab.padh, lab.padh, 0));
 
     // printf("gpu = %d, idx recon = %lld. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
-    HANDLE_ERROR(cudaMemcpy(&recon[process.idx_recon], c_recon, N*sizeof(float), cudaMemcpyDeviceToHost));
+    HANDLE_ERROR(cudaMemcpy(&recon[process.idx_recon], c_rec, N*sizeof(float), cudaMemcpyDeviceToHost));
 
     HANDLE_ERROR(cudaFree(c_proj));
     HANDLE_ERROR(cudaFree(c_recon));
@@ -194,9 +195,9 @@ __global__ void set_beta(Lab lab, float *dangles, float* beta){
 extern "C"{
 __device__ void set_recon_idxs(long long int n, int* i, int*j, int* k, Lab lab) {
     long int nij, rem_ij;
-    nij = lab.nx*lab.ny;
+    nij = lab.nph*lab.nph;
     *k = (n) / nij;    
     rem_ij = (n) % nij;
-    *j = rem_ij / lab.nx;
-    *i = rem_ij % lab.nx;
+    *j = rem_ij / lab.nph;
+    *i = rem_ij % lab.nph;
 }}

@@ -40,8 +40,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
 
     n_recon       = (long long int) (zi_max_recon - zi_min_recon) * lab.nx * lab.ny;
     idx_recon     = (long long int) zi_min_recon * lab.nx * lab.ny;
-    n_recon_pad   = (long long int) (zi_max_recon - zi_min_recon) * lab.nx * (1 + lab.padh) * lab.ny;
-    idx_recon_pad = (long long int) zi_min_recon * lab.nx * (1 + lab.padh) * lab.ny;
+    n_recon_pad   = (long long int) (zi_max_recon - zi_min_recon) * lab.nph * lab.nph;
+    idx_recon_pad = (long long int) zi_min_recon * lab.nph * lab.nph;
 
     zi_recon      = (zi_max_recon - zi_min_recon);
 
@@ -93,8 +93,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     (*process).z_proj = zi_proj;
     (*process).idx_proj = idx_proj;
     (*process).n_proj = n_proj;
-    (*process).idx_proj = idx_proj_pad;
-    (*process).n_proj = n_proj_pad;
+    (*process).idx_proj_pad = idx_proj_pad;
+    (*process).n_proj_pad = n_proj_pad;
 
 
     (*process).n_filter = n_filter;
@@ -110,8 +110,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     (*process).idx_recon = idx_recon;
     (*process).z_ph = z_min;
     (*process).z_det = -lab.v + Zi_min * lab.dv;
-    (*process).n_recon = n_recon_pad;
-    (*process).idx_recon = idx_recon_pad;
+    (*process).n_recon_pad = n_recon_pad;
+    (*process).idx_recon_pad = idx_recon_pad;
 }
 }
 
@@ -312,13 +312,12 @@ extern "C" {
         int blockgpu = (lab.nv + ndev - 1) / ndev;
 
         size_t total_required_mem_per_slice_bytes = (
-                static_cast<float>(sizeof(float)) * lab.nh  * lab.nbeta + // Tomo slice
-                static_cast<float>(sizeof(float)) * lab.nh  * lab.nh    + // Reconstructed object slice
-                static_cast<float>(sizeof(float)) * lab.nph * lab.nph   + // Reconstructed object padded slice
-                static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // Tomo padded slice
-                static_cast<float>(sizeof(float)) * lab.nph             + // FBP filter kernel
-                static_cast<float>(sizeof(float)) * lab.nbeta             // angles
-                ); 
+            static_cast<float>(sizeof(float)) * lab.nh  * lab.nbeta + // Tomo slice
+            static_cast<float>(sizeof(float)) * lab.nh  * lab.nh    + // Reconstructed object slice
+            static_cast<float>(sizeof(float)) * lab.nph * lab.nph   + // Reconstructed object padded slice
+        2 * static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // Tomo padded slice + filter kernel
+            static_cast<float>(sizeof(float)) * lab.nbeta             // angles
+        ); 
 
         int blocksize = lab.blocksize;
 

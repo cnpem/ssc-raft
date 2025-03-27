@@ -33,7 +33,7 @@ extern "C"
         
         n_process = memory(lab, ndevs);
 
-        printf("B: ndevs = %d, blockgpu = %d, n_process = %d \n", ndevs, blockgpu, n_process);
+        // printf("Paola 26/03/25 \n");
 
         // printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);
         // printf("nh = %d, nv = %d, nx = %d, ny = %d, nz = %d \n",  lab.nh,  lab.nv, lab.nx, lab.ny, lab.nz);
