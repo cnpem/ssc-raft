@@ -24,16 +24,16 @@ def Centersino(frame0, frame1, flat, dark):
         nrays = frame0.shape[-1]
         nslices = frame0.shape[-2]
 
-        frame0 = numpy.ascontiguousarray(frame0.astype(numpy.float32))
+        frame0 = CNICE(frame0, numpy.float32)
         frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
 
-        frame1 = numpy.ascontiguousarray(frame1.astype(numpy.float32))
+        frame1 = CNICE(frame1, numpy.float32)
         frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
 
-        dark = numpy.ascontiguousarray(dark.astype(numpy.float32))
+        dark = CNICE(dark, numpy.float32)
         darkptr = dark.ctypes.data_as(ctypes.c_void_p)
 
-        flat = numpy.ascontiguousarray(flat.astype(numpy.float32))
+        flat = CNICE(flat, numpy.float32)
         flatptr = flat.ctypes.data_as(ctypes.c_void_p)
 
         offset = libraft.findcentersino(frame0ptr, frame1ptr, darkptr, flatptr, 
@@ -62,16 +62,16 @@ def Centersino_subpixel(frame0, frame1, flat, dark):
         nrays = frame0.shape[-1]
         nslices = frame0.shape[-2]
 
-        frame0 = numpy.ascontiguousarray(frame0.astype(numpy.float32))
+        frame0 = CNICE(frame0, numpy.float32)
         frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
 
-        frame1 = numpy.ascontiguousarray(frame1.astype(numpy.float32))
+        frame1 = CNICE(frame1, numpy.float32)
         frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
 
-        dark = numpy.ascontiguousarray(dark.astype(numpy.float32))
+        dark = CNICE(dark, numpy.float32)
         darkptr = dark.ctypes.data_as(ctypes.c_void_p)
 
-        flat = numpy.ascontiguousarray(flat.astype(numpy.float32))
+        flat = CNICE(flat, numpy.float32)
         flatptr = flat.ctypes.data_as(ctypes.c_void_p)
 
         offset = libraft.findcentersino_subpixel(frame0ptr, frame1ptr, darkptr, flatptr, 

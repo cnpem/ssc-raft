@@ -176,12 +176,12 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     gpus = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_p = gpus.ctypes.data_as(ctypes.c_void_p)
 
-    angles = numpy.ascontiguousarray(angles.astype(numpy.float32))
+    angles = CNICE(angles, numpy.float32)
     angles_p = angles.ctypes.data_as(ctypes.c_void_p)
 
     logger.info(f'Tomogram data shape: {tomogram.shape} = (slices,angles,rays).')
 
-    proj = numpy.ascontiguousarray(tomogram.astype(numpy.float32))
+    proj = CNICE(tomogram, numpy.float32)
     proj_p = proj.ctypes.data_as(ctypes.c_void_p)
 
     logger.info(f'Recon shape: ({lab.nx}, {lab.ny}, {lab.nz}) = (nx,ny,nz).')

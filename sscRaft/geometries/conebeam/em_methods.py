@@ -47,15 +47,21 @@ def _process_cone_data(tomo, flat, dark):
         raise ValueError("Negative value found in tomo after dark subtraction.")
     if (flat < 0).any():
         raise ValueError("Negative value found in flat after dark subtraction.")
-    
-    return tomo.astype(numpy.float32), flat.astype(numpy.float32), dark.astype(numpy.float32)
+
+    if tomo.dtype != numpy.float32:
+        tomo = tomo.astype(numpy.float32)
+    if flat.dtype != numpy.float32:
+        flat = flat.astype(numpy.float32)
+    if dark.dtype != numpy.float32:
+        dark = dark.astype(numpy.float32)
+
+    return tomo, flat, dark
 
 def _make_angs_pointer(cone_data, tomo_shape):
     try:
-        angs = cone_data["angs"].astype(numpy.float32)
+        angs = CNICE(cone_data["angs"], numpy.float32)
     except:
         angs = numpy.linspace(0, 2*numpy.pi, tomo_shape[0], dtype=numpy.float32)
-    angs = numpy.ascontiguousarray(angs)
     angs_p = angs.ctypes.data_as(ctypes.c_void_p)
     return angs_p
 
@@ -72,9 +78,9 @@ def _make_detector_arrays(z2, nh, nv, H, V):
 
 def _make_detector_pointer(cone_data, tomo_shape):
     try:
-        px = cone_data["px"].astype(numpy.float32)
-        py = cone_data["py"].astype(numpy.float32)
-        pz = cone_data["pz"].astype(numpy.float32)
+        px = CNICE(cone_data["px"], numpy.float32)
+        py = CNICE(cone_data["py"], numpy.float32)
+        pz = CNICE(cone_data["pz"], numpy.float32)
     except:
         z2 = cone_data["z2"]
         pixel_size = cone_data["pixel_size"]
@@ -86,9 +92,6 @@ def _make_detector_pointer(cone_data, tomo_shape):
             z2, 
             nx_detc, nz_detc, 
             H, V)
-    px = numpy.ascontiguousarray(px.astype(numpy.float32))
-    py = numpy.ascontiguousarray(py.astype(numpy.float32))
-    pz = numpy.ascontiguousarray(pz.astype(numpy.float32))
     cone_data["px"] = px
     cone_data["py"] = py
     cone_data["pz"] = pz
@@ -196,7 +199,7 @@ def _make_struct_lab_pointer(cone_data, tomo_shape):
 
 def _make_recon_pointer(cone_data, recon_max, lab):
     try:
-        recon = cone_data["recon"].astype(numpy.float32)
+        recon = CNICE(cone_data["recon"], numpy.float32)
         neg_idxs = recon < 0
         if neg_idxs.any():
             recon[neg_idxs] = 1
@@ -207,7 +210,6 @@ def _make_recon_pointer(cone_data, recon_max, lab):
             warnings.warn("Higher than recon_max value encountered in initial-value-recon.")
     except:
         recon = numpy.ones([lab.nz, lab.ny, lab.nx], dtype=numpy.float32, order="C")
-    recon = numpy.ascontiguousarray(recon)
     recon_p = recon.ctypes.data_as(ctypes.c_void_p)
     return recon_p, recon
 
@@ -349,12 +351,11 @@ variables describing length should use the same unit of measurement).
     legth_unit = cone_data["unit of measurement (length)"]
     cone_data["unit of measurement (attenuation coefficient)"] = legth_unit + "^-1"
     cone_data["tomo.shape"] = tomo.shape
-    tomo, flat, dark = _process_cone_data(
-        tomo.astype(numpy.float32),
-        flat.astype(numpy.float32),
-        dark.astype(numpy.float32))
-    tomo_p = numpy.ascontiguousarray(tomo).ctypes.data_as(ctypes.c_void_p)
-    flat_p = numpy.ascontiguousarray(flat).ctypes.data_as(ctypes.c_void_p)
+
+    tomo, flat, dark = _process_cone_data(tomo, flat, dark)
+    tomo, flat = CNICE(tomo, np.float32), CNICE(flat, np.float32)
+    tomo_p = tomo.ctypes.data_as(ctypes.c_void_p)
+    flat_p = flat.ctypes.data_as(ctypes.c_void_p)
     # dark_p = numpy.ascontiguousarray(dark).ctypes.data_as(ctypes.c_void_p) # to do: sum dark after ray integral.
     angs_p = _make_angs_pointer(cone_data, tomo.shape)
     pz_p, py_p, px_p = _make_detector_pointer(cone_data, tomo.shape)

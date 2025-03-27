@@ -90,7 +90,7 @@ def phase_retrieval(frames, dic):
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
    
-    frames = numpy.ascontiguousarray(frames.astype(numpy.float32))
+    frames = CNICE(frames, numpy.float32)
     frames_ptr = frames.ctypes.data_as(ctypes.c_void_p)
 
     libraft.getPhaseMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
