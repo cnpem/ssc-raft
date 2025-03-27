@@ -316,7 +316,7 @@ def correct_rotation_axis_subpixel(data: numpy.ndarray, axis_offset: float, gpus
     nangles  = data.shape[-2]
     
     if len(data.shape) == 3:
-        nslices = data.shape[ 0]
+        nslices = data.shape[0]
     if len(data.shape) == 2:
         nslices = 1
 
@@ -385,7 +385,7 @@ def correct_rotation_axis_block(data, rotation_axis_list, block_of_slices):
     j = 0
     for i in range(0,nslices,block_of_slices):
 
-        data[i:i+block_of_slices] = correct_rotation_axis_cropped(data[i:i+block_of_slices], rotation_axis_list[j])
+        data[i:i+block_of_slices] = correct_rotation_axis_subpixel(data[i:i+block_of_slices], rotation_axis_list[j],[0],0)
         j = j + 1
 
     return data

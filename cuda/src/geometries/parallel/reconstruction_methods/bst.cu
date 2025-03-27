@@ -416,7 +416,7 @@ extern "C" {
 
         if (blocksize == 0) {
             int blocksize_aux = compute_GPU_blocksize(  blockgpu, 
-                                                        nstreams * configs.total_required_mem_per_slice_bytes, 
+                                                        (size_t)nstreams * configs.total_required_mem_per_slice_bytes, 
                                                         true, 
                                                         BYTES_TO_GB * getTotalDeviceMemory());
             blocksize = min(blockgpu, blocksize_aux);

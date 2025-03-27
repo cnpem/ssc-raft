@@ -59,18 +59,11 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
         message_error = f'Data has wrong shape = {tomogram.shape}. It needs to be 2D or 3D.'
         logger.error(message_error)
         raise ValueError(message_error)
-
-    padh = int(nrays // 2)
+    
     try:
-        pad  = dic['padding']
-        # logger.info(f'Set FDK pad value as {pad} x horizontal dimension ({padh}).')
-        padh = int(pad * padh)
-        # padh = power_of_2_padding(nrays,padh)
+        padh  = dic['padding']
     except:
-        pad  = 1
-        # logger.info(f'Set default FDK pad value as {pad} x horizontal dimension ({padh}).')
-        padh = int(pad * padh)
-        # padh = power_of_2_padding(nrays,padh)
+        padh  = 0
 
     if angles is None:
         try:
@@ -80,50 +73,20 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
             logger.error(message_error) 
             raise ValueError(message_error)
     
-    # try:
-    #     start_recon_slice = dic['slices'][0]
-    #     end_recon_slice   = dic['slices'][1]
-    #     is_slice          = 1
-    #     logger.info(f'Reconstruct slices {start_recon_slice} to {end_recon_slice}.')
-    # except:
     start_recon_slice = 0
     end_recon_slice   = nslices
     is_slice          = 0
     logger.info(f'Reconstruct all slices: {start_recon_slice} to {end_recon_slice}.')  
 
-    blockslices_recon = end_recon_slice - start_recon_slice
-
-    # try:
-    #     reconsize = dic['reconSize']
-
-    #     if isinstance(reconsize,list) or isinstance(reconsize,tuple):
-        
-    #         if len(dic['reconSize']) == 1:
-    #             nx, ny, nz = int(reconsize[0]), int(reconsize[0]), int(blockslices_recon)
-    #         else:
-    #             nx, ny, nz = int(reconsize[0]), int(reconsize[1]), int(blockslices_recon)
-        
-    #     elif isinstance(reconsize,int):
-            
-    #         nx, ny, nz = int(reconsize), int(reconsize), int(blockslices_recon)
-        
-    #     else:
-    #         logger.error(f'Dictionary entry `reconsize` wrong ({reconsize}). The entry `reconsize` is optional, but if it exists it needs to be a list = [nx,ny].')
-    #         logger.error(f'Finishing run...')
-    #         sys.exit(1)
-
-    # except:
-    nx, ny, nz = int(nrays), int(nrays), int(blockslices_recon)
+    nx, ny, nz = int(nrays), int(nrays), int(nslices)
     logger.info(f'Set default reconstruction size ({nx},{ny},{nz}) = (x,y,z).')
 
     start_tomo_slice  = 0
     end_tomo_slice    = nslices
 
-    logger.info(f'Reconstructing {blockslices_recon} slices of {nslices}.')
-
     nh, nv = int(nrays), int(nslices)
     h, v   = nh*dh/2, nv*dv/2
-    nph    = int(nh + 2 * padh)
+    nph    = int(nh * ( 1 + padh ))
 
     nbeta  = len(angles)
 

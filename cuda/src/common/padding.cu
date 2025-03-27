@@ -301,6 +301,7 @@ __global__ void contrast_enhance::padding(float *in, cufftComplex *inpadded, dim
 
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
+    inpadded[indpad].x = 1.0;
     inpadded[indpad].y = 0.0;
 
     if ( ( i <=          (int)padding_x ) && ( j <=          (int)padding_y )) inpadded[indpad].x = in[size.x * k * size.y + size.x *            0 +            0];
