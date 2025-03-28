@@ -2,7 +2,7 @@ from ..rafttypes import *
 from .constructors import dont_process
 from .constructors import apply_filter_constructor
 from .pre_process import apply_log
-from ..processing.opt import transpose
+from ..processing.opt import transpose_gpu
 from ..processing.rings import *
 from ..phase_retrieval.phase import *
 
@@ -92,10 +92,10 @@ remove_rings_titarenko = partial(
 
 
 def paganin_by_frames(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -> numpy.ndarray:
-    tomogram = transpose(tomogram)
-    dic['magn'] = 1 
+    tomogram = transpose_gpu(tomogram)
+    dic['magn'] = 1
     tomogram = phase_retrieval(tomogram, dic)
-    tomogram = transpose(tomogram)
+    tomogram = transpose_gpu(tomogram)
     return tomogram
 
 paganin_by_frames = partial(
@@ -136,7 +136,8 @@ def multiple_filters(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: dict) -
     if paganin_method in paganin_methods:
         if paganin_method == 'paganin_by_frames':
             logger.info(f"Applying Paganin by frames method: {paganin_method}")
-            tomogram = numpy.exp(-tomogram, tomogram) # calculate inplace exp(-tomogram)
+            tomogram *= -1
+            tomogram = numpy.exp(tomogram, tomogram) # calculate inplace exp(-tomogram)
             tomogram = paganin_methods[paganin_method](tomogram=tomogram, recon=recon, dic=dic)
             tomogram = apply_log(tomogram, dic)
             logger.info("Paganin by frames process completed.")

@@ -274,20 +274,15 @@ def correct_rotation_axis_cropped(data: numpy.ndarray, deviation: int) -> numpy.
     """
     logger.info(f'Applying given rotation axis correction deviation value: {deviation}')
 
-    deviation = - deviation # Fix centersino value
+    proj = numpy.zeros_like(data)
+    if deviation < 0:
+        proj[..., :deviation] = data[..., -deviation:]
+    elif deviation > 0:
+        proj[..., deviation:] = data[..., :-deviation]
 
-    proj = numpy.zeros((data.shape[0], data.shape[1], data.shape[2] + 2 * numpy.abs(deviation)))
+    data[...] = proj
 
-    if(deviation < 0):
-        proj[:,:,2 * numpy.abs(deviation):data.shape[2] + 2 * numpy.abs(deviation)] = data
-    else:
-        proj[:,:,0:data.shape[2]] = data
-
-
-    if deviation != 0:
-        proj = proj[:,:,numpy.abs(deviation):-numpy.abs(deviation)]
-
-    return proj
+    return data
 
 
 def correct_rotation_axis_subpixel(data: numpy.ndarray, axis_offset: float, gpus: list = [0], blocksize: int = 0) -> numpy.ndarray:

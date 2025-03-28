@@ -6,14 +6,15 @@ from ..processing.background_correction import *
 from ..processing.alignments.rotationaxis import *
 from ..processing.alignments.excentric_tomo import *
 
-from ..processing.opt import transpose
+from ..processing.opt import transpose, transpose_gpu
 
 import time
 
 def apply_log(tomogram: numpy.ndarray, dic: dict) -> numpy.ndarray:
     start = time.time()
     logger.info('Start applying -log(tomogram)...')
-    tomogram = -numpy.log(tomogram, tomogram) # calculate inplace the -log(tomogram)
+    tomogram = numpy.log(tomogram, tomogram) # calculate inplace the -log(tomogram)
+    tomogram *= -1
     logger.info(f'Finished applying -log(tomogram). Time elapsed: {time.time() - start}s')
 
     return tomogram
@@ -23,7 +24,7 @@ def calculate_transposed_volumes(tomogram: numpy.ndarray, flat: numpy.ndarray, d
     logger.info('Calculating the transpose volumes of tomogram, flat-field and dark-field...')
     flat = transpose(flat)
     dark = transpose(dark)
-    tomogram = transpose(tomogram)
+    tomogram = transpose_gpu(tomogram)
     logger.info(f'Finished calculating transpose volumes. Time elapsed: {str(time.time() - start)}s')
 
     return tomogram, flat, dark

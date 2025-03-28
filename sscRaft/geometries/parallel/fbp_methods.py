@@ -31,6 +31,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
         * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
     """        
+
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
     gpus     = numpy.ascontiguousarray(gpus.astype(numpy.intc))
