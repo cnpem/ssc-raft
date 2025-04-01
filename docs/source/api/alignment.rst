@@ -25,7 +25,7 @@ Alignment API
 
 .. _apistitch:
 
-.. automodule:: sscRaft.processing.alignments.stitching360
+.. automodule:: sscRaft.processing.alignments.excentric_tomo
      :members:
      :undoc-members:
      :show-inheritance:

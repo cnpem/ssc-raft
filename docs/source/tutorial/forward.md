@@ -33,7 +33,7 @@ The input and output data is on the following format:
     nangles  = phantom.shape[1]
     angles   = numpy.linspace(0, numpy.pi, nangles)
 
-    tomogram = sscRaft.radon_RT(phantom, angles, gpus = [0,1])
+    tomogram = sscRaft.radon_RT(phantom, angles, gpus = [0,1], pixel = 1.0)
 ```
 
 The reference to all the input parameters can be found on the {ref}`Radon API documentation <apiradon>`.

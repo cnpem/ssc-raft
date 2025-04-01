@@ -43,7 +43,7 @@ The input and output data is on the following format:
     reconstruction = sscRaft.fdk(tomogram, dic = {'gpu': [0,1], 'angles[rad]': angles, 'beta/delta': 0.0,
                                                   'detectorPixel[m]': 3.61e-6, 'z1[m]':1000e-3, 'z1+z2[m]':2000e-3, 'z2[m]':500e-3, 
                                                   'energy[eV]': 22e3, 'filter': 'hamming', 
-                                                  'padding': 2, 'blocksize': 0})
+                                                  'padding': 1, 'blocksize': 0})
 ```
 
 The reference to all the input parameters can be found on the {ref}`FDK API documentation <apifdk>`.

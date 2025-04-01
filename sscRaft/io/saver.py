@@ -2,12 +2,10 @@ from ..rafttypes import *
 import os
 import time
 import h5py
-import asyncio
-import numpy as np
+import numpy
 
 from .._version import __version__
 from .executor_manager import get_executor
-
 
 # Define function to save the tomogram asynchronously
 def async_save(tomogram: numpy.ndarray, dic: dict, save_prefix: str) -> None:

@@ -603,8 +603,6 @@ extern "C"{
 		int subvolume = (nslices + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; 
 
-        printf("Subvolume: %d, %d \n",subvolume, nslices);
-
 		if (ngpus == 1){ /* 1 device */
 
 			getRotAxisCorrectionGPU(gpu_parameters, tomogram, axis_offset, tomo_size, gpus[0], blocksize);

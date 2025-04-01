@@ -1,22 +1,29 @@
-Version 3.2.0 - 2025-02-26
+Version 3.2.0 - 2025-04-01
 --------------------------
 *Added:*
   - Added extendend domain padding for functions ``FDK``, ``FBP by RT`` and ``FBP by BST``. 
   - Added rotation axis offset function by blocks.
   - Added rotation axis correction function by blocks with subpixel correction.
   - No cuda streams on ``FBP by BST``.
-  - Cuda streams on ``background_correction``.
+  - Blocksize option added on ``FDK`` function.
+  - Added rotational axis and excentric tomography methods documentation pages.
+  - Added version on zenodo ``json``.
 
 *Changed:*
   - Changed use of padding for functions ``FDK``, ``FBP by RT`` and ``FBP by BST``. Now it is on the whole data process, not only on the filter.
   - Fixed TOMCAT API pipeline for live-reconstruction.
   - Fixed memory allocation on ``FBP by BST`` and ``background_correction``.
+  - Changed names for excentric tomography functions.
+  - Fixed excentric tomography stitching correction function padding.
+  - Fixed ``stitchExcentricTomo`` (parallel-beam) bug for odd angle dimension.
+  - Some minor bugs on the ``iterative_reprojetion()`` alignment function.
 
 *Known Bugs:*
   - ``BST`` works for 180 degrees only on a regular angle mesh.
   - ``BST`` angles are hardcoded and not as input.
   - Memory issues on ``EM`` for cone-beam geometry.
-  - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension.
+  - No cuda streams on ``FBP by BST``: bug.
+  - A few bugs on TOMCAT's CLI rings and paganin methods call.
 
 *To be done:*
   - Refactoring ``FDK``.

@@ -100,7 +100,6 @@ def correct_rotation_axis360(data: numpy.ndarray, dic: dict) -> numpy.ndarray:
 
         * ``dic['shift']`` (Tuple, optional): (bool,int) Rotation axis automatic corrrection (is_autoRot) (``is_autoRot = True``, ``value = 0``)
         * ``dic['findRotationAxis']`` (Tuple, optional): (int,int,int) For rotation axis function. Tuple (``nx_search=500``, ``nx_window=500``, ``nsinos=None``)
-        * ``dic['padding']`` (int, optional): Number of elements for horizontal zero-padding. Defaults to ``0``
 
     Options:
 
@@ -227,7 +226,7 @@ def c_correct_rotation_axis(data: numpy.ndarray, deviation: int,
     return out
 
 
-def correct_rotation_axis(data: numpy.ndarray, deviation: int) -> numpy.ndarray:
+def correct_rotation_axis_int(data: numpy.ndarray, deviation: int) -> numpy.ndarray:
     """Corrects the rotation axis of a data according to a deviation value defined 
     by the number of pixels translated form the center of the data.
 
@@ -285,7 +284,7 @@ def correct_rotation_axis_cropped(data: numpy.ndarray, deviation: int) -> numpy.
     return data
 
 
-def correct_rotation_axis_subpixel(data: numpy.ndarray, axis_offset: float, gpus: list = [0], blocksize: int = 0) -> numpy.ndarray:
+def correct_rotation_axis(data: numpy.ndarray, axis_offset: float, gpus: list = [0], blocksize: int = 0) -> numpy.ndarray:
     """Corrects the rotation axis of a data according to a deviation value from
     the center of the data. Subpixel precision.
 
@@ -380,7 +379,7 @@ def correct_rotation_axis_block(data, rotation_axis_list, block_of_slices):
     j = 0
     for i in range(0,nslices,block_of_slices):
 
-        data[i:i+block_of_slices] = correct_rotation_axis_subpixel(data[i:i+block_of_slices], rotation_axis_list[j],[0],0)
+        data[i:i+block_of_slices] = correct_rotation_axis(data[i:i+block_of_slices], rotation_axis_list[j],[0],0)
         j = j + 1
 
     return data

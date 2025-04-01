@@ -38,6 +38,7 @@ The ssc-raft algorithm is called as ``sscRaft`` python module.
     tutorial/phaseret
     tutorial/rings
     tutorial/alignment
+    tutorial/excentric
     tutorial/reconstructions
     tutorial/forward
 

@@ -1,6 +1,6 @@
 from ...rafttypes import *
 
-from ...geometries.methods import fbp
+from ...geometries.methods import fbp, em
 from ...geometries.parallel.radon_methods import radon_RT
 
 try:
@@ -158,7 +158,7 @@ def apply_shifts(data,shifts, method='scipy',cpus=32,turn_off_vertical=False,rem
 def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0], pixel = 1):
     print('Reprojecting...')
     if radon_method == 'raft':
-        ang = -1*numpy.copy(angles)
+        ang = numpy.copy(angles)
         tomogram = radon_RT(tomogram, angles, gpus, pixel)
         tomogram = numpy.swapaxes(tomogram,0,1)
     elif radon_method == 'tomopy':
@@ -169,13 +169,15 @@ def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0], pixel = 1):
 
 def reconstruct_and_reproject(data,angles,dic,tomo_method='raft',radon_method='raft',cpus=1,gpus=[0]):
     print('Reconstructing...')
-    if tomo_method == 'raft':
+    if tomo_method == 'raft_fbp':
         tomo = fbp(numpy.swapaxes(data,0,1), dic = dic["algorithm_dic"])
         # tomo = sscRaft.bst(numpy.swapaxes(data,0,1), dic["algorithm_dic"])
+    elif tomo_method == 'raft_em':
+        tomo = em(numpy.swapaxes(data,0,1), dic = dic["algorithm_dic"])
     elif tomo_method == 'tomopy':
         tomo = tomopy.recon(data,angles,algorithm='fbp',ncore=cpus,filter_name='ramlak')
     else:
-        raise ValueError('Select a proper method for tomographic reconstruction: raft or tomopy')
+        raise ValueError('Select a proper method for tomographic reconstruction: raft_fbp, raft_em or tomopy')
     reprojected_data = reproject(tomo,angles,radon_method,cpus,gpus, dic["algorithm_dic"]["detectorPixel[m]"])
     return tomo, reprojected_data
 
@@ -304,7 +306,7 @@ def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=
 
     dic = {}
     dic["algorithm_dic"] = {}
-    dic["algorithm_dic"]['algorithm'] = "FBP"
+    #dic["algorithm_dic"]['algorithm'] = "FBP"
     dic["algorithm_dic"]["detectorPixel[m]"] = pixel
     if 'regularization' not in dic["algorithm_dic"]:
         dic["algorithm_dic"]['beta/delta'] = 0 # regularization <= 1; use for smoothening
@@ -312,8 +314,12 @@ def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=
         dic["algorithm_dic"]['filter'] = FBP_filter
     else:
         dic["algorithm_dic"]['filter'] = "" # no filtering, i.e., doing backprojection only
+        
+    if(tomo_method == 'raft_fbp'):
+        dic["algorithm_dic"]['method'] =  'RT'
+    elif(tomo_method == 'raft_em'):
+        dic["algorithm_dic"]['method'] = 'eEMRT'
 
-    dic["algorithm_dic"]['method'] =  'RT'
     dic["algorithm_dic"]['gpu'] =  gpus
     dic["algorithm_dic"]['angles[rad]'] =  angles # angles in radians
     # dic["algorithm_dic"]['angles[rad]'] -= dic["algorithm_dic"]['angles'].min()
@@ -395,7 +401,11 @@ def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=
             
         if reached_threshold.all() == True:
             break # exit for loop
+    if(tomo_method == 'raft_fbp'):
+        aligned_tomo = fbp(numpy.swapaxes(sinogram,0,1), dic = dic["algorithm_dic"])
+    elif(tomo_method == 'raft_em'):
+        aligned_tomo = em(numpy.swapaxes(sinogram,0,1), dic = dic["algorithm_dic"])
+    elif(tomo_method == 'tomopy'):
+        aligned_tomo = tomopy.recon(numpy.swapaxes(sinogram,0,1),angles,algorithm='fbp',ncore=n_cpus,filter_name='ramlak')
 
-    aligned_tomo = fbp(numpy.swapaxes(sinogram,0,1), dic = dic["algorithm_dic"])
-        
     return aligned_tomo, sinogram, cumulative_shifts, reprojected_sinogram
