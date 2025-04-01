@@ -176,29 +176,15 @@ namespace opt{
         }
     };
 
-     __global__ void paddR2C(float *in, cufftComplex *outpadded, 
-    dim3 size, dim3 pad, float value);
+    __global__ void paddR2C(float *in, cufftComplex *outpadded, dim3 size, dim3 pad);
+    __global__ void paddC2C(cufftComplex *in, cufftComplex *outpadded, dim3 size, dim3 pad);
+    __global__ void paddC2R(cufftComplex *in, float *outpadded, dim3 size, dim3 pad);
+    __global__ void paddR2R(float *in, float *outpadded, dim3 size, dim3 pad);
 
-    __global__ void paddC2C(cufftComplex *in, cufftComplex *outpadded,
-    dim3 size, dim3 pad, float value);
-
-    __global__ void paddC2R(cufftComplex *in, float *outpadded, 
-    dim3 size, dim3 pad, float value);
-
-    __global__ void paddR2R(float *in, float *outpadded, 
-    dim3 size, dim3 pad, float value);
-
-    __global__ void remove_paddC2R(cufftComplex *inpadded, float *out, 
-    dim3 size, dim3 padsize);
-
-    __global__ void remove_paddC2C(cufftComplex *inpadded, cufftComplex *out, 
-    dim3 size, dim3 padsize);
-
-    __global__ void remove_paddR2C(float *inpadded, cufftComplex *out, 
-    dim3 size, dim3 padsize);
-
-    __global__ void remove_paddR2R(float *inpadded, float *out, 
-    dim3 size, dim3 pad);
+    __global__ void remove_paddC2R(cufftComplex *inpadded, float *out, dim3 size, dim3 padsize);
+    __global__ void remove_paddC2C(cufftComplex *inpadded, cufftComplex *out, dim3 size, dim3 padsize);
+    __global__ void remove_paddR2C(float *inpadded, cufftComplex *out, dim3 size, dim3 padsize);
+    __global__ void remove_paddR2R(float *inpadded, float *out, dim3 size, dim3 pad);
 
     extern "C" {
 

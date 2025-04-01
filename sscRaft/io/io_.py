@@ -4,7 +4,7 @@ import time
 
 from sscRaft import __version__
 
-def read_hdf5_measure(filepath, hdf5path, d_type = numpy.float32, pin_memory=False):
+def read_hdf5_measure(filepath, hdf5path, d_type = numpy.float32, pin_memory=False, slices=None):
     """Read HDF5 file with h5py.
 
     Args:
@@ -18,7 +18,14 @@ def read_hdf5_measure(filepath, hdf5path, d_type = numpy.float32, pin_memory=Fal
     """
     dataset = h5py.File(filepath, 'r')[hdf5path]
 
-    nangles, nslices, nrays = dataset.shape
+    if slices is not None:
+        nangles, _, nrays = dataset.shape
+        nslices = slices[1] - slices[0]
+        if nslices == 0:
+            nslices = 1
+            slices[1] = slices[0] + 1
+    else:
+        nangles, nslices, nrays = dataset.shape
 
     if nangles % 2 != 0:
         dataset_shape = (nangles-1, nslices, nrays)
@@ -30,11 +37,20 @@ def read_hdf5_measure(filepath, hdf5path, d_type = numpy.float32, pin_memory=Fal
     else:
         data = numpy.empty(dataset_shape, d_type)
 
-    data[...] = dataset[:-1]
+    if slices is not None:
+        if nangles % 2 != 0:
+            data[...] = dataset[:-1,slices[0]:slices[1],:]
+        else:
+            data[...] = dataset[:,slices[0]:slices[1],:]
+    else:
+        if nangles % 2 != 0:
+            data[...] = dataset[:-1]
+        else:
+            data[...] = dataset[:]
 
     return data
 
-def read_hdf5(filepath, hdf5path, d_type = numpy.float32, pin_memory=False):
+def read_hdf5(filepath, hdf5path, d_type = numpy.float32, pin_memory=False, slices=None):
     """Read HDF5 file with h5py.
 
     Args:
@@ -48,12 +64,26 @@ def read_hdf5(filepath, hdf5path, d_type = numpy.float32, pin_memory=False):
     """
     dataset = h5py.File(filepath, 'r')[hdf5path]
 
-    if pin_memory:
-        data = pinned_empty(dataset.shape, d_type)
+    if slices is not None:
+        nangles, _, nrays = dataset.shape
+        nslices = slices[1] - slices[0]
+        if nslices == 0:
+            nslices = 1
+            slices[1] = slices[0] + 1
     else:
-        data = numpy.empty(dataset.shape, d_type)
+        nangles, nslices, nrays = dataset.shape
 
-    data[...] = dataset[:]
+    dataset_shape = (nangles, nslices, nrays)
+
+    if pin_memory:
+        data = pinned_empty(dataset_shape, d_type)
+    else:
+        data = numpy.empty(dataset_shape, d_type)
+
+    if slices is not None:
+        data[...] = dataset[:,slices[0]:slices[1],:]
+    else:
+        data[...] = dataset[:]
 
     return data
 

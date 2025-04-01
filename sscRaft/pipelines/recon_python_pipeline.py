@@ -7,7 +7,7 @@ import time
 
 # Define the supported tomogram reconstruction methods
 def set_fbp_method(method_name: str):
-    return lambda tomogram, recon, dic: fbp(tomogram=tomogram, obj=recon, dic={**dic, 'method': method_name})
+    return lambda tomogram, recon, dic: fbp(tomogram=tomogram, obj=recon, nstreams=2, dic={**dic, 'method': method_name})
 
 # Define the supported tomogram reconstruction methods
 def set_em_method(method_name: str):
@@ -37,7 +37,7 @@ def multiple_recon_methods_wrapper(tomogram: numpy.ndarray, recon: numpy.ndarray
     Raises:
         ValueError: If the specified reconstruction method is not implemented.
     """
-    recon_method   = dic.get('recon_method', 'fbp_BST')
+    recon_method   = dic.get('method', 'fbp_BST')
     if recon_method in recon_function_methods:
         reconstruction = recon_function_methods[recon_method](tomogram=tomogram, recon=recon, dic=dic)
     else:
@@ -72,7 +72,7 @@ def reconstruction_methods(tomogram: numpy.ndarray, recon: numpy.ndarray, dic:di
 
 
     if dic.get('save_recon', False):
-        save_name   = dic.get('reconstruct', 'Recon_' + dic['input_name'])
+        save_name   = dic.get('reconstruct', 'Recon_' + dic['id'] + '_' + dic['input_name'])
         # Save the tomogram asynchronously if specified
         async_save_worker(recon, dic, save_name, 'save_recon')
 

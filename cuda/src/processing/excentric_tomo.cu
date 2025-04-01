@@ -419,21 +419,16 @@ __global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, 
 {
     size_t outdx = threadIdx.x + blockDim.x*blockIdx.x;
 
-    if(outdx < sizex)
-    {
+    if(outdx < sizex){
         size_t indx = offset > 0 ? outdx : (sizex-1-outdx);
         offset = abs(offset);
 
-        float coef = fminf(0.5f+((int)outdx-offset)*0.5f/(offset+1E-3f),1.0f);
+        float coef  = fminf(0.5f+((int)outdx-offset)*0.5f/(offset+1E-3f),1.0f);
 
         atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef*temp1[blockIdx.y*sizex + indx]);
         atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
 
-        if(outdx <= offset)
-        {   // Modified by Paola on June 10h 2024: Added 0* (zero multiplication)
-            // sinogram[blockIdx.y*sizex*2 + outdx] = 0 * temp2[blockIdx.y*sizex + 0];
-            // sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = 0 * temp1[blockIdx.y*sizex + 0];
-
+        if(outdx <= offset){   
             sinogram[blockIdx.y*sizex*2 + outdx] = temp1[blockIdx.y*sizex + 0];
             sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp2[blockIdx.y*sizex + 0];
         }

@@ -19,7 +19,6 @@
 /*============================================================================*/
 /* namespace opt (in 'inc/commons/opt.hpp') functions definitions */
 
-
 void opt::flip_x(float *data, int sizex, int sizey, int sizez) {
     const size_t sizexy = sizex * sizey;
 

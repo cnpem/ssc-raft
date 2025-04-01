@@ -44,8 +44,6 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
         nslices = 1
     else:
         nslices = tomogram.shape[0]
-    
-    objsize        = nrays
 
     filter_type    = FilterNumber(dic['filter'])
     beta_delta     = dic['beta/delta']
@@ -65,14 +63,19 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
     padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
-    # pad = padx * nrays
-    # logger.info(f'Set FBP pad value as {padx} x horizontal dimension = ({pad}).')
+    pad    = (padx) * nrays
+    logger.info(f'Set FBP RT pad value as {padx} x horizontal dimension = ({pad}).')
 
+    # Object (reconstruction)
+    objsize = nrays
+    logger.info(f'Object size: (nslices, ny, nx) = ({nslices},{objsize},{objsize}).')
+    
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     if obj is None:
         obj      = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+        # obj      = numpy.zeros([nslices, nangles, nrays * (padx+1)], dtype=numpy.float32)
         obj      = CNICE(obj)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
@@ -91,7 +94,6 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
 
-
     # bShiftCenter = dic['shift center']
 
     libraft.getFBPMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
@@ -100,7 +102,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
     return obj
 
-def bstGPU(tomogram, angles, gpus, dic, obj = None):
+def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
     tomogram using the Backprojection Slice Theorem (BST) method.
 
@@ -146,8 +148,6 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
             nslices = 1
     else:
             nslices = tomogram.shape[0]
-    
-    objsize        = nrays
 
     filter_type    = FilterNumber(dic['filter'])
     beta_delta     = dic['beta/delta']
@@ -165,37 +165,42 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None):
         z2             = 0.0
         energy         = 1.0
         
-    padx, pady, padz  = dic['padding'] + 2,0,0 # (padx, pady, padz)
+    padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
 
-    # logger.info(f'Set BST pad value as {pad} x horizontal dimension ({padx}).')
+    pad    = (padx) * nrays
+    logger.info(f'Set FBP BST pad value as {padx} x horizontal dimension = ({pad}).')
+
+    # Object (reconstruction)
+    objsize = nrays
+    logger.info(f'Object size: (nslices, ny, nx) = ({nslices},{objsize},{objsize}).')
 
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
     if obj is None:
-        obj      = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
-        obj      = CNICE(obj)
-    obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
+        obj = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
+        obj = CNICE(obj)
+    obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
-    angles       = numpy.array(angles)
-    angles       = CNICE(angles) 
-    angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
+    angles          = numpy.array(angles)
+    angles          = CNICE(angles) 
+    angles_ptr      = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, filter_type, 0, blocksize]
-    param_int     = numpy.array(param_int)
-    param_int     = CNICE(param_int,numpy.int32)
-    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+    param_int       = [nrays, nangles, nslices, objsize, 
+                        padx, pady, padz, filter_type, 0, blocksize]
+    param_int       = numpy.array(param_int)
+    param_int       = CNICE(param_int,numpy.int32)
+    param_int_ptr   = param_int.ctypes.data_as(ctypes.c_void_p)
 
     param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely, offset]
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
 
-
     libraft.getBSTMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
         obj_ptr, tomogram_ptr, angles_ptr, 
-        param_float_ptr, param_int_ptr)
+        param_float_ptr, param_int_ptr,
+        ctypes.c_int(nstreams))
 
     return obj
 

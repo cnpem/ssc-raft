@@ -22,7 +22,7 @@ extern "C"{
         Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel_x);
 
         if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+            filterFBPpad(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         HANDLE_ERROR(cudaDeviceSynchronize());
 
@@ -45,13 +45,13 @@ extern "C"{
         int blocksize = configs.blocksize;
 
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
-        float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
+        float *dtomo   = opt::allocGPU<float>((size_t)nrays * nangles * blocksize);
 
         /* Loop for each batch of size 'batch' in threads */
 		int ptr = 0, subblock; size_t ptr_block_tomo = 0;
@@ -69,8 +69,8 @@ extern "C"{
                                 (size_t)nrays * nangles * subblock);
 
             getFilterLowPass( configs, gpus, dtomo,  
-                            dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
-                            dim3(nrayspad  ,    nangles, subblock)); /* Tomogram padded size */
+                            dim3(nrays     , nangles, subblock),  /* Tomogram size */
+                            dim3(nrayspad  , nangles, subblock)); /* Tomogram padded size */
 
             opt::GPUToCPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);

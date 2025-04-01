@@ -1,3 +1,30 @@
+Version 3.2.0 - 2025-02-26
+--------------------------
+*Added:*
+  - Added extendend domain padding for functions ``FDK``, ``FBP by RT`` and ``FBP by BST``. 
+  - Added rotation axis offset function by blocks.
+  - Added rotation axis correction function by blocks with subpixel correction.
+  - No cuda streams on ``FBP by BST``.
+  - Cuda streams on ``background_correction``.
+
+*Changed:*
+  - Changed use of padding for functions ``FDK``, ``FBP by RT`` and ``FBP by BST``. Now it is on the whole data process, not only on the filter.
+  - Fixed TOMCAT API pipeline for live-reconstruction.
+  - Fixed memory allocation on ``FBP by BST`` and ``background_correction``.
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+  - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension.
+
+*To be done:*
+  - Refactoring ``FDK``.
+  - Refactoring ``EM`` conebeam ray tracing.
+  - Refactoring ``FST`` frequency domain forward method for parallel beam.
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
+
+
 Version 3.1.1 - 2025-02-26
 --------------------------
 *Added:*

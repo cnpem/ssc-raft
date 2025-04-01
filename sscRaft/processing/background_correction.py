@@ -3,7 +3,7 @@
 from ..rafttypes import *
 from ..io.io_ import *
 
-def _background_correctionGPU(frames, flat, dark, gpus, is_log):
+def _background_correctionGPU(frames, flat, dark, gpus = [0], is_log = False, blocksize = 0):
     """ GPU function to correct tomography projections (or frames) background 
     with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
     a sample, to measure the background.
@@ -25,8 +25,9 @@ def _background_correctionGPU(frames, flat, dark, gpus, is_log):
         frames (ndarray): Frames (or projections) of size [slices, angles, lenght]
         flat   (ndarray): Flat of size [slices, number of flats, lenght]
         dark   (ndarray): Dark of size [slices, lenght]
-        gpus  (int list): List of GPUs 
-        is_log (bool): Apply ``- logarithm()`` or not 
+        gpus  (int list, optional): List of GPUs [Default: [0]]
+        is_log    (bool, optional): Apply ``- logarithm()`` or not [Default: False]
+        blocksize  (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [Default: 0]
 
     Returns:
         (ndarray): Corrected frames (or projections) of dimension [slices, angles, lenght]
@@ -103,12 +104,10 @@ def _background_correctionGPU(frames, flat, dark, gpus, is_log):
     frames     = CNICE(frames)
     frames_ptr = frames.ctypes.data_as(ctypes.c_void_p)
 
-    # print('BG frames_ptr: ', frames_ptr)
-
     libraft.getBackgroundCorrectionMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
             frames_ptr, flat_ptr, dark_ptr, 
-            c_int(nrays), c_int(nangles), c_int(nslices), 
-            c_int(nflats), c_int(is_log))
+            ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
+            ctypes.c_int(nflats), ctypes.c_int(is_log), ctypes.c_int(blocksize))
 
     return frames 
 
@@ -140,32 +139,34 @@ def correct_projections(frames, flat, dark, dic, **kwargs):
     
     Dictionary parameters:
     
-        * ``experiment['gpu']`` (int list): List of GPUs [Default: [0]]
-        * ``experiment['uselog']`` (bool, optional): Apply ``- logarithm()`` or not [Default: False]
+        * ``dic['gpu']`` (int list): List of GPUs [Default: [0]]
+        * ``dic['uselog']`` (bool, optional): Apply ``- logarithm()`` or not [Default: False]
+        * ``dic['blocksize']`` (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [Default: 0]
 
     * One or MultiGPUs. 
-    * Calls function ``background_correctionGPU()``.
+    * Calls function ``_background_correctionGPU()``.
     """        
     
     # Set dictionary parameters:
-    required = ('gpu',)
-    optional = ('uselog')
-    defaut   = (False)
+    required  = ('gpu',)
+    optional  = ('uselog','blocksize')
+    defaut    = (False,0)
     
     dic = SetDictionary(dic,required,optional,defaut)
 
-    gpus   = dic['gpu']
-    is_log = dic['uselog']
+    gpus      = dic['gpu']
+    is_log    = dic['uselog']
+    blocksize = dic['blocksize']
     
-    frames = numpy.swapaxes(frames,0,1)
-    flat   = numpy.swapaxes(flat,0,1)
-    dark   = numpy.swapaxes(dark,0,1)
+    frames    = numpy.swapaxes(frames,0,1)
+    flat      = numpy.swapaxes(flat,0,1)
+    dark      = numpy.swapaxes(dark,0,1)
 
-    frames = _background_correctionGPU( frames, flat, dark, gpus, is_log ) 
+    frames    = _background_correctionGPU( frames, flat, dark, gpus, is_log, blocksize ) 
 
     return frames
 
-def correct_background(frames, flat, dark, gpus = [0], is_log = False):
+def correct_background(frames, flat, dark, gpus = [0], is_log = False, blocksize = 0):
     """ Function to correct tomography projections (or frames) background 
     with flat (or empty) and dark. Flat (or empty). Flat is a measurement without
     a sample, to measure the background. Dark is a measurements without a beam and sample, 
@@ -185,19 +186,21 @@ def correct_background(frames, flat, dark, gpus = [0], is_log = False):
     :math:`D_f` is the flat measurement and :math:`D_d` is the dark measurement.
 
     Args:
-        frames (ndarray): Frames (or projections) of size [slices, angles, lenght].
-        flat   (ndarray): Flat of size [slices, number of flats, lenght].
-        dark   (ndarray): Dark of size [slices, lenght].
+        frames (ndarray): Frames (or projections) of size [slices, angles, lenght]
+        flat   (ndarray): Flat of size [slices, number of flats, lenght]
+        dark   (ndarray): Dark of size [slices, lenght]
         gpus  (int list, optional): List of GPUs [Default: [0]].
-        is_log (bool, optional): Apply ``- logarithm()`` or not [Default: False].
+        is_log (bool, optional): Apply ``- logarithm()`` or not [Default: False]
+        blocksize (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [Default: 0]
+
 
     Returns:
         (ndarray): Corrected frames (or projections) of dimension [slices, angles, lenght].
 
     * One or MultiGPUs. 
-    * Calls function ``background_correctionGPU()``.
+    * Calls function ``_background_correctionGPU()``.
     """        
     
-    frames = _background_correctionGPU( frames, flat, dark, gpus, is_log ) 
+    frames = _background_correctionGPU( frames, flat, dark, gpus, is_log, blocksize ) 
 
     return frames

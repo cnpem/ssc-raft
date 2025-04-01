@@ -62,73 +62,80 @@ extern "C"{
 
 	void getBackgroundCorrectionGPU(GPU gpus, int gpu, 
     float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log)
+    dim3 size, int numflats, int is_log, int blocksize)
 	{
 		// Supports 2 flats max
 		HANDLE_ERROR(cudaSetDevice(gpu));
 
-		int i;
-		int blocksize = min(size.z, 32); // Herança do Giovanni -> Mudar
+        const size_t nstreams = 2;
 
-		int nblock = (int)ceil( (float) size.z / blocksize );
+		int i;
+        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 3 * size.x ) * nstreams;
+
+        if ( blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize(size.z, total_required_mem_per_slice_bytes, 
+                                                        true, BYTES_TO_GB * getTotalDeviceMemory());
+            blocksize          = min(size.z, blocksize_aux);
+        }
+        int nblock = (int)ceil( (float) size.z / blocksize );
 		int ptr = 0, subblock;
 
-        float *d_flat   = opt::allocGPU<float>((size_t) size.z * size.x * numflats * blocksize);
-        float *d_dark   = opt::allocGPU<float>((size_t) size.z * size.x * blocksize);
+        float *d_flat = opt::allocGPU<float>((size_t) size.z * size.x * numflats * blocksize);
+        float *d_dark = opt::allocGPU<float>((size_t) size.z * size.x * blocksize);
 
         opt::CPUToGPU<float>(flat, d_flat, (size_t)size.z * size.x * numflats);
         opt::CPUToGPU<float>(dark, d_dark, (size_t)size.z * size.x);
 
-        const size_t nstreams = 2;
+        float *d_frames[nstreams];
         cudaStream_t streams[nstreams];
 
         for (int st = 0; st < nstreams; ++st) {
             cudaStreamCreate(&streams[st]);
+
+            d_frames[st] = opt::allocGPU<float>((size_t) size.x * size.y * blocksize, streams[st]);
         }
 
 		for(i = 0; i < nblock; i++) {
+            int st = i % nstreams;
             cudaStream_t stream = streams[i % nstreams];
-
-            // GPUs Pointers: declaration and allocation
-            float *d_frames = opt::allocGPU<float>((size_t) size.x *   size.y * blocksize, stream);
-
+            
 			subblock = min(size.z - ptr, blocksize);
 
-            opt::CPUToGPU<float>(frames + (size_t)ptr * size.x *   size.y, d_frames, (size_t)subblock * size.x *   size.y, stream);
+            opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames[st], (size_t)subblock * size.x * size.y, stream);
 
-			getBackgroundCorrection(gpus, d_frames,
+			getBackgroundCorrection(gpus, d_frames[st],
                     d_flat + (size_t)ptr * size.x * numflats,
                     d_dark + (size_t)ptr * size.x,
                     dim3(size.x, size.y, subblock), numflats, stream);
 
             if (is_log == 1)
-                getLog(d_frames, dim3(size.x, size.y, subblock), stream);
-            opt::GPUToCPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames, (size_t)subblock * size.x * size.y, stream);
+                getLog(d_frames[st], dim3(size.x, size.y, subblock), stream);
+
+            opt::GPUToCPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames[st], (size_t)subblock * size.x * size.y, stream);
 
 			/* Update pointer */
 			ptr = ptr + subblock;
-
-            HANDLE_ERROR(cudaFreeAsync(d_frames, stream));
         }
 
         for (int st = 0; st < nstreams; ++st) {
             cudaStreamSynchronize(streams[st]);
+
+            HANDLE_ERROR(cudaFreeAsync(d_frames[st], streams[st]));
+
             cudaStreamDestroy(streams[st]);
         }
 
         HANDLE_ERROR(cudaFree(d_flat));
         HANDLE_ERROR(cudaFree(d_dark));
 
-
         HANDLE_ERROR(cudaDeviceSynchronize());
 
 	}
 
-
 	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus,
     float* frames, float* flat, float* dark,
     int nrays, int nangles, int nslices, int numflats,
-    int is_log)
+    int is_log, int blocksize)
 	{
 		int i;
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
@@ -151,7 +158,7 @@ extern "C"{
                 flat   + (size_t)ptr * nrays * numflats,
                 dark   + (size_t)ptr * nrays,
                 dim3(nrays, nangles, subblock),
-                numflats, is_log
+                numflats, is_log, blocksize
                 ));
 
             /* Update pointer */

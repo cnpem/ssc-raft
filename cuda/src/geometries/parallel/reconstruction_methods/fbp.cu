@@ -10,15 +10,17 @@ extern "C"{
     float pixel_size_x, float pixel_size_y,
     dim3 obj_size, dim3 tomo_size)
     {
-        int i, j, k;
-        float x, y, scale;
-        int t_index, angle_index;
-        float t, sum;  
-        // float cosk, sink;
+        int i, j, k, t_index, angle_index;
+        float x, y, scale, t, sum;
 
         int nrays   = tomo_size.x;
         int nangles = tomo_size.y;
 
+        /* Correction scale (angular correction) for 
+            cases where there are more than 180 degrees.
+            Specially for testes with Mogno conebeam data 
+            that is acquired in 360 degrees rotation.
+        */
         if ( angles[nangles - 1] > float(M_PI) ){
             scale = float(M_PI) / angles[nangles - 1];
         }else{  
@@ -48,7 +50,6 @@ extern "C"{
         k = (blockDim.z * blockIdx.z + threadIdx.z);
     
         if ( ( i < obj_size.x ) && ( j < obj_size.y ) && ( k < obj_size.z ) ){
-        
             sum = 0;
             
             x = xmin + i * dx;
@@ -56,28 +57,20 @@ extern "C"{
             
             for(angle_index = 0; angle_index < nangles; angle_index++){
 
-                // __sincosf(angles[angle_index], &sink, &cosk);
-
                 /* Compute angle step size (dangle)*/
                 if ( angle_index == (nangles - 1) )
-
                     dangle = angles[angle_index] - angles[angle_index - 1];
-
                 else
-
                     dangle = angles[angle_index + 1] - angles[angle_index];
                 
-                t = x * cosine[angle_index] - y * sine[angle_index]; // here
-                
-                // t = x * cosk + y * sink;
-                
+                /* Compute t variable */
+                t = x * cosine[angle_index] - y * sine[angle_index]; 
+                                
                 t_index = (int) ( ( t - tmin ) / dt);	     
 
                 if ( ( t_index > -1 ) && ( t_index < nrays) )
                     sum += tomogram[ k * nrays * nangles  + angle_index * nrays + t_index] * dangle;
-                
             }
-        
             object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = sum * scale;
         }
     }
@@ -87,7 +80,7 @@ extern "C"{
 extern "C"{
     void getFBP(CFG configs, GPU gpus, 
     float *obj, float *tomogram, float *angles, 
-    dim3 tomo_size, dim3 tomo_pad, dim3 obj_size)
+    dim3 tomo_size, dim3 obj_size)
     {
         int filter_type      = configs.reconstruction_filter_type;
         float paganin_reg    = configs.reconstruction_paganin;
@@ -95,33 +88,32 @@ extern "C"{
         float axis_offset    = configs.rotation_axis_offset;
         float pixel_x        = configs.geometry.obj_pixel_x;
         float pixel_y        = configs.geometry.obj_pixel_y;
+        int nangles          = tomo_size.y;
 
-        int nangles          = configs.tomo.size.y;
+        /* Reconstruction GPUs padded Grd and Blocks */
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( obj_size.x / TPBX ) + 1,
+                        (int)ceil( obj_size.y / TPBY ) + 1,
+                        (int)ceil( obj_size.z / TPBZ ) + 1);
 
+        /* Filter and Paganin by slices (filter) */
         Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel_x);
-        
+
+        if (filter.type != Filter::EType::none)
+            filterFBP(gpus, filter, tomogram, tomo_size);
+
+        /* Sin and Cos tables for backprojection */
         float *sintable = opt::allocGPU<float>(nangles);
         float *costable = opt::allocGPU<float>(nangles);
 
-        int gridBlock = (int)ceil( nangles / TPBY ) + 1;
-        setSinCosTable<<<gridBlock,TPBY>>>(sintable, costable, angles, nangles);
+        int grid = (int)ceil( nangles / TPBY ) + 1;
+        setSinCosTable<<<grid,TPBY>>>(sintable, costable, angles, nangles);
 
-        if (filter.type != Filter::EType::none)
-            filterFBP(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
-
-        // if (filter.type != Filter::EType::none)
-        //     filterFBP_Complex(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad, pixel_x);
-
-        /* Old version - Gio */
-        // if (filter.type != Filter::EType::none)
-        //     SinoFilter(tomogram, 
-        //         (size_t)tomo_size.x, (size_t)tomo_size.y, (size_t)tomo_size.z, 
-        //         axis_offset, true, filter, false, sintable, pixel_x);
-
-        BackProjection_SS<<<gpus.Grd,gpus.BT>>>(obj, tomogram, angles,
-                                                sintable, costable, 
-                                                pixel_x, pixel_y,
-                                                obj_size, tomo_size);
+        /* Backprojection */
+        BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, tomogram, angles,
+                                                        sintable, costable, 
+                                                        pixel_x, pixel_y,
+                                                        obj_size, tomo_size);
 
         HANDLE_ERROR(cudaDeviceSynchronize());
         
@@ -138,34 +130,64 @@ extern "C"{
     {
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
-        /* Projection data sizes */
-        int nrays    = configs.tomo.size.x;
-        int nangles  = configs.tomo.size.y;
-        int nrayspad = configs.tomo.padsize.x;
-
-        /* Reconstruction sizes */
-        int sizeImagex = configs.obj.size.x;
-        int sizeImagey = configs.obj.size.y;
-
         int i;
 
         int blocksize = configs.blocksize;
 
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, A100_MEM);
+            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
+        /* Projection data sizes */
+        /* Projection size */
+        int nrays    = configs.tomo.size.x;
+        int nangles  = configs.tomo.size.y;
+
+        /* Projection padded size */
+        int nrayspad = configs.tomo.padsize.x;
+
+        /* Projection GPUs padded Grd and Blocks */
+        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 TomogridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
+                            (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
+                            (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
+
+        /* Reconstruction sizes */
+        /* Reconstruction size */
+        int sizeImagex = configs.obj.size.x;
+        int sizeImagey = configs.obj.size.y;
+
+        /* Reconstruction padded size */
+        int padImagex  = configs.obj.padsize.x;
+        int padImagey  = configs.obj.padsize.y;
+
+        /* Reconstruction GPUs padded Grd and Blocks */
+        dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 ObjgridBlock(  (int)ceil( configs.obj.padsize.x / TPBX ) + 1,
+                            (int)ceil( configs.obj.padsize.y / TPBY ) + 1,
+                            (int)ceil( configs.obj.padsize.z / TPBZ ) + 1);
+
         float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
         float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagey * blocksize);
         float *dangles = opt::allocGPU<float>( nangles );
+
+        /* Padding */
+        float *dtomoPadded = opt::allocGPU<float>((size_t) nrayspad *   nangles * blocksize);
+        float *dobjPadded  = opt::allocGPU<float>((size_t)padImagex * padImagey * blocksize);
 
         opt::CPUToGPU<float>(angles, dangles, nangles);
 
         /* Loop for each batch of size 'batch' in threads */
 		int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_obj = 0;
+
+        // printf("Size image %d, %d \n", sizeImagex, sizeImagey);
+        // printf("Size image %d, %d, %d \n", configs.tomo.size.z, configs.tomo.size.y,configs.tomo.size.x);
+        // printf("Size image %d, %d, %d \n", configs.tomo.padsize.z, configs.tomo.padsize.y,configs.tomo.padsize.x);
+
+        // fflush(stdout);
 
         for (i = 0; i < ind_block; i++){
 
@@ -173,6 +195,7 @@ extern "C"{
 
 			ptr_block_tomo = (size_t)     nrays *    nangles * ptr;
             ptr_block_obj  = (size_t)sizeImagex * sizeImagey * ptr;
+            // ptr_block_obj  = (size_t)nrayspad * nangles * ptr;
 
 			/* Update pointer */
 			ptr = ptr + subblock;
@@ -180,13 +203,27 @@ extern "C"{
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
 
-            getFBP( configs, gpus, dobj, dtomo, dangles, 
-                    dim3(nrays     ,    nangles, subblock),  /* Tomogram size */
-                    dim3(nrayspad  ,    nangles, subblock),  /* Tomogram padded size */
-                    dim3(sizeImagex, sizeImagey, subblock)); /* Object (reconstruction) size */
+            /* Padding the tomogram data */
+            TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
+            opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomoPadded, 
+                                                                dim3(nrays, nangles, subblock), 
+                                                                configs.tomo.pad);
+
+            getFBP( configs, gpus, dobjPadded, dtomoPadded, dangles, 
+                    dim3(nrayspad ,   nangles, subblock),  /* Tomogram padded size */
+                    dim3(padImagex, padImagey, subblock)); /* Object (reconstruction) padded size */
+
+            /* Remove padd from the object (reconstruction) */
+            ObjgridBlock.z = TomogridBlock.z;
+            opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(dobjPadded, dobj, 
+                                                                    dim3(sizeImagex, sizeImagey, subblock), 
+                                                                    configs.obj.pad);
 
             opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, 
                                 (size_t)sizeImagex * sizeImagey * subblock);
+
+            // opt::GPUToCPU<float>(obj + ptr_block_obj, dtomoPadded, 
+            //                     (size_t)nrayspad * nangles * subblock);
 
         }
         HANDLE_ERROR(cudaDeviceSynchronize());
@@ -194,7 +231,8 @@ extern "C"{
         HANDLE_ERROR(cudaFree(dangles));
         HANDLE_ERROR(cudaFree(dtomo));
         HANDLE_ERROR(cudaFree(dobj));
-
+        HANDLE_ERROR(cudaFree(dtomoPadded));
+        HANDLE_ERROR(cudaFree(dobjPadded));
     }
 
     void getFBPMultiGPU(int* gpus, int ngpus, 
@@ -215,7 +253,7 @@ extern "C"{
         setFBPParameters(&configs, paramf, parami);
         // printFBPParameters(&configs);
 
-        setGPUParameters(&gpu_parameters, configs.obj.size, ngpus, gpus);
+        setGPUParameters(&gpu_parameters, configs.obj.padsize, ngpus, gpus);
 
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;

@@ -4,7 +4,7 @@ from ..io import SetDictionary
 from .parallel.fbp_methods import *
 from .parallel.em_methods import *
 
-def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
+def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs):
     """Computes the reconstruction of a parallel beam tomogram using the Filtered Backprojection (RT) method 
     or the Backprojection Slice Theorem (BST) method [1]_.
     
@@ -12,7 +12,8 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
         tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
         angles (float list, optional):  List of angles in radians [default: None]
         obj (ndarray, optional): Reconstructed 3D object array [default: None]
-        dic (dict, optional): Dictionary with the experiment info [default: None
+        dic (dict, optional): Dictionary with the experiment info [default: None]
+        nstreams (int, optional): Number of streams for cuda stream acceleration Ex: 0,1,2 [default: 0 (no streams used)]
 
     Returns:
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x]
@@ -20,7 +21,6 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
     * One or MultiGPUs. 
     * Calls function ``bstGPU()``
     * Calls function ``fbpGPU()``
-
 
     Dictionary parameters:
 
@@ -76,7 +76,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, **kwargs):
 
         angles = numpy.linspace(0.0, numpy.pi, tomogram.shape[-2], endpoint=False)
 
-        output = bstGPU( tomogram, angles, gpus, dic, obj=obj)
+        output = bstGPU( tomogram, angles, gpus, dic, obj=obj, nstreams=nstreams)
 
         return output
 

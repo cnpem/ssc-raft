@@ -172,24 +172,24 @@ extern "C"{
         switch (configs.reconstruction_method){
             case 0:
                 /* FBP */
-                getFBP( configs, gpus,
-                        workspace->obj,
-                        workspace->tomo,
-                        workspace->angles,
-                        configs.tomo.batchsize,
-                        configs.tomo.padbatchsize,
-                        configs.obj.batchsize);
+                // getFBP( configs, gpus,
+                //         workspace->obj,
+                //         workspace->tomo,
+                //         workspace->angles,
+                //         configs.tomo.batchsize,
+                //         configs.tomo.padbatchsize,
+                //         configs.obj.batchsize);
                 break;
             case 1:
                 /* BST */
-                getBST( configs, gpus,
-                        workspace->obj,
-                        workspace->tomo,
-                        workspace->angles,
-                        configs.tomo.batchsize,
-                        configs.tomo.padbatchsize,
-                        configs.obj.batchsize);
-                break;
+                // getBST( configs, gpus,
+                //         workspace->obj,
+                //         workspace->tomo,
+                //         workspace->angles,
+                //         configs.tomo.batchsize,
+                //         configs.tomo.padbatchsize,
+                //         configs.obj.batchsize);
+                // break;
             case 2:
                 /* EM RT eEM */
                 get_eEM_RT( configs, gpus,

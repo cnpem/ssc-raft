@@ -470,7 +470,7 @@ extern "C"{
     {
         /* Projection data sizes */
         int padx    = 2;
-        int nrays   = tomo_size.x * ( 1.0 + padx );
+        int nrays   = tomo_size.x * ( 1 + padx );
         int nangles = tomo_size.y;
         int nslices = tomo_size.z;
 
@@ -495,7 +495,7 @@ extern "C"{
         float *dataPadded = opt::allocGPU<float>(npad);
 
         opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, tomo_size,
-                                                    dim3(padx,0,0), 0.0f);
+                                                    dim3(padx,0,0));
 
         size_t offset; 
         for( int k = 0; k < nslices; k++){  
@@ -540,8 +540,13 @@ extern "C"{
 
         int i; 
 
+        size_t total_required_mem_per_slice_bytes = (
+            static_cast<float>(sizeof(float)) * nangles * nrays     + // Tomo slice
+            static_cast<float>(sizeof(float)) * nangles * nrays * 3   // Tomo padded slice + filter kernel
+        ); 
+
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, nangles * nrays * 6, true, A100_MEM);
+            int blocksize_aux  = compute_GPU_blocksize(sizez, total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
 
@@ -597,6 +602,8 @@ extern "C"{
 
 		int subvolume = (nslices + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; 
+
+        printf("Subvolume: %d, %d \n",subvolume, nslices);
 
 		if (ngpus == 1){ /* 1 device */
 

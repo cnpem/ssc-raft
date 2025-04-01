@@ -19,7 +19,8 @@ def rings(tomogram, dic, **kwargs):
 
         * ``dic['gpu']`` (int list): List of GPUs to use [required]
         * ``dic['regularization']`` (float,optional): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
-        * ``dic['blocks']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1]   
+        * ``dic['blocks']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1] 
+        * ``dic['blocksize']`` (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [default: 0]
 
     References:
 
@@ -27,8 +28,8 @@ def rings(tomogram, dic, **kwargs):
     
     """
     required = ('gpu',)
-    optional = ('regularization','blocks')
-    default  = (              -1,       1)
+    optional = ('regularization','blocks','blocksize')
+    default  = (              -1,       1,          0)
 
     dic = SetDictionary(dic,required,optional,default)
 
@@ -36,7 +37,8 @@ def rings(tomogram, dic, **kwargs):
 
     rings_lambda = dic['regularization']
     rings_block  = dic['blocks']
+    blocksize    = dic['blocksize']
 
-    tomogram = TitarenkoRingsGPU( tomogram, gpus, rings_lambda, rings_block ) 
+    tomogram = TitarenkoRingsGPU( tomogram, gpus, rings_lambda, rings_block, blocksize ) 
 
     return tomogram

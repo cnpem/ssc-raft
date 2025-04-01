@@ -10,21 +10,28 @@
 /* Background Correction */
 extern "C"{
 
-	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, int nrays, int nangles, int nslices, int numflats, int is_log);
+	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, 
+    int nrays, int nangles, int nslices, int numflats, int is_log, int blocksize);
 
-	void getBackgroundCorrectionGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, dim3 size, int numflats, int is_log);
+	void getBackgroundCorrectionGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, 
+    dim3 size, int numflats, int is_log, int blocksize);
 
-	void getBackgroundCorrection(GPU gpus, float* frames, float* flat, float* dark, dim3 size, int numflats, cudaStream_t stream = 0);
+	void getBackgroundCorrection(GPU gpus, float* frames, float* flat, float* dark, 
+    dim3 size, int numflats, cudaStream_t stream = 0);
 }
 
 /* Rings */
 extern "C"{
     
-    void getTitarenkoRingsMultiGPU(int *gpus, int ngpus, float *data, int nrays, int nangles, int nslices, float lambda_rings, int ring_blocks);
+    void getTitarenkoRingsMultiGPU(int *gpus, int ngpus, float *data, 
+    int nrays, int nangles, int nslices, 
+    float lambda_rings, int ring_blocks, int blocksize);
 
-    void getTitarenkoRingsGPU(GPU gpus, int gpu, float *data, dim3 size, float lambda_rings, int ring_blocks);
+    void getTitarenkoRingsGPU(GPU gpus, int gpu, float *data, dim3 size, 
+    float lambda_rings, int ring_blocks, int blocksize);
 
-    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, float lambda_rings, int ring_blocks, cudaStream_t stream = 0);
+    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, 
+    float lambda_rings, int ring_blocks, cudaStream_t stream = 0);
 }
 
 /* Rotation Axis */
