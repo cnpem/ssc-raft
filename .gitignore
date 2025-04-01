@@ -3,6 +3,7 @@ __pycache__/
 docs/build/
 build/
 dist/
+.github/*
 *.egg-info/
 .vscode/
 *.png
