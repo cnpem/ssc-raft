@@ -325,7 +325,7 @@ def correct_rotation_axis(data: numpy.ndarray, axis_offset: float, gpus: list = 
     return data
 
 
-def Centersino_block(frame0, frame1, flat, dark, block_of_slices):
+def Centersino_block(frame0, frame1, flat, dark, block_size) -> list:
     """ Find the offset by block of slices of a 180 tomogram 
     to correctly align it, computed by cross correlation.
     It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
@@ -339,26 +339,28 @@ def Centersino_block(frame0, frame1, flat, dark, block_of_slices):
         frame1 (ndarray): Last frame of intensity data obtained by detector - The axes are [slices, lenght]
         flat (ndarray): Flat. The axes are [slices, lenght]
         dark (ndarray): Dark. The axes are [slices, lenght]
-        block_of_slices (int): Number of slices in a block
+        block_size (int): Number of slices in a block
 
     Returns:
         (int list): List of offset values
     """   
-    
-    nslices =  frame0.shape[0]
+    min_block: int = 0
+    deviation_block_list = []
 
-    rotation_axis = []
+    number_of_slices: int =  frame0.shape[0]
+    total_block_number: int = np.ceil(number_of_slices / block_size).astype(np.int16)
 
-    for i in range(0,nslices,block_of_slices):
-    
-        deviation = Centersino(frame0[i:i+block_of_slices], frame1[i:i+block_of_slices], flat[i:i+block_of_slices], dark[i:i+block_of_slices])
-    
-        rotation_axis.append(deviation)
+    for counter, index in enumerate(range(total_block_number)):
+        lindex = index * min_block
+        min_block = min(number_of_slices - (index * min_block), block_size)
+        rindex = lindex + min_block
+        deviation = Centersino(frame0[lindex:rindex], frame1[lindex:rindex], flat[lindex:rindex], dark[lindex:rindex])
+        deviation_block_list.append(deviation)
         
-    return rotation_axis
+    return deviation_block_list
 
 
-def correct_rotation_axis_block(data, rotation_axis_list, block_of_slices):
+def correct_rotation_axis_block(data, rotation_axis_list, block_size):
     """Corrects the rotation axis by blocks of a data according to a deviation value defined 
     by the number of pixels translated form the center of the data.
 
@@ -367,19 +369,21 @@ def correct_rotation_axis_block(data, rotation_axis_list, block_of_slices):
     Args:
         data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
         rotation_axis_list (int list): List of rotation axis deviation by blocks
-        block_of_slices (int): Number of slices in a block
+        block_size (int): Number of slices in a block
 
     Returns:
         (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, lenght] 
 
     * CPU function
     """
-    nslices = data.shape[0]
+    min_block: int = 0
+    number_of_slices: int =  data.shape[0]
+    total_block_number: int = np.ceil(number_of_slices / block_size).astype(np.int16)
 
-    j = 0
-    for i in range(0,nslices,block_of_slices):
-
-        data[i:i+block_of_slices] = correct_rotation_axis(data[i:i+block_of_slices], rotation_axis_list[j],[0],0)
-        j = j + 1
+    for counter, index in enumerate(range(total_block_number)):
+        lindex = index * min_block
+        min_block = min(number_of_slices - (index * min_block), block_size)
+        rindex = lindex + min_block
+        data[lindex:rindex] = correct_rotation_axis(data[lindex:rindex], rotation_axis_list[counter], [0], 0)
 
     return data

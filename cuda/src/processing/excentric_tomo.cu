@@ -491,7 +491,7 @@ extern "C"{
     int offset, int ngpu)
 	{
 		HANDLE_ERROR(cudaSetDevice(ngpu));
-		// printf("tomo360 gpou block: %d %d %d\n",nslices,nrays,nangles);
+		// printf("tomo360 gpu block: %d %d %d\n",nslices,nrays,nangles);
 
         size_t y_size = (size_t)nangles / 2;
 

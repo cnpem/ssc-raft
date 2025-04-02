@@ -542,7 +542,7 @@ extern "C"{
 
         size_t total_required_mem_per_slice_bytes = (
             static_cast<float>(sizeof(float)) * nangles * nrays     + // Tomo slice
-            static_cast<float>(sizeof(float)) * nangles * nrays * 3   // Tomo padded slice + filter kernel
+            static_cast<float>(sizeof(float)) * nangles * nrays * 6   // Tomo padded slice + filter kernel
         ); 
 
         if ( blocksize == 0 ){
