@@ -66,9 +66,9 @@ def stitchExcentricTomo(tomogram, offset, gpus = [0]):
         tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
     
     libraft.getExcentricTomoMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
-                                tomogram_ptr, 
-                                ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
-                                ctypes.c_int(offset))
+                                    tomogram_ptr, 
+                                    ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
+                                    ctypes.c_int(offset))
 
     return tomogram.reshape((nslices, nangles // 2, nrays * 2))
                 

@@ -1,3 +1,21 @@
+Version 3.2.1 - 2025-04-04
+--------------------------
+*Changed:*
+  - Fixed rotation axis blocks: block size computations.
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+  - No cuda streams on ``FBP by BST``: bug.
+  - A few bugs on TOMCAT's CLI rings and paganin methods call.
+
+*To be done:*
+  - Refactoring ``FDK``.
+  - Refactoring ``EM`` conebeam ray tracing.
+  - Refactoring ``FST`` frequency domain forward method for parallel beam.
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
+
 Version 3.2.0 - 2025-04-01
 --------------------------
 *Added:*

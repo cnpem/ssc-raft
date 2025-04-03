@@ -221,8 +221,6 @@ def c_correct_rotation_axis(data: numpy.ndarray, deviation: int,
     libraft.correctRotationAxis(data_ptr, out_ptr,
                                 sizex, sizey, sizez,
                                 ctypes.c_int(deviation))
-
-
     return out
 
 
