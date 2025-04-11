@@ -30,9 +30,9 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
     if ( n >= process.n_recon_pad ) return;
 
     set_recon_idxs(n, &i, &j, &k, lab);
-    x = -Rxpad + i*lab.dx;
-    y = -Rypad + j*lab.dy;
-    z = process.z_ph + k*lab.dz;
+    x = - Rxpad + i * lab.dx;
+    y = - Rypad + j * lab.dy;
+    z = process.z_ph + k * lab.dz;
 
     int block = process.z_proj;
 	
@@ -64,9 +64,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
         // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
-
     recon[n] = recon[n]*lab.dbeta / 2.0;
-    // }
 }}
 
 extern "C"{
@@ -118,6 +116,8 @@ float** c_proj, float** c_recon, float** c_beta, Process process)
 
     // clock_t end = clock();
     // printf("Time copy_to_gpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_gpu BKP: Gpu %d/%d \n",process.i_gpu,process.i);
+
 }}
 
 extern "C"{
@@ -137,6 +137,10 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
     dim3 gridBlock( (int)ceil( lab.nph         / TPBX ) + 1,
                     (int)ceil( lab.nph         / TPBY ) + 1,
                     (int)ceil( process.z_recon / TPBZ ) + 1);
+
+    // printf("nph: %d \n", lab.nph);
+    // printf("padh: %d \n", lab.padh);
+    // printf("nx, ny: %d, %d \n", lab.nx, lab.ny);
     
     /* Copy GPU sinograms to padded GPU sinograms *c_proj*/
     opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(c_recon, c_rec,
@@ -153,6 +157,8 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
     
     // clock_t end = clock();
     // printf("Time copy_to_cpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_cpu BKP: Gpu %d/%d \n",process.i_gpu,process.i);
+
 }}
 
 extern "C"{
@@ -180,6 +186,7 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process pr
 
     clock_t b_end = clock();
     // printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);
+    // printf("Time backproj: Gpu %d \n",process.i_gpu);
 }}
 
 

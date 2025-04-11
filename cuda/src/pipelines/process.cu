@@ -9,7 +9,7 @@ extern "C"{
     bool using_fft, float gpu_memory)
     {
         const float empiric_const = using_fft? 4.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
-        const float epsilon = 4.0;       // how much free memory we want to leave, in GB.
+        const float epsilon = 6.0;       // how much free memory we want to leave, in GB.
     
         long blocksize;
 
@@ -17,13 +17,13 @@ extern "C"{
 
         blocksize = static_cast<long>( - epsilon + ( gpu_memory / ( total_mem_per_slice_GB * empiric_const ) ) );
         
-        std::cout << "\t  total required mem per slice: " << total_mem_per_slice_GB << " GB" << std::endl;
-        std::cout << "\t  gpu_memory: " << gpu_memory << " GB" << std::endl;
-        std::cout << "\t  number of slices: " << nslices << std::endl;
+        // std::cout << "\t  total required mem per slice: " << total_mem_per_slice_GB << " GB" << std::endl;
+        // std::cout << "\t  gpu_memory: " << gpu_memory << " GB" << std::endl;
+        // std::cout << "\t  number of slices: " << nslices << std::endl;
 
         if (nslices < blocksize) blocksize = nslices;
 
-        std::cout << "\t  Blocksize: " << blocksize << std::endl;
+        // std::cout << "\t  Blocksize: " << blocksize << std::endl;
 
         return blocksize;
     }

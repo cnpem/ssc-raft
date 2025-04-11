@@ -21,6 +21,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     long long int n_recon_pad, idx_recon_pad;
     float z_min, z_max, L, Lx;
 
+    float block = 0.0f;
+
     // Variables for the projection volume
     float Z_min, Z_max;
     int Zi_min, Zi_max, zi_proj;
@@ -33,10 +35,16 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     int zi_filter, zi_filter_pad;
 
     // --- Divide the reconstruction volume among processes ---
-    // nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
-    nz_gpu_recon = (lab.nz + n_process - 1) / n_process;
+    nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
+    // nz_gpu_recon = (lab.nz + n_process - 1) / n_process;
     zi_min_recon = i * nz_gpu_recon;
-    zi_max_recon = std::min((i + 1) * nz_gpu_recon, lab.nz);
+    block        = std::min(nz_gpu_recon, lab.nz - zi_min_recon);
+    zi_max_recon = zi_min_recon + block;
+
+    // nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
+    // nz_gpu_recon = (lab.nz + n_process - 1) / n_process;
+    // zi_min_recon = i * nz_gpu_recon;
+    // zi_max_recon = std::min((i + 1) * nz_gpu_recon, lab.nz);
 
     n_recon       = (long long int) (zi_max_recon - zi_min_recon) * lab.nx * lab.ny;
     idx_recon     = (long long int) zi_min_recon * lab.nx * lab.ny;
@@ -51,6 +59,12 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     // --- Calculate the required range in the projection volume based on z_min and z_max ---
     L = sqrt(lab.x * lab.x + lab.y * lab.y);
 
+    // --- Calculate the required range in the PADDED projection volume based on z_min and z_max ---
+    // float Rxpad = lab.dx * (float)lab.nph / 2.0f;
+    // float Rypad = lab.dy * (float)lab.nph / 2.0f;
+
+    // L = sqrt(Rxpad * Rxpad + Rypad * Rypad);
+
     Z_min = std::max(-lab.v, std::min(
         lab.Dsd * z_min / (lab.D - L),
         lab.Dsd * z_min / (lab.D + L)
@@ -64,26 +78,31 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     Zi_max = std::min(lab.nv, (int) ceil((Z_max + lab.v) / lab.dv));
 
     idx_proj = (long long int) Zi_min * lab.nbeta * lab.nh;
-    n_proj = (long long int) (Zi_max - Zi_min) * lab.nbeta * lab.nh;
+    n_proj   = (long long int) (Zi_max - Zi_min) * lab.nbeta * lab.nh;
 
     idx_proj_pad = (long long int) Zi_min * lab.nbeta * lab.nph;
     n_proj_pad   = (long long int) (Zi_max - Zi_min) * lab.nbeta * lab.nph;
     zi_proj      = (Zi_max - Zi_min);
 
     // --- Calculate filter volumes based on the projection indices ---
-
     // nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
-    nv_gpu_filter = (lab.nv + n_process - 1) / n_process;
+    // nv_gpu_filter = (lab.nv + n_process - 1) / n_process;
+    // zi_min_filter = i * nv_gpu_filter;
+    // zi_max_filter = std::min((i + 1) * nv_gpu_filter, lab.nv);
+    block         = 0.0f;
+    nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
+    // nv_gpu_filter = (lab.nv + n_process - 1) / n_process;
     zi_min_filter = i * nv_gpu_filter;
-    zi_max_filter = std::min((i + 1) * nv_gpu_filter, lab.nv);
+    block         = std::min(nv_gpu_filter, lab.nv - zi_min_filter);
+    zi_max_filter = zi_min_filter + block;
 
-    n_filter = (long long int) (zi_max_filter - zi_min_filter)*lab.nbeta*lab.nh;
+    n_filter   = (long long int) (zi_max_filter - zi_min_filter)*lab.nbeta*lab.nh;
     idx_filter = (long long int) zi_min_filter*lab.nbeta*lab.nh;
-    zi_filter = zi_max_filter - zi_min_filter;
+    zi_filter  = zi_max_filter - zi_min_filter;
 
-    n_filter_pad = (long long int) (zi_max_filter - zi_min_filter) * lab.nbeta * lab.nph;
+    n_filter_pad   = (long long int) (zi_max_filter - zi_min_filter) * lab.nbeta * lab.nph;
     idx_filter_pad = (long long int) zi_min_filter * lab.nbeta * lab.nph;
-    zi_filter_pad = zi_max_filter - zi_min_filter;
+    zi_filter_pad  = zi_max_filter - zi_min_filter;
 
     // --- Populate the process structure ---
     (*process).i = i;

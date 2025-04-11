@@ -56,6 +56,7 @@ extern "C"
 
         HANDLE_ERROR(cudaDeviceSynchronize());
 
+        // printf("Backprojection:\n");
         // clock_t b_begin = clock();
 
         set_backprojection(lab, recon, proj, angles, n_process, ndevs, process);

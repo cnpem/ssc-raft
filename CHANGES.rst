@@ -1,7 +1,11 @@
-Version 3.2.1 - 2025-04-04
+Version 3.2.1 - 2025-04-11
 --------------------------
+*Added:*
+  - New blocksize division that is not power of 2. 
+
 *Changed:*
   - Fixed rotation axis blocks: block size computations.
+  - Fixed ``FDK`` process division function for slices. 
 
 *Known Bugs:*
   - ``BST`` works for 180 degrees only on a regular angle mesh.

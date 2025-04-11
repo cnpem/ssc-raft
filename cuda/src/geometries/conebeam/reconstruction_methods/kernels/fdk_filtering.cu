@@ -75,7 +75,7 @@ Process process)
     HANDLE_ERROR(cudaFree(c_tomo));
 
     // clock_t end = clock();
-    // printf("Time copy_to_gpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_gpu filter: Gpu %d \n",process.i);
 }}
 
 extern "C"{
@@ -110,6 +110,8 @@ void copy_cpu_filter_fft(Lab lab, float* proj, float* c_proj, cufftComplex* c_si
 
     // clock_t end = clock();
     // printf("Time copy_to_cpu: Gpu %d ---- %f \n",process.i, double(end - begin)/CLOCKS_PER_SEC);
+    // printf("Time copy_to_cpu Filter: Gpu %d \n",process.i);
+
 }}
 
 extern "C"{
