@@ -53,6 +53,9 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
 
     zi_recon      = (zi_max_recon - zi_min_recon);
 
+    // printf("process: %d \n", i);
+    // printf("zi_recon: %d \n", zi_recon);
+
     z_min = -lab.z + zi_min_recon * lab.dz;
     z_max = -lab.z + zi_max_recon * lab.dz;
 
@@ -83,6 +86,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     idx_proj_pad = (long long int) Zi_min * lab.nbeta * lab.nph;
     n_proj_pad   = (long long int) (Zi_max - Zi_min) * lab.nbeta * lab.nph;
     zi_proj      = (Zi_max - Zi_min);
+
+    // printf("zi_proj: %d \n", zi_proj);
 
     // --- Calculate filter volumes based on the projection indices ---
     // nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
@@ -115,7 +120,6 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     (*process).idx_proj_pad = idx_proj_pad;
     (*process).n_proj_pad = n_proj_pad;
 
-
     (*process).n_filter = n_filter;
     (*process).idx_filter = idx_filter;
     (*process).z_filter = zi_filter; 
@@ -143,7 +147,7 @@ extern "C" {
             static_cast<float>(sizeof(float)) * lab.nh  * lab.nbeta + // Tomo slice
             static_cast<float>(sizeof(float)) * lab.nh  * lab.nh    + // Reconstructed object slice
             static_cast<float>(sizeof(float)) * lab.nph * lab.nph   + // Reconstructed object padded slice
-        2 * static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // Tomo padded slice + filter kernel
+        5 * static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // Tomo padded slice + filter kernel
             static_cast<float>(sizeof(float)) * lab.nbeta             // angles
         ); 
 
@@ -155,6 +159,10 @@ extern "C" {
         }
 
         int n_process = (int)ceil( (float) blockgpu / blocksize ) * ndev;
+
+        // printf("Blocksize: %d \n", blocksize);
+        // printf("n_process: %d \n", n_process);
+        // printf("blockgpu: %d \n", blockgpu);
 
         return n_process;
     }

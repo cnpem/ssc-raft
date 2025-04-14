@@ -5,11 +5,11 @@
 #include "common/types.hpp"
 
 extern "C"{
-    int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
+    int compute_GPU_blocksize_block(int nslices, float total_required_mem_per_slice,
     bool using_fft, float gpu_memory)
     {
-        const float empiric_const = using_fft? 4.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
-        const float epsilon = 6.0;       // how much free memory we want to leave, in GB.
+        const float empiric_const = using_fft? 2.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
+        const float epsilon = 4.0;       // how much free memory we want to leave, in GB.
     
         long blocksize;
 
@@ -28,7 +28,7 @@ extern "C"{
         return blocksize;
     }
 
-    int compute_GPU_blocksize_2power(int nslices, float total_required_mem_per_slice,
+    int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
     bool using_fft, float gpu_memory)
     {
         const float empiric_const = using_fft? 4.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
@@ -46,9 +46,9 @@ extern "C"{
 
         raw_blocksize = static_cast<long>( - epsilon + ( gpu_memory / ( total_mem_per_slice_GB * empiric_const ) ) );
         
-        std::cout << "\t  total_required_mem_per_slice GB: " << total_mem_per_slice_GB << std::endl;
-        std::cout << "\t  gpu_memory: " << gpu_memory << std::endl;
-        std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
+        // std::cout << "\t  total_required_mem_per_slice GB: " << total_mem_per_slice_GB << std::endl;
+        // std::cout << "\t  gpu_memory: " << gpu_memory << std::endl;
+        // std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
 
         if (nslices < raw_blocksize) {
             blocksize = nslices;
@@ -60,7 +60,7 @@ extern "C"{
             blocksize = 1 << blocksize_exp;
         }
 
-        std::cout << "\t  Blocksize: " << blocksize << std::endl;
+        // std::cout << "\t  Blocksize: " << blocksize << std::endl;
 
         return blocksize;
     }

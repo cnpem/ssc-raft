@@ -70,7 +70,7 @@ extern "C"{
         const size_t nstreams = 2;
 
 		int i;
-        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 3 * size.x ) * nstreams;
+        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 6 * size.x ) * nstreams;
 
         if ( blocksize == 0 ){
             int blocksize_aux  = compute_GPU_blocksize(size.z, total_required_mem_per_slice_bytes, 

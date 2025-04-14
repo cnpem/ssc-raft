@@ -1,3 +1,23 @@
+Version 3.2.2 - 2025-04-14
+--------------------------
+*Changed:*
+  - Return blocksize division function for power of 2. 
+  - Fixed ``FDK`` process division function for slices. 
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+  - No cuda streams on ``FBP by BST``: bug.
+  - A few bugs on TOMCAT's CLI rings and paganin methods call.
+
+*To be done:*
+  - Refactoring ``FDK``.
+  - Refactoring ``EM`` conebeam ray tracing.
+  - Refactoring ``FST`` frequency domain forward method for parallel beam.
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
+
+
 Version 3.2.1 - 2025-04-11
 --------------------------
 *Added:*

@@ -26,7 +26,7 @@ extern "C"
         int i, n_process;
 
         // int block    = ( lab.slice_recon_end - lab.slice_recon_start );
-        int blockgpu = (int) floor( (float)lab.nv / ndevs ); 
+        int blockgpu = (lab.nv + ndevs - 1) / ndevs;
 
         if ( ( blockgpu <= ndevs) ) ndevs = 1;
         // printf("Rot axis = %d \n", lab.rotation_axis_offset);
@@ -35,11 +35,13 @@ extern "C"
 
         // printf("Paola 26/03/25 \n");
 
-        // printf("n_process = %d, n_gpus = %d and regularization = %f \n", n_process, ndevs, lab.reg);
+        // printf("n_process = %d, n_gpus = %d, block_gpu = %d \n", n_process, ndevs, blockgpu);
         // printf("nh = %d, nv = %d, nx = %d, ny = %d, nz = %d \n",  lab.nh,  lab.nv, lab.nx, lab.ny, lab.nz);
         // printf("dh = %e, dv = %e, dx = %e, dy = %e, dz = %e \n",  lab.dh,  lab.dv, lab.dx, lab.dy, lab.dz);
         // printf("dbeta = %e, nbeta = %d, \n",  lab.dbeta,  lab.nbeta);
         // printf("D = %e, Dsd = %e, \n",  lab.D,  lab.Dsd);
+
+        fflush(stdout);
 
         Process *process = (Process *)malloc(sizeof(Process) * n_process);
         
@@ -79,7 +81,8 @@ extern "C"
 
         int i, k = 0;
         std::vector<thread> threads_back;
-        threads_back.reserve(ndevs);
+        // threads_back.reserve(ndevs);
+
         float *c_proj[ndevs];
         float *c_recon[ndevs];
         float *c_beta[ndevs];
@@ -118,7 +121,7 @@ extern "C"
 
         int i, k = 0;
         std::vector<thread> threads_filt;
-        threads_filt.reserve(ndevs);
+        // threads_filt.reserve(ndevs);
 
         float *c_filter[ndevs], *c_W[ndevs];
         cufftComplex *c_signal[ndevs];
@@ -131,6 +134,7 @@ extern "C"
                 HANDLE_ERROR(cudaDeviceSynchronize());
             }
 
+            // printf("process i filter = %ld \n", k % ndevs);
             threads_filt.emplace_back(thread(fft, lab, c_filter[k % ndevs], c_signal[k % ndevs], c_W[k % ndevs], process[k]));
             k = k + 1;
 
