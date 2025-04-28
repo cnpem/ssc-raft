@@ -318,6 +318,7 @@ def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=
     if(tomo_method == 'raft_fbp'):
         dic["algorithm_dic"]['method'] =  'RT'
     elif(tomo_method == 'raft_em'):
+        dic["algorithm_dic"]['iterations'] = 5
         dic["algorithm_dic"]['method'] = 'eEMRT'
 
     dic["algorithm_dic"]['gpu'] =  gpus

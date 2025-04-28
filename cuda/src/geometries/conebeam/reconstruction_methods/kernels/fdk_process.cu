@@ -60,13 +60,13 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     z_max = -lab.z + zi_max_recon * lab.dz;
 
     // --- Calculate the required range in the projection volume based on z_min and z_max ---
-    L = sqrt(lab.x * lab.x + lab.y * lab.y);
+    // L = sqrt(lab.x * lab.x + lab.y * lab.y);
 
     // --- Calculate the required range in the PADDED projection volume based on z_min and z_max ---
-    // float Rxpad = lab.dx * (float)lab.nph / 2.0f;
-    // float Rypad = lab.dy * (float)lab.nph / 2.0f;
+    float Rxpad = lab.dx * (float)lab.nph / 2.0f;
+    float Rypad = lab.dy * (float)lab.nph / 2.0f;
 
-    // L = sqrt(Rxpad * Rxpad + Rypad * Rypad);
+    L = sqrt(Rxpad * Rxpad + Rypad * Rypad);
 
     Z_min = std::max(-lab.v, std::min(
         lab.Dsd * z_min / (lab.D - L),
@@ -77,6 +77,7 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
         lab.Dsd * z_max / (lab.D - L)
     ));
 
+    // Change ceil and floor here?
     Zi_min = std::max(0, (int) floor((Z_min + lab.v) / lab.dv));
     Zi_max = std::min(lab.nv, (int) ceil((Z_max + lab.v) / lab.dv));
 
@@ -141,10 +142,10 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
 extern "C" {
     int memory(Lab lab, int ndev) {
 
-        int blockgpu = (lab.nv + ndev - 1) / ndev;
+        int blockgpu = (int) ceil((float) lab.nz / ndev); //(lab.nv + ndev - 1) / ndev;
 
         size_t total_required_mem_per_slice_bytes = (
-            static_cast<float>(sizeof(float)) * lab.nh  * lab.nbeta + // Tomo slice
+        5 * static_cast<float>(sizeof(float)) * lab.nh  * lab.nbeta + // Tomo slic e
             static_cast<float>(sizeof(float)) * lab.nh  * lab.nh    + // Reconstructed object slice
             static_cast<float>(sizeof(float)) * lab.nph * lab.nph   + // Reconstructed object padded slice
         5 * static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // Tomo padded slice + filter kernel
