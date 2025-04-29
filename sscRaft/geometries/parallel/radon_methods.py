@@ -55,7 +55,8 @@ def radon_RT(phantom, angles, gpus, pixel = 1.0):
     # itmin = ( numpy.ceil( (-1 + a)/dt) ).astype(numpy.intc) 
     # itmax = ( numpy.ceil( ( 1 + a)/dt) ).astype(numpy.intc) 
     
-    tomogram = tomogram * nrays * pixel / 2
+    scale     = nrays * pixel / 2
+    tomogram *= scale
     
     logger.info(f'Finished Radon RT method')
     return tomogram

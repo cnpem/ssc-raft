@@ -159,4 +159,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     libraft.gpu_fdk(lab, obj_ptr, proj_p, angles_p, gpus_p, 
                     ctypes.c_int(ndev), time_p)
 
+    if angles[-1] <= numpy.pi:
+         obj *= 2.0
+         
     return obj

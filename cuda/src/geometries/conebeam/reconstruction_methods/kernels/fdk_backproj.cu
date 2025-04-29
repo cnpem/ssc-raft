@@ -64,7 +64,7 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
         // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
-    recon[n] = recon[n]*lab.dbeta / 2.0;
+    recon[n] = recon[n] * lab.dbeta / 2.0f;
 }}
 
 extern "C"{
@@ -164,7 +164,7 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
 }}
 
 extern "C"{
-void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process process) {
+void backprojection(Lab lab, float* recon, float* proj, float* beta, Process process) {
     long long int M;	
     long int n_blocks;
     int n_threads;
