@@ -159,8 +159,12 @@ extern "C" {
         for( int indray = 0; indray < phantom_size.y; indray++ ){
             s = - ay + indray * dy;
 
-            x = t * ctheta - s * stheta;
-            y = t * stheta + s * ctheta;
+            x =   t * ctheta + s * stheta;
+            y = - t * stheta + s * ctheta;
+
+            // Original
+            // x = t * ctheta - s * stheta;
+            // y = t * stheta + s * ctheta;
             
             indx = (int) ((x + 1)/dx);
             indy = (int) ((y + 1)/dy);	 
