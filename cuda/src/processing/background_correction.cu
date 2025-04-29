@@ -51,8 +51,8 @@ extern "C"{
     float* frames, float* flat, float* dark, 
     dim3 size, int numflats, cudaStream_t stream)
 	{
-        dim3 threadsPerBlock( gpus.BT.x,  gpus.BT.y,           1);
-        dim3       gridBlock(gpus.Grd.x, gpus.Grd.y,      size.z);
+        dim3 threadsPerBlock( gpus.BT.x,  gpus.BT.y,      1);
+        dim3       gridBlock(gpus.Grd.x, gpus.Grd.y, size.z);
         
 		/* Do the dark subtraction and division by flat (without log) */
         BackgroundCorrection<<<gridBlock,threadsPerBlock, 0, stream>>>(frames, dark, flat, size, numflats);
@@ -70,29 +70,36 @@ extern "C"{
         const size_t nstreams = 2;
 
 		int i;
-        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( size.x * size.y + 6 * size.x ) * nstreams;
+        size_t total_required_mem_per_slice_bytes = nstreams * (           static_cast<float>(sizeof(float)) * ( size.x * size.y ) + // Raw data sinogram
+                                                                numflats * static_cast<float>(sizeof(float)) * ( size.x * size.z ) + // Flat line
+                                                                           static_cast<float>(sizeof(float)) * ( size.x * size.z )   // Dark line
+                                                                );
 
         if ( blocksize == 0 ){
             int blocksize_aux  = compute_GPU_blocksize(size.z, total_required_mem_per_slice_bytes, 
                                                         true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(size.z, blocksize_aux);
+            blocksize          = min(32, blocksize);
         }
+        // printf("Blocksize: %d \n",blocksize);
+
         int nblock = (int)ceil( (float) size.z / blocksize );
 		int ptr = 0, subblock;
 
-        float *d_flat = opt::allocGPU<float>((size_t) size.z * size.x * numflats * blocksize);
-        float *d_dark = opt::allocGPU<float>((size_t) size.z * size.x * blocksize);
-
-        opt::CPUToGPU<float>(flat, d_flat, (size_t)size.z * size.x * numflats);
-        opt::CPUToGPU<float>(dark, d_dark, (size_t)size.z * size.x);
-
         float *d_frames[nstreams];
+        float *d_flat[nstreams];
+        float *d_dark[nstreams];
         cudaStream_t streams[nstreams];
 
         for (int st = 0; st < nstreams; ++st) {
             cudaStreamCreate(&streams[st]);
 
-            d_frames[st] = opt::allocGPU<float>((size_t) size.x * size.y * blocksize, streams[st]);
+            d_frames[st] = opt::allocGPU<float>((size_t) size.x * size.y * blocksize           , streams[st]);
+            d_flat[st]   = opt::allocGPU<float>((size_t) size.z * size.x * blocksize * numflats, streams[st]);
+            d_dark[st]   = opt::allocGPU<float>((size_t) size.z * size.x * blocksize           , streams[st]);
+
+            opt::CPUToGPU<float>(flat, d_flat[st], (size_t)size.x * size.z * numflats, streams[st]);
+            opt::CPUToGPU<float>(dark, d_dark[st], (size_t)size.x * size.z           , streams[st]);
         }
 
 		for(i = 0; i < nblock; i++) {
@@ -104,8 +111,8 @@ extern "C"{
             opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames[st], (size_t)subblock * size.x * size.y, stream);
 
 			getBackgroundCorrection(gpus, d_frames[st],
-                    d_flat + (size_t)ptr * size.x * numflats,
-                    d_dark + (size_t)ptr * size.x,
+                    d_flat[st] + (size_t)ptr * size.x * numflats,
+                    d_dark[st] + (size_t)ptr * size.x,
                     dim3(size.x, size.y, subblock), numflats, stream);
 
             if (is_log == 1)
@@ -121,12 +128,11 @@ extern "C"{
             cudaStreamSynchronize(streams[st]);
 
             HANDLE_ERROR(cudaFreeAsync(d_frames[st], streams[st]));
+            HANDLE_ERROR(cudaFreeAsync(d_flat[st]  , streams[st]));
+            HANDLE_ERROR(cudaFreeAsync(d_dark[st]  , streams[st]));
 
             cudaStreamDestroy(streams[st]);
         }
-
-        HANDLE_ERROR(cudaFree(d_flat));
-        HANDLE_ERROR(cudaFree(d_dark));
 
         HANDLE_ERROR(cudaDeviceSynchronize());
 

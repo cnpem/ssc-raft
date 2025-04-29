@@ -546,8 +546,11 @@ extern "C"{
         ); 
 
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
+            int blocksize_aux  = compute_GPU_blocksize( sizez, 
+                                                        total_required_mem_per_slice_bytes, true, 
+                                                        BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
+            blocksize          = min(32, blocksize);
         }
 
         int ind_block = (int)ceil( (float) sizez / blocksize );

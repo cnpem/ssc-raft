@@ -1,3 +1,25 @@
+Version 3.2.3 - 2025-04-28
+--------------------------
+*Changed:*
+  - Fixed blocksize division for ``correct_background()`` function.
+  - Fixed blocksize division for ``phase_retrieval()`` function (Paganin by frames).
+  - Fixed blocksize division for ``rings()`` and ``correct_rotation_axis`` functions. 
+  - Fixed ``L`` variable on ``FDK`` process division.
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+  - No cuda streams on ``FBP by BST``: bug.
+  - A few bugs on TOMCAT's CLI rings and paganin methods call.
+  - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
+
+*To be done:*
+  - Refactoring ``FDK``.
+  - Refactoring ``EM`` conebeam ray tracing.
+  - Refactoring ``FST`` frequency domain forward method for parallel beam.
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
+
 Version 3.2.2 - 2025-04-14
 --------------------------
 *Changed:*

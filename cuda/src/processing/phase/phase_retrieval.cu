@@ -61,7 +61,7 @@ extern "C" {
 
         /* Compute total memory used of Phase Filter method on a single frame */
         configs->total_required_mem_per_frame_bytes = (
-                4 * configs->tomo.frame_padd_memory_bytes // Projection
+                8 * configs->tomo.frame_padd_memory_bytes // Projection
                 ); 
     }
 
@@ -176,9 +176,15 @@ extern "C" {
         int blocksize = configs.blocksize;
 
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_frame_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
+            int blocksize_aux  = compute_GPU_blocksize( sizez, 
+                                                        configs.total_required_mem_per_frame_bytes, 
+                                                        true, 
+                                                        BYTES_TO_GB * getTotalDeviceMemory());
+
             blocksize          = min(sizez, blocksize_aux);
+            blocksize          = min(32, blocksize);
         }
+        // printf("Blocksize: %d \n",blocksize);
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
@@ -206,11 +212,11 @@ extern "C" {
 			}
 
             opt::CPUToGPU<float>(projections + ptr_block, dprojections, 
-                            (size_t)nrays * nslices * subblock);
+                                (size_t)nrays * nslices * subblock);
 
 			getPhase( configs, gpus, dprojections, kernel,
-                    dim3(nrays, nslices, subblock), 
-                    dim3(nrayspad, nslicespad, subblock)
+                      dim3(nrays, nslices, subblock), 
+                      dim3(nrayspad, nslicespad, subblock)
                     );
 
 			opt::GPUToCPU<float>(projections + ptr_block, dprojections, 

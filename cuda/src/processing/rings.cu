@@ -525,6 +525,7 @@ extern "C"{
             int blocksize_aux  = compute_GPU_blocksize(nslices, total_required_mem_per_slice_bytes, 
                                                         true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(nslices, blocksize_aux);
+            blocksize          = min(32, blocksize);
         }
 
         int nblock = (int)ceil( (float) nslices / blocksize );

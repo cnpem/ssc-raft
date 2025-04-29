@@ -141,6 +141,8 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
     // printf("nph: %d \n", lab.nph);
     // printf("padh: %d \n", lab.padh);
     // printf("nx, ny: %d, %d \n", lab.nx, lab.ny);
+
+    // fflush(stdout);
     
     /* Copy GPU sinograms to padded GPU sinograms *c_proj*/
     opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(c_recon, c_rec,

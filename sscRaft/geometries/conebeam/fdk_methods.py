@@ -86,7 +86,9 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
 
     nh, nv = int(nrays), int(nslices)
     h, v   = nh*dh/2, nv*dv/2
-    nph    = int(nh * ( 1 + padh ))
+    nph    = int( nh * ( 1 + padh ) )
+
+    print("nph:",nph,padh)
 
     nbeta  = len(angles)
 

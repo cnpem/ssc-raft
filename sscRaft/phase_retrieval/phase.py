@@ -33,7 +33,7 @@ def phase_retrieval(frames, dic):
         * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters [default: 1.0] 
         * ``dic['energy[eV]']`` (float): Beam line energy in KeV [default: 1.0] 
         * ``dic['magn']`` (float): Magnification of beam [default: 1.0] 
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 0] 
+        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 1] 
         * ``dic['blocksize']`` (int,optional): Size of projection blocks to be processed simultaneously [default: 0 (automatic computation)] 
 
     References:
@@ -44,7 +44,7 @@ def phase_retrieval(frames, dic):
 
     required = (    'gpu',)
     optional = ( 'method', 'beta/delta','padding','blocksize','z2[m]','energy[eV]','magn', 'detectorPixel[m]')
-    default  = ('paganin',          0.0,        0,          0,      1,           1,     1,                1.0)
+    default  = ('paganin',          0.0,        1,          0,      1,           1,     1,                1.0)
     
     dic = SetDictionary(dic,required,optional,default)
 
@@ -76,22 +76,22 @@ def phase_retrieval(frames, dic):
         logger.error(f'Blocksize is bigger than the number of angles ({nangles}) divided by the number of GPUs selected ({ngpus})!')
         raise ValueError(f'Blocksize is bigger than the number of angles ({nangles}) divided by the number of GPUs selected ({ngpus})!')
 
-    methodname = dic['method']
-    method     = PhaseMethodNumber(methodname)
+    methodname      = dic['method']
+    method          = PhaseMethodNumber(methodname)
 
-    param_int     = [nrays, nslices, nangles, 
-                     padx, pady, padz, method, blocksize]
-    param_int     = numpy.array(param_int)
-    param_int     = CNICE(param_int,numpy.int32)
-    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+    param_int       = [nrays, nslices, nangles, 
+                       padx, pady, padz, method, blocksize]
+    param_int       = numpy.array(param_int)
+    param_int       = CNICE(param_int,numpy.int32)
+    param_int_ptr   = param_int.ctypes.data_as(ctypes.c_void_p)
 
     param_float     = [beta_delta,pixel_det,pixel_det,energy,z2,z2,magn,magn]
     param_float     = numpy.array(param_float)
     param_float     = CNICE(param_float,numpy.float32)
     param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
    
-    frames = CNICE(frames, numpy.float32)
-    frames_ptr = frames.ctypes.data_as(ctypes.c_void_p)
+    frames          = CNICE(frames, numpy.float32)
+    frames_ptr      = frames.ctypes.data_as(ctypes.c_void_p)
 
     libraft.getPhaseMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
                             frames_ptr, param_float_ptr, param_int_ptr)                     

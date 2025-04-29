@@ -46,9 +46,9 @@ extern "C"{
 
         raw_blocksize = static_cast<long>( - epsilon + ( gpu_memory / ( total_mem_per_slice_GB * empiric_const ) ) );
         
-        // std::cout << "\t  total_required_mem_per_slice GB: " << total_mem_per_slice_GB << std::endl;
-        // std::cout << "\t  gpu_memory: " << gpu_memory << std::endl;
-        // std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
+        std::cout << "\t  total_required_mem_per_slice GB: " << total_mem_per_slice_GB << std::endl;
+        std::cout << "\t  gpu_memory: " << gpu_memory << std::endl;
+        std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
 
         if (nslices < raw_blocksize) {
             blocksize = nslices;
@@ -60,7 +60,7 @@ extern "C"{
             blocksize = 1 << blocksize_exp;
         }
 
-        // std::cout << "\t  Blocksize: " << blocksize << std::endl;
+        std::cout << "\t  Blocksize: " << blocksize << std::endl;
 
         return blocksize;
     }
