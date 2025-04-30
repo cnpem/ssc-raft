@@ -42,7 +42,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs)
 
             #. Related filters: \'gaussian\', \'lorentz\' and \'rectangle\'
 
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
+        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 0]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
         * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
@@ -53,7 +53,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs)
     """
     required = ('gpu',)        
     optional = ('filter','rotation axis offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method','detectorPixel[m]')
-    default  = (  'ramp',                   0.0,        2,             0.0,         0.0,          0,         1.0,    1.0,    'RT',               1.0)
+    default  = (  'ramp',                   0.0,        0,             0.0,         0.0,          0,         1.0,    1.0,    'RT',               1.0)
     
     dic = SetDictionary(dic,required,optional,default)  
 
@@ -122,16 +122,16 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
         * ``dic['angles[rad]']`` (float list, optional):  List of angles in radians [default: None]
         * ``dic['iterations']`` (int, optional): Global number of iterations [default: 100]
         * ``dic['interpolation']`` (str, optional):  Type of interpolation. Options: \'nearest\' or \'bilinear\' [default: \'bilinear\']
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 2]  
+        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 0]  
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [default: 0 (automatically)]
 
     """
     # Set default dictionary parameters:
     required = ('gpu',)
     optional = ('iterations','detectorPixel[m]','padding','beamgeometry','interpolation','blocksize')
-    default  = (10,0.0,2,'parallel','bilinear',0)
+    default  = (          10,               1.0,        0,    'parallel',     'bilinear',          0)
 
-    dic          = SetDictionary(dic,required,optional,default)
+    dic      = SetDictionary(dic,required,optional,default)
 
     blocksize     = dic['blocksize']
 

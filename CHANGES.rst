@@ -3,6 +3,9 @@ Version 3.2.4 - 2025-00-00
 *Changed:*
   - Fixed parallel ``radonRT()`` function to use an angle list of ``(0,+180)`` not ``(0,-180)``, and standardize sample rotation and reconstruction order.
   - Fixed ``FDK`` recon values for a 180 degree measurement.
+  - Fixed reconstruction methods default dictionary values.
+  - Fixed GCC name on ``docs/conf.py``.
+  - Install documentation Zenodo update.
 
 *Known Bugs:*
   - ``BST`` works for 180 degrees only on a regular angle mesh.

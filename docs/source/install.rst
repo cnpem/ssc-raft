@@ -60,16 +60,15 @@ Source code from Zenodo
 ***********************
 
 The source code can be downloaded from `zenodo website <https://zenodo.org/>`_ under the 
-DOI: `10.5281/zenodo.10988342 <https://doi.org/10.5281/zenodo.10988342>`_.
-
-After download the ``ssc-raft-v<version>.tar.gz`` with the source files, one can decompress by
+DOI: `10.5281/zenodo.10988342 <https://doi.org/10.5281/zenodo.10988342>`_. On the left panel, one can find
+the available versions. Select the version want and download the ``ssc-raft.tar.gz`` with the source files, one can decompress by
 
 .. code-block:: bash
 
-    tar -xvf ssc-raft-v<version>.tar.gz
+    tar -xvf ssc-raft.tar.gz
 
 
-To compile the source files, enter the follwing command inside the folder
+To compile the source files, enter the following command inside the folder
 
 .. code-block:: bash
 

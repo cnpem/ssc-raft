@@ -156,9 +156,8 @@ def apply_shifts(data,shifts, method='scipy',cpus=32,turn_off_vertical=False,rem
     return data
 
 def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0], pixel = 1):
-    print('Reprojecting...')
+    logger.info('Reprojecting...')
     if radon_method == 'raft':
-        ang = numpy.copy(angles)
         tomogram = radon_RT(tomogram, angles, gpus, pixel)
         tomogram = numpy.swapaxes(tomogram,0,1)
     elif radon_method == 'tomopy':
@@ -168,7 +167,8 @@ def reproject(tomogram, angles,radon_method='raft',cpus=1,gpus=[0], pixel = 1):
     return tomogram
 
 def reconstruct_and_reproject(data,angles,dic,tomo_method='raft',radon_method='raft',cpus=1,gpus=[0]):
-    print('Reconstructing...')
+    logger.info('Reconstructing...')
+   
     if tomo_method == 'raft_fbp':
         tomo = fbp(numpy.swapaxes(data,0,1), dic = dic["algorithm_dic"])
         # tomo = sscRaft.bst(numpy.swapaxes(data,0,1), dic["algorithm_dic"])
@@ -208,7 +208,8 @@ def check_sinogram_shape(sinogram):
         if myshape[2]%2 != 0:
             sinogram = sinogram[:,:,0:-1]
 
-        print(f"As of now, filtering in sscRaft requires an array with even pixels. Your array shape is {myshape}. Adjusting shape to {sinogram.shape} \n")
+        # Necessary because, as of version 3.2.4 of ssc-raft, the FBP filter is R2C_C2R and require an even number of pixels (hard-coded)
+        logger.info(f"As of now, filtering in sscRaft requires an array with even pixels. Your array shape is {myshape}. Adjusting shape to {sinogram.shape}")
             
     return sinogram
 
@@ -291,7 +292,21 @@ def plot_iterative_reprojection(tomo,sinogram,angles,neighboor_shifts,cumulative
     plt.tight_layout()
     plt.show()
 
-def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=32, using_phase_derivative=False,threshold=1e-2, max_iterations=10, max_downsampling=1,fft_upsampling=100,turn_off_vertical=False,plot=False,plot_type='phase', FBP_filter='ramp',find_shift_method='correlation',apply_shift_method='scipy',tomo_method='raft',radon_method='raft'):
+def iterative_reprojection(original_sinogram, angles, 
+                           pixel = 1, gpus=[0], n_cpus=32, 
+                           using_phase_derivative=False,
+                           threshold=1e-2, 
+                           max_iterations=10, 
+                           max_downsampling=1,
+                           fft_upsampling=100,
+                           turn_off_vertical=False,
+                           plot=False,plot_type='phase', 
+                           find_shift_method='correlation',
+                           apply_shift_method='scipy',
+                           tomo_method='raft',
+                           radon_method='raft',
+                           em_iterations=5,
+                           FBP_filter='ramp'):
 
     try:
         import tomopy
@@ -300,16 +315,18 @@ def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=
 
     try:
         n_cpus = int(os.getenv('SLURM_CPUS_ON_NODE'))
-        print(f'Using {n_cpus} CPUs')
+        logger.info(f'Using {n_cpus} CPUs allocated on SLURM.')
     except:
-        print(f'Could not read CPUs from SLURM. Using {n_cpus} CPUs')
+        logger.info(f'Could not read CPUs from SLURM. Using {n_cpus} CPUs from user input.')
 
     dic = {}
     dic["algorithm_dic"] = {}
-    #dic["algorithm_dic"]['algorithm'] = "FBP"
+
     dic["algorithm_dic"]["detectorPixel[m]"] = pixel
+
     if 'regularization' not in dic["algorithm_dic"]:
         dic["algorithm_dic"]['beta/delta'] = 0 # regularization <= 1; use for smoothening
+    
     if using_phase_derivative==False:
         dic["algorithm_dic"]['filter'] = FBP_filter
     else:
@@ -318,11 +335,11 @@ def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=
     if(tomo_method == 'raft_fbp'):
         dic["algorithm_dic"]['method'] =  'RT'
     elif(tomo_method == 'raft_em'):
-        dic["algorithm_dic"]['iterations'] = 5
+        dic["algorithm_dic"]['iterations'] = em_iterations
         dic["algorithm_dic"]['method'] = 'eEMRT'
 
-    dic["algorithm_dic"]['gpu'] =  gpus
-    dic["algorithm_dic"]['angles[rad]'] =  angles # angles in radians
+    dic["algorithm_dic"]['gpu'] = gpus
+    dic["algorithm_dic"]['angles[rad]'] = angles # angles in radians
     # dic["algorithm_dic"]['angles[rad]'] -= dic["algorithm_dic"]['angles'].min()
     
     fig, ax0 = plt.subplots()
@@ -337,55 +354,92 @@ def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=
     ax0.set_xlabel('Frame number')
     plt.show()
     
+    # Necessary for now
     original_sinogram = check_sinogram_shape(original_sinogram.copy())
-    sinogram = original_sinogram.copy()
+    sinogram          = original_sinogram.copy()
 
     if using_phase_derivative:
-        print('Computing phase derivative of sinogram...')
+        logger.info('Computing phase derivative of sinogram...')
         sinogram=phase_derivative_hilbert_transform(sinogram,pixel_size=1)
 
-    print('Reconstructing and reprojecting from input data...')
-    tomo, reprojected_sinogram = reconstruct_and_reproject(sinogram,dic["algorithm_dic"]["angles[rad]"],dic,tomo_method=tomo_method,radon_method=radon_method,cpus=n_cpus,gpus=dic['algorithm_dic']['gpu'])
+    logger.info('Reconstructing and reprojecting from input data...')
+    tomo, reprojected_sinogram = reconstruct_and_reproject(sinogram,
+                                                           dic["algorithm_dic"]["angles[rad]"],
+                                                           dic,
+                                                           tomo_method=tomo_method,
+                                                           radon_method=radon_method,
+                                                           cpus=n_cpus,
+                                                           gpus=dic['algorithm_dic']['gpu'])
 
     cumulative_shifts = numpy.empty((original_sinogram.shape[0],2),dtype=numpy.float32)
     cumulative_shifts[:,0] = 0  
     cumulative_shifts[:,1] = 0  
     
-    plot_iterative_reprojection(tomo,original_sinogram,dic["algorithm_dic"]['angles[rad]'],cumulative_shifts,cumulative_shifts,plot_type=plot_type) # plot initial recon
+    plot_iterative_reprojection(tomo,
+                                original_sinogram,
+                                dic["algorithm_dic"]['angles[rad]'],
+                                cumulative_shifts,
+                                cumulative_shifts,
+                                plot_type=plot_type) # plot initial recon
 
-    
     iter_count = 0 
-    for downsampling in [int(max_downsampling/(2**i)) for i in range(0,int(numpy.log2(max_downsampling)+1))]: # descreasing list from max_downsampling to 1
-        print(f'Downsampling data {downsampling} times...')
+    # descreasing list from max_downsampling to 1
+    for downsampling in [int(max_downsampling/(2**i)) for i in range(0,int(numpy.log2(max_downsampling)+1))]: 
+        logger.info(f'Downsampling data {downsampling} times...')
+        
         while iter_count < max_iterations:
-            print(f'Iteration #',iter_count+1)
+            logger.info(f'Iteration {iter_count}')
 
-            print('Finding shifts...')
+            logger.info(f'Finding shifts...')
             
             if using_phase_derivative:
-                # sinogram_adjusted = adjust_data_for_correlation(sinogram,using_phase_gradient=using_phase_derivative)
-                # reprojected_adjusted = adjust_data_for_correlation(reprojected_sinogram,using_phase_gradient=using_phase_derivative)
+                # sinogram_adjusted        = adjust_data_for_correlation(sinogram,using_phase_gradient=using_phase_derivative)
+                # reprojected_adjusted     = adjust_data_for_correlation(reprojected_sinogram,using_phase_gradient=using_phase_derivative)
                 # cumulative_shifts,shifts = find_shift(sinogram_adjusted, reprojected_adjusted, cumulative_shifts, downsampling,method=find_shift_method,fft_upsampling=fft_upsampling)
-                cumulative_shifts,shifts = find_shift(sinogram, reprojected_sinogram, cumulative_shifts, downsampling,method=find_shift_method,fft_upsampling=fft_upsampling)
+                
+                cumulative_shifts,shifts = find_shift(sinogram, 
+                                                      reprojected_sinogram, 
+                                                      cumulative_shifts, 
+                                                      downsampling,
+                                                      method=find_shift_method,
+                                                      fft_upsampling=fft_upsampling)
             else:
-                cumulative_shifts,shifts = find_shift(sinogram, reprojected_sinogram, cumulative_shifts, downsampling,method=find_shift_method,fft_upsampling=fft_upsampling)
+                cumulative_shifts,shifts = find_shift(sinogram,
+                                                      reprojected_sinogram, 
+                                                      cumulative_shifts, 
+                                                      downsampling,
+                                                      method=find_shift_method,
+                                                      fft_upsampling=fft_upsampling)
 
                 
             reached_threshold = shifts < threshold
+
             if reached_threshold.all() == True:
-                print(f'All pixel shifts smaller than {threshold}. Exiting algorithm.')
+                logger.info(f'All pixel shifts smaller than {threshold}. Exiting algorithm.')
                 break # exit while loop
             
-            print('Applying shifts...')
-            sinogram = apply_shifts(original_sinogram.copy(),cumulative_shifts,method=apply_shift_method,turn_off_vertical=turn_off_vertical, remove_null_borders=True)
+            logger.info('Applying shifts...')
+            sinogram = apply_shifts(original_sinogram.copy(),
+                                    cumulative_shifts,
+                                    method=apply_shift_method,
+                                    turn_off_vertical=turn_off_vertical, 
+                                    remove_null_borders=True)
             sinogram = check_sinogram_shape(sinogram)
 
-            print('Reconstructing and reprojecting...')
+            logger.info('Reconstructing and reprojecting...')
             if using_phase_derivative:
-                phase_derivative_sinogram=phase_derivative_hilbert_transform(sinogram,pixel_size=1)
-                tomo, reprojected_sinogram = reconstruct_and_reproject(phase_derivative_sinogram,dic["algorithm_dic"]["angles[rad]"],dic,tomo_method=tomo_method,radon_method=radon_method)
+                phase_derivative_sinogram  = phase_derivative_hilbert_transform(sinogram,pixel_size=1)
+                tomo, reprojected_sinogram = reconstruct_and_reproject(phase_derivative_sinogram,
+                                                                       dic["algorithm_dic"]["angles[rad]"],
+                                                                       dic,
+                                                                       tomo_method=tomo_method,
+                                                                       radon_method=radon_method)
             else:
-                tomo, reprojected_sinogram = reconstruct_and_reproject(sinogram,dic["algorithm_dic"]["angles[rad]"],dic,tomo_method=tomo_method,radon_method=radon_method)
+                tomo, reprojected_sinogram = reconstruct_and_reproject(sinogram,
+                                                                       dic["algorithm_dic"]["angles[rad]"],
+                                                                       dic,
+                                                                       tomo_method=tomo_method,
+                                                                       radon_method=radon_method)
                 
             fig, ax = plt.subplots(1,3,figsize=(12,4),dpi=200)
             im0 = ax[0].imshow(sinogram[0])
@@ -402,6 +456,7 @@ def iterative_reprojection(original_sinogram,angles, pixel = 1, gpus=[0],n_cpus=
             
         if reached_threshold.all() == True:
             break # exit for loop
+
     if(tomo_method == 'raft_fbp'):
         aligned_tomo = fbp(numpy.swapaxes(sinogram,0,1), dic = dic["algorithm_dic"])
     elif(tomo_method == 'raft_em'):
