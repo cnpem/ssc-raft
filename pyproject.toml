@@ -11,7 +11,8 @@ requires = [
 [project]
 dynamic = ["version"]
 name = "sscRaft"
-license = { file = "LICENSE.txt" }
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE.txt"]
 
 dependencies = [
     "numpy<2",
@@ -19,7 +20,6 @@ dependencies = [
     "scipy",
     "matplotlib",
     "SharedArray",
-    "uuid",
     "h5py",
     "click>=8.0.4",
     "colorama>=0.4.5",
@@ -33,10 +33,18 @@ dependencies = [
 ]
 
 classifiers=[
-    'Development Status :: 4 - Beta', 'License :: OSI Approved :: GPL-3.0 License',
-    'Intended Audience :: Science/Research', 'Intended Audience :: Education', 'Intended Audience :: Developers',
-    'Natural Language :: English', 'Operating System :: OS Independent', 'Programming Language :: Python',
-    'Programming Language :: Python :: 3.0', 'Programming Language :: C', 'Programming Language :: C++'
+    'Development Status :: 4 - Beta', 
+    'Intended Audience :: Science/Research', 
+    'Intended Audience :: Education', 
+    'Intended Audience :: Developers',
+    'Natural Language :: English', 
+    'Operating System :: OS Independent', 
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.7', 
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: C', 
+    'Programming Language :: C++'
 ]
 authors = [
     {name = "Eduardo X. Miqueles", email = "eduardo.miqueles@lnls.br"},
@@ -56,6 +64,13 @@ maintainers = [
 ]
 description = "Reconstruction algorithms for tomography"
 keywords = ["raft", "tomography", "radon", "imaging", "filtered backprojection", "fdk", "expectation-maximization","rings","tomogram alignment"]
+
+[project.urls]
+Homepage = "https://github.com/cnpem/ssc-raft/"
+Documentation = "docs/build/index.html"
+Repository = "https://github.com/cnpem/ssc-raft.git"
+Issues = "https://github.com/cnpem/ssc-raft/issues"
+Changelog = "CHANGES.rst"
 
 [tool.setuptools]
 platforms = ["Linux"]

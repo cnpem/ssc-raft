@@ -96,7 +96,6 @@ build_docs:
   artifacts:
     paths:
       - ./docs/build/
-    expire_in: 1 day
 
 deploy_docs:
   stage: deploy

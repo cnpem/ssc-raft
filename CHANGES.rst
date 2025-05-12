@@ -1,4 +1,4 @@
-Version 3.2.4 - 2025-00-00
+Version 3.2.4 - 2025-05-12
 --------------------------
 *Changed:*
   - Fixed parallel ``radonRT()`` function to use an angle list of ``(0,+180)`` not ``(0,-180)``, and standardize sample rotation and reconstruction order.
@@ -6,6 +6,8 @@ Version 3.2.4 - 2025-00-00
   - Fixed reconstruction methods default dictionary values.
   - Fixed GCC name on ``docs/conf.py``.
   - Install documentation Zenodo update.
+  - Added and fixed some parameters on ``pyproject.toml``.
+  - Remove ``uuid`` of dependencies on ``pyproject.toml``.
 
 *Known Bugs:*
   - ``BST`` works for 180 degrees only on a regular angle mesh.

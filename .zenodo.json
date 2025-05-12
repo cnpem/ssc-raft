@@ -93,7 +93,7 @@
     ],
     "language": "eng",
     "license": "gpl-3.0-or-later",
-    "notes": "<ul><li><strong>Programming languages:</strong> Python, C++, Cuda</li><li><strong>Alternative titles:</strong> sscRaft, ssc-raft</li></ul>",
+    "notes": "<ul><li><strong>Programming languages:</strong> Python, C++, Cuda</li><li><strong>Alternative titles:</strong> sscRaft, ssc-raft, RAFT</li></ul>",
     "related_identifiers": [
         {
             "relation": "isPublishedIn",
