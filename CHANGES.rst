@@ -1,3 +1,28 @@
+Version 3.2.4 - 2025-05-12
+--------------------------
+*Changed:*
+  - Fixed parallel ``radonRT()`` function to use an angle list of ``(0,+180)`` not ``(0,-180)``, and standardize sample rotation and reconstruction order.
+  - Fixed ``FDK`` recon values for a 180 degree measurement.
+  - Fixed reconstruction methods default dictionary values.
+  - Fixed GCC name on ``docs/conf.py``.
+  - Install documentation Zenodo update.
+  - Added and fixed some parameters on ``pyproject.toml``.
+  - Remove ``uuid`` of dependencies on ``pyproject.toml``.
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+  - No cuda streams on ``FBP by BST``: bug.
+  - A few bugs on TOMCAT's CLI rings and paganin methods call.
+  - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
+
+*To be done:*
+  - Refactoring ``FDK``.
+  - Refactoring ``EM`` conebeam ray tracing.
+  - Refactoring ``FST`` frequency domain forward method for parallel beam.
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
+
 Version 3.2.3 - 2025-04-28
 --------------------------
 *Changed:*

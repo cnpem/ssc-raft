@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'ssc-raft'
-copyright = '2022, GCC'
-author = 'GCC'
+copyright = '2022, Sirius Scientific Computing Group'
+author = 'Sirius Scientific Computing Group'
 
 # -- General configuration ---------------------------------------------------
 

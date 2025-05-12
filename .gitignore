@@ -1,6 +1,5 @@
 _skbuild/
 __pycache__/
-docs/build/
 build/
 dist/
 .github/*

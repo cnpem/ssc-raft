@@ -26,7 +26,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 1.0]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0 ]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
+        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 0]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
         * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
@@ -45,23 +45,23 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     else:
         nslices = tomogram.shape[0]
 
-    filter_type    = FilterNumber(dic['filter'])
-    beta_delta     = dic['beta/delta']
-    regularization = dic['regularization']
-    offset         = dic['rotation axis offset']
-    blocksize      = dic['blocksize']
-    energy         = dic['energy[eV]']
-    z2             = dic['z2[m]']
-    pixelx, pixely = dic['detectorPixel[m]'],dic['detectorPixel[m]']
+    filter_type    = FilterNumber(dic.get(dic['filter'], 'ramp'))
+    beta_delta     = dic.get(dic['beta/delta'], 0.0)
+    regularization = dic.get(dic['regularization'], 1.0)
+    offset         = dic.get(dic['rotation axis offset'], 0)
+    blocksize      = dic.get(dic['blocksize'], 0)
+    energy         = dic.get(dic['energy[eV]'], 1.0)
+    z2             = dic.get(dic['z2[m]'], 1.0)
+    pixelx, pixely = dic.get(dic['detectorPixel[m]'], 1.0),dic.get(dic['detectorPixel[m]'],1.0)
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
     else:
         beta_delta     = 0.0
-        z2             = 0.0
+        z2             = 1.0
         energy         = 1.0
 
-    padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
+    padx, pady, padz  = dic.get(dic['padding'], 0),0,0 # (padx, pady, padz)
 
     pad    = (padx) * nrays
     logger.info(f'Set FBP RT pad value as {padx} x horizontal dimension = ({pad}).')
@@ -127,7 +127,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 1.0]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
+        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 0]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
         * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
@@ -149,23 +149,23 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     else:
             nslices = tomogram.shape[0]
 
-    filter_type    = FilterNumber(dic['filter'])
-    beta_delta     = dic['beta/delta']
-    regularization = dic['regularization']
-    offset         = int(dic['rotation axis offset'])
-    blocksize      = dic['blocksize']
-    energy         = dic['energy[eV]']
-    z2             = dic['z2[m]']
-    pixelx, pixely = dic['detectorPixel[m]'],dic['detectorPixel[m]']
+    filter_type    = FilterNumber(dic.get(dic['filter'], 'ramp'))
+    beta_delta     = dic.get(dic['beta/delta'], 0.0)
+    regularization = dic.get(dic['regularization'], 1.0)
+    offset         = dic.get(dic['rotation axis offset'], 0)
+    blocksize      = dic.get(dic['blocksize'], 0)
+    energy         = dic.get(dic['energy[eV]'], 1.0)
+    z2             = dic.get(dic['z2[m]'], 1.0)
+    pixelx, pixely = dic.get(dic['detectorPixel[m]'], 1.0),dic.get(dic['detectorPixel[m]'],1.0)
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
     else:
         beta_delta     = 0.0
-        z2             = 0.0
+        z2             = 1.0
         energy         = 1.0
         
-    padx, pady, padz  = dic['padding'],0,0 # (padx, pady, padz)
+    padx, pady, padz  = dic.get(dic['padding'], 0),0,0 # (padx, pady, padz)
 
     pad    = (padx) * nrays
     logger.info(f'Set FBP BST pad value as {padx} x horizontal dimension = ({pad}).')

@@ -35,7 +35,7 @@ Sirius Scientific Computing Team: [gcc@lnls.br](malito:gcc@lnls.br)
 
 ## Documentation
 
-The package documentation can be found on the GCC website [https://gcc.lnls.br/ssc/ssc-raft/index.html](https://gcc.lnls.br/ssc/ssc-raft/index.html) inside the CNEPM network.
+The package documentation can be found on the GCC website [https://gcc.lnls.br/ssc/ssc-raft/index.html](https://gcc.lnls.br/ssc/ssc-raft/index.html) inside the CNPEM network.
 Also, the `HTML` documentation can be found in the source directory `./docs/build/index.html` and can be opened with your preferred brownser.
 
 ## Install
@@ -74,14 +74,14 @@ The `<version>` is the version of the `sscRaft` to be installed. Example, to ins
 ### Source code from Zenodo
 
 The source code can be downloaded from [zenodo website](https://zenodo.org/) under the DOI:[10.5281/zenodo.10988342](https://doi.org/10.5281/zenodo.10988342).
-
-After download the `ssc-raft-v<version>.tar.gz` with the source files, one can decompress by
+On the left panel, one can find
+the available versions. Select the version want and download the ``ssc-raft.tar.gz`` with the source files, one can decompress by
 
 ```bash
-    tar -xvf ssc-raft-v<version>.tar.gz
+    tar -xvf ssc-raft.tar.gz
 ```
 
-To compile the source files, enter the follwing command inside the folder
+To compile the source files, enter the following command inside the folder
 
 ```bash
     make clean && make

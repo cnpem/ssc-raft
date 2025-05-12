@@ -1,7 +1,7 @@
 {
     "upload_type": "software",
     "title": "ssc-raft",
-    "version": "3.2.3",
+    "version": "3.2.4",
     "access_right": "open",
     "communities": [
     ],
@@ -93,7 +93,7 @@
     ],
     "language": "eng",
     "license": "gpl-3.0-or-later",
-    "notes": "<ul><li><strong>Programming languages:</strong> Python, C++, Cuda, Jupyter Notebook</li><li><strong>Alternative titles:</strong> sscCdi, ssc-cdi</li></ul>",
+    "notes": "<ul><li><strong>Programming languages:</strong> Python, C++, Cuda</li><li><strong>Alternative titles:</strong> sscRaft, ssc-raft, RAFT</li></ul>",
     "related_identifiers": [
         {
             "relation": "isPublishedIn",
