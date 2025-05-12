@@ -19,7 +19,6 @@ dependencies = [
     "scipy",
     "matplotlib",
     "SharedArray",
-    "uuid",
     "h5py",
     "click>=8.0.4",
     "colorama>=0.4.5",
@@ -33,10 +32,18 @@ dependencies = [
 ]
 
 classifiers=[
-    'Development Status :: 4 - Beta', 'License :: OSI Approved :: GPL-3.0 License',
-    'Intended Audience :: Science/Research', 'Intended Audience :: Education', 'Intended Audience :: Developers',
-    'Natural Language :: English', 'Operating System :: OS Independent', 'Programming Language :: Python',
-    'Programming Language :: Python :: 3.0', 'Programming Language :: C', 'Programming Language :: C++'
+    'Development Status :: 4 - Beta', 
+    'Intended Audience :: Science/Research', 
+    'Intended Audience :: Education', 
+    'Intended Audience :: Developers',
+    'Natural Language :: English', 
+    'Operating System :: OS Independent', 
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9', 
+    'Programming Language :: C', 
+    'Programming Language :: C++'
 ]
 authors = [
     {name = "Eduardo X. Miqueles", email = "eduardo.miqueles@lnls.br"},
@@ -44,7 +51,7 @@ authors = [
     {name = "Larissa M. Moreno", email = "larissa.moreno@lnls.br"},
     {name = "Alan Peixinho", email = "alan.peixinho@lnls.br"},
     {name = "João Oliveira", email = "joao.oliveira@lnls.br"},
-    {name = "Yuri Rossi Tonin", email = "yuri.tonin@lnls.br"},
+    {name = "Yuri Rossi Tonin"},
     {name = "Otávio Paiano"},
     {name = "Gilberto Martinez Jr"},
     {name = "Giovanni Baraldi"}
@@ -56,6 +63,13 @@ maintainers = [
 ]
 description = "Reconstruction algorithms for tomography"
 keywords = ["raft", "tomography", "radon", "imaging", "filtered backprojection", "fdk", "expectation-maximization","rings","tomogram alignment"]
+
+[project.urls]
+Homepage = "https://gcc.lnls.br"
+Documentation = "https://readthedocs.org"
+Repository = "https://github.com/me/spam.git"
+Issues = "https://github.com/me/spam/issues"
+Changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 
 [tool.setuptools]
 platforms = ["Linux"]

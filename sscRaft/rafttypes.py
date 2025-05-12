@@ -69,7 +69,7 @@ DEBUG = 10
 
 nthreads = multiprocessing.cpu_count()
 
-# Load required libraies:
+############# Load required libraries ##############
 
 libcudart = ctypes.CDLL('libcudart.so', mode=ctypes.RTLD_GLOBAL)
 libstdcpp = ctypes.CDLL( ctypes.util.find_library( "stdc++" ), mode=ctypes.RTLD_GLOBAL )
@@ -77,6 +77,7 @@ libstdcpp = ctypes.CDLL( ctypes.util.find_library( "stdc++" ), mode=ctypes.RTLD_
 # libfftw3  = ctypes.CDLL( ctypes.util.find_library( "fftw3" ), mode=ctypes.RTLD_GLOBAL )
 # libfftw3_threads  = ctypes.CDLL( ctypes.util.find_library( "fftw3_threads" ), mode=ctypes.RTLD_GLOBAL )
 
+############# Load library C/C++/CUDA ##############
 
 _lib = "lib/libraft"
 
@@ -483,17 +484,17 @@ def unpin_array(data):
     libcudart.cudaHostUnregister(ctypes.c_void_p(data.ctypes.data))
 
 def CNICE(darray,dtype=numpy.float32):
-        if darray.dtype != dtype:
-                return numpy.ascontiguousarray(darray.astype(dtype))
-        elif darray.flags['C_CONTIGUOUS'] == False:
-                return numpy.ascontiguousarray(darray)
-        else:
-                return darray
+    if darray.dtype != dtype:
+        return numpy.ascontiguousarray(darray.astype(dtype))
+    elif darray.flags['C_CONTIGUOUS'] == False:
+        return numpy.ascontiguousarray(darray)
+    else:
+        return darray
 
 VERBOSE = False
 def dprint(*x):
-        if VERBOSE:
-                print(*x)
+    if VERBOSE:
+        print(*x)
 
 def nice(f): # scientific notation + 2 decimals
     return "{:.2e}".format(f)

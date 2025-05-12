@@ -14,8 +14,8 @@
 extern "C"{
 __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process){
 
-    long long int n = blockDim.x * blockIdx.x + threadIdx.x ;
-    long long int idx;
+    size_t n = (size_t)(blockDim.x * blockIdx.x + threadIdx.x);
+    size_t idx;
     int i, j, k, m;
 
     float Rxpad = lab.dx * (float)lab.nph / 2.0f;
@@ -58,9 +58,9 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         if( zk >= block) continue;   
         if( zk + process.zi >= lab.nv) continue; 
 
-        idx = (long long int) zk*lab.nbeta*lab.nph + m*lab.nph + xi; 
+        idx = (size_t)(zk*lab.nbeta*lab.nph + m*lab.nph + xi); 
         
-        Q = proj[idx];   
+        Q        = proj[idx];   
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
         // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
