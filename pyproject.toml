@@ -13,6 +13,9 @@ dynamic = ["version"]
 name = "sscRaft"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE.txt"]
+readme = "README.md"
+
+requires-python = ">=3.7"
 
 dependencies = [
     "numpy<2",
@@ -21,15 +24,15 @@ dependencies = [
     "matplotlib",
     "SharedArray",
     "h5py",
-    "click>=8.0.4",
-    "colorama>=0.4.5",
-    "rich>=12.6.0",
-    "mdurl>=0.1.0",
-    "Pygments>=2.14.0",
-    "shellingham>=1.5.0",
-    "typer>=0.9.0",
-    "typing_extensions>=4.1.1",
-    "tqdm"
+    "click >= 8.0.4",
+    "colorama >= 0.4.5",
+    "rich >= 12.6.0",
+    "mdurl >= 0.1.0",
+    "Pygments >= 2.14.0",
+    "shellingham >= 1.5.0",
+    "typer >= 0.9.0",
+    "typing_extensions >= 4.1.1",
+    "tqdm",
 ]
 
 classifiers=[
@@ -38,11 +41,7 @@ classifiers=[
     'Intended Audience :: Education', 
     'Intended Audience :: Developers',
     'Natural Language :: English', 
-    'Operating System :: OS Independent', 
     'Programming Language :: Python',
-    'Programming Language :: Python :: 3.7', 
-    'Programming Language :: Python :: 3.8',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: C', 
     'Programming Language :: C++'
 ]
@@ -67,10 +66,10 @@ keywords = ["raft", "tomography", "radon", "imaging", "filtered backprojection",
 
 [project.urls]
 Homepage = "https://github.com/cnpem/ssc-raft/"
-Documentation = "docs/build/index.html"
+Documentation = "https://github.com/cnpem/ssc-raft/master/docs/build/index.html"
 Repository = "https://github.com/cnpem/ssc-raft.git"
 Issues = "https://github.com/cnpem/ssc-raft/issues"
-Changelog = "CHANGES.rst"
+Changelog = "https://github.com/cnpem/ssc-raft/master/CHANGES.rst"
 
 [tool.setuptools]
 platforms = ["Linux"]
