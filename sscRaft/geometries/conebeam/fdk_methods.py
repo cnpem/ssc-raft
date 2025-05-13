@@ -30,17 +30,17 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
 
     """
-    blocksize      = dic.get(dic['blocksize'], 0)
-    regularization = dic.get(dic['beta/delta'], 0.0)
+    blocksize      = dic.get('blocksize', 0)
+    regularization = dic.get('beta/delta', 0.0)
 
     if regularization != 0.0:
         regularization = 1.0 / regularization
 
-    Dd     = dic.get(dic['z1[m]'], 1.0), 
-    Dsd    = dic.get(dic['z1+z2[m]'], 1.0)
-    dh     = dic.get(dic['detectorPixel[m]'], 1.0) 
+    Dd     = dic.get('z1[m]', 1.0)
+    Dsd    = dic.get('z1+z2[m]', 1.0)
+    dh     = dic.get('detectorPixel[m]', 1.0) 
     dv     = dh
-    energy = dic.get(dic['energy[eV]'], 1.0)
+    energy = dic.get('energy[eV]', 1.0)
 
     nrays   = tomogram.shape[-1]
     nangles = tomogram.shape[-2]
@@ -55,7 +55,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
         logger.error(message_error)
         raise ValueError(message_error)
     
-    padh = dic.get(dic['padding'], 0)
+    padh = dic.get('padding', 0)
 
     if angles is None:
         try:
@@ -95,7 +95,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
 
     fourier    = True
-    filtername = dic.get(dic['filter'], 'ramp')
+    filtername = dic.get('filter', 'ramp')
     filter     = FilterNumber(dic['filter'])
 
     logger.info(f'FDK filter: {filtername}({filter})')
@@ -126,7 +126,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     time = numpy.ascontiguousarray(time.astype(numpy.float64))
     time_p = time.ctypes.data_as(ctypes.c_void_p)
 
-    gpus = numpy.array(dic.get(dic['gpu'], [0]))
+    gpus = numpy.array(dic.get('gpu', [0]))
     ndev = len(gpus)
     gpus = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_p = gpus.ctypes.data_as(ctypes.c_void_p)
