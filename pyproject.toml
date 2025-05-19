@@ -18,7 +18,7 @@ readme = "README.md"
 requires-python = ">=3.7"
 
 dependencies = [
-    "numpy<2",
+    "numpy",
     "scikit-image >=0.19.3",
     "scipy",
     "matplotlib",

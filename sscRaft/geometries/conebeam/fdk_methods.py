@@ -88,7 +88,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
         raise ValueError(message_error)
 
     beta_max = angles[nbeta - 1]
-    dbeta    = angles[1] - angles[0]
+    dbeta    = numpy.abs(angles[1] - angles[0])
 
     magn       = Dd/Dsd
     dx, dy, dz = dh*magn, dh*magn, dv*magn

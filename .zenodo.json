@@ -1,7 +1,7 @@
 {
     "upload_type": "software",
     "title": "ssc-raft",
-    "version": "3.2.4",
+    "version": "3.2.5",
     "access_right": "open",
     "communities": [
     ],
@@ -35,6 +35,12 @@
             "affiliation": "Brazilian Synchrotron Light Laboratory",
             "orcid": "0009-0002-6983-2342",
             "type": "projectmember"
+        },
+        {
+            "name": "R. Tonin, Yuri",
+            "affiliation": "Georg-August-Universität Göttingen",
+            "orcid": "0000-0003-1403-815X",
+            "type": "other"
         },
         {
             "name": "M. Paiano, Otavio",
@@ -106,6 +112,14 @@
         {
             "relation": "isPartOf",
             "identifier": "https://doi.org/10.1109/TIP.2017.2766785"
+        },
+        {
+            "relation": "isPartOf",
+            "identifier": "https://doi.org/10.1016/j.rinam.2019.100088"
+        },
+        {
+            "relation": "isPartOf",
+            "identifier": "https://doi.org/10.1007/978-3-031-80084-9_18"
         }
     ]
 }

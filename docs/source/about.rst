@@ -58,7 +58,7 @@ Authors and Contributors
       - LNLS/CNPEM
     * - Yuri Rossi Tonin
       - Contributor
-      - LNLS/CNPEM
+      - Georg-August-Universität Göttingen
     * - Otávio M. Paiano
       - Past contributor
       - 

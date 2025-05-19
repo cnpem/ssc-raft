@@ -22,7 +22,7 @@ extern "C"{
             that is acquired in 360 degrees rotation.
         */
         if ( angles[nangles - 1] > float(M_PI) ){
-            scale = float(M_PI) / angles[nangles - 1];
+            scale = float(M_PI) / abs(angles[nangles - 1]);
         }else{  
             scale = 1.0f;
         }
@@ -59,9 +59,9 @@ extern "C"{
 
                 /* Compute angle step size (dangle)*/
                 if ( angle_index == (nangles - 1) )
-                    dangle = angles[angle_index] - angles[angle_index - 1];
+                    dangle = abs(angles[angle_index] - angles[angle_index - 1]);
                 else
-                    dangle = angles[angle_index + 1] - angles[angle_index];
+                    dangle = abs(angles[angle_index + 1] - angles[angle_index]);
                 
                 /* Compute t variable */
                 t = x * cosine[angle_index] - y * sine[angle_index]; 

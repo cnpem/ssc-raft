@@ -300,6 +300,7 @@ def iterative_reprojection(original_sinogram, angles,
                            max_downsampling=1,
                            fft_upsampling=100,
                            turn_off_vertical=False,
+                           remove_null_borders = True,
                            plot=False,plot_type='phase', 
                            find_shift_method='correlation',
                            apply_shift_method='scipy',
@@ -423,7 +424,7 @@ def iterative_reprojection(original_sinogram, angles,
                                     cumulative_shifts,
                                     method=apply_shift_method,
                                     turn_off_vertical=turn_off_vertical, 
-                                    remove_null_borders=True)
+                                    remove_null_borders=remove_null_borders)
             sinogram = check_sinogram_shape(sinogram)
 
             logger.info('Reconstructing and reprojecting...')
