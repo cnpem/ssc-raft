@@ -148,8 +148,12 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
 
     libraft.gpu_fdk(lab, obj_ptr, proj_p, angles_p, gpus_p, 
                     ctypes.c_int(ndev), time_p)
+    
+    angles_range = numpy.abs(angles[-1] - angles[0])
+    last_angle   = max( numpy.abs( angles[-1] ), numpy.abs( angles[0] ) )
+    scale        = 2.0
 
-    if angles[-1] <= numpy.pi:
-         obj *= 2.0
+    if angles_range <= numpy.pi:
+         obj *= scale
          
     return obj

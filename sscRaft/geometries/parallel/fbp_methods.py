@@ -99,6 +99,18 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     libraft.getFBPMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
         obj_ptr, tomogram_ptr, angles_ptr, 
         param_float_ptr, param_int_ptr)
+    
+    ''' Correction scale (angular correction) for 
+        cases where there are more than 180 degrees.
+        Specially for testes with Mogno conebeam data 
+        that is acquired in 360 degrees rotation.
+    '''
+    angles_range = numpy.abs(angles[-1] - angles[0])
+    last_angle   = max( numpy.abs( angles[-1] ), numpy.abs( angles[0] ) )
+    scale        = numpy.pi / last_angle
+    
+    if angles_range > numpy.pi:
+        obj *= scale
 
     return obj
 

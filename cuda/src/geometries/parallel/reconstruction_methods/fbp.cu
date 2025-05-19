@@ -16,17 +16,6 @@ extern "C"{
         int nrays   = tomo_size.x;
         int nangles = tomo_size.y;
 
-        /* Correction scale (angular correction) for 
-            cases where there are more than 180 degrees.
-            Specially for testes with Mogno conebeam data 
-            that is acquired in 360 degrees rotation.
-        */
-        if ( angles[nangles - 1] > float(M_PI) ){
-            scale = float(M_PI) / abs(angles[nangles - 1]);
-        }else{  
-            scale = 1.0f;
-        }
-
         // float xmin = -1.0;
         // float ymin = -1.0;
         // float dx   = 2.0 / (obj_size.x - 1);
@@ -71,7 +60,7 @@ extern "C"{
                 if ( ( t_index > -1 ) && ( t_index < nrays) )
                     sum += tomogram[ k * nrays * nangles  + angle_index * nrays + t_index] * dangle;
             }
-            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = sum * scale;
+            object[k * obj_size.y * obj_size.x + j * obj_size.x + i]  = sum;
         }
     }
 
