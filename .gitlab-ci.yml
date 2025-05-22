@@ -96,6 +96,8 @@ build_docs:
   artifacts:
     paths:
       - ./docs/build/
+  only:
+    - tags
 
 deploy_docs:
   stage: deploy
