@@ -56,9 +56,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.mathjax',
     'sphinx_rtd_theme',
-    'myst_parser'
-    # 'breathe',
-    # 'exhale'
+    'myst_parser',
+    'sphinx_multiversion'
 ]
 # breathe_projects = { "proj": "xml/" }
 # breathe_default_project = "proj"
@@ -111,6 +110,10 @@ html_theme = 'sphinx_rtd_theme'
 html_style = 'css/my_theme.css'
 # html_theme = 'alabaster'
 
+# no branches only tags for multiversion
+smv_branch_whitelist = None
+
+templates_path = ['_templates']
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
