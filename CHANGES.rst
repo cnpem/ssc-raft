@@ -1,3 +1,24 @@
+Version 3.2.6 - 2025-xx-xx
+--------------------------
+*Added:*
+  - Centersino function to compute subpixel rotation axis deviation. 
+
+*Corrections:*
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+  - No cuda streams on ``FBP by BST``: bug.
+  - A few bugs on TOMCAT's CLI rings and paganin methods call.
+  - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
+
+*To be done:*
+  - Refactoring ``FDK``.
+  - Refactoring ``EM`` conebeam ray tracing.
+  - Refactoring ``FST`` frequency domain forward method for parallel beam.
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
+
 Version 3.2.5 - 2025-05-19
 --------------------------
 *Corrections:*

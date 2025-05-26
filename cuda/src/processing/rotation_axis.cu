@@ -319,12 +319,12 @@ extern "C"{
         
         float maxx = 0;
         int posx = 0;
-        const size_t irange = (sizex>>2)<<2;
+        // const size_t irange = (sizex>>2)<<2;
 
         float bestpos = 0.0f;
 
         const float di = 0.01f;
-        //const size_t irange = size_t(sizex * (1.0f/di));
+        const size_t irange = size_t(sizex * (1.0f/di));
         for(size_t j=0; j<sizey; j++) {
 
             for(float i=0; i < irange; i++) {
@@ -349,7 +349,8 @@ extern "C"{
                 }
             }
         }
-        // printf("bestpos = %f \n", bestpos);
+        printf("bestpos = %f \n", bestpos);
+        printf("posx = %f \n", posx);
         fflush(stdout);
         if(bestpos > (float)sizex/2.0f) // look into it!
             bestpos -= (float)sizex;
