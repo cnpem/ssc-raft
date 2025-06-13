@@ -43,33 +43,22 @@
 #include <iostream>
 #include <future>
 
+enum ReconstructionMethod
+{
+    none    = 0,
+    fbpRT   = 1,
+    fbpBST  = 2,
+    eEMRT   = 3,
+    tEMRT   = 4,
+    tEMFQ   = 5,
+    fdk     = 5
+};
+
 typedef struct dimension
 {
     dim3 size; /* Dimension values */
-    float  posx,  posy,  posz; /* points values */
-    float    dx,    dy,    dz; /* spacing values */
-    float    Lx,    Ly,    Lz; /* Dimension length valuess */
-
-    size_t xyz = size.x * size.y * size.x; /* Total number of points */
-    size_t xy  = size.x * size.y; /* Total number of points on xy-plane */
-
-    int xslice0, xslice1; /* Slices X: start (0)  and end slice (1)*/
-    int yslice0, yslice1; /* Slices Y: start (0)  and end slice (1)*/
-    int zslice0, zslice1; /* Slices Z: start (0)  and end slice (1)*/
-
-    dim3  padsize; /* Padded dimensions: (size * (1 + pad)) */
     dim3  pad;     /* Pad value */
-
-    dim3 batchsize;
-    dim3 padbatchsize;
-
-    float width_memory_bytes;
-    float lenght_memory_bytes;
-    float slice_memory_bytes;
-    float slice_padd_memory_bytes;
-    float frame_memory_bytes;
-    float frame_padd_memory_bytes;
-
+    int blocksize;
 } DIM; /* Data dimensions */
 
 inline float calcSliceMemoryBytes(DIM dimension) {
@@ -77,7 +66,7 @@ inline float calcSliceMemoryBytes(DIM dimension) {
 }
 
 inline float calcPaddedSliceMemoryBytes(DIM dimension) {
-    return ((dimension.size.x + 2 * dimension.pad.x) + (dimension.size.y + 2 * dimension.pad.y)) * sizeof(float);
+    return ((dimension.size.x * ( 1 + dimension.pad.x )) + (dimension.size.y * ( 1 + dimension.pad.y) ))* sizeof(float);
 }
 
 inline float calcWidthMemoryBytes(DIM dimension) {
@@ -93,83 +82,75 @@ typedef struct geometry
     /* General reconstruction variables*/
     float detector_pixel_x, detector_pixel_y;
     float obj_pixel_x, obj_pixel_y;
-    float energy, wavelength, wavenumber;
+    float energy, wavelength;
     float z1x, z1y, z2x, z2y;
     float magnitude_x, magnitude_y;
 
-} GEO;
+}GEO;
 
 typedef struct flags
 {
     /* Bool variables - Pipeline */
     int do_flat_dark_correction, do_flat_dark_log;
-    int do_phase_filter;
+    int do_paganin_filter;
     int do_rings;
-    int do_rotation, do_rotation_auto_offset, do_rotation_correction;
+    int do_rotation, do_rotation_axis_offset, do_rotation_correction;
     int do_alignment;
     int do_reconstruction;
+    int do_eccentric;
 
-} FLAG;
+}FLAG;
+
+typedef struct ContrastEnhancementFilter
+{
+    /* Paganin Filter */
+    int method; /* Contrast Enhancement methods. Options: paganin, paganin_slices*/
+    float beta_delta; /* beta/delta parameter */
+    float paganin_lambda; /* Paganin regularization parameter */
+
+}CEF;
+
+typedef struct RingsFilter
+{
+    /* Paganin Filter */
+    int method; /* Rings methods. Options: titarenko*/
+    int rings_block;    /* Titarenko's parameter */
+    float rings_lambda; /* Titarenko's regularization parameter */
+
+}RF;
+
+typedef struct Reconstruction
+{
+    /* Paganin Filter */
+    int method;                  /* Reconstruction methods. Options: FBP*/
+    int filter;                  /* Filter. Options: ramp, hamming, hann, ... */
+    float filter_reg;            /* General regularization parameter for filter */
+    float paganin_slices = 0.0f; /* Paganin regularization parameter for slices method */
+    int iterations;              /* Iterations for iterative methods */
+    float rotation_axis_offset;  /* Rotation axis offset */
+    float total_variation;       /* Total variation regularization parameter */
+    int interpolation;           /* Interpolation Type. Options: 'bilinear' and 'nearest' */
+}REC;
 
 typedef struct config
 {
-    /* Pipeline variables */
-    float total_required_mem_per_slice_bytes;
-    float total_required_mem_per_frame_bytes;
-    int blocksize;
-
+    int nflats;
+    
     GEO geometry;
-
-    FLAG flags;
 
     /* Reconstruction variables */
     DIM obj;
 
     /* Tomogram variables */
-    DIM tomo;
+    DIM tomo; 
 
-    /* Flat/Dark Correction */
-    int numflats, numdarks;
+    FLAG flags;
 
-    /* Phase Retrieval */
-    int  phase_type;  /* Phase type */
-    float phase_reg; /* Phase regularization parameter */
-    float beta_delta; /* beta/delta parameter */
+    CEF ContrastParam;
 
-    /* Rings */
-    int rings_block;
-    float rings_lambda, rings_lambda_computed;
+    RF RingsParam;
 
-    /* Rotation Axis Correction */
-    int rotation_axis_method;
-    float rotation_axis_offset, rotation_axis_offset_computed;
-
-
-    /* Reconstruction method variables */
-    int reconstruction_method;
-    int reconstruction_filter_type;   /* Reconstruction Filter type */
-    float reconstruction_paganin;     /* Reconstruction Paganin regularization parameter */
-    float reconstruction_reg;         /* General regularization parameter */
-    float reconstruction_tv;          /* Total variation regularization parameter */
-
-    int datatype;
-    float threshold;
-    int interpolation; /* interpolation type */
-
-    /* Paralell */
-
-    /* FBP */
-
-    /* BST */
-
-    /* EM Parallel */
-    int em_iterations;
-
-    /* Conical */
-
-    /* FDK */
-
-    /* EM Conical */
+    REC ReconParam;
 
 } CFG;
 
@@ -226,7 +207,7 @@ extern "C" {
 
 typedef struct workspace
 {	/* GPU */
-	float *tomo, *obj;
+	float *tomo, *obj, *tomoPadd, *objPadd;
 	float *flat, *dark, *angles; 
 }WKP;
 
@@ -267,15 +248,6 @@ inline size_t getTotalDeviceMemory(int device = 0) {
     return total_mem;
 }
 
-/* Commom parameters */
-extern "C"{
-
-    void setReconstructionParameters(CFG *configs, float *parameters_float, int *parameters_int, int *flags);
-    void printGPUParameters(GPU *gpus_parameters);
-	void setGPUParameters(GPU *gpus_parameters, dim3 size, int ngpus, int *gpus);
-
-}
-
 /* Processes - parallelization */
 
 extern "C" {
@@ -296,7 +268,7 @@ extern "C" {
 /* Workspace - GPU pointers */
 extern "C"{
 
-	WKP *allocateWorkspace(CFG configs, size_t tomo_batch_size, size_t obj_batch_size);
+	WKP *Initialize_workspace(CFG configs, size_t tomo_batch_size, size_t obj_batch_size);
 
 	void freeWorkspace(WKP *workspace, CFG configs);
 

@@ -13,10 +13,10 @@ extern "C"{
 	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, 
     int nrays, int nangles, int nslices, int numflats, int is_log, int blocksize);
 
-	void getBackgroundCorrectionGPU(GPU gpus, int gpu, float* frames, float* flat, float* dark, 
+	void getBackgroundCorrectionGPU(int gpu, float* frames, float* flat, float* dark, 
     dim3 size, int numflats, int is_log, int blocksize);
 
-	void getBackgroundCorrection(GPU gpus, float* frames, float* flat, float* dark, 
+	void getBackgroundCorrection(float* frames, float* flat, float* dark, 
     dim3 size, int numflats, cudaStream_t stream = 0);
 }
 
@@ -27,10 +27,10 @@ extern "C"{
     int nrays, int nangles, int nslices, 
     float lambda_rings, int ring_blocks, int blocksize);
 
-    void getTitarenkoRingsGPU(GPU gpus, int gpu, float *data, dim3 size, 
+    void getTitarenkoRingsGPU(int gpu, float *data, dim3 size, 
     float lambda_rings, int ring_blocks, int blocksize);
 
-    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size, 
+    void getTitarenkoRings(float *tomogram, dim3 size, 
     float lambda_rings, int ring_blocks, cudaStream_t stream = 0);
 }
 
@@ -44,7 +44,7 @@ extern "C" {
     float* tomogram, float axis_offset, 
     int nrays, int nangles, int nslices, int blocksize);
 
-    void getRotAxisCorrectionGPU(GPU gpus, float *tomogram, 
+    void getRotAxisCorrectionGPU(float *tomogram, 
     float axis_offset, dim3 tomo_size, int ngpu, int blocksize);
 }
 
@@ -61,17 +61,24 @@ extern "C"{
     float* dark, float* flat, size_t sizex, size_t sizey);
 }
 
-/* Phase retrieval Functions */
+/* Contrast Enhancement Functions */
 extern "C"{
 
-    void getPhaseMultiGPU(int *gpus, int ngpus, 
-    float *projections, float *paramf, int *parami);
+    void getContrastEnhencementMultiGPU(DIM tomo, GEO geometry, CEF PaganinFilter,
+    int *gpus, int ngpus, float *projections);
 
-    void getPhase(CFG configs, GPU gpus, float *kernel, float *projections, 
-    dim3 size, dim3 size_pad);
+    void getContrastEnhencementGPU(DIM tomo, GEO geometry, CEF PaganinFilter,
+    float *projections, int sizez, int ngpu);
 }
 
 namespace contrast_enhance{ // Phase retrieval Paganin
+
+    enum ContrastEnhanceType
+    {
+        none           = 0,
+        paganin        = 1,
+        paganin_slices = 2
+    };
 
     __global__ void padding(float *in, cufftComplex *inpadded, dim3 size, dim3 pad);
     __global__ void recuperate_padding(cufftComplex *inpadded, float *in, dim3 size, dim3 pad);
@@ -79,7 +86,7 @@ namespace contrast_enhance{ // Phase retrieval Paganin
     __global__ void paganinKernel(float *kernel, float beta_delta, float wavelength, 
     float pixel_objx, float pixel_objy, float z2, dim3 size);
 
-    void apply_contrast_filter(CFG configs, GPU gpus, float *projections, float *kernel,
+    void apply_contrast_filter(cufftHandle mplan, float *projections, float *kernel,
     dim3 size, dim3 size_pad, dim3 pad);
 
     __global__ void multiplication(cufftComplex *a, float *b, cufftComplex *ans, dim3 size);

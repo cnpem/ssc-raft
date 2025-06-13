@@ -3,143 +3,78 @@
 
 extern "C"{
 
-	void printGPUParameters(GPU *gpus_parameters)
-	{
-		printf("BT: %d, %d, %d \n", gpus_parameters->BT.x, gpus_parameters->BT.y, gpus_parameters->BT.z);
-		printf("GD: %d, %d, %d \n", gpus_parameters->Grd.x, gpus_parameters->Grd.y, gpus_parameters->Grd.z);
-	}
+    void setTomoParameters(CFG *configs, int nrays, int nangles, int nslices, 
+    int padx, int pady, int padz, int blocksize)
+    {
+        /* Set Tomogram variables */
+        configs->tomo.size = dim3(nrays,nangles,nslices);  
 
-	void setGPUParameters(GPU *gpus_parameters, dim3 size, int ngpus, int *gpus)
-	{
-		/* Initialize Device sizes variables */
-		int Nsx                = TPBX;
-		int Nsy                = TPBY;
-		int Nsz                = TPBZ;
+        /* Set padding */
+        
+        /* Pad is the integer number such that the total padding is = ( pad + 1 ) * dimension 
+        Example: 
+            - Data have dimension on x-axis of nx = 2048;
+            - The padx = 1;
+            - The new dimension is nx_pad = nx * (1 + padx) = 4096
+        */
+        configs->tomo.pad = dim3(padx, pady, padz); 
 
-		gpus_parameters->BT    = dim3(Nsx,Nsy,Nsz);
-		const int bx           = ( size.x + Nsx - 1 ) / Nsx;
-		const int by           = ( size.y + Nsy - 1 ) / Nsy;
-		const int bz           = ( size.z + Nsz - 1 ) / Nsz;
-		gpus_parameters->Grd   = dim3(bx,by,bz);
+        /* Padsize is the final dimension with padding. 
+        Example:
+            - Data have dimension on x-axis of nx = 2048 and padx = 1
+            - padsizex = nx_pad = nx * (1 + padx) = 4096
+            - See Pad example above. 
+        */
+        configs->tomo.padsize = dim3(configs->tomo.size.x * ( 1 + configs->tomo.pad.x ),configs->tomo.size.y * ( 1 + configs->tomo.pad.y ),configs->tomo.size.z);
 
-        gpus_parameters->gpus = gpus;
-        gpus_parameters->ngpus = ngpus;
+        /* GPU blocksize */
+        configs->blocksize = blocksize;
     }
 
-    void setReconstructionParameters(CFG *configs, float *parameters_float, int *parameters_int, int *flags)
-	{
-		/* Set Geometry */
-		// TODO: remove this parameter from ctypes wrapper?
-        //configs->geometry.geometry        = parameters_int[0];
+    void setObjParameters(CFG *configs, int nx, int ny, int nz, 
+    int padx, int pady, int padz)
+    {
+        /* Set Detector variables */
+        configs->obj.size = dim3(nx,ny,nz);  
 
-		/* Set Reconstruction variables */
-		configs->obj.size                 = dim3(parameters_int[0],parameters_int[1],parameters_int[2]);
+        /* Set padding */
+        
+        /* Pad is the integer number such that the total padding is = ( pad + 1 ) * dimension 
+        Example: 
+            - Data have dimension on x-axis of nx = 2048;
+            - The padx = 1;
+            - The new dimension is nx_pad = nx * (1 + padx) = 4096
+        */
+        configs->obj.pad = dim3(padx, pady, padz); 
 
-		//configs->obj.Lx                   = parameters_float[0];
-		//configs->obj.Ly                   = parameters_float[1];
-		//configs->obj.Lz                   = parameters_float[2];
-		//configs->obj.dx                   = parameters_float[3];
-		//configs->obj.dy                   = parameters_float[4];
-		//configs->obj.dz                   = parameters_float[5];
+        /* Padsize is the final dimension with padding. 
+        Example:
+            - Data have dimension on x-axis of nx = 2048 and padx = 1
+            - padsizex = nx_pad = nx * (1 + padx) = 4096
+            - See Pad example above. 
+        */
+        configs->obj.padsize = dim3(configs->obj.size.x * ( 1 + configs->obj.pad.x ),configs->obj.size.y * ( 1 + configs->obj.pad.y ),configs->obj.size.z);
 
-		/* Set Tomogram (or detector) variables (h for horizontal (nrays) and v for vertical (nslices)) */
-		configs->tomo.size                 = dim3(parameters_int[3],parameters_int[4],parameters_int[5]);
+    }
 
-		//configs->tomo.Lx                   = parameters_float[9];
-		//configs->tomo.Ly                   = parameters_float[10];
-		//configs->tomo.Lz                   = parameters_float[11];
-		//configs->tomo.dx                   = parameters_float[12];
-		//configs->tomo.dy                   = parameters_float[13];
-		//configs->tomo.dz                   = parameters_float[14];
+    void setGeometryParameters(CFG *configs, float detector_pixel_x_meters, float detector_pixel_y_meters, 
+        float energy_eV, float z2_x_meters, float z2_y_meters, float magnitude_x, float magnitude_y)
+    {
+        /* Set Geometry */
+        configs->geometry.detector_pixel_x = detector_pixel_x_meters;
+        configs->geometry.detector_pixel_y = detector_pixel_y_meters;
+        configs->geometry.energy           = energy_eV;
+        configs->geometry.z2x              = z2_x_meters;
+        configs->geometry.z2y              = z2_y_meters;
+        configs->geometry.magnitude_x      = magnitude_x;
+        configs->geometry.magnitude_y      = magnitude_y;
+        configs->geometry.wavelength       = ( ( plank * vc ) / configs->geometry.energy );
 
-		/* Set Padding */
-		configs->tomo.pad                  = dim3(parameters_int[6],parameters_int[7],parameters_int[8]);
+        configs->geometry.obj_pixel_x      = configs->geometry.detector_pixel_x / configs->geometry.magnitude_x;
+        configs->geometry.obj_pixel_y      = configs->geometry.detector_pixel_y / configs->geometry.magnitude_y;
 
-		//int npadx                          = configs->tomo.size.x * ( 1 + 2 * configs->tomo.pad.x );
-		//int npady                          = configs->tomo.size.y * ( 1 + 2 * configs->tomo.pad.y );
-		//int npadz                          = configs->tomo.size.z * ( 1 + 2 * configs->tomo.pad.z );
-
-		//configs->tomo.padsize              = dim3(npadx,npady,npadz);
-
-		/* Set General reconstruction variables*/
-		configs->geometry.detector_pixel_x = parameters_float[0];
-		configs->geometry.detector_pixel_y = parameters_float[1];
-		configs->geometry.energy           = parameters_float[2];
-		configs->geometry.z1x              = parameters_float[3];
-		configs->geometry.z1y              = parameters_float[4];
-		configs->geometry.z2x              = parameters_float[5];
-		configs->geometry.z2y              = parameters_float[6];
-
-        configs->geometry.magnitude_x = parameters_float[7];
-        configs->geometry.magnitude_y = parameters_float[8];
-
-		/* Set wavelenght and wavenumber */
-		configs->geometry.wavelength       = ( plank * vc          ) / configs->geometry.energy;
-		configs->geometry.wavenumber       = ( 2.0   * float(M_PI) ) / configs->geometry.wavelength;
-
-
-		/* Set General variables */
-
-		/* Set Bool variables - Pipeline */
-		configs->flags.do_flat_dark_correction  = flags[0];
-		configs->flags.do_flat_dark_log         = flags[1];
-		configs->flags.do_phase_filter          = flags[2];
-		configs->flags.do_rings                 = flags[3];
-		configs->flags.do_rotation              = flags[4];
-		configs->flags.do_rotation_correction   = flags[5];
-		configs->flags.do_reconstruction        = flags[6];
-        configs->flags.do_rotation_auto_offset = false;
-
-		/* Set Flat/Dark Correction */
-		configs->numflats                       = parameters_int[9];
-
-		/* Set Phase Retrieval */
-		configs->phase_type                     = parameters_int[10]; /* Phase method type */
-		configs->beta_delta                     = parameters_float[9]; /* Phase regularization parameter */
-
-		/* Set Rings */
-		configs->rings_block                    = parameters_int[11];
-		configs->rings_lambda                   = parameters_float[10];
-
-		/* Set Rotation Axis Correction */
-		configs->rotation_axis_offset           = parameters_int[12];
-
-		/* Set Reconstruction method variables */
-		configs->reconstruction_method          = parameters_int[13];
-		configs->reconstruction_filter_type     = parameters_int[14];   /* Reconstruction Filter type */
-
-		configs->reconstruction_paganin         = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * (configs->beta_delta == 0.0f ? 0.0f: (1.0f / configs->beta_delta) ); /* Reconstruction Filter regularization parameter */
-		configs->reconstruction_reg             = parameters_float[11]; /* General regularization parameter */
-
-		/* Set Slices on Reconstruction and on Tomogram */
-		/* For Parallel and Fanbeam geometry,
-		Slices on reconstruction are the SAME as the slices on tomogram.
-		For Conebeam geometry,
-		Slices on reconstrucion are DIFFERENT as the slices on tomogram.
-		*/
-		configs->obj.zslice0               = parameters_int[15]; /* Slices: start slice on reconstruction */
-		configs->obj.zslice1               = parameters_int[16]; /* Slices: end slice on reconstruction */
-
-		configs->tomo.zslice0              = parameters_int[17]; /* Slices: start slice on tomogram */
-		configs->tomo.zslice1              = parameters_int[18]; /* Slices: end slice on tomogram */
-
-		/* Paralell */
-
-		/* Set FBP */
-
-		/* Set BST */
-
-		/* Set EM RT */
-		configs->em_iterations                  = parameters_int[19];
-
-		/* Set EM FST */
-
-		/* Conical */
-
-		/* Set FDK */
-
-		/* Set EM Conical */
-
-	}
+        configs->geometry.z2x             /= configs->geometry.magnitude_x;
+        configs->geometry.z2y             /= configs->geometry.magnitude_y; 
+    }
 
 }

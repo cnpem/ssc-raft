@@ -67,20 +67,20 @@ float pixel_objx, float pixel_objy, dim3 size)
     kernel[ind]  = 1.0f / ( 1.0f + regularization * (wx*wx + wy*wy) );
 }
 
-__global__ void paganinKernel_tomopy(CFG configs, cufftComplex *data, dim3 size)
-{
-    /* Version of Paganin by frames implemented on Tomopy
-    DOI:10.1107/S1600577514013939 */
-}
+// __global__ void paganinKernel_tomopy(CFG configs, cufftComplex *data, dim3 size)
+// {
+//     /* Version of Paganin by frames implemented on Tomopy
+//     DOI:10.1107/S1600577514013939 */
+// }
 
-__global__ void paganinKernel_v0(CFG configs, cufftComplex *data, dim3 size)
-{
-    /* Version of Paganin by frames on Miqueles and Guerrero (2020)
-    https://doi.org/10.1016/j.rinam.2019.100088 and published by 
-    Yu et al (2002) https://doi.org/10.1364/OE.26.011110 */
-}
+// __global__ void paganinKernel_v0(CFG configs, cufftComplex *data, dim3 size)
+// {
+//     /* Version of Paganin by frames on Miqueles and Guerrero (2020)
+//     https://doi.org/10.1016/j.rinam.2019.100088 and published by 
+//     Yu et al (2002) https://doi.org/10.1364/OE.26.011110 */
+// }
 
-void contrast_enhance::apply_contrast_filter(CFG configs, GPU gpus, float *projections, float *kernel,
+void contrast_enhance::apply_contrast_filter(cufftHandle mplan, float *projections, float *kernel,
 dim3 size, dim3 size_pad, dim3 pad)
 {
     size_t npad = opt::get_total_points(size_pad);
@@ -95,11 +95,11 @@ dim3 size, dim3 size_pad, dim3 pad)
     
     contrast_enhance::padding<<<gridBlock,threadsPerBlock>>>(projections, dataPadded, size, pad);
 
-    HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_FORWARD));
+    HANDLE_FFTERROR(cufftExecC2C(mplan, dataPadded, dataPadded, CUFFT_FORWARD));
 
     contrast_enhance::multiplication<<<gridBlock,threadsPerBlock>>>(dataPadded, kernel, dataPadded, size_pad);
 
-    HANDLE_FFTERROR(cufftExecC2C(gpus.mplan, dataPadded, dataPadded, CUFFT_INVERSE));
+    HANDLE_FFTERROR(cufftExecC2C(mplan, dataPadded, dataPadded, CUFFT_INVERSE));
 
     opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
 

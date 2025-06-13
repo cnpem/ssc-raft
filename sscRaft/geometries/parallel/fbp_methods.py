@@ -53,15 +53,16 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     energy         = dic.get('energy[eV]', 1.0)
     z2             = dic.get('z2[m]', 1.0)
     pixelx, pixely = dic.get('detectorPixel[m]', 1.0),dic.get('detectorPixel[m]',1.0)
+    wavelength     = CONST/energy 
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
-    else:
-        beta_delta     = 0.0
-        z2             = 1.0
-        energy         = 1.0
+        paganin_slices_regularization = wavelength * z2 * numpy.pi * beta_delta / (pixelx * pixelx); 
 
-    padx, pady, padz  = dic.get('padding', 0),0,0 # (padx, pady, padz)
+    else:
+        paganin_slices_regularization = 0.0
+
+    padx   = dic.get('padding', 0)
 
     pad    = (padx) * nrays
     logger.info(f'Set FBP RT pad value as {padx} x horizontal dimension = ({pad}).')
@@ -75,7 +76,6 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
     if obj is None:
         obj      = numpy.zeros([nslices, objsize, objsize], dtype=numpy.float32)
-        # obj      = numpy.zeros([nslices, nangles, nrays * (padx+1)], dtype=numpy.float32)
         obj      = CNICE(obj)
     obj_ptr      = obj.ctypes.data_as(ctypes.c_void_p)
 
@@ -83,22 +83,29 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     angles       = CNICE(angles) 
     angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, filter_type, 0, blocksize]
-    param_int     = numpy.array(param_int)
-    param_int     = CNICE(param_int,numpy.int32)
-    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
+    obj_size     = dim3(x = objsize, y = objsize, z = nslices)
 
-    param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely, offset]
-    param_float     = numpy.array(param_float)
-    param_float     = CNICE(param_float,numpy.float32)
-    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+    tomo_pad     = dim3(x = padx, y =    0, z = 0)
+    obj_pad      = dim3(x = padx, y = padx, z = 0)
 
-    # bShiftCenter = dic['shift center']
+    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
+    obj_dim      = DIM(size =  obj_size, pad =  obj_pad, blocksize = blocksize)
 
-    libraft.getFBPMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
-        obj_ptr, tomogram_ptr, angles_ptr, 
-        param_float_ptr, param_int_ptr)
+    geometry     = GEO(detector_pixel_x = pixelx, detector_pixel_y = pixely, 
+                       obj_pixel_x = pixelx, obj_pixel_y = pixelx, 
+                       energy = energy, wavelength = wavelength, 
+                       z1x = 0, z1y = 0, z2x = z2, z2y = z2, 
+                       magnitude_x = 1.0, magnitude_y = 1.0)
+
+    ReconParam   = REC( method = 0, filter = filter_type, filter_reg = regularization,
+                        paganin_slices = paganin_slices_regularization, 
+                        iterations = 0, rotation_axis_offset = offset,
+                        total_variation = 0, interpolation = 0)
+
+    libraft.getFBPMultiGPU(tomo_dim, obj_dim, geometry, ReconParam, 
+                           gpus_ptr,ctypes.c_int(ngpus),
+                           obj_ptr, tomogram_ptr, angles_ptr)
     
     ''' Correction scale (angular correction) for 
         cases where there are more than 180 degrees.
@@ -169,16 +176,16 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     energy         = dic.get('energy[eV]', 1.0)
     z2             = dic.get('z2[m]', 1.0)
     pixelx, pixely = dic.get('detectorPixel[m]', 1.0),dic.get('detectorPixel[m]',1.0)
+    wavelength     = CONST/energy 
+
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
+        paganin_slices_regularization = wavelength * z2 * numpy.pi * beta_delta / (pixelx * pixelx); 
     else:
-        beta_delta     = 0.0
-        z2             = 1.0
-        energy         = 1.0
+        paganin_slices_regularization = 0.0
         
-    padx, pady, padz  = dic.get('padding', 0),0,0 # (padx, pady, padz)
-
+    padx  = dic.get('padding', 0)
     pad    = (padx) * nrays
     logger.info(f'Set FBP BST pad value as {padx} x horizontal dimension = ({pad}).')
 
@@ -198,21 +205,30 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     angles          = CNICE(angles) 
     angles_ptr      = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    param_int       = [nrays, nangles, nslices, objsize, 
-                        padx, pady, padz, filter_type, 0, blocksize]
-    param_int       = numpy.array(param_int)
-    param_int       = CNICE(param_int,numpy.int32)
-    param_int_ptr   = param_int.ctypes.data_as(ctypes.c_void_p)
+    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
+    obj_size     = dim3(x = objsize, y = objsize, z = nslices)
 
-    param_float     = [beta_delta, regularization, energy, z2, pixelx, pixely, offset]
-    param_float     = numpy.array(param_float)
-    param_float     = CNICE(param_float,numpy.float32)
-    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+    tomo_pad     = dim3(x = padx, y =    0, z = 0)
+    obj_pad      = dim3(x = padx, y = padx, z = 0)
 
-    libraft.getBSTMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
-        obj_ptr, tomogram_ptr, angles_ptr, 
-        param_float_ptr, param_int_ptr,
-        ctypes.c_int(nstreams))
+    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
+    obj_dim      = DIM(size =  obj_size, pad =  obj_pad, blocksize = blocksize)
+
+    geometry     = GEO(detector_pixel_x = pixelx, detector_pixel_y = pixely, 
+                       obj_pixel_x = pixelx, obj_pixel_y = pixelx, 
+                       energy = energy, wavelength = wavelength, 
+                       z1x = 0, z1y = 0, z2x = z2, z2y = z2, 
+                       magnitude_x = 1.0, magnitude_y = 1.0)
+
+    ReconParam   = REC( method = 0, filter = filter_type, filter_reg = regularization,
+                        paganin_slices = paganin_slices_regularization, 
+                        iterations = 0, rotation_axis_offset = offset,
+                        total_variation = 0, interpolation = 0)
+
+    libraft.getBSTMultiGPU(tomo_dim, obj_dim, geometry, ReconParam,
+                           gpus_ptr, ctypes.c_int(ngpus), 
+                           obj_ptr, tomogram_ptr, angles_ptr, 
+                           ctypes.c_int(nstreams))
 
     return obj
 

@@ -10,14 +10,6 @@
 #include "common/complex.hpp"
 #include "common/logerror.hpp"
 
-enum PhaseFilterType
-{
-    paganin        = 0,
-    paganin_tomopy = 1,
-    paganin_v0     = 2,
-    paganin_v1     = 3
-};
-
 struct Filter{
 
 	Filter() = default;
@@ -76,12 +68,12 @@ extern "C"{
     size_t nrays, size_t nangles, int csino, Filter reg, float pixel, 
     cudaStream_t stream) ;
 
-	void filterFBPpad(GPU gpus, Filter filter, 
+	void filterFBPpad(Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad);
 
-    void filterFBP(GPU gpus, Filter filter, float *tomogram, dim3 size);
+    void filterFBP(Filter filter, float *tomogram, dim3 size);
 
-    void filterFBP_Complex(GPU gpus, Filter filter, 
+    void filterFBP_Complex(Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad, float pixel);
 
     void getFilterLowPassMultiGPU(int* gpus, int ngpus, 

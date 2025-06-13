@@ -2,6 +2,7 @@ Version 3.2.6 - 2025-xx-xx
 --------------------------
 *Added:*
   - Centersino function to compute subpixel rotation axis deviation. 
+  - Option to apply ``-log(*)`` and ``exp(-*)`` on the transpose ``GPU`` function.
 
 *Corrections:*
 

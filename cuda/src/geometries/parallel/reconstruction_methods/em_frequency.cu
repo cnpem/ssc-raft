@@ -88,7 +88,7 @@ int zpad, int interpolation, float dx, float tv_param, int niter)
 
 }
 
-void get_tEM_FQ_GPU(CFG configs,
+void get_tEM_FQ_GPU(CFG configs, REC ReconParam, 
 float *sino, float *recon, float *angles, float *flat,
 int blocksize, int gpu)
 {
@@ -116,7 +116,7 @@ int blocksize, int gpu)
         - 'nearest'  = 0 (see Python function)
         - 'bilinear' = 1 (see Python function)
     */
-    int interpolation = configs.interpolation;
+    int interpolation = ReconParam.interpolation;
 
     /*dx: 
         - Detector pixel size in [X] units (can be any)
@@ -129,12 +129,12 @@ int blocksize, int gpu)
         - Regularization parameter for total variation (TV) regularization
         - If 'tv_param' =< 0.0, there is no application of TV regularization
     */
-    float tv_param = configs.reconstruction_tv;
+    float tv_param = ReconParam.total_variation;
 
     /* niter:
         - Number of iterations for EM
     */
-    int niter = configs.em_iterations;
+    int niter = ReconParam.iterations;
 
 
     /* Declaration of FST variables */
@@ -298,7 +298,7 @@ int blocksize, int gpu)
 
 extern "C"{
 
-    void _get_tEM_FQ_GPU(CFG configs,
+    void _get_tEM_FQ_GPU(CFG configs, REC ReconParam,
     float *count, float *obj, float *angles, float *flat, 
     int blockgpu, int gpu)
     {
@@ -307,7 +307,7 @@ extern "C"{
         int nangles   = configs.tomo.size.y;
         int pad       = configs.tomo.pad.x;
 
-        int blocksize = configs.blocksize;
+        int blocksize = configs.tomo.blocksize;
 
         if ( blocksize == 0 ){
             int blocksize_aux = calc_blocksize(blockgpu, nangles, nrays, pad, true); 
@@ -323,11 +323,11 @@ extern "C"{
             subblock = min(blockgpu - ptr, blocksize);
             // printf("Subblock of get_tEM_FQ_GPU on block %d: %d \n",i,subblock);
 
-            get_tEM_FQ_GPU( configs,
+            get_tEM_FQ_GPU( configs, ReconParam,
                             count + (size_t)ptr*nrays*nangles, 
                             obj   + (size_t)ptr*nrays*nrays,
                             angles, 
-                            flat + (size_t)ptr*nrays,
+                            flat  + (size_t)ptr*nrays,
                             subblock, gpu);
 
             /* Update pointer */
@@ -336,9 +336,8 @@ extern "C"{
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-    void get_tEM_FQ_MultiGPU(int* gpus, int ngpus, 
-    float *count, float *obj, float *angles, float *flat,
-    float *paramf, int *parami)
+    void get_tEM_FQ_MultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+    int* gpus, int ngpus, float *count, float *object, float *angles, float *flat)
     {
         int i, Maxgpudev;
 		
@@ -351,10 +350,9 @@ extern "C"{
 
         /* General struct found on inc/common/configs.hpp */
         CFG configs;
-
-        /* Found on src/geometries/parallel/reconstruction_methods/parameters.cu */
-        setEMFQParameters(&configs, paramf, parami);
-        // printEMFQParameters(&configs);
+        configs.tomo     = tomo;
+        configs.obj      = obj;
+        configs.geometry = geometry;
 
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;
@@ -371,7 +369,7 @@ extern "C"{
 
         if (ngpus == 1){
 
-            _get_tEM_FQ_GPU(configs, count, obj, angles, flat, nslices, gpus[0]);
+            _get_tEM_FQ_GPU(configs, count, object, angles, flat, nslices, gpus[0]);
 
         }else{
             for(t = 0; t < ngpus; t++){ 
@@ -379,9 +377,9 @@ extern "C"{
                 subblock = min(nslices - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async, _get_tEM_FQ_GPU, 
-                    configs,
-                    count + (size_t)ptr * nrays * nangles, 
-                    obj   + (size_t)ptr * nrays * nrays, 
+                    configs, ReconParam,
+                    count  + (size_t)ptr * nrays * nangles, 
+                    object + (size_t)ptr * nrays * nrays, 
                     angles, 
                     flat + (size_t)ptr * nrays, 
                     subblock, gpus[t]));

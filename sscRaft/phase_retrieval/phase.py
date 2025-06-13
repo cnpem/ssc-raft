@@ -67,8 +67,10 @@ def phase_retrieval(frames, dic):
     energy     = dic['energy[eV]']
     magn       = dic['magn']
     pixel_det  = dic['detectorPixel[m]']
+    wavelength = CONST/energy 
+    pixel_obj  = pixel_det / magn
 
-    padx, pady, padz  = dic['padding'],dic['padding'],0 # (padx, pady, padz)
+    padx, pady = dic['padding'],dic['padding']
 
     blocksize = dic['blocksize']
 
@@ -79,22 +81,22 @@ def phase_retrieval(frames, dic):
     methodname      = dic['method']
     method          = PhaseMethodNumber(methodname)
 
-    param_int       = [nrays, nslices, nangles, 
-                       padx, pady, padz, method, blocksize]
-    param_int       = numpy.array(param_int)
-    param_int       = CNICE(param_int,numpy.int32)
-    param_int_ptr   = param_int.ctypes.data_as(ctypes.c_void_p)
+    tomo_size    = dim3(x = nrays, y = nangles, z = nslices)
+    tomo_pad     = dim3(x =  padx, y =    pady, z = 0)
+    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
 
-    param_float     = [beta_delta,pixel_det,pixel_det,energy,z2,z2,magn,magn]
-    param_float     = numpy.array(param_float)
-    param_float     = CNICE(param_float,numpy.float32)
-    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+    geometry     = GEO(detector_pixel_x = pixel_det, detector_pixel_y = pixel_det, 
+                       obj_pixel_x = pixel_obj, obj_pixel_y = pixel_obj, 
+                       energy = energy, wavelength = wavelength, 
+                       z1x = 0, z1y = 0, z2x = z2, z2y = z2, 
+                       magnitude_x = magn, magnitude_y = magn)
+    
+    ContrastEnhencementParam = CEF(method = method, beta_delta = beta_delta, paganin_lambda = 1.0)
    
     frames          = CNICE(frames, numpy.float32)
     frames_ptr      = frames.ctypes.data_as(ctypes.c_void_p)
 
-    libraft.getPhaseMultiGPU(gpus_ptr, ctypes.c_int(ngpus),
-                            frames_ptr, param_float_ptr, param_int_ptr)                     
+    libraft.getContrastEnhencementMultiGPU(tomo_dim, geometry, ContrastEnhencementParam, 
+                             gpus_ptr, ctypes.c_int(ngpus), frames_ptr)                     
 
     return frames
-

@@ -9,10 +9,8 @@
 
 extern "C" {  
 
-    void get_tEM_RT_MultiGPU(int* gpus, int ngpus,
-    float* obj, float* count, 
-    float *flat, float* angles, 
-    float *paramf, int *parami)
+    void get_tEM_RT_MultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+    int* gpus, int ngpus, float* object, float* count, float *flat, float* angles)
     {
         int i, Maxgpudev;
         
@@ -23,13 +21,10 @@ extern "C" {
         for(i = 0; i < ngpus; i++) 
             assert(gpus[i] < Maxgpudev && "Invalid device number.");
 
-        CFG configs; GPU gpu_parameters;
-
-        setEMRTParameters(&configs, paramf, parami);
-        // printEMRTParameters(&configs);
-
-        setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
-        // printGPUParameters(&gpu_parameters);
+        CFG configs; 
+        configs.tomo     = tomo;
+        configs.obj      = obj;
+        configs.geometry = geometry;
 
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;
@@ -45,7 +40,7 @@ extern "C" {
 
         if (ngpus == 1){ /* 1 device */
 
-            get_tEM_RT_GPU(configs, gpu_parameters, obj, count, flat, angles, nslices, gpus[0]);
+            get_tEM_RT_GPU(configs, ReconParam, object, count, flat, angles, nslices, gpus[0]);
 
         }else{
         /* Launch async Threads for each device.
@@ -61,10 +56,10 @@ extern "C" {
 
                 threads.push_back( std::async( std::launch::async, 
                                                 get_tEM_RT_GPU, 
-                                                configs, gpu_parameters, 
-                                                obj   + (size_t)   nx *      ny * ptr,
-                                                count + (size_t)nrays * nangles * ptr, 
-                                                flat  + (size_t)nrays           * ptr, 
+                                                configs, ReconParam, 
+                                                object + (size_t)   nx *      ny * ptr,
+                                                count  + (size_t)nrays * nangles * ptr, 
+                                                flat   + (size_t)nrays           * ptr, 
                                                 angles, 
                                                 subblock,
                                                 gpus[i]
@@ -83,7 +78,7 @@ extern "C" {
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-    void get_tEM_RT_GPU(CFG configs, GPU gpus, 
+    void get_tEM_RT_GPU(CFG configs, REC ReconParam, 
     float *obj, float *count, float *flat, float *angles, 
     int sizez, int ngpu)
     {
@@ -91,10 +86,17 @@ extern "C" {
         int nrays     = configs.tomo.size.x;
         int nangles   = configs.tomo.size.y;
 
+        /* Compute total memory used of FBP method on a singles slice */
+        size_t total_required_mem_per_slice_bytes = (
+            calcSliceMemoryBytes(configs.tomo)           + // Tomo slice
+            calcSliceMemoryBytes(configs.obj)            + // Reconstructed object slice
+            configs.tomo.size.y * sizeof(float)            // angles
+            ); 
+
         int i; 
-        int blocksize        = configs.blocksize;
+        int blocksize = configs.tomo.blocksize;
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
+            int blocksize_aux  = compute_GPU_blocksize(sizez, total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
         int ind_block = (int)ceil( (float) sizez / blocksize );
@@ -102,16 +104,15 @@ extern "C" {
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
         /* Allocate GPU memory for the input and output image */
+        float *dcount      = opt::allocGPU<float>((size_t)    nrays *   nangles * blocksize);
+        float *dflat       = opt::allocGPU<float>((size_t)    nrays *   nangles            );
+        float *dobj        = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
 
-        float *dcount  = opt::allocGPU<float>((size_t)nrays * nangles * blocksize);
-        float *dflat   = opt::allocGPU<float>((size_t)nrays * nangles);
-        float *dobj    = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
-
-        float *back    = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
+        float *back        = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
         float *backcounts  = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
-        float *temp    = opt::allocGPU<float>((size_t)nrays * nangles * blocksize);
+        float *temp        = opt::allocGPU<float>((size_t)    nrays *   nangles * blocksize);
 
-        float *dangles = opt::allocGPU<float>( nangles );
+        float *dangles     = opt::allocGPU<float>( nangles );
         opt::CPUToGPU<float>(angles, dangles, nangles);
 
         HANDLE_ERROR( cudaPeekAtLastError() );
@@ -130,11 +131,11 @@ extern "C" {
             /* Update pointer */
             ptr = ptr + subblock;
 
-            opt::CPUToGPU<float>(count + ptr_block_tomo, dcount, (size_t)nrays * nangles * subblock);
-            opt::CPUToGPU<float>(flat + ptr_block_flat, dflat, (size_t)nrays *subblock);
-            opt::CPUToGPU<float>(obj + ptr_block_obj, dobj, (size_t)sizeImage * sizeImage * subblock);
+            opt::CPUToGPU<float>(count + ptr_block_tomo, dcount, (size_t)    nrays *   nangles * subblock);
+            opt::CPUToGPU<float>(flat  + ptr_block_flat, dflat , (size_t)    nrays *             subblock);
+            opt::CPUToGPU<float>(obj   + ptr_block_obj , dobj  , (size_t)sizeImage * sizeImage * subblock);
 
-            get_tEM_RT( configs, gpus, dobj, dcount, dflat, dangles,
+            get_tEM_RT( configs, ReconParam, dobj, dcount, dflat, dangles,
                         backcounts, temp, back, subblock);
 
             opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, (size_t)sizeImage * sizeImage * subblock);
@@ -151,26 +152,26 @@ extern "C" {
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-    void get_tEM_RT(CFG configs, GPU gpus, 
+    void get_tEM_RT(CFG configs, REC ReconParam, 
     float *output, float *count, float *flat, float *angles, 
     float *backcounts, float *temp, float *back,
     int blockSize)
     {
         int k;
-        int niter     = configs.em_iterations;
+        int niter     = ReconParam.iterations;
         int sizeImage = configs.obj.size.x;
         int nrays     = configs.tomo.size.x;
         int nangles   = configs.tomo.size.y;
 
         //GRID and BLOCKS SIZE
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlockD((int)ceil((nrays)/threadsPerBlock.x)+1,
-		                (int)ceil((nangles)/threadsPerBlock.y)+1,
-		                (int)ceil(blockSize/threadsPerBlock.z)+1);
+        dim3 gridBlockD((int)ceil(     nrays / threadsPerBlock.x ) + 1,
+		                (int)ceil(   nangles / threadsPerBlock.y ) + 1,
+		                (int)ceil( blockSize / threadsPerBlock.z ) + 1);
 
-        dim3 gridBlockF((int)ceil((sizeImage)/threadsPerBlock.x)+1,
-                        (int)ceil((sizeImage)/threadsPerBlock.y)+1,
-		                (int)ceil(blockSize/threadsPerBlock.z)+1);
+        dim3 gridBlockF((int)ceil( sizeImage / threadsPerBlock.x ) + 1,
+                        (int)ceil( sizeImage / threadsPerBlock.y ) + 1,
+		                (int)ceil( blockSize / threadsPerBlock.z ) + 1);
 
         /* Commented to add initial guess: `output` variable is also the initial guess */ 
         // kernel_ones<<<gridBlockF,threadsPerBlock>>>(output, sizeImage, nrays, nangles, blockSize); 
@@ -198,9 +199,8 @@ extern "C" {
 
 extern "C"{   
 
-    void get_eEM_RT_MultiGPU(int* gpus, int ngpus,
-    float* obj, float* tomogram, float* angles, 
-    float *paramf, int *parami)
+    void get_eEM_RT_MultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+    int* gpus, int ngpus, float* object, float* tomogram, float* angles)
     {
         int i, Maxgpudev;
         
@@ -211,19 +211,17 @@ extern "C"{
         for(i = 0; i < ngpus; i++) 
             assert(gpus[i] < Maxgpudev && "Invalid device number.");
 
-        CFG configs; GPU gpu_parameters;
-
-        setEMRTParameters(&configs, paramf, parami);
-        // printEMRTParameters(&configs);
-
-        setGPUParameters(&gpu_parameters, configs.tomo.padsize, ngpus, gpus);
+        CFG configs; 
+        configs.tomo     = tomo;
+        configs.obj      = obj;
+        configs.geometry = geometry;
 
         int subvolume = (configs.tomo.size.z + ngpus - 1) / ngpus;
         int subblock, ptr = 0; 
 
         if (ngpus == 1){ /* 1 device */
 
-            get_eEM_RT_GPU(configs, gpu_parameters, obj, tomogram, angles, subvolume, gpus[0]);
+            get_eEM_RT_GPU(configs, ReconParam, object, tomogram, angles, subvolume, gpus[0]);
 
         }else{
         /* Launch async Threads for each device.
@@ -239,9 +237,9 @@ extern "C"{
 
                 threads.push_back( std::async( std::launch::async, 
                                                 get_eEM_RT_GPU, 
-                                                configs, gpu_parameters, 
-                                                obj    + (size_t)configs.obj.size.x * configs.obj.size.y * ptr,
-                                                tomogram + (size_t)configs.tomo.size.x  * configs.tomo.size.y  * ptr, 
+                                                configs, ReconParam, 
+                                                object   + (size_t) configs.obj.size.x *  configs.obj.size.y * ptr,
+                                                tomogram + (size_t)configs.tomo.size.x * configs.tomo.size.y * ptr, 
                                                 angles, 
                                                 subblock,
                                                 gpus[i]
@@ -261,14 +259,26 @@ extern "C"{
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-    void get_eEM_RT_GPU(CFG configs, GPU gpus, 
+    void get_eEM_RT_GPU(CFG configs, REC ReconParam, 
     float *obj, float *tomogram, float *angles, 
     int sizez, int ngpu)
     {
+        int sizeImage = configs.obj.size.x;
+        int nrays     = configs.tomo.size.x;
+        int nangles   = configs.tomo.size.y;
+
         int i; 
-        int blocksize        = configs.blocksize;
+        int blocksize = configs.tomo.blocksize;
+
+        /* Compute total memory used of FBP method on a singles slice */
+        size_t total_required_mem_per_slice_bytes = (
+            calcSliceMemoryBytes(configs.tomo)           + // Tomo slice
+            calcSliceMemoryBytes(configs.obj)            + // Reconstructed object slice
+            configs.tomo.size.y * sizeof(float)            // angles
+            ); 
+
         if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, configs.total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
+            int blocksize_aux  = compute_GPU_blocksize(sizez, total_required_mem_per_slice_bytes, true, BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
         int ind_block = (int)ceil( (float) sizez / blocksize );
@@ -278,11 +288,14 @@ extern "C"{
         float *dobj, *dtomo, *dangles;
 
         /* Allocate GPU memory for the input and output image */ 
-        HANDLE_ERROR(cudaMalloc((void **)&dobj   ,sizeof(float) * (size_t) configs.obj.size.x *  configs.obj.size.y * blocksize));  
-        HANDLE_ERROR(cudaMalloc((void **)&dtomo  ,sizeof(float) * (size_t)configs.tomo.size.x * configs.tomo.size.y * blocksize));
-        HANDLE_ERROR(cudaMalloc((void **)&dangles,sizeof(float) * configs.tomo.size.y));
+        float *dtomo    = opt::allocGPU<float>((size_t)    nrays *   nangles * blocksize);
+        float *dobj     = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
 
-        HANDLE_ERROR(cudaMemcpy(dangles, angles, sizeof(float) * configs.tomo.size.y, cudaMemcpyHostToDevice));	
+        float *backones = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
+        float *temp     = opt::allocGPU<float>((size_t)    nrays *   nangles * blocksize);
+
+        float *dangles     = opt::allocGPU<float>( nangles );
+        opt::CPUToGPU<float>(angles, dangles, nangles);
 
         /* Loop for each batch of size 'batch' in threads */
         int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_obj = 0;
@@ -290,22 +303,25 @@ extern "C"{
         for (i = 0; i < ind_block; i++){
 
             subblock        = min(sizez - ptr, blocksize);
-            ptr_block_tomo  = (size_t)configs.tomo.size.x  * configs.tomo.size.y  * ptr;
-            ptr_block_obj = (size_t)configs.obj.size.x * configs.obj.size.y * ptr;
+            ptr_block_tomo  = (size_t)configs.tomo.size.x * configs.tomo.size.y * ptr;
+            ptr_block_obj   = (size_t) configs.obj.size.x *  configs.obj.size.y * ptr;
             
             /* Update pointer */
             ptr = ptr + subblock;
+            
+            opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, (size_t)    nrays *   nangles * subblock);
+            opt::CPUToGPU<float>(     obj + ptr_block_obj , dobj , (size_t)sizeImage * sizeImage * subblock);
 
-            HANDLE_ERROR(cudaMemcpy(dtomo, tomogram + ptr_block_tomo, sizeof(float) * (size_t)configs.tomo.size.x * configs.tomo.size.y * subblock, cudaMemcpyHostToDevice));	
-            HANDLE_ERROR(cudaMemcpy(dobj, obj + ptr_block_obj, (size_t)configs.obj.size.x * configs.obj.size.y * subblock * sizeof(float), cudaMemcpyHostToDevice));
+            get_eEM_RT( configs, ReconParam, dobj, dtomo, dangles, 
+                        backones, temp, subblock);                           
             
-            get_eEM_RT( configs, gpus, dobj, dtomo, dangles, subblock);                           
-            
-            HANDLE_ERROR(cudaMemcpy(obj + ptr_block_obj, dobj, (size_t)configs.obj.size.x * configs.obj.size.y * subblock * sizeof(float), cudaMemcpyDeviceToHost));
+            opt::GPUToCPU<float>(obj + ptr_block_obj, dobj, (size_t)sizeImage * sizeImage * subblock);
         }
         HANDLE_ERROR(cudaFree(dobj));
         HANDLE_ERROR(cudaFree(dtomo));
         HANDLE_ERROR(cudaFree(dangles));
+        HANDLE_ERROR(cudaFree(temp));
+        HANDLE_ERROR(cudaFree(backones));
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
@@ -313,29 +329,25 @@ extern "C"{
 
 extern "C" {
 
-    void get_eEM_RT(CFG configs, GPU gpus, 
-    float *output, float *tomo, float *angles, int blockSize)
+    void get_eEM_RT(CFG configs, REC ReconParam, 
+    float *output, float *tomo, float *angles, float *backones, float *temp, 
+    int blockSize)
     {
         int k;
-        int niter     = configs.em_iterations;
+        int niter     = ReconParam.iterations;
         int sizeImage = configs.obj.size.x;
         int nrays     = configs.tomo.size.x;
         int nangles   = configs.tomo.size.y;
 
         //GRID and BLOCKS SIZE
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlockD((int)ceil((nrays)/threadsPerBlock.x)+1,
-		                (int)ceil((nangles)/threadsPerBlock.y)+1,
-		                (int)ceil(blockSize/threadsPerBlock.z)+1);
+        dim3 gridBlockD((int)ceil(     nrays / threadsPerBlock.x ) + 1,
+		                (int)ceil(   nangles / threadsPerBlock.y ) + 1,
+		                (int)ceil( blockSize / threadsPerBlock.z ) + 1);
 
-        dim3 gridBlockF((int)ceil((sizeImage)/threadsPerBlock.x)+1,
-                        (int)ceil((sizeImage)/threadsPerBlock.y)+1,
-		                (int)ceil(blockSize/threadsPerBlock.z)+1);
-
-        float *backones, *temp;
-
-        HANDLE_ERROR(cudaMalloc((void **)&backones  ,sizeof(float) * (size_t)sizeImage * sizeImage * blockSize));
-        HANDLE_ERROR(cudaMalloc((void **)&temp      ,sizeof(float) * (size_t)nrays     * nangles   * blockSize));
+        dim3 gridBlockF((int)ceil( sizeImage / threadsPerBlock.x ) + 1,
+                        (int)ceil( sizeImage / threadsPerBlock.y ) + 1,
+		                (int)ceil( blockSize / threadsPerBlock.z ) + 1);
 
         /* Commented to add initial guess: `output` variable is also the initial guess */
         // kernel_ones<<<gridBlockF,threadsPerBlock>>>(output, sizeImage, nrays, nangles, blockSize);
@@ -350,8 +362,7 @@ extern "C" {
             
             HANDLE_ERROR(cudaDeviceSynchronize());
         }
-        HANDLE_ERROR(cudaFree(temp));
-        HANDLE_ERROR(cudaFree(backones));
+
     }
 }
 

@@ -6,31 +6,30 @@
 
 
 extern "C"{
-    void getFilterLowPass(CFG configs, GPU gpus, 
+    void getFilterLowPass(CFG configs, REC FilterParam, 
     float *tomogram, 
     dim3 tomo_size, dim3 tomo_pad)
     {
-        int filter_type      = configs.reconstruction_filter_type;
-        float paganin_reg    = configs.reconstruction_paganin;
-        float regularization = configs.reconstruction_reg;
-        float axis_offset    = 0.0;
-        float pixel_x        = configs.geometry.obj_pixel_x;
-        float pixel_y        = configs.geometry.obj_pixel_y;
+        int filter_type   = FilterParam.filter;
+        float paganin_reg = FilterParam.paganin_slices;
+        float filter_reg  = FilterParam.filter_reg;
+        float axis_offset = 0.0;
+        float pixel_x     = configs.geometry.obj_pixel_x;
+        float pixel_y     = configs.geometry.obj_pixel_y;
 
-        int nangles          = configs.tomo.size.y;
+        int nangles       = configs.tomo.size.y;
 
-        Filter filter(filter_type, paganin_reg, regularization, axis_offset, pixel_x);
+        Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel_x);
 
         if (filter.type != Filter::EType::none)
-            filterFBPpad(gpus, filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
+            filterFBPpad(filter, tomogram, tomo_size, tomo_pad, configs.tomo.pad);
 
         HANDLE_ERROR(cudaDeviceSynchronize());
-
     }
 }
 
 extern "C"{   
-    void getFilterLowPassGPU(CFG configs, GPU gpus, 
+    void getFilterLowPassGPU(CFG configs, REC FilterParam, 
     float *tomogram, int sizez, int ngpu)
     {
         HANDLE_ERROR(cudaSetDevice(ngpu));
@@ -38,15 +37,21 @@ extern "C"{
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;
         int nangles  = configs.tomo.size.y;
-        int nrayspad = configs.tomo.padsize.x;
+        int nrayspad = nrays * (1 + configs.tomo.pad.x);
 
         int i;
 
-        int blocksize = configs.blocksize;
+        int blocksize = configs.tomo.blocksize;
+
+        /* Compute total memory used on a singles slice */
+        size_t total_required_mem_per_slice_bytes = (
+            calcSliceMemoryBytes(configs.tomo)       + // Tomo slice
+            calcPaddedSliceMemoryBytes(configs.tomo)  // Tomo padded slice
+            ); 
 
         if ( blocksize == 0 ){
             int blocksize_aux  = compute_GPU_blocksize( sizez, 
-                                                        configs.total_required_mem_per_slice_bytes, 
+                                                        2 * total_required_mem_per_slice_bytes, 
                                                         true, 
                                                         BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
@@ -71,7 +76,7 @@ extern "C"{
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
 
-            getFilterLowPass( configs, gpus, dtomo,  
+            getFilterLowPass( configs, FilterParam, dtomo,  
                             dim3(nrays     , nangles, subblock),  /* Tomogram size */
                             dim3(nrayspad  , nangles, subblock)); /* Tomogram padded size */
 
@@ -84,8 +89,8 @@ extern "C"{
         HANDLE_ERROR(cudaFree(dtomo));
     }
 
-    void getFilterLowPassMultiGPU(int* gpus, int ngpus, 
-    float* tomogram, float *paramf, int *parami)
+    void getFilterLowPassMultiGPU(DIM tomo, GEO geometry, REC FilterParam,
+    int* gpus, int ngpus, float* tomogram)
     {
         int i, Maxgpudev;
 
@@ -96,12 +101,9 @@ extern "C"{
 		for(i = 0; i < ngpus; i++) 
 			assert(gpus[i] < Maxgpudev && "Invalid device number.");
 
-		CFG configs; GPU gpu_parameters;
-
-        setFBPParameters(&configs, paramf, parami);
-        // printFBPParameters(&configs);
-
-        setGPUParameters(&gpu_parameters, configs.obj.size, ngpus, gpus);
+		CFG configs; 
+        configs.tomo     = tomo;
+        configs.geometry = geometry;
 
         /* Projection data sizes */
         int nrays    = configs.tomo.size.x;
@@ -113,7 +115,7 @@ extern "C"{
 
 		if (ngpus == 1){ /* 1 device */
 
-			getFilterLowPassGPU(configs, gpu_parameters, tomogram, nslices, gpus[0]);
+			getFilterLowPassGPU(configs, FilterParam, tomogram, nslices, gpus[0]);
 
 		}else{
 		/* Launch async Threads for each device.
@@ -129,7 +131,8 @@ extern "C"{
 
 				threads.push_back( std::async( std::launch::async, 
                     getFilterLowPassGPU, 
-                    configs, gpu_parameters, 
+                    configs, 
+                    FilterParam,
                     tomogram + (size_t)nrays * nangles * ptr, 
                     subblock,
                     gpus[i]));

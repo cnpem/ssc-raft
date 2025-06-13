@@ -149,7 +149,7 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
     tv_smooth     = 0.0 # dic['smoothness']
 
     # Interpolation for EM Frequency
-    interpolation = setInterpolation(dic['interpolation'])
+    interpolation = dic['interpolation']
 
     if angles is None:
         try:
@@ -168,11 +168,11 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
 
     if method == 'eEMRT':
 
-        output = eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj) 
+        output = eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj) / det_pixel
     
     elif method == 'tEMRT':
 
-        output = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj)
+        output = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj) / det_pixel
 
     elif method == 'tEMFQ':
 

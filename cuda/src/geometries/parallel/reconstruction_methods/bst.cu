@@ -376,8 +376,8 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
 
 extern "C" {
 
-    void getBSTGPU_stream(CFG configs, 
-    float* obj, float* tomo, float* angles, 
+    void getBSTGPU_stream(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+    float* object, float* tomo, float* angles, 
     int blockgpu, int gpu, int nstreams) 
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
@@ -385,44 +385,51 @@ extern "C" {
         // nstreams = 2;
 
         const int blocksize_bst = 1;
+        int blocksize           = tomo.blocksize;
 
-        /* Projection data sizes */
-        int nrays   = configs.tomo.padsize.x;
-        int nangles = configs.tomo.padsize.y;
-
-        /* Projection GPUs padded Grd and Blocks */
-        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 TomogridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
-                            (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
-                            (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
-
-        /* Reconstruction sizes */
-        int sizeImagex = configs.obj.padsize.x;
-
-        /* Reconstruction GPUs padded Grd and Blocks */
-        dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 ObjgridBlock(  (int)ceil( configs.obj.padsize.x / TPBX ) + 1,
-                            (int)ceil( configs.obj.padsize.y / TPBY ) + 1,
-                            (int)ceil( configs.obj.padsize.z / TPBZ ) + 1);
-
-        int bst_padd         = 2; /* Fix this padding for we will padd the data before this */
-        int filter_type      = configs.reconstruction_filter_type;
-        float paganin_reg    = configs.reconstruction_paganin;
-        float regularization = configs.reconstruction_reg;
-        float axis_offset    = configs.rotation_axis_offset;
-        float pixel          = configs.geometry.obj_pixel_x;
-
-        int blocksize = configs.blocksize;
+        size_t total_required_mem_per_slice_bytes = (
+            calcSliceMemoryBytes(tomo)           + // Tomo slice
+            2 * calcSliceMemoryBytes(obj)        + // Reconstructed object slice
+            2 * calcPaddedSliceMemoryBytes(obj)  + // Reconstructed object padded slice
+            2 * calcPaddedSliceMemoryBytes(tomo) + // Tomo padded slice 
+            tomo.size.y * sizeof(float)            // angles
+            ); 
 
         if (blocksize == 0) {
             int blocksize_aux = compute_GPU_blocksize(  blockgpu, 
-                                                        (size_t)nstreams * configs.total_required_mem_per_slice_bytes, 
+                                                        (size_t)nstreams * total_required_mem_per_slice_bytes, 
                                                         true, 
                                                         BYTES_TO_GB * getTotalDeviceMemory());
             blocksize = min(blockgpu, blocksize_aux);
         }
         int ind_block = (int)ceil((float)blockgpu / blocksize);
         int ptr = 0, subblock;
+
+        /* Projection data sizes */
+        int nrays    = tomo.size.x * (1 + tomo.pad.x);
+        int nangles  = tomo.size.y;
+
+        /* Projection GPUs padded Grd and Blocks */
+        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 TomogridBlock( (int)ceil(     nrays / TPBX ) + 1,
+                            (int)ceil(   nangles / TPBY ) + 1,
+                            (int)ceil( blocksize / TPBZ ) + 1);
+
+        /* Reconstruction sizes */
+        int sizeImagex = obj.size.x * (1 + obj.pad.x);
+
+        /* Reconstruction GPUs padded Grd and Blocks */
+        dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 ObjgridBlock(  (int)ceil( sizeImagex / TPBX ) + 1,
+                            (int)ceil( sizeImagex / TPBY ) + 1,
+                            (int)ceil(  blocksize / TPBZ ) + 1);
+
+        int bst_padd         = 2; /* Fix this padding for we will padd the data before this */
+        int filter_type   = ReconParam.filter;
+        float paganin_reg = ReconParam.paganin_slices;
+        float filter_reg  = ReconParam.filter_reg;
+        float axis_offset = ReconParam.rotation_axis_offset;
+        float pixel       = geometry.obj_pixel_x;
 
         float* dangles = opt::allocGPU<float>(nangles);
 
@@ -463,8 +470,8 @@ extern "C" {
             polarblock[st]     = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
             realpolar[st]      = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
 
-            dtomo[st] = opt::allocGPU<float>((size_t)configs.tomo.size.x *            nangles * blocksize, streams[st]);
-            dobj[st]  = opt::allocGPU<float>((size_t) configs.obj.size.x * configs.obj.size.y * blocksize, streams[st]);
+            dtomo[st] = opt::allocGPU<float>((size_t)tomo.size.x *     nangles * blocksize, streams[st]);
+            dobj[st]  = opt::allocGPU<float>((size_t) cobj.size.x * obj.size.y * blocksize, streams[st]);
 
             dtomoPadded[st] = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize, streams[st]);
             dobjPadded[st]  = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize, streams[st]);
@@ -476,19 +483,19 @@ extern "C" {
 
             subblock = min(blockgpu - ptr, (int)blocksize);
 
-            opt::CPUToGPU<float>(tomo + (size_t)ptr * configs.tomo.size.x * nangles, 
+            opt::CPUToGPU<float>(tomo + (size_t)ptr * tomo.size.x * nangles, 
                                 dtomo[st], 
-                                (size_t)configs.tomo.size.x * nangles * subblock,
+                                (size_t)tomo.size.x * nangles * subblock,
                                 stream);
 
             /* Padding the tomogram data */
             TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
             opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock,0,stream>>>(   dtomo[st], dtomoPadded[st], 
-                                                                            dim3(configs.tomo.size.x, configs.tomo.size.x, subblock),
-                                                                            configs.tomo.pad);
+                                                                            dim3(tomo.size.x, tomo.size.x, subblock),
+                                                                            tomo.pad);
             getBST_stream( dobjPadded[st], dtomoPadded[st],
                     dangles, nrays, nangles, subblock, sizeImagex, 
-                    bst_padd, regularization, paganin_reg,
+                    bst_padd, filter_reg, paganin_reg,
                     filter_type, axis_offset, pixel, 
                     plans1d[st], plans2d[st], filterplans[st],
                     filtersino[st], cartesianblock[st], polarblock[st], realpolar[st],
@@ -497,12 +504,12 @@ extern "C" {
             /* Remove padd from the object (reconstruction) */
             ObjgridBlock.z = TomogridBlock.z;
             opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock,0,stream>>>(  dobjPadded[st], dobj[st], 
-                                                                                dim3(configs.obj.size.x, configs.obj.size.x, subblock), 
-                                                                                configs.obj.pad);
+                                                                                dim3(obj.size.x, obj.size.x, subblock), 
+                                                                                obj.pad);
 
-            opt::GPUToCPU<float>(obj +  size_t(ptr * configs.obj.size.x * configs.obj.size.y), 
+            opt::GPUToCPU<float>(object +  size_t(ptr * obj.size.x * obj.size.y), 
                                 dobj[st],
-                                size_t(configs.obj.size.x * configs.obj.size.y * subblock), 
+                                size_t(obj.size.x * obj.size.y * subblock), 
                                 stream);
 
             /* Update pointer */
@@ -533,51 +540,58 @@ extern "C" {
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-void getBSTGPU(CFG configs, 
-    float* obj, float* tomo, float* angles, 
+void getBSTGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+    float* object, float* tomo, float* angles, 
     int blockgpu, int gpu) 
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
 
         const int blocksize_bst = 1;
+        int blocksize           = tomo.blocksize;
 
-        /* Projection data sizes */
-        int nrays   = configs.tomo.padsize.x;
-        int nangles = configs.tomo.padsize.y;
-
-        /* Projection GPUs padded Grd and Blocks */
-        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 TomogridBlock( (int)ceil( configs.tomo.padsize.x / TPBX ) + 1,
-                            (int)ceil( configs.tomo.padsize.y / TPBY ) + 1,
-                            (int)ceil( configs.tomo.padsize.z / TPBZ ) + 1);
-
-        /* Reconstruction sizes */
-        int sizeImagex = configs.obj.padsize.x;
-
-        /* Reconstruction GPUs padded Grd and Blocks */
-        dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 ObjgridBlock(  (int)ceil( configs.obj.padsize.x / TPBX ) + 1,
-                            (int)ceil( configs.obj.padsize.y / TPBY ) + 1,
-                            (int)ceil( configs.obj.padsize.z / TPBZ ) + 1);
-
-        int bst_padd         = 2; /* Fix this padding for we will padd the data before this */
-        int filter_type      = configs.reconstruction_filter_type;
-        float paganin_reg    = configs.reconstruction_paganin;
-        float regularization = configs.reconstruction_reg;
-        float axis_offset    = configs.rotation_axis_offset;
-        float pixel          = configs.geometry.obj_pixel_x;
-
-        int blocksize = configs.blocksize;
+        size_t total_required_mem_per_slice_bytes = (
+            calcSliceMemoryBytes(tomo)           + // Tomo slice
+            2 * calcSliceMemoryBytes(obj)        + // Reconstructed object slice
+            2 * calcPaddedSliceMemoryBytes(obj)  + // Reconstructed object padded slice
+            2 * calcPaddedSliceMemoryBytes(tomo) + // Tomo padded slice 
+            tomo.size.y * sizeof(float)            // angles
+            ); 
 
         if (blocksize == 0) {
             int blocksize_aux = compute_GPU_blocksize(  blockgpu, 
-                                                        configs.total_required_mem_per_slice_bytes, 
+                                                        total_required_mem_per_slice_bytes, 
                                                         true, 
                                                         BYTES_TO_GB * getTotalDeviceMemory());
             blocksize = min(blockgpu, blocksize_aux);
         }
         int ind_block = (int)ceil((float)blockgpu / blocksize);
         int ptr = 0, subblock;
+
+        /* Projection data sizes */
+        int nrays    = tomo.size.x * (1 + tomo.pad.x);
+        int nangles  = tomo.size.y;
+
+        /* Projection GPUs padded Grd and Blocks */
+        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 TomogridBlock( (int)ceil(     nrays / TPBX ) + 1,
+                            (int)ceil(   nangles / TPBY ) + 1,
+                            (int)ceil( blocksize / TPBZ ) + 1);
+
+        /* Reconstruction sizes */
+        int sizeImagex = obj.size.x * (1 + obj.pad.x);
+
+        /* Reconstruction GPUs padded Grd and Blocks */
+        dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 ObjgridBlock(  (int)ceil( sizeImagex / TPBX ) + 1,
+                            (int)ceil( sizeImagex / TPBY ) + 1,
+                            (int)ceil(  blocksize / TPBZ ) + 1);
+
+        int bst_padd         = 2; /* Fix this padding for we will padd the data before this */
+        int filter_type   = ReconParam.filter;
+        float paganin_reg = ReconParam.paganin_slices;
+        float filter_reg  = ReconParam.filter_reg;
+        float axis_offset = ReconParam.rotation_axis_offset;
+        float pixel       = geometry.obj_pixel_x;
 
         float* dangles = opt::allocGPU<float>(nangles);
 
@@ -611,8 +625,8 @@ void getBSTGPU(CFG configs,
         polarblock     = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU);
         realpolar      = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU);
 
-        dtomo = opt::allocGPU<float>((size_t)configs.tomo.size.x *            nangles * blocksize);
-        dobj  = opt::allocGPU<float>((size_t) configs.obj.size.x * configs.obj.size.y * blocksize);
+        dtomo = opt::allocGPU<float>((size_t)tomo.size.x *    nangles * blocksize);
+        dobj  = opt::allocGPU<float>((size_t) obj.size.x * obj.size.y * blocksize);
 
         dtomoPadded = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
         dobjPadded  = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize);
@@ -622,18 +636,18 @@ void getBSTGPU(CFG configs,
 
             subblock = min(blockgpu - ptr, (int)blocksize);
 
-            opt::CPUToGPU<float>(tomo + (size_t)ptr * configs.tomo.size.x * nangles, 
+            opt::CPUToGPU<float>(tomo + (size_t)ptr * tomo.size.x * nangles, 
                                 dtomo, 
-                                (size_t)configs.tomo.size.x * nangles * subblock);
+                                (size_t)tomo.size.x * nangles * subblock);
 
             /* Padding the tomogram data */
             TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
             opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomoPadded, 
-                                                                dim3(configs.tomo.size.x, configs.tomo.size.x, subblock),
-                                                                configs.tomo.pad);
+                                                                dim3(tomo.size.x, tomo.size.x, subblock),
+                                                                tomo.pad);
             getBST( dobjPadded, dtomoPadded,
                     dangles, nrays, nangles, subblock, sizeImagex, 
-                    bst_padd, regularization, paganin_reg,
+                    bst_padd, filter_reg, paganin_reg,
                     filter_type, axis_offset, pixel, 
                     plans1d, plans2d, filterplans,
                     filtersino, cartesianblock, polarblock, realpolar,
@@ -642,12 +656,12 @@ void getBSTGPU(CFG configs,
             /* Remove padd from the object (reconstruction) */
             ObjgridBlock.z = TomogridBlock.z;
             opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(   dobjPadded, dobj, 
-                                                                        dim3(configs.obj.size.x, configs.obj.size.x, subblock), 
-                                                                        configs.obj.pad);
+                                                                        dim3(obj.size.x, obj.size.x, subblock), 
+                                                                        obj.pad);
 
-            opt::GPUToCPU<float>(obj +  size_t(ptr * configs.obj.size.x * configs.obj.size.y), 
+            opt::GPUToCPU<float>(object +  size_t(ptr * obj.size.x * obj.size.y), 
                                 dobj,
-                                size_t(configs.obj.size.x * configs.obj.size.y * subblock));
+                                size_t(obj.size.x * obj.size.y * subblock));
 
             /* Update pointer */
             ptr = ptr + subblock;
@@ -671,9 +685,9 @@ void getBSTGPU(CFG configs,
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-    void getBSTMultiGPU(int* gpus, int ngpus, 
-    float* obj, float* tomogram, float* angles, 
-    float* paramf, int* parami, int nstreams) 
+    void getBSTMultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+    int* gpus, int ngpus, float* object, float* tomogram, float* angles,
+    int nstreams) 
     {
         int i, Maxgpudev;
 
@@ -682,19 +696,14 @@ void getBSTGPU(CFG configs,
 
         /* If devices input are larger than actual devices on GPU, exit */
         for (i = 0; i < ngpus; i++) assert(gpus[i] < Maxgpudev && "Invalid device number.");
-        CFG configs;
-        GPU gpu_parameters;
-
-        setBSTParameters(&configs, paramf, parami);
-        // printBSTParameters(&configs);
 
         /* Projection data sizes */
-        int nrays   = configs.tomo.size.x;
-        int nangles = configs.tomo.size.y;
-        int nslices = configs.tomo.size.z;
+        int nrays   = tomo.size.x;
+        int nangles = tomo.size.y;
+        int nslices = tomo.size.z;
 
         /* Reconstruction sizes */
-        int sizeImagex = configs.obj.size.x;
+        int sizeImagex = obj.size.x;
 
         int blockgpu = (nslices + ngpus - 1) / ngpus;
         int subblock, ptr = 0;
@@ -706,8 +715,8 @@ void getBSTGPU(CFG configs,
             for (i = 0; i < ngpus; i++) {
                 subblock = min(nslices - ptr, blockgpu);
 
-                threads.push_back(std::async(std::launch::async, getBSTGPU, configs,
-                                            obj      + (size_t)ptr * sizeImagex * sizeImagex,
+                threads.push_back(std::async(std::launch::async, getBSTGPU, tomo, obj, geometry, ReconParam,
+                                            object   + (size_t)ptr * sizeImagex * sizeImagex,
                                             tomogram + (size_t)ptr *      nrays * nangles, 
                                             angles, subblock, gpus[i]));
 
@@ -721,8 +730,8 @@ void getBSTGPU(CFG configs,
             for (i = 0; i < ngpus; i++) {
                 subblock = min(nslices - ptr, blockgpu);
 
-                threads.push_back(std::async(std::launch::async, getBSTGPU_stream, configs,
-                                            obj      + (size_t)ptr * sizeImagex * sizeImagex,
+                threads.push_back(std::async(std::launch::async, getBSTGPU_stream, tomo, obj, geometry, ReconParam,
+                                            object   + (size_t)ptr * sizeImagex * sizeImagex,
                                             tomogram + (size_t)ptr *      nrays * nangles, 
                                             angles, subblock, gpus[i], nstreams));
 

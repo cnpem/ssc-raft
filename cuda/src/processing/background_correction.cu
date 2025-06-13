@@ -47,12 +47,11 @@ dim3 size, int numflats)
 }
 
 extern "C"{
-	void getBackgroundCorrection(GPU gpus, 
-    float* frames, float* flat, float* dark, 
+	void getBackgroundCorrection(float* frames, float* flat, float* dark, 
     dim3 size, int numflats, cudaStream_t stream)
 	{
-        dim3 threadsPerBlock( gpus.BT.x,  gpus.BT.y,      1);
-        dim3       gridBlock(gpus.Grd.x, gpus.Grd.y, size.z);
+        dim3 threadsPerBlock(TPBX,TPBY,1);
+        dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
         
 		/* Do the dark subtraction and division by flat (without log) */
         BackgroundCorrection<<<gridBlock,threadsPerBlock, 0, stream>>>(frames, dark, flat, size, numflats);
@@ -60,7 +59,7 @@ extern "C"{
         HANDLE_ERROR(cudaGetLastError());
 	}
 
-	void getBackgroundCorrectionGPU(GPU gpus, int gpu, 
+	void getBackgroundCorrectionGPU(int gpu, 
     float* frames, float* flat, float* dark, 
     dim3 size, int numflats, int is_log, int blocksize)
 	{
@@ -110,7 +109,7 @@ extern "C"{
 
             opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames[st], (size_t)subblock * size.x * size.y, stream);
 
-			getBackgroundCorrection(gpus, d_frames[st],
+			getBackgroundCorrection(d_frames[st],
                     d_flat[st] + (size_t)ptr * size.x * numflats,
                     d_dark[st] + (size_t)ptr * size.x,
                     dim3(size.x, size.y, subblock), numflats, stream);
@@ -147,9 +146,6 @@ extern "C"{
 		int blockgpu = (nslices + ngpus - 1) / ngpus;
 		int ptr = 0, subblock;
 
-        GPU gpu_parameters;
-        setGPUParameters(&gpu_parameters, dim3(nrays,nangles,nslices), ngpus, gpus);
-
 		std::vector<std::future<void>> threads;
         threads.reserve(ngpus);
 
@@ -158,7 +154,6 @@ extern "C"{
 
             threads.push_back(std::async( std::launch::async,
                 getBackgroundCorrectionGPU,
-                gpu_parameters,
                 gpus[i],
                 frames + (size_t)ptr * nrays * nangles,
                 flat   + (size_t)ptr * nrays * numflats,

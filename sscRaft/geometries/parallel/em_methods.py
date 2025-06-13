@@ -49,23 +49,31 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
     angles        = CNICE(angles) #angles pointer
     angles_ptr    = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    padx, pady, padz = 0,0,0
-    nflats           = 1
+    padx          = 0
 
-    param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, nflats, iterations, blocksize]
-    param_int     = numpy.array(param_int)
-    param_int     = CNICE(param_int,numpy.int32)
-    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
+    obj_size     = dim3(x = objsize, y = objsize, z = nslices)
 
-    param_float     = [0]
-    param_float     = numpy.array(param_float)
-    param_float     = CNICE(param_float,numpy.float32)
-    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+    tomo_pad     = dim3(x = padx, y =    0, z = 0)
+    obj_pad      = dim3(x = padx, y = padx, z = 0)
 
-    libraft.get_eEM_RT_MultiGPU(gpus_ptr, ctypes.c_int(ngpus),
-                    obj_ptr, tomo_ptr, angles_ptr, 
-                    param_float_ptr, param_int_ptr)
+    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
+    obj_dim      = DIM(size =  obj_size, pad =  obj_pad, blocksize = blocksize)
+
+    geometry     = GEO(detector_pixel_x = 1.0, detector_pixel_y = 1.0, 
+                       obj_pixel_x = 1.0, obj_pixel_y = 1.0, 
+                       energy = 1.0, wavelength = 1.0, 
+                       z1x = 0, z1y = 0, z2x = 0, z2y = 0, 
+                       magnitude_x = 1.0, magnitude_y = 1.0)
+
+    ReconParam   = REC( method = 0, filter = 0, filter_reg = 1.0,
+                        paganin_slices = 0.0, iterations = iterations, rotation_axis_offset = 0,
+                        total_variation = 0, interpolation = 0)
+
+
+    libraft.get_eEM_RT_MultiGPU(tomo_dim, obj_dim, geometry, ReconParam, 
+                                gpus_ptr, ctypes.c_int(ngpus),
+                                obj_ptr, tomo_ptr, angles_ptr)
 
     return obj
 
@@ -131,22 +139,30 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
     angles        = CNICE(angles) #angles pointer
     angles_ptr    = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    padx, pady, padz = 0,0,0
+    padx          = 0
 
-    param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, nflats, iterations, blocksize]
-    param_int     = numpy.array(param_int)
-    param_int     = CNICE(param_int,numpy.int32)
-    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
+    obj_size     = dim3(x = objsize, y = objsize, z = nslices)
 
-    param_float     = [0]
-    param_float     = numpy.array(param_float)
-    param_float     = CNICE(param_float,numpy.float32)
-    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+    tomo_pad     = dim3(x = padx, y =    0, z = 0)
+    obj_pad      = dim3(x = padx, y = padx, z = 0)
 
-    libraft.get_tEM_RT_MultiGPU(gpus_ptr, ctypes.c_int(ngpus),
-                    obj_ptr, counts_ptr, flat_ptr, angles_ptr, 
-                    param_float_ptr, param_int_ptr)
+    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
+    obj_dim      = DIM(size =  obj_size, pad =  obj_pad, blocksize = blocksize)
+
+    geometry     = GEO(detector_pixel_x = 1.0, detector_pixel_y = 1.0, 
+                       obj_pixel_x = 1.0, obj_pixel_y = 1.0, 
+                       energy = 1.0, wavelength = 1.0, 
+                       z1x = 0, z1y = 0, z2x = 0, z2y = 0, 
+                       magnitude_x = 1.0, magnitude_y = 1.0)
+
+    ReconParam   = REC( method = 0, filter = 0, filter_reg = 1.0,
+                        paganin_slices = 0.0, iterations = iterations, rotation_axis_offset = 0,
+                        total_variation = 0, interpolation = 0)
+
+    libraft.get_tEM_RT_MultiGPU(tomo_dim, obj_dim, geometry, ReconParam,
+                                gpus_ptr, ctypes.c_int(ngpus),
+                                obj_ptr, counts_ptr, flat_ptr, angles_ptr)
 
     return obj
 
@@ -214,27 +230,32 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
     angles      = CNICE(angles) 
     angles_ptr  = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    padx,pady,padz         = pad
+    padx,_,_         = pad
     det_pixelx, det_pixely = det_pixel
+    interp                 = setInterpolation(interpolation)
 
-    # padd = padx * nrays
-    # logger.info(f'Set EM Frequency pad value as {padx} x horizontal dimension = ({padd}).')
+    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
+    obj_size     = dim3(x = objsize, y = objsize, z = nslices)
 
-    param_int     = [nrays, nangles, nslices, objsize, 
-                     padx, pady, padz, nflats, iterations, interpolation, blocksize]
-    param_int     = numpy.array(param_int)
-    param_int     = CNICE(param_int,numpy.int32)
-    param_int_ptr = param_int.ctypes.data_as(ctypes.c_void_p)
+    tomo_pad     = dim3(x = padx, y =    0, z = 0)
+    obj_pad      = dim3(x = padx, y = padx, z = 0)
 
-    param_float     = [det_pixelx, det_pixely, tv_reg]
-    param_float     = numpy.array(param_float)
-    param_float     = CNICE(param_float,numpy.float32)
-    param_float_ptr = param_float.ctypes.data_as(ctypes.c_void_p)
+    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
+    obj_dim      = DIM(size =  obj_size, pad =  obj_pad, blocksize = blocksize)
 
+    geometry     = GEO(detector_pixel_x = det_pixelx, detector_pixel_y = det_pixely, 
+                       obj_pixel_x = det_pixelx, det_pixely = det_pixel, 
+                       energy = 1.0, wavelength = 1.0, 
+                       z1x = 0, z1y = 0, z2x = 0, z2y = 0, 
+                       magnitude_x = 1.0, magnitude_y = 1.0)
+    
+    ReconParam   = REC( method = 0, filter = 0, filter_reg = 1.0,
+                        paganin_slices = 0.0, iterations = iterations, rotation_axis_offset = 0,
+                        total_variation = tv_reg, interpolation = interp)
 
-    libraft.get_tEM_FQ_MultiGPU( gpus_ptr, ctypes.c_int(ngpus),
-                    count_ptr, obj_ptr, angles_ptr, flat_ptr,
-                    param_float_ptr, param_int_ptr)
+    libraft.get_tEM_FQ_MultiGPU(tomo_dim, obj_dim, geometry, ReconParam, 
+                                gpus_ptr, ctypes.c_int(ngpus),
+                                count_ptr, obj_ptr, angles_ptr, flat_ptr)
 
     return obj
 

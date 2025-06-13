@@ -5,16 +5,17 @@
 #include "processing/filters.hpp"
 
 extern "C"{
+    void getFBPMultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+        int* gpus, int ngpus, float* object, float* tomogram, float* angles,);
 
-    void setFBPParameters(CFG *configs, float *parameters_float, int *parameters_int);
-    void printFBPParameters(CFG *configs);
+    void getFBPGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam, 
+    float *object, float *tomogram, float *angles, 
+    int sizez, int ngpu);
 
-    void getFBPMultiGPU(int* gpus, int ngpus, float* recon, float* tomogram, float* angles, float *paramf, int *parami);
-
-    void getFBPGPU(CFG configs, GPU gpus, float* recon, float* tomogram, float* angles, int sizez, int ngpu);
-
-    void getFBP(CFG configs, GPU gpus, float *recon, float *tomogram, float *angles, dim3 tomo_size, dim3 recon_size);
-
+    void getFBP(REC ReconParam, 
+    float *obj, float *tomogram, float *angles, 
+    dim3 tomo_size, dim3 obj_size,
+    float pixel_x, float pixel_y);
 }
 
 

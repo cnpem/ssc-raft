@@ -6,33 +6,28 @@
 /* EM Parallel */
 
 extern "C"{
+    void get_tEM_RT_MultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+    int* gpus, int ngpus, float* object, float* count, float *flat, float* angles);
 
-    void setEMRTParameters(CFG *configs, float *parameters_float, int *parameters_int);
-    void printEMRTParameters(CFG *configs);
+    void get_eEM_RT_MultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
+    int* gpus, int ngpus, float* object, float* tomogram, float* angles);
 
-    void get_tEM_RT_MultiGPU(int* gpus, int ngpus,
-    float* recon, float* count, float *flat, float* angles, 
-    float *paramf, int *parami);
-
-    void get_eEM_RT_MultiGPU(int* gpus, int ngpus, 
-    float* recon, float* tomogram, float* angles, 
-    float *paramf, int *parami);
-
-    void get_tEM_RT_GPU(CFG configs, GPU gpus, float *obj, float *count, float *flat, float *angles, 
+    void get_tEM_RT_GPU(CFG configs, REC ReconParam, 
+    float *obj, float *count, float *flat, float *angles, 
     int sizez, int ngpu);
 
-    void get_eEM_RT_GPU(CFG configs, GPU gpus, float *obj, float *tomogram, float *angles, 
+    void get_eEM_RT_GPU(CFG configs, REC ReconParam, 
+    float *obj, float *tomogram, float *angles, 
     int sizez, int ngpu);
 
-    void get_tEM_RT(CFG configs, GPU gpus, 
+    void get_tEM_RT(CFG configs, REC ReconParam, 
     float *output, float *count, float *flat, float *angles, 
     float *backcounts, float *temp, float *back,
     int blockSize);
 
-    void get_eEM_RT(CFG configs, GPU gpus, float *output, float *tomo, float *angles, int blockSize);
-
-    void setEMFQParameters(CFG *configs, float *parameters_float, int *parameters_int);
-    void printEMFQParameters(CFG *configs);
+    void get_eEM_RT(CFG configs, REC ReconParam, 
+    float *output, float *tomo, float *angles, float *backones, float *temp,
+    int blockSize);
 }
 
 /* CUDA KERNELS */

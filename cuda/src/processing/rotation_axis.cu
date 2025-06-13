@@ -466,7 +466,7 @@ __global__ void rot_axis_correction_kernel(complex *kernel, float axis_offset, d
 }
 
 extern "C"{
-    void getRotAxisCorrection(GPU gpus, float *tomogram, 
+    void getRotAxisCorrection(float *tomogram, 
     float axis_offset, dim3 tomo_size)
     {
         /* Projection data sizes */
@@ -488,9 +488,12 @@ extern "C"{
         dim3 fft_size = dim3( nrays / 2 + 1, nangles, 1 );
         size_t nfft   = opt::get_total_points(fft_size);
         size_t npad   = nrays * nangles * nslices;
+        
+        cufftHandle mplan;
+        cufftHandle mplanI;
 
-		cufftPlan1d(&gpus.mplan , nrays, CUFFT_R2C, nangles);
-		cufftPlan1d(&gpus.mplanI, nrays, CUFFT_C2R, nangles);
+		cufftPlan1d(&mplan , nrays, CUFFT_R2C, nangles);
+		cufftPlan1d(&mplanI, nrays, CUFFT_C2R, nangles);
 
         cufftComplex *fft = opt::allocGPU<cufftComplex>(nfft);
         float *dataPadded = opt::allocGPU<float>(npad);
@@ -503,11 +506,11 @@ extern "C"{
             
             offset = (size_t)k * nrays * nangles;
 
-            HANDLE_FFTERROR(cufftExecR2C(gpus.mplan, dataPadded + offset, fft));
+            HANDLE_FFTERROR(cufftExecR2C(mplan, dataPadded + offset, fft));
                     
             rot_axis_correction_kernel<<<gridBlockFFT,threadsPerBlockFFT>>>((complex*)fft, axis_offset, fft_size);
 
-            HANDLE_FFTERROR(cufftExecC2R(gpus.mplanI, fft, dataPadded + offset));
+            HANDLE_FFTERROR(cufftExecC2R(mplanI, fft, dataPadded + offset));
 
         }
         
@@ -520,8 +523,8 @@ extern "C"{
 
         HANDLE_ERROR(cudaFree(dataPadded));
         HANDLE_ERROR(cudaFree(fft));
-		HANDLE_FFTERROR(cufftDestroy(gpus.mplan));
-        HANDLE_FFTERROR(cufftDestroy(gpus.mplanI));
+		HANDLE_FFTERROR(cufftDestroy(mplan));
+        HANDLE_FFTERROR(cufftDestroy(mplanI));
 
         HANDLE_ERROR(cudaDeviceSynchronize());   
     }
@@ -529,7 +532,7 @@ extern "C"{
 
 extern "C"{   
 
-    void getRotAxisCorrectionGPU(GPU gpus, float *tomogram, 
+    void getRotAxisCorrectionGPU(float *tomogram, 
     float axis_offset, dim3 tomo_size, int ngpu, int blocksize)
     {
         HANDLE_ERROR(cudaSetDevice(ngpu));
@@ -573,7 +576,7 @@ extern "C"{
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
 
-            getRotAxisCorrection(gpus, dtomo, axis_offset, 
+            getRotAxisCorrection(dtomo, axis_offset, 
                                 dim3(nrays, nangles, subblock));  /* Tomogram size */
 
             opt::GPUToCPU<float>(tomogram + ptr_block_tomo, dtomo, 
@@ -598,18 +601,14 @@ extern "C"{
 		for(i = 0; i < ngpus; i++) 
 			assert(gpus[i] < Maxgpudev && "Invalid device number.");
 
-		GPU gpu_parameters;
-
         dim3 tomo_size = dim3(nrays, nangles, nslices);
-
-        setGPUParameters(&gpu_parameters, tomo_size, ngpus, gpus);
 
 		int subvolume = (nslices + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; 
 
 		if (ngpus == 1){ /* 1 device */
 
-			getRotAxisCorrectionGPU(gpu_parameters, tomogram, axis_offset, tomo_size, gpus[0], blocksize);
+			getRotAxisCorrectionGPU(tomogram, axis_offset, tomo_size, gpus[0], blocksize);
 
 		}else{
 		/* Launch async Threads for each device.
@@ -625,7 +624,6 @@ extern "C"{
 
 				threads.push_back( std::async( std::launch::async, 
                     getRotAxisCorrectionGPU, 
-                    gpu_parameters, 
                     tomogram + (size_t)nrays * nangles * ptr, 
                     axis_offset,
                     dim3(nrays, nangles, subblock),

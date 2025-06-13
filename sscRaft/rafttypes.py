@@ -67,6 +67,14 @@ console_handler.setLevel(console_log_level)
 DEBUG = 10
 '''----------------------------------------------'''
 
+#==========================================================
+# Definitions and Constants
+#==========================================================
+LIGHT_VELOCITY = 299792458                         # [m/s]
+PLANK_CONSTANT = 4.135667662E-15                   # [eV.s]
+CONST          = PLANK_CONSTANT * LIGHT_VELOCITY   # [eV.m]
+#==========================================================
+
 nthreads = multiprocessing.cpu_count()
 
 ############# Load required libraries ##############
@@ -91,6 +99,69 @@ def load_library(lib,ext):
 libraft  = load_library(_lib, ext)
 
 #########################
+#########################
+#|       ssc-raft      |#
+#|   Struct prototypes |#
+#########################
+
+class dim3(ctypes.Structure):
+    _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int), ("z", ctypes.c_int)]
+
+class DIM(ctypes.Structure):
+    _fields_ = [("size", dim3), ("pad", dim3), ("blocksize", ctypes.c_int)]
+
+class GEO(ctypes.Structure):
+    _fields_ = [("detector_pixel_x", ctypes.c_float), ("detector_pixel_y", ctypes.c_float), 
+                ("obj_pixel_x", ctypes.c_float), ("obj_pixel_y", ctypes.c_float),
+                ("energy", ctypes.c_float), ("wavelength", ctypes.c_float),
+                ("z1x", ctypes.c_float), ("z1y", ctypes.c_float),
+                ("magnitude_x", ctypes.c_int), ("magnitude_y", ctypes.c_int)
+                ]
+    
+class FLAG(ctypes.Structure):
+    _fields_ = [("do_flat_dark_correction", ctypes.c_int),
+                ("do_flat_dark_log", ctypes.c_int),
+                ("do_paganin_filter", ctypes.c_int),
+                ("do_rings", ctypes.c_int),
+                ("do_rotation", ctypes.c_int),
+                ("do_rotation_correction", ctypes.c_int),
+                ("do_alignment", ctypes.c_int),
+                ("do_eccentric", ctypes.c_int),
+                ("do_reconstruction", ctypes.c_int)]
+
+class CEF(ctypes.Structure):
+    _fields_ = [("method", ctypes.c_int), 
+                ("beta_delta", ctypes.c_float), 
+                ("paganin_lambda", ctypes.c_float)]   
+
+class RF(ctypes.Structure):
+    _fields_ = [("method", ctypes.c_int), 
+                ("rings_block", ctypes.c_int), 
+                ("rings_lambda", ctypes.c_float)]   
+
+class REC(ctypes.Structure):
+    _fields_ = [("method", ctypes.c_int), 
+                ("filter", ctypes.c_int), 
+                ("filter_reg", ctypes.c_float),
+                ("paganin_slices", ctypes.c_float),
+                ("iterations", ctypes.c_int),
+                ("rotation_axis_offset", ctypes.c_float),
+                ("total_variation", ctypes.c_float),
+                ("interpolation", ctypes.c_int)
+                ] 
+
+class CFG(ctypes.Structure):
+    _fields_ = [("nflats", ctypes.c_int), 
+                ("geometry", GEO), 
+                ("obj", DIM),
+                ("tomo", DIM),
+                ("flags", FLAG),
+                ("ContrastParam", CEF),
+                ("RingsParam", RF),
+                ("ReconParam", REC)
+                ] 
+    
+#########################
 
 #########################
 #|       ssc-raft      |#
@@ -98,7 +169,6 @@ libraft  = load_library(_lib, ext)
 #########################
 
 ############# Raft ##############
-
 
 try:
     # Float flipx on CPU
@@ -127,8 +197,10 @@ except:
 try:
     # EM Ray Tracing MultiGPU without semafaro
     libraft.get_tEM_RT_MultiGPU.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+        DIM, DIM, GEO, REC,
+        ctypes.c_void_p, ctypes.c_int, 
+        ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_void_p
     ]
     
     libraft.get_tEM_RT_MultiGPU.restype  = None
@@ -138,8 +210,10 @@ except:
 
 try:
     libraft.get_eEM_RT_MultiGPU.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+        DIM, DIM, GEO, REC,
+        ctypes.c_void_p, ctypes.c_int, 
+        ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, 
     ]
 
     libraft.get_eEM_RT_MultiGPU.restype  = None
@@ -150,8 +224,10 @@ except:
 try:
     # EM Frequency MultiGPU without semafaro
     libraft.get_tEM_FQ_MultiGPU.argtypes = [
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_void_p, 
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+        DIM, DIM, GEO, REC,
+        ctypes.c_void_p, ctypes.c_int, 
+        ctypes.c_void_p, ctypes.c_void_p, 
+        ctypes.c_void_p, ctypes.c_void_p
     ]
         
     libraft.get_tEM_FQ_MultiGPU.restype  = None
@@ -162,9 +238,9 @@ except:
 try:
     # BST 
     libraft.getBSTMultiGPU.argtypes = [
+        DIM, DIM, GEO, REC,
         ctypes.c_void_p, ctypes.c_int, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-        ctypes.c_void_p, ctypes.c_void_p, 
         ctypes.c_int
     ]
     
@@ -176,9 +252,9 @@ except:
 try:
     # FBP 
     libraft.getFBPMultiGPU.argtypes = [
+        DIM, DIM, GEO, REC,
         ctypes.c_void_p, ctypes.c_int, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-        ctypes.c_void_p, ctypes.c_void_p
     ]
     
     libraft.getFBPMultiGPU.restype  = None
@@ -189,8 +265,9 @@ except:
 try:
     # FBP Filter only 
     libraft.getFilterLowPassMultiGPU.argtypes = [
+        DIM, GEO, REC,
         ctypes.c_void_p, ctypes.c_int, 
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+        ctypes.c_void_p, 
     ]
     
     libraft.getFilterLowPassMultiGPU.restype  = None
@@ -272,38 +349,39 @@ except:
 
 ######## Raft - Stitching Offset 360 ##########
 try:
-    libraft.getOffsetExcentricTomoGPU.argtypes = [
+    libraft.getOffsetEccentricTomoGPU.argtypes = [
         ctypes.c_int, ctypes.c_void_p,  
         ctypes.c_int, ctypes.c_int, ctypes.c_int
     ]
     
-    libraft.getOffsetExcentricTomoGPU.restype  = ctypes.c_int
+    libraft.getOffsetEccentricTomoGPU.restype  = ctypes.c_int
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_OFFSET_EXCENTRIC_TOMO-')
     pass
 
 ######## Raft - Excentric Tomography Stitch ##########
 try:
-    libraft.getExcentricTomoMultiGPU.argtypes = [
+    libraft.getEccentricTomoMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int,
         ctypes.c_void_p, 
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
         ctypes.c_int
     ]
     
-    libraft.getExcentricTomoMultiGPU.restype  = None
+    libraft.getEccentricTomoMultiGPU.restype  = None
 except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_EXCENTRIC_TOMO_STITCH-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_ECCENTRIC_TOMO_STITCH-')
     pass
 
 ######## Raft - Phase Retrieval Paganin method and similar methods ##########
 try:
-    libraft.getPhaseMultiGPU.argtypes = [
+    libraft.getContrastEnhencementMultiGPU.argtypes = [
+        DIM, GEO, CEF,
         ctypes.c_void_p, ctypes.c_int,
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+        ctypes.c_void_p, 
     ]
     
-    libraft.getPhaseMultiGPU.restype  = None
+    libraft.getContrastEnhencementMultiGPU.restype  = None
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_PHASE_RETRIEVAL-')
     pass
@@ -433,7 +511,6 @@ except:
     pass
 
 
-
 try:
     libraft.ReconstructionPipeline.argtypes = [
         ctypes.c_void_p, ctypes.c_void_p,
@@ -520,12 +597,12 @@ def FilterNumber(mfilter):
         return 6
 
 def PhaseMethodNumber(mfilter):
-    if mfilter.lower() == 'paganin':
+    if mfilter.lower() == 'none':
         return 0
-    elif mfilter.lower() == 'fresnel':
+    elif mfilter.lower() == 'paganin':
         return 1
     else:
-        return 0
+        return 1
 
 def setInterpolation(name):
     """ Set interpolation 

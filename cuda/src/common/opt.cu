@@ -70,8 +70,8 @@ void opt::transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez) {
 }
 
 void _transpose_zyx2yzx_worker(int gpu, float *data, size_t start_x, size_t end_x,
-        size_t sizex, size_t sizey, size_t sizez, size_t blocksize) {
-
+size_t sizex, size_t sizey, size_t sizez, size_t blocksize, opt::TransposeOperation Topt) 
+{
     float alpha = 1.0f, beta = 0.0f;
 
     cudaSetDevice(gpu);
@@ -90,7 +90,6 @@ void _transpose_zyx2yzx_worker(int gpu, float *data, size_t start_x, size_t end_
 
         cudaMemcpy2DAsync(d_data_block_in, cur_blocksize * sizeof(float), datablock, sizex * sizeof(float),
                 cur_blocksize * sizeof(float), sizez * sizey, cudaMemcpyHostToDevice);
-
 
         //block transposition (ZY,X) -> (X,ZY)
         HANDLE_CUBLASERROR(cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_N,
@@ -114,6 +113,12 @@ void _transpose_zyx2yzx_worker(int gpu, float *data, size_t start_x, size_t end_
                 cur_blocksize, sizez * sizey, &alpha, d_data_block_in, sizez * sizey, &beta, nullptr,
                 cur_blocksize, d_data_block_out, cur_blocksize));
 
+        if (Topt == opt::TransposeOperation::log)
+            getlog(d_data_block_out, dim3(cur_blocksize,sizey,sizez));
+
+        if (Topt == opt::TransposeOperation::exp)
+            getexp(d_data_block_out, dim3(cur_blocksize,sizey,sizez));
+
         cudaMemcpy2DAsync(datablock, sizex * sizeof(float), d_data_block_out, cur_blocksize * sizeof(float),
                 cur_blocksize * sizeof(float),  sizez * sizey, cudaMemcpyDeviceToHost);
 
@@ -134,7 +139,37 @@ void opt::transpose_zyx2yzx(int* gpus, int ngpus, float *data, int sizex, int si
         const size_t gpu_offset = g * gpu_blocksize;
         threads.emplace_back(_transpose_zyx2yzx_worker,
                     gpus[g], data, gpu_offset, std::min(gpu_offset + gpu_blocksize, (size_t)sizex),
-                    sizex, sizey, sizez, blockx);
+                    sizex, sizey, sizez, blockx, opt::TransposeOperation::none);
+    }
+    for (int g = 0; g < ngpus; ++g) {
+        threads[g].join();
+    }
+}
+
+void opt::transpose_zyx2yzx_log(int* gpus, int ngpus, float *data, int sizex, int sizey, int sizez, int blockx) {
+    std::vector<std::thread> threads;
+    threads.reserve(ngpus);
+    const size_t gpu_blocksize = sizex / ngpus;
+    for (int g = 0; g < ngpus; ++g) {
+        const size_t gpu_offset = g * gpu_blocksize;
+        threads.emplace_back(_transpose_zyx2yzx_worker,
+                    gpus[g], data, gpu_offset, std::min(gpu_offset + gpu_blocksize, (size_t)sizex),
+                    sizex, sizey, sizez, blockx, opt::TransposeOperation::log);
+    }
+    for (int g = 0; g < ngpus; ++g) {
+        threads[g].join();
+    }
+}
+
+void opt::transpose_zyx2yzx_exp(int* gpus, int ngpus, float *data, int sizex, int sizey, int sizez, int blockx) {
+    std::vector<std::thread> threads;
+    threads.reserve(ngpus);
+    const size_t gpu_blocksize = sizex / ngpus;
+    for (int g = 0; g < ngpus; ++g) {
+        const size_t gpu_offset = g * gpu_blocksize;
+        threads.emplace_back(_transpose_zyx2yzx_worker,
+                    gpus[g], data, gpu_offset, std::min(gpu_offset + gpu_blocksize, (size_t)sizex),
+                    sizex, sizey, sizez, blockx, opt::TransposeOperation::exp);
     }
     for (int g = 0; g < ngpus; ++g) {
         threads[g].join();
@@ -193,14 +228,6 @@ __global__ void setSinCosTable(float *sintable, float *costable, float *angles, 
     costable[k] = __cosf(angles[k]);
 }
 
-void getLog(float *data, dim3 size, cudaStream_t stream) {
-    dim3 threadsPerBlock(TPBX, TPBY, TPBZ);
-    dim3 gridBlock((int)ceil(size.x / threadsPerBlock.x) + 1, (int)ceil(size.y / threadsPerBlock.y) + 1,
-                   (int)ceil(size.z / threadsPerBlock.z) + 1);
-
-    Klog<<<gridBlock, threadsPerBlock, 0, stream>>>(data, size);
-}
-
 static __global__ void Klog(float *data, dim3 size) {
     int i = threadIdx.x + blockIdx.x * blockDim.x;
     int j = threadIdx.y + blockIdx.y * blockDim.y;
@@ -213,9 +240,52 @@ static __global__ void Klog(float *data, dim3 size) {
     data[index] = -logf(data[index]);
 }
 
+static __global__ void KExp(float *data, dim3 size) {
+    int i = threadIdx.x + blockIdx.x * blockDim.x;
+    int j = threadIdx.y + blockIdx.y * blockDim.y;
+    int k = threadIdx.z + blockIdx.z * blockDim.z;
 
-dim3 opt::setGridBlock(dim3 size) {
-    dim3 gridBlock((int)ceil(size.x / TPBX) + 1, (int)ceil(size.y / TPBY) + 1, (int)ceil(size.z / TPBZ) + 1);
+    if ((i >= size.x) || (j >= size.y) || (k >= size.z)) return;
+
+    size_t index = IND(i, j, k, size.x, size.y);
+
+    data[index] = expf(-data[index]);
+}
+
+void getLog(float *data, dim3 size, cudaStream_t stream) {
+    dim3 threadsPerBlock(TPBX, TPBY, TPBZ);
+    dim3 gridBlock((int)ceil(size.x / threadsPerBlock.x) + 1, (int)ceil(size.y / threadsPerBlock.y) + 1,
+                   (int)ceil(size.z / threadsPerBlock.z) + 1);
+
+    Klog<<<gridBlock, threadsPerBlock, 0, stream>>>(data, size);
+}
+
+void getlog(float *data, dim3 size) {
+    dim3 threadsPerBlock(TPBX, TPBY, TPBZ);
+    dim3 gridBlock((int)ceil(size.x / threadsPerBlock.x) + 1, (int)ceil(size.y / threadsPerBlock.y) + 1,
+                   (int)ceil(size.z / threadsPerBlock.z) + 1);
+
+    Klog<<<gridBlock, threadsPerBlock>>>(data, size);
+}
+
+void getExp(float *data, dim3 size, cudaStream_t stream) {
+    dim3 threadsPerBlock(TPBX, TPBY, TPBZ);
+    dim3 gridBlock((int)ceil(size.x / threadsPerBlock.x) + 1, (int)ceil(size.y / threadsPerBlock.y) + 1,
+                   (int)ceil(size.z / threadsPerBlock.z) + 1);
+
+    KExp<<<gridBlock, threadsPerBlock, 0, stream>>>(data, size);
+}
+
+void getexp(float *data, dim3 size) {
+    dim3 threadsPerBlock(TPBX, TPBY, TPBZ);
+    dim3 gridBlock((int)ceil(size.x / threadsPerBlock.x) + 1, (int)ceil(size.y / threadsPerBlock.y) + 1,
+                   (int)ceil(size.z / threadsPerBlock.z) + 1);
+
+    KExp<<<gridBlock, threadsPerBlock>>>(data, size);
+}
+
+dim3 opt::setGridBlock(dim3 size, dim3 BT) {
+    dim3 gridBlock((int)ceil(size.x / BT.x) + 1, (int)ceil(size.y / BT.y) + 1, (int)ceil(size.z / BT.z) + 1);
 
     return gridBlock;
 }

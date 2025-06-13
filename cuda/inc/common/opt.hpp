@@ -24,12 +24,16 @@
 #include "common/logerror.hpp"
 
 void getLog(float *data, dim3 size, cudaStream_t stream = 0);
+void getlog(float *data, dim3 size);
+void getExp(float *data, dim3 size, cudaStream_t stream = 0);
+void getexp(float *data, dim3 size);
 
 __global__ void setSinCosTable(float *sintable, float *costable, float *angles, int nangles);
     
 static __global__ void Klog(float* data, dim3 size);
 
 namespace opt{
+
     inline __host__ __device__ int assert_dimension(int size1, int size2)
     { return ( size1 == size2 ? 1 : 0 ); };
 
@@ -115,7 +119,7 @@ namespace opt{
 
     void MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE);
 
-    dim3 setGridBlock(dim3 size);
+    dim3 setGridBlock(dim3 size, dim3 BT);
     
     template<typename Type>
     __global__ void fftshift2D(Type *c, dim3 size)
@@ -186,11 +190,20 @@ namespace opt{
     __global__ void remove_paddR2C(float *inpadded, cufftComplex *out, dim3 size, dim3 padsize);
     __global__ void remove_paddR2R(float *inpadded, float *out, dim3 size, dim3 pad);
 
+    enum TransposeOperation
+    {
+        none = 0, /* Do nothing */
+        log  = 1, /* Apply data = -log( data) */
+        exp  = 2  /* Apply data =  exp(-data) */
+    };
+
     extern "C" {
 
         void flip_x(float *data, int sizex, int sizey, int sizez);
         void transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez);
         void transpose_zyx2yzx(int* gpus, int ngpus, float *data, int sizex, int sizey, int sizez, int blockx);
+        void transpose_zyx2yzx_log(int* gpus, int ngpus, float *data, int sizex, int sizey, int sizez, int blockx);
+        void transpose_zyx2yzx_exp(int* gpus, int ngpus, float *data, int sizex, int sizey, int sizez, int blockx);
     }
 }
 

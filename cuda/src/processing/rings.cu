@@ -471,8 +471,8 @@ extern "C"
 
 extern "C"{
 
-    void getTitarenkoRings(GPU gpus, float *tomogram, dim3 size,
-            float lambda_rings, int ring_blocks, cudaStream_t stream)
+    void getTitarenkoRings(float *tomogram, dim3 size,
+    float lambda_rings, int ring_blocks, cudaStream_t stream)
     {
 
         /* Projection data sizes */
@@ -504,10 +504,10 @@ extern "C"{
         HANDLE_ERROR(cudaGetLastError());
     }
 
-    void getTitarenkoRingsGPU(GPU gpus, int gpu,
-        float *data, dim3 size, 
-        float lambda_rings, int ring_blocks,
-        int blocksize)
+    void getTitarenkoRingsGPU(int gpu,
+    float *data, dim3 size, 
+    float lambda_rings, int ring_blocks,
+    int blocksize)
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
 
@@ -548,9 +548,9 @@ extern "C"{
 
             opt::CPUToGPU<float>(data + (size_t)ptr * nrays * nangles, tomogram[st], (size_t)subblock * nrays * nangles, stream);
 
-            getTitarenkoRings(gpus, tomogram[st],
-                                    dim3(nrays, nangles, subblock),
-                                    lambda_rings, ring_blocks, stream);
+            getTitarenkoRings(tomogram[st],
+                        dim3(nrays, nangles, subblock),
+                        lambda_rings, ring_blocks, stream);
 
             opt::GPUToCPU<float>(data + (size_t)ptr * nrays * nangles, tomogram[st], (size_t)subblock * nrays * nangles, stream);
 
@@ -580,10 +580,6 @@ extern "C"{
         int blockgpu = (nslices + ngpus - 1) / ngpus;
         int ptr = 0, subblock;
 
-        GPU gpu_parameters;
-
-        setGPUParameters(&gpu_parameters, dim3(nrays, nangles, nslices), ngpus, gpus);
-
 		std::vector<std::future<void>> threads;
         threads.reserve(ngpus);
 
@@ -593,7 +589,6 @@ extern "C"{
 
             threads.push_back(std::async(std::launch::async,
                 getTitarenkoRingsGPU,
-                gpu_parameters,
                 gpus[i],
                 data + (size_t)ptr * nrays * nangles,
                 dim3(nrays, nangles, subblock),
