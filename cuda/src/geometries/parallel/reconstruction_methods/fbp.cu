@@ -204,7 +204,7 @@ extern "C"{
 
             getFBP( ReconParam, dobjPadded, dtomoPadded, dangles, 
                     dim3(nrayspad ,   nangles, subblock),  /* Tomogram padded size */
-                    dim3(padImagex, padImagey, subblock)  /* Object (reconstruction) padded size */
+                    dim3(padImagex, padImagey, subblock),  /* Object (reconstruction) padded size */
                     geometry.obj_pixel_x, geometry.obj_pixel_x); 
 
             /* Remove padd from the object (reconstruction) */

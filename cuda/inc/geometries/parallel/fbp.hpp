@@ -6,7 +6,7 @@
 
 extern "C"{
     void getFBPMultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
-        int* gpus, int ngpus, float* object, float* tomogram, float* angles,);
+        int* gpus, int ngpus, float* object, float* tomogram, float* angles);
 
     void getFBPGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam, 
     float *object, float *tomogram, float *angles, 

@@ -369,7 +369,7 @@ extern "C"{
 
         if (ngpus == 1){
 
-            _get_tEM_FQ_GPU(configs, count, object, angles, flat, nslices, gpus[0]);
+            _get_tEM_FQ_GPU(configs, ReconParam, count, object, angles, flat, nslices, gpus[0]);
 
         }else{
             for(t = 0; t < ngpus; t++){ 

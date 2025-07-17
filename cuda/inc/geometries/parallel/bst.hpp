@@ -20,7 +20,7 @@ extern "C" {
         float reg, float paganin, int filter_type, float offset, float pixel, 
         cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan, 
         cImage* filtersino, cImage* cartesianblock, cImage* polarblock, cImage* realpolar, 
-        int gpu, cudaStream_t stream = 0);
+        int gpu, cudaStream_t stream);
 
     void EMFQ_BST(float* blockRecon, float *wholesinoblock, float *angles,
     int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0);

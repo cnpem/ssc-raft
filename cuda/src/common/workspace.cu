@@ -1,5 +1,6 @@
 #include <cstddef>
 #include "common/configs.hpp"
+#include "common/opt.hpp"
 #include "common/logerror.hpp"
 
 
@@ -13,9 +14,9 @@ extern "C"{
         const size_t flatptr_size =   configs.nflats *     tomo_batch_size * configs.tomo.size.x;
         const size_t darkptr_size =  tomo_batch_size *                       configs.tomo.size.x;
 
-        const int tomosizepadx = configs.tomo.size.x * ( 1.0f + configs.tomo.pad.x );
-        const int objsizepadx  =  configs.obj.size.x * ( 1.0f +  configs.obj.pad.x );
-        const int objsizepady  =  configs.obj.size.y * ( 1.0f +  configs.obj.pad.y );
+        const int tomosizepadx = configs.tomo.size.x * ( 1 + configs.tomo.pad.x );
+        const int objsizepadx  =  configs.obj.size.x * ( 1 +  configs.obj.pad.x );
+        const int objsizepady  =  configs.obj.size.y * ( 1 +  configs.obj.pad.y );
 
         const size_t tomoptr_padsize =  tomo_batch_size * tomosizepadx * configs.tomo.size.y;
         const size_t objptr_padsize  =   obj_batch_size *  objsizepadx *         objsizepadx;

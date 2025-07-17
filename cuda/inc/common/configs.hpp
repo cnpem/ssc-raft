@@ -51,7 +51,7 @@ enum ReconstructionMethod
     eEMRT   = 3,
     tEMRT   = 4,
     tEMFQ   = 5,
-    fdk     = 5
+    fdk     = 6
 };
 
 typedef struct dimension
@@ -270,7 +270,7 @@ extern "C"{
 
 	WKP *Initialize_workspace(CFG configs, size_t tomo_batch_size, size_t obj_batch_size);
 
-	void freeWorkspace(WKP *workspace, CFG configs);
+	void freeWorkspace(WKP *workspace);
 
 }
 

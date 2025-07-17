@@ -316,7 +316,7 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
     float reg, float paganin, int filter_type, float offset, float pixel, 
     cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan, 
     cImage* filtersino, cImage* cartesianblock, cImage* polarblock, cImage* realpolar, 
-    int gpu, cudaStream_t stream = 0) 
+    int gpu, cudaStream_t stream) 
     {
         // HANDLE_ERROR(cudaSetDevice(gpu));
 
@@ -377,7 +377,7 @@ void EMFQ_BST_ITER(float* blockRecon, float* wholesinoblock, float* angles, cIma
 extern "C" {
 
     void getBSTGPU_stream(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
-    float* object, float* tomo, float* angles, 
+    float* object, float* tomogram, float* angles, 
     int blockgpu, int gpu, int nstreams) 
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
@@ -471,7 +471,7 @@ extern "C" {
             realpolar[st]      = new cImage(nrays * bst_padd,    nangles * blocksize_bst, 1, MemoryType::EAllocGPU, streams[st]);
 
             dtomo[st] = opt::allocGPU<float>((size_t)tomo.size.x *     nangles * blocksize, streams[st]);
-            dobj[st]  = opt::allocGPU<float>((size_t) cobj.size.x * obj.size.y * blocksize, streams[st]);
+            dobj[st]  = opt::allocGPU<float>((size_t) obj.size.x *  obj.size.y * blocksize, streams[st]);
 
             dtomoPadded[st] = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize, streams[st]);
             dobjPadded[st]  = opt::allocGPU<float>((size_t)sizeImagex * sizeImagex * blocksize, streams[st]);
@@ -483,7 +483,7 @@ extern "C" {
 
             subblock = min(blockgpu - ptr, (int)blocksize);
 
-            opt::CPUToGPU<float>(tomo + (size_t)ptr * tomo.size.x * nangles, 
+            opt::CPUToGPU<float>(tomogram + (size_t)ptr * tomo.size.x * nangles, 
                                 dtomo[st], 
                                 (size_t)tomo.size.x * nangles * subblock,
                                 stream);
@@ -541,7 +541,7 @@ extern "C" {
     }
 
 void getBSTGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
-    float* object, float* tomo, float* angles, 
+    float* object, float* tomogram, float* angles, 
     int blockgpu, int gpu) 
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
@@ -636,7 +636,7 @@ void getBSTGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
 
             subblock = min(blockgpu - ptr, (int)blocksize);
 
-            opt::CPUToGPU<float>(tomo + (size_t)ptr * tomo.size.x * nangles, 
+            opt::CPUToGPU<float>(tomogram + (size_t)ptr * tomo.size.x * nangles, 
                                 dtomo, 
                                 (size_t)tomo.size.x * nangles * subblock);
 

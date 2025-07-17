@@ -11,49 +11,45 @@
 #include "geometries/parallel/bst.hpp"
 #include "processing/processing.hpp"
 
+extern "C"{
 
-extern "C" {
-
-    void ReconstructionPipeline_GPU(CFG configs,
-    float *object, float *data, float *flats, float *darks, float *angles, 
-    int gpu_device)
+    void getReconstructionMethods(CFG configs, WKP *workspace, dim3 tomo_size, dim3 obj_size)
     {
-        int nrays   = configs.tomo.size.x;
-        int nangles = configs.tomo.size.y;
-        int nslices = configs.tomo.size.z;
+        switch (configs.ReconParam.method){
 
-        int nx      = configs.obj.size.x;
-        int ny      = configs.obj.size.y;
-        int nz      = configs.obj.size.z;
-
-        size_t tomoptr_size = nslices * nangles * nrays;
-        size_t objptr_size  =      nz *      ny *    nx;
-        size_t flatptr_size =           nangles * nrays;
-        size_t darkptr_size =           nangles * nrays;
-
-        /* Initialize GPU device */
-        HANDLE_ERROR(cudaSetDevice(gpu_device));
-
-        /* Local GPUs Pointers: allocation */
-        WKP *workspace = allocateWorkspace(configs, nslices, nz);
-
-        /* Copy data from host to device */
-        opt::CPUToGPU<float>(angles, workspace->angles,      nangles);
-        opt::CPUToGPU<float>(  data, workspace->tomo  , tomoptr_size);
-        opt::CPUToGPU<float>( flats, workspace->flat  , flatptr_size);
-        opt::CPUToGPU<float>( darks, workspace->dark  , darkptr_size);
-
-        /* Enter Reconstruction Pipeline */
-        _ReconstructionPipeline(configs, workspace);
-
-        /* Copy Reconstructed data from device to host */
-        opt::GPUToCPU<float>(object, workspace->obj, objptr_size);
-
-        free(workspace->obj); /* Dealocate variable we will not use anymore */
-        free(workspace);
-
-        // cudaDeviceSynchronize();
+            case ReconstructionMethod::fbpRT:
+                /* FBP */
+                getFBP( configs.ReconParam, 
+                        workspace->objPadd, 
+                        workspace->tomoPadd, 
+                        workspace->angles, 
+                        tomo_size, obj_size, 
+                        configs.geometry.detector_pixel_x, 
+                        configs.geometry.detector_pixel_y
+                    );
+                break;
+            case ReconstructionMethod::fbpBST:
+                /* BST */
+                break;
+            case ReconstructionMethod::eEMRT:
+                /* EM RT eEM */
+                break;
+            case ReconstructionMethod::tEMRT:
+                /* EM RT tEM */
+                break;
+            case ReconstructionMethod::tEMFQ:
+                /* EM FQ tEM */
+                break;
+            case ReconstructionMethod::fdk:
+                /* FDK */
+                break;
+            default:
+                printf("No reconstruction method selected. Finishing run... \n");
+                exit(EXIT_SUCCESS);
+                break;
+        }
     }
+
 }
 
 extern "C"{
@@ -118,45 +114,46 @@ extern "C"{
     }
 }
 
-extern "C"{
+extern "C" {
 
-    void getReconstructionMethods(CFG configs, WKP *workspace, dim3 tomo_size, dim3 obj_size)
+    void ReconstructionPipeline_GPU(CFG configs,
+    float *object, float *data, float *flats, float *darks, float *angles, 
+    int gpu_device)
     {
-        switch (configs.ReconParam.method){
+        int nrays   = configs.tomo.size.x;
+        int nangles = configs.tomo.size.y;
+        int nslices = configs.tomo.size.z;
 
-            case ReconstructionMethod::fbpRT:
-                /* FBP */
-                getFBP( configs, 
-                        configs.ReconParam, 
-                        workspace->objPadd, 
-                        workspace->tomoPadd, 
-                        workspace->angles, 
-                        tomo_size, obj_size, 
-                        configs.geometry.detector_pixel_x, 
-                        configs.geometry.detector_pixel_y
-                    );
-                break;
-            case ReconstructionMethod::fbpBST:
-                /* BST */
-                break;
-            case ReconstructionMethod::eEMRT:
-                /* EM RT eEM */
-                break;
-            case ReconstructionMethod::tEMRT:
-                /* EM RT tEM */
-                break;
-            case ReconstructionMethod::tEMFQ:
-                /* EM FQ tEM */
-                break;
-            case ReconstructionMethod::fdk:
-                /* FDK */
-                break;
-            default:
-                printf("No reconstruction method selected. Finishing run... \n");
-                exit(EXIT_SUCCESS);
-                break;
-        }
+        int nx      = configs.obj.size.x;
+        int ny      = configs.obj.size.y;
+        int nz      = configs.obj.size.z;
+
+        size_t tomoptr_size = nslices * nangles * nrays;
+        size_t objptr_size  =      nz *      ny *    nx;
+        size_t flatptr_size =           nangles * nrays;
+        size_t darkptr_size =           nangles * nrays;
+
+        /* Initialize GPU device */
+        HANDLE_ERROR(cudaSetDevice(gpu_device));
+
+        /* Local GPUs Pointers: allocation */
+        WKP *workspace = Initialize_workspace(configs, nslices, nz);
+
+        /* Copy data from host to device */
+        opt::CPUToGPU<float>(angles, workspace->angles,      nangles);
+        opt::CPUToGPU<float>(  data, workspace->tomo  , tomoptr_size);
+        opt::CPUToGPU<float>( flats, workspace->flat  , flatptr_size);
+        opt::CPUToGPU<float>( darks, workspace->dark  , darkptr_size);
+
+        /* Enter Reconstruction Pipeline */
+        _ReconstructionPipeline(configs, workspace);
+
+        /* Copy Reconstructed data from device to host */
+        opt::GPUToCPU<float>(object, workspace->obj, objptr_size);
+
+        free(workspace->obj); /* Dealocate variable we will not use anymore */
+        free(workspace);
+
+        // cudaDeviceSynchronize();
     }
-
 }
-

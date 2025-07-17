@@ -76,8 +76,8 @@ extern "C"{
     void filterFBP_Complex(Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad, float pixel);
 
-    void getFilterLowPassMultiGPU(int* gpus, int ngpus, 
-    float* tomogram, float *paramf, int *parami);
+    void getFilterLowPassMultiGPU(DIM tomo, GEO geometry, REC FilterParam,
+    int* gpus, int ngpus, float* tomogram);
     
 
 }

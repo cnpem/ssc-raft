@@ -263,6 +263,8 @@ extern "C"{
     float *obj, float *tomogram, float *angles, 
     int sizez, int ngpu)
     {
+        HANDLE_ERROR(cudaSetDevice(ngpu));
+
         int sizeImage = configs.obj.size.x;
         int nrays     = configs.tomo.size.x;
         int nangles   = configs.tomo.size.y;
@@ -283,10 +285,7 @@ extern "C"{
         }
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
-        HANDLE_ERROR(cudaSetDevice(ngpu));
-
-        float *dobj, *dtomo, *dangles;
-
+        
         /* Allocate GPU memory for the input and output image */ 
         float *dtomo    = opt::allocGPU<float>((size_t)    nrays *   nangles * blocksize);
         float *dobj     = opt::allocGPU<float>((size_t)sizeImage * sizeImage * blocksize);
