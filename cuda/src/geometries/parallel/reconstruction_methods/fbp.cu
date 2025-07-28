@@ -116,6 +116,8 @@ extern "C"{
     float *object, float *tomogram, float *angles, 
     int sizez, int ngpu)
     {
+        printf("Here 2 \n");
+        fflush(stdout);
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
         int i;
@@ -140,6 +142,8 @@ extern "C"{
         }
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
+        printf("Here 3. blocksize = %d; ind_block = %d \n", blocksize, ind_block);
+        fflush(stdout);
 
         /* Projection data sizes */
         /* Projection size */
@@ -251,38 +255,44 @@ extern "C"{
 		int subvolume = (nslices + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; 
 
-		if (ngpus == 1){ /* 1 device */
+        printf("nslices, nrays, nangles = (%d, %d, %d) \n",nslices, nrays, nangles);
+        printf("sizeImagex, sizeImagey = (%d, %d) \n",sizeImagex, sizeImagey);
+        fflush(stdout);
 
-			getFBPGPU(tomo, obj, geometry, ReconParam, object, tomogram, angles, nslices, gpus[0]);
+		// if (ngpus == 1){ /* 1 device */
+            
+        //     printf("Here 1 \n");
+        //     fflush(stdout);
+		// 	getFBPGPU(tomo, obj, geometry, ReconParam, object, tomogram, angles, nslices, gpus[0]);
 
-		}else{
-		/* Launch async Threads for each device.
-			Each device solves a block of 'nrays * nangles' size.
-		*/
-			// See future c++ async launch
-			std::vector<std::future<void>> threads = {};
-            threads.reserve(ngpus);
+		// }else{
+		// /* Launch async Threads for each device.
+		// 	Each device solves a block of 'nrays * nangles' size.
+		// */
+		// 	// See future c++ async launch
+		// 	std::vector<std::future<void>> threads = {};
+        //     threads.reserve(ngpus);
 
-			for (i = 0; i < ngpus; i++){
+		// 	for (i = 0; i < ngpus; i++){
 				
-				subblock   = min(nslices - ptr, subvolume);
+		// 		subblock   = min(nslices - ptr, subvolume);
 
-				threads.push_back( std::async( std::launch::async, 
-                    getFBPGPU, 
-                    tomo, obj, geometry, ReconParam, 
-                    object   + (size_t)sizeImagex * sizeImagey * ptr,
-                    tomogram + (size_t)     nrays *    nangles * ptr, 
-                    angles, 
-                    subblock,
-                    gpus[i]));
+		// 		threads.push_back( std::async( std::launch::async, 
+        //             getFBPGPU, 
+        //             tomo, obj, geometry, ReconParam, 
+        //             object   + (size_t)sizeImagex * sizeImagey * ptr,
+        //             tomogram + (size_t)     nrays *    nangles * ptr, 
+        //             angles, 
+        //             subblock,
+        //             gpus[i]));
 
-                /* Update pointer */
-				ptr = ptr + subblock;		
+        //         /* Update pointer */
+		// 		ptr = ptr + subblock;		
 
-			}
-			for (i = 0; i < ngpus; i++)
-				threads[i].get();
-		}
+		// 	}
+		// 	for (i = 0; i < ngpus; i++)
+		// 		threads[i].get();
+		// }
     }
 
 }

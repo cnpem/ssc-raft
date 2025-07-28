@@ -75,10 +75,11 @@ extern "C"{
         if (isParallelOrFanbeamGeometry(configs)) {
             for (int p = 0; p < total_number_of_processes; p++)
                 setProcessParallel(configs, process, gpus, p, total_number_of_processes);
-        } else { //cone beam geometry
-            for (int p = 0; p < total_number_of_processes; p++)
-                setProcessConebeam(configs, process, gpus, p, total_number_of_processes);
-        }
+        } 
+        // else { //cone beam geometry
+        //     // for (int p = 0; p < total_number_of_processes; p++)
+        //     //     setProcessConebeam(configs, process, gpus, p, total_number_of_processes);
+        // }
 
         return process;
 	}

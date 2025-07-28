@@ -115,7 +115,7 @@ class GEO(ctypes.Structure):
                 ("obj_pixel_x", ctypes.c_float), ("obj_pixel_y", ctypes.c_float),
                 ("energy", ctypes.c_float), ("wavelength", ctypes.c_float),
                 ("z1x", ctypes.c_float), ("z1y", ctypes.c_float),
-                ("magnitude_x", ctypes.c_int), ("magnitude_y", ctypes.c_int)
+                ("magnitude_x", ctypes.c_float), ("magnitude_y", ctypes.c_float)
                 ]
     
 class FLAG(ctypes.Structure):
@@ -511,17 +511,17 @@ except:
     pass
 
 
-try:
-    libraft.ReconstructionPipeline.argtypes = [
-        ctypes.c_void_p, ctypes.c_void_p,
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-        ctypes.c_void_p, ctypes.c_int
-    ]
-    libraft.ReconstructionPipeline.restype = None
+# try:
+#     libraft.ReconstructionPipeline.argtypes = [
+#         ctypes.c_void_p, ctypes.c_void_p,
+#         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+#         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+#         ctypes.c_void_p, ctypes.c_int
+#     ]
+#     libraft.ReconstructionPipeline.restype = None
 
-except:
-    logger.error('Cannot find C/CUDA librar: -.RAFT_RECONSTRUCTION_PIPELINE')
+# except:
+#     logger.error('Cannot find C/CUDA library: -.RAFT_RECONSTRUCTION_PIPELINE-')
 
 #########################
 #|      ssc-raft       |#

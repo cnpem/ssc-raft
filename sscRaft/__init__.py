@@ -10,4 +10,4 @@ try:
     from .io   import *
 
 except OSError:
-    logging.error("Could not load sscRaft shared libraries")
+    logging.error("Could not load sscRaft shared libraries (__init__.py)")

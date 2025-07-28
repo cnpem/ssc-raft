@@ -64,8 +64,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
     padx   = dic.get('padding', 0)
 
-    pad    = (padx) * nrays
-    logger.info(f'Set FBP RT pad value as {padx} x horizontal dimension = ({pad}).')
+    logger.info(f'Set FBP RT pad value as {padx}.')
 
     # Object (reconstruction)
     objsize = nrays
