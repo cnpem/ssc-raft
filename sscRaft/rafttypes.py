@@ -104,20 +104,61 @@ libraft  = load_library(_lib, ext)
 #|   Struct prototypes |#
 #########################
 
+class coord(ctypes.Structure):
+    _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float)]
+
 class dim3(ctypes.Structure):
     _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int), ("z", ctypes.c_int)]
 
 class DIM(ctypes.Structure):
-    _fields_ = [("size", dim3), ("pad", dim3), ("blocksize", ctypes.c_int)]
+    _fields_ = [("size", dim3), ("pad", dim3), ("blocksize", ctypes.c_int), ("padding_mode", ctypes.c_int)]
+
+def dimension(size, pad, blocksize = 0, padd_mode = 2):
+    # padd_mode = 2 is the edge mode
+    x, y, z = size
+    px      = int(pad[0])
+    py      = int(pad[1])
+    pz      = int(pad[2])
+
+    pad_sum = px + py + pz
+
+    size_   = dim3(x =  x, y =  y, z =  z)
+    pad_    = dim3(x = px, y = py, z = pz)
+
+    if int(pad_sum) == 0:
+        padd_mode = 0
+
+    dim_size   = DIM(size = size_, pad = pad_, blocksize = blocksize, padding_mode = padd_mode)
+
+    return dim_size
 
 class GEO(ctypes.Structure):
-    _fields_ = [("detector_pixel_x", ctypes.c_float), ("detector_pixel_y", ctypes.c_float), 
-                ("obj_pixel_x", ctypes.c_float), ("obj_pixel_y", ctypes.c_float),
-                ("energy", ctypes.c_float), ("wavelength", ctypes.c_float),
-                ("z1x", ctypes.c_float), ("z1y", ctypes.c_float),
-                ("magnitude_x", ctypes.c_float), ("magnitude_y", ctypes.c_float)
+    _fields_ = [("detector_pixel", coord), 
+                ("obj_pixel", coord), 
+                ("z1", coord), 
+                ("z2", coord), 
+                ("magnitude", coord), 
+                ("energy", ctypes.c_float), 
+                ("wavelength", ctypes.c_float),
                 ]
-    
+
+def define_geometry(detector_pixel, obj_pixel, z1, z2, magnitude, energy, wavelength):
+
+    detector_pixel_ = coord(x = detector_pixel[0], y = detector_pixel[1])
+    obj_pixel_      = coord(x =      obj_pixel[0], y =      obj_pixel[1])
+    z1_             = coord(x =             z1[0], y =             z1[1])
+    z2_             = coord(x =             z2[0], y =             z2[1])
+    magnitude_      = coord(x =      magnitude[0], y =      magnitude[1])
+
+    geometry_       = GEO(detector_pixel = detector_pixel_,
+                          obj_pixel      = obj_pixel_,
+                          z1             = z1_,
+                          z2             = z2_,
+                          magnitude      = magnitude_, 
+                          energy         = energy, 
+                          wavelength     = wavelength)
+    return geometry_
+   
 class FLAG(ctypes.Structure):
     _fields_ = [("do_flat_dark_correction", ctypes.c_int),
                 ("do_flat_dark_log", ctypes.c_int),
@@ -132,7 +173,16 @@ class FLAG(ctypes.Structure):
 class CEF(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
                 ("beta_delta", ctypes.c_float), 
-                ("paganin_lambda", ctypes.c_float)]   
+                ("regularization", ctypes.c_float),
+                ("post_process", ctypes.c_int)]   
+
+def contrast_param(method, beta_delta, regularization = 0.0, post_process = 0):
+
+    return CEF(method = method, 
+               beta_delta = beta_delta, 
+               regularization = regularization, 
+               post_process = post_process)
+
 
 class RF(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
@@ -596,14 +646,30 @@ def FilterNumber(mfilter):
     else:
         return 6
 
-def PhaseMethodNumber(mfilter):
+def ContrastFilterNumber(mfilter):
     if mfilter.lower() == 'none':
         return 0
     elif mfilter.lower() == 'paganin':
         return 1
+    elif mfilter.lower() == 'paganin_slices':
+        return 2
+    elif mfilter.lower() == 'contrast':
+        return 3
     else:
         return 1
 
+def PaddMode(pmode):
+    if pmode.lower() == 'nopad':
+        return 0
+    elif pmode.lower() == 'zero':
+        return 1
+    elif pmode.lower() == 'edge':
+        return 2
+    elif pmode.lower() == 'ones':
+        return 3
+    else:
+        return 2
+    
 def setInterpolation(name):
     """ Set interpolation 
 

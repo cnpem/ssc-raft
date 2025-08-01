@@ -44,7 +44,6 @@ inline void __cufftSafeCall(cufftResult err, const char *file, const int line)
     }
 }
 
-
 inline void SaveLog(){};
 #define LogB(x)
 #define LogE()

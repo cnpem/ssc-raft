@@ -104,7 +104,7 @@ float** c_proj, float** c_recon, float** c_beta, Process process)
                         (int)ceil( process.z_proj / TPBZ ) + 1);
     
     /* Copy GPU sinograms to padded GPU sinograms *c_proj*/
-    opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(c_tomo, *c_proj, 
+    opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(c_tomo, *c_proj, 2, 
                                                         dim3(lab.nh, lab.nbeta, process.z_proj),
                                                         dim3(lab.padh, 0, 0));
 

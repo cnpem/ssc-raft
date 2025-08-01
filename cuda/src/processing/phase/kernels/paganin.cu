@@ -2,6 +2,19 @@
 #include "processing/processing.hpp"
 #include "common/opt.hpp"
 
+__global__ void contrast_enhance::copy(float *projection, float *kernel, dim3 size)
+{
+    int i      = blockIdx.x*blockDim.x + threadIdx.x;
+    int j      = blockIdx.y*blockDim.y + threadIdx.y;
+    int k      = blockIdx.z*blockDim.z + threadIdx.z;
+
+    size_t index  = size.x * k * size.y + size.x * j + i;
+    size_t ind = size.x * j + i;
+
+    if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
+
+    projection[index] = kernel[ind];
+}
 
 __global__ void contrast_enhance::multiplication(cufftComplex *a, float *b, 
 cufftComplex *ans, dim3 size)
@@ -54,15 +67,11 @@ float pixel_objx, float pixel_objy, dim3 size)
     if ( (i >= size.x) || (j >= size.y) || (k >= 1) ) return;
 
     /* Reciprocal grid */
-    
-    float hx = 2.0f / size.x;
-    float hy = 2.0f / size.y;
-
     float wx = fminf( i, size.x - i ) / (float)size.x;  
     float wy = fminf( j, size.y - j ) / (float)size.y;
 
-    wx       = wx / hx;
-    wy       = wy / hy;
+    wx       = wx / pixel_objx;
+    wy       = wy / pixel_objy;
 
     kernel[ind]  = 1.0f / ( 1.0f + regularization * (wx*wx + wy*wy) );
 }
@@ -81,10 +90,11 @@ float pixel_objx, float pixel_objy, dim3 size)
 // }
 
 void contrast_enhance::apply_contrast_filter(cufftHandle mplan, float *projections, float *kernel,
-dim3 size, dim3 size_pad, dim3 pad)
+dim3 size, dim3 pad, int padding_mode)
 {
-    size_t npad = opt::get_total_points(size_pad);
-    float scale = (float)( size_pad.x * size_pad.y);
+    dim3 size_pad = opt::compute_size_padded(size, pad);
+    size_t npad   = opt::get_total_points(size_pad);
+    float scale   = (float)( size_pad.x * size_pad.y);
 
     cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
@@ -93,7 +103,7 @@ dim3 size, dim3 size_pad, dim3 pad)
                     (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
                     (int)ceil( size_pad.z / threadsPerBlock.z ) + 1);
     
-    contrast_enhance::padding<<<gridBlock,threadsPerBlock>>>(projections, dataPadded, size, pad);
+    opt::paddR2C<<<gridBlock,threadsPerBlock>>>(projections, dataPadded, padding_mode, size, pad);
 
     HANDLE_FFTERROR(cufftExecC2C(mplan, dataPadded, dataPadded, CUFFT_FORWARD));
 
@@ -105,7 +115,7 @@ dim3 size, dim3 size_pad, dim3 pad)
 
     // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
 
-    contrast_enhance::recuperate_padding<<<gridBlock,threadsPerBlock>>>(dataPadded, projections, size, pad);
+    opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, projections, size, pad);
 
     HANDLE_ERROR(cudaFree(dataPadded));
 }

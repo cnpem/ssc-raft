@@ -106,7 +106,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
 
-        opt::paddR2C<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, size, pad);
+        opt::paddR2C<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, 2, size, pad);
 
 		convolution_Real_C2C_1D(mplan, dataPadded, size_pad, filter, pixel);
 
@@ -143,7 +143,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
 
         float *dataPadded = opt::allocGPU<float>(npad);
 
-        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, size, pad);
+        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, 2, size, pad);
 
         size_t offset; 
         for( int k = 0; k < size.z; k++){  
@@ -195,6 +195,29 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(mplan));
         HANDLE_FFTERROR(cufftDestroy(mplanI));
 	}
+
+    void filter_lowpass(cufftHandle mplan, cufftHandle mplanI, Filter filter, 
+    float *tomogram, dim3 size)
+    {	
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock( (int)ceil( size.x / TPBX ) + 1,
+                        (int)ceil( size.y / TPBY ) + 1,
+                        (int)ceil( size.z / TPBZ ) + 1);
+
+        dim3 fft_size = dim3( size.x / 2 + 1, size.y, 1 );
+
+        size_t offset; 
+        for( int k = 0; k < size.z; k++){  
+            
+            offset = (size_t)k * size.x * size.y;
+
+            convolution_R2C_C2R_1D(mplan, mplanI, tomogram + offset, fft_size, filter);
+        }
+        
+        float scale = (float)(size.x) * filter.pixel;
+
+        opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
+    }
 }
 
 extern "C" {

@@ -14,12 +14,12 @@ extern "C"{
         const size_t flatptr_size =   configs.nflats *     tomo_batch_size * configs.tomo.size.x;
         const size_t darkptr_size =  tomo_batch_size *                       configs.tomo.size.x;
 
-        const int tomosizepadx = configs.tomo.size.x * ( 1 + configs.tomo.pad.x );
-        const int objsizepadx  =  configs.obj.size.x * ( 1 +  configs.obj.pad.x );
-        const int objsizepady  =  configs.obj.size.y * ( 1 +  configs.obj.pad.y );
+        const int tomosizepadx = PDIM(configs.tomo.size.x,configs.tomo.pad.x); // configs.tomo.size.x * ( 1 + configs.tomo.pad.x );
+        const int objsizepadx  = PDIM( configs.obj.size.x, configs.obj.pad.x); // configs.obj.size.x * ( 1 +  configs.obj.pad.x );
+        const int objsizepady  = PDIM( configs.obj.size.y, configs.obj.pad.y); // configs.obj.size.y * ( 1 +  configs.obj.pad.y );
 
         const size_t tomoptr_padsize =  tomo_batch_size * tomosizepadx * configs.tomo.size.y;
-        const size_t objptr_padsize  =   obj_batch_size *  objsizepadx *         objsizepadx;
+        const size_t objptr_padsize  =   obj_batch_size *  objsizepadx *         objsizepady;
 
         const size_t angles_size  = configs.tomo.size.y;
 

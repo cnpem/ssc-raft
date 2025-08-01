@@ -64,10 +64,10 @@ extern "C"{
 /* Contrast Enhancement Functions */
 extern "C"{
 
-    void getContrastEnhencementMultiGPU(DIM tomo, GEO geometry, CEF PaganinFilter,
+    void getContrastEnhencementMultiGPU(DIM tomo, GEO geometry, CEF ContrastFilter,
     int *gpus, int ngpus, float *projections);
 
-    void getContrastEnhencementGPU(DIM tomo, GEO geometry, CEF PaganinFilter,
+    void getContrastEnhencementGPU(DIM tomo, GEO geometry, CEF ContrastFilter,
     float *projections, int sizez, int ngpu);
 }
 
@@ -77,17 +77,15 @@ namespace contrast_enhance{ // Phase retrieval Paganin
     {
         none           = 0,
         paganin        = 1,
-        paganin_slices = 2
+        paganin_slices = 2,
+        contrast       = 3
     };
-
-    __global__ void padding(float *in, cufftComplex *inpadded, dim3 size, dim3 pad);
-    __global__ void recuperate_padding(cufftComplex *inpadded, float *in, dim3 size, dim3 pad);
 
     __global__ void paganinKernel(float *kernel, float beta_delta, float wavelength, 
     float pixel_objx, float pixel_objy, float z2, dim3 size);
 
     void apply_contrast_filter(cufftHandle mplan, float *projections, float *kernel,
-    dim3 size, dim3 size_pad, dim3 pad);
+    dim3 size, dim3 pad, int padding_mode);
 
     __global__ void multiplication(cufftComplex *a, float *b, cufftComplex *ans, dim3 size);
 

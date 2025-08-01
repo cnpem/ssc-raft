@@ -180,10 +180,14 @@ namespace opt{
         }
     };
 
-    __global__ void paddR2C(float *in, cufftComplex *outpadded, dim3 size, dim3 pad);
-    __global__ void paddC2C(cufftComplex *in, cufftComplex *outpadded, dim3 size, dim3 pad);
-    __global__ void paddC2R(cufftComplex *in, float *outpadded, dim3 size, dim3 pad);
-    __global__ void paddR2R(float *in, float *outpadded, dim3 size, dim3 pad);
+    dim3 compute_size_padded(dim3 size, dim3 pad);
+    int compute_dim_padded(int size, int pad);
+    int compute_padding_size(int size, int pad);
+
+    __global__ void paddR2C(float *in, cufftComplex *outpadded, int padding_mode, dim3 size, dim3 pad);
+    __global__ void paddC2C(cufftComplex *in, cufftComplex *outpadded, int padding_mode, dim3 size, dim3 pad);
+    __global__ void paddC2R(cufftComplex *in, float *outpadded, int padding_mode, dim3 size, dim3 pad);
+    __global__ void paddR2R(float *in, float *outpadded, int padding_mode, dim3 size, dim3 pad);
 
     __global__ void remove_paddC2R(cufftComplex *inpadded, float *out, dim3 size, dim3 padsize);
     __global__ void remove_paddC2C(cufftComplex *inpadded, cufftComplex *out, dim3 size, dim3 padsize);
@@ -195,6 +199,14 @@ namespace opt{
         none = 0, /* Do nothing */
         log  = 1, /* Apply data = -log( data) */
         exp  = 2  /* Apply data =  exp(-data) */
+    };
+
+    enum PaddingMode
+    {
+        nopad = 0, /* No padding */
+        zero  = 1, /* Zero padding */
+        edge  = 2, /* Edge padding */
+        ones  = 3  /* Ones padding */
     };
 
     extern "C" {

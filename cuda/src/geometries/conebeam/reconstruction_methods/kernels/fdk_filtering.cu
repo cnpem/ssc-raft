@@ -30,7 +30,7 @@ Process process)
                         (int)ceil( process.z_filter / TPBZ ) + 1);
     
     /* Copy GPU sinograms to padded GPU sinograms *c_proj*/
-    opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(c_tomo, *c_proj, 
+    opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(c_tomo, *c_proj, 2,
                                                         dim3(lab.nh, lab.nbeta, process.z_filter),
                                                         dim3(lab.padh, 0, 0));
     

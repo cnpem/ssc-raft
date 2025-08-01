@@ -116,13 +116,9 @@ extern "C"{
     float *object, float *tomogram, float *angles, 
     int sizez, int ngpu)
     {
-        printf("Here 2 \n");
-        fflush(stdout);
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
-        int i;
-
-        int blocksize = tomo.blocksize;
+        int i, blocksize = tomo.blocksize;
 
         /* Compute total memory used of FBP method on a singles slice */
         size_t total_required_mem_per_slice_bytes = (
@@ -142,16 +138,17 @@ extern "C"{
         }
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
-        printf("Here 3. blocksize = %d; ind_block = %d \n", blocksize, ind_block);
-        fflush(stdout);
+		int ptr = 0, subblock; 
 
         /* Projection data sizes */
         /* Projection size */
         int nrays    = tomo.size.x;
         int nangles  = tomo.size.y;
+        int nTomo    = nrays * nangles;
 
         /* Projection padded size */
-        int nrayspad = nrays * (1 + tomo.pad.x);
+        int nrayspad = PDIM(nrays,tomo.pad.x); // nrays * (1 + tomo.pad.x);
+        int nTomopad = nrayspad * nangles;
 
         /* Projection GPUs padded Grd and Blocks */
         dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
@@ -163,10 +160,31 @@ extern "C"{
         /* Reconstruction size */
         int sizeImagex = obj.size.x;
         int sizeImagey = obj.size.y;
+        int nImage     = sizeImagex * sizeImagey;
 
         /* Reconstruction padded size */
-        int padImagex  = sizeImagex * (1 + obj.pad.x);
-        int padImagey  = sizeImagey * (1 + obj.pad.y);
+        int padImagex  = PDIM(sizeImagex,obj.pad.x); // sizeImagex * (1 + obj.pad.x);
+        int padImagey  = PDIM(sizeImagey,obj.pad.y); // sizeImagey * (1 + obj.pad.y);
+        int npadImage  = padImagex * padImagey;
+
+        int padx  = PADS(sizeImagex,obj.pad.x); 
+        int pady  = PADS(sizeImagey,obj.pad.y); 
+        int padt  = PADS(nrays,tomo.pad.x);
+        
+        Log("Size tomo");
+        printDim(tomo.size);
+        Log("Pad tomo");
+        printDim(tomo.pad);
+        printf("TOMO: nrayspad = %d\n", nrayspad);
+        printf("TOMO: padx = %d; pady = %d \n", padx);
+        Log("Size obj");
+        printDim(obj.size);
+        Log("Pad obj");
+        printDim(obj.pad);
+        printf("OBJ: padImagex = %d; padImagey = %d \n", padImagex, padImagey);
+        printf("OBJ: padx = %d; pady = %d \n", padx, pady);
+        printf("padding_mode = %d \n", tomo.padding_mode);
+        fflush(stdout);
 
         /* Reconstruction GPUs padded Grd and Blocks */
         dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
@@ -174,60 +192,78 @@ extern "C"{
                             (int)ceil( padImagey / TPBY ) + 1,
                             (int)ceil( blocksize / TPBZ ) + 1);
 
-        float *dtomo   = opt::allocGPU<float>((size_t)     nrays *    nangles * blocksize);
-        float *dobj    = opt::allocGPU<float>((size_t)sizeImagex * sizeImagey * blocksize);
+        float *dtomo   = opt::allocGPU<float>((size_t) nTomo * blocksize);
+        float *dobj    = opt::allocGPU<float>((size_t)nImage * blocksize);
         float *dangles = opt::allocGPU<float>( nangles );
 
-        /* Padding */
-        float *dtomoPadded = opt::allocGPU<float>((size_t) nrayspad *   nangles * blocksize);
-        float *dobjPadded  = opt::allocGPU<float>((size_t)padImagex * padImagey * blocksize);
+        float *dtomoPadded, *dobjPadded;
 
         opt::CPUToGPU<float>(angles, dangles, nangles);
 
-        /* Loop for each batch of size 'batch' in threads */
-		int ptr = 0, subblock; size_t ptr_block_tomo = 0, ptr_block_obj = 0;
+        if ( tomo.padding_mode == opt::PaddingMode::nopad ){
 
-        for (i = 0; i < ind_block; i++){
+            for (i = 0; i < ind_block; i++){
 
-			subblock       = min(sizez - ptr, blocksize);
+                subblock = min(sizez - ptr, blocksize);
+                
+                opt::CPUToGPU<float>(tomogram + (size_t)nTomo * ptr,
+                                     dtomo, (size_t)nTomo * subblock);
+                
+                getFBP( ReconParam, dobj, dtomo, dangles, 
+                        dim3(     nrays,   nangles, subblock),  /* Tomogram padded size */
+                        dim3(sizeImagex, padImagey, subblock),  /* Object (reconstruction) padded size */
+                        geometry.obj_pixel.x, geometry.obj_pixel.x); 
 
-			ptr_block_tomo = (size_t)     nrays *    nangles * ptr;
-            ptr_block_obj  = (size_t)sizeImagex * sizeImagey * ptr;
+                opt::GPUToCPU<float>(object + (size_t)nImage * ptr, 
+                                     dobj, (size_t)nImage * subblock);
 
-			/* Update pointer */
-			ptr = ptr + subblock;
-			
-            opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
-                                (size_t)nrays * nangles * subblock);
+                /* Update pointer */
+                ptr = ptr + subblock;
+            }
+        }else{
+            /* Padding */
+            dtomoPadded = opt::allocGPU<float>((size_t) nTomopad * blocksize);
+            dobjPadded  = opt::allocGPU<float>((size_t)npadImage * blocksize);
+        
+            for (i = 0; i < ind_block; i++){
 
-            /* Padding the tomogram data */
-            TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
-            opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomoPadded, 
-                                                                dim3(nrays, nangles, subblock), 
-                                                                tomo.pad);
+                subblock = min(sizez - ptr, blocksize);
 
-            getFBP( ReconParam, dobjPadded, dtomoPadded, dangles, 
-                    dim3(nrayspad ,   nangles, subblock),  /* Tomogram padded size */
-                    dim3(padImagex, padImagey, subblock),  /* Object (reconstruction) padded size */
-                    geometry.obj_pixel_x, geometry.obj_pixel_x); 
+                opt::CPUToGPU<float>(tomogram + (size_t)nTomo * ptr, dtomo, 
+                                    (size_t)nTomo * subblock);
+                
+                /* Padding the tomogram data */
+                TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
+                opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomoPadded, tomo.padding_mode,
+                                                                    dim3(nrays, nangles, subblock), 
+                                                                    tomo.pad);
 
-            /* Remove padd from the object (reconstruction) */
-            ObjgridBlock.z = TomogridBlock.z;
-            opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(dobjPadded, dobj, 
-                                                                    dim3(sizeImagex, sizeImagey, subblock), 
-                                                                    obj.pad);
+                getFBP( ReconParam, dobjPadded, dtomoPadded, dangles, 
+                        dim3( nrayspad,   nangles, subblock),  /* Tomogram padded size */
+                        dim3(padImagex, padImagey, subblock),  /* Object (reconstruction) padded size */
+                        geometry.obj_pixel.x, geometry.obj_pixel.x); 
 
-            opt::GPUToCPU<float>(object + ptr_block_obj, dobj, 
-                                (size_t)sizeImagex * sizeImagey * subblock);
+                /* Remove padd from the object (reconstruction) */
+                ObjgridBlock.z = TomogridBlock.z;
+                opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(dobjPadded, dobj, 
+                                                                        dim3(sizeImagex, sizeImagey, subblock), 
+                                                                        obj.pad);
 
+                opt::GPUToCPU<float>(object + (size_t)nImage * ptr, dobj, 
+                                    (size_t)nImage * subblock);
+
+                /* Update pointer */
+                ptr = ptr + subblock;
+            }
+            HANDLE_ERROR(cudaFree(dtomoPadded));
+            HANDLE_ERROR(cudaFree(dobjPadded));
         }
         HANDLE_ERROR(cudaDeviceSynchronize());
 
         HANDLE_ERROR(cudaFree(dangles));
         HANDLE_ERROR(cudaFree(dtomo));
         HANDLE_ERROR(cudaFree(dobj));
-        HANDLE_ERROR(cudaFree(dtomoPadded));
-        HANDLE_ERROR(cudaFree(dobjPadded));
+
     }
 
     void getFBPMultiGPU(DIM tomo, DIM obj, GEO geometry, REC ReconParam,
@@ -241,7 +277,6 @@ extern "C"{
 		/* If devices input are larger than actual devices on GPU, exit */
 		for(i = 0; i < ngpus; i++) 
 			assert(gpus[i] < Maxgpudev && "Invalid device number.");
-
 
         /* Projection data sizes */
         int nrays    = tomo.size.x;
@@ -257,42 +292,46 @@ extern "C"{
 
         printf("nslices, nrays, nangles = (%d, %d, %d) \n",nslices, nrays, nangles);
         printf("sizeImagex, sizeImagey = (%d, %d) \n",sizeImagex, sizeImagey);
+        printf("tomo pad = %d, %d, %d \n",tomo.pad.x, tomo.pad.y, tomo.pad.z);
+        printf("obj pad = %d, %d, %d \n",obj.pad.x, obj.pad.y, obj.pad.z);
+        printf("padding_mode = %d \n",tomo.padding_mode);
+        printf("Blocksize = %d \n",tomo.blocksize);
+        printf("subvolume = %d \n",subvolume);
+        printf("ngpus = %d, %d \n",ngpus, gpus[0]);
         fflush(stdout);
 
-		// if (ngpus == 1){ /* 1 device */
+		if (ngpus == 1){ /* 1 device */
             
-        //     printf("Here 1 \n");
-        //     fflush(stdout);
-		// 	getFBPGPU(tomo, obj, geometry, ReconParam, object, tomogram, angles, nslices, gpus[0]);
+			getFBPGPU(tomo, obj, geometry, ReconParam, object, tomogram, angles, nslices, gpus[0]);
 
-		// }else{
-		// /* Launch async Threads for each device.
-		// 	Each device solves a block of 'nrays * nangles' size.
-		// */
-		// 	// See future c++ async launch
-		// 	std::vector<std::future<void>> threads = {};
-        //     threads.reserve(ngpus);
+		}else{
+		/* Launch async Threads for each device.
+			Each device solves a block of 'nrays * nangles' size.
+		*/
+			//See future c++ async launch
+			std::vector<std::future<void>> threads = {};
+            threads.reserve(ngpus);
 
-		// 	for (i = 0; i < ngpus; i++){
+			for (i = 0; i < ngpus; i++){
 				
-		// 		subblock   = min(nslices - ptr, subvolume);
+				subblock   = min(nslices - ptr, subvolume);
 
-		// 		threads.push_back( std::async( std::launch::async, 
-        //             getFBPGPU, 
-        //             tomo, obj, geometry, ReconParam, 
-        //             object   + (size_t)sizeImagex * sizeImagey * ptr,
-        //             tomogram + (size_t)     nrays *    nangles * ptr, 
-        //             angles, 
-        //             subblock,
-        //             gpus[i]));
+				threads.push_back( std::async( std::launch::async, 
+                    getFBPGPU, 
+                    tomo, obj, geometry, ReconParam, 
+                    object   + (size_t)sizeImagex * sizeImagey * ptr,
+                    tomogram + (size_t)     nrays *    nangles * ptr, 
+                    angles, 
+                    subblock,
+                    gpus[i]));
 
-        //         /* Update pointer */
-		// 		ptr = ptr + subblock;		
+                /* Update pointer */
+				ptr = ptr + subblock;		
 
-		// 	}
-		// 	for (i = 0; i < ngpus; i++)
-		// 		threads[i].get();
-		// }
+			}
+			for (i = 0; i < ngpus; i++)
+				threads[i].get();
+		}
     }
 
 }

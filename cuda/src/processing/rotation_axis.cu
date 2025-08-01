@@ -470,8 +470,8 @@ extern "C"{
     float axis_offset, dim3 tomo_size)
     {
         /* Projection data sizes */
-        int padx    = 2;
-        int nrays   = tomo_size.x * ( 1 + padx );
+        int padx    = int( 0.5f * 100 );
+        int nrays   = PDIM(tomo_size.x,padx); // tomo_size.x * ( 1 + padx );
         int nangles = tomo_size.y;
         int nslices = tomo_size.z;
 
@@ -498,8 +498,7 @@ extern "C"{
         cufftComplex *fft = opt::allocGPU<cufftComplex>(nfft);
         float *dataPadded = opt::allocGPU<float>(npad);
 
-        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, tomo_size,
-                                                    dim3(padx,0,0));
+        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, 2, tomo_size, dim3(padx,0,0));
 
         size_t offset; 
         for( int k = 0; k < nslices; k++){  

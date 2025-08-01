@@ -11,6 +11,10 @@
 
 #define IND(I,J,K,NX,NY) (long long int)( (I) + (J) * (NX) + (K) * (NX) * (NY) )
 
+#define PADS(X, P) (int)( ( X * P) / 100 )
+
+#define PDIM(X,P) (int)( X + 2 * ((int)( (X * P) / 100 )) )
+
 #define vc 299792458           /* Velocity of Light [m/s] */ 
 #define plank 4.135667696E-15  /* Plank constant [ev*s] */
 #define PI 3.141592653589793238462643383279502884
@@ -54,11 +58,18 @@ enum ReconstructionMethod
     fdk     = 6
 };
 
+typedef struct coordinates
+{
+    float x; /* Coordinates values on x-direction */
+    float y; /* Coordinates values on y-direction */
+} coord; /* Coordinates values */
+
 typedef struct dimension
 {
     dim3 size; /* Dimension values */
     dim3  pad;     /* Pad value */
     int blocksize;
+    int padding_mode;
 } DIM; /* Data dimensions */
 
 inline float calcSliceMemoryBytes(DIM dimension) {
@@ -80,12 +91,11 @@ inline float calcLengthMemoryBytes(DIM dimension) {
 typedef struct geometry
 {
     /* General reconstruction variables*/
-    float detector_pixel_x, detector_pixel_y;
-    float obj_pixel_x, obj_pixel_y;
+    coord detector_pixel;
+    coord obj_pixel;
+    coord z1, z2;
+    coord magnitude;
     float energy, wavelength;
-    float z1x, z1y, z2x, z2y;
-    float magnitude_x, magnitude_y;
-
 }GEO;
 
 typedef struct flags
@@ -106,7 +116,8 @@ typedef struct ContrastEnhancementFilter
     /* Paganin Filter */
     int method; /* Contrast Enhancement methods. Options: paganin, paganin_slices*/
     float beta_delta; /* beta/delta parameter */
-    float paganin_lambda; /* Paganin regularization parameter */
+    float regularization; /* regularization parameter */
+    int post_process; /* Function applied after usual convolution: ex. aplly -log() after Paganin kernel */
 
 }CEF;
 
@@ -158,22 +169,22 @@ inline void printDim(dim3 d) {
     printf("dim3 {%d, %d, %d}\n", d.x, d.y, d.z);
 }
 
-inline float calcTotalRequiredMemoryBytes(CFG configs) {
+inline float calcTotalRequiredMemoryBytes(DIM tomo, DIM obj) {
     return (
-            calcSliceMemoryBytes(configs.tomo) +
-            calcSliceMemoryBytes(configs.obj) +
-            calcPaddedSliceMemoryBytes(configs.tomo) +
-            calcLengthMemoryBytes(configs.tomo) +
-            calcWidthMemoryBytes(configs.tomo)
+            calcSliceMemoryBytes(tomo) +
+            calcSliceMemoryBytes(obj) +
+            calcPaddedSliceMemoryBytes(tomo) +
+            calcLengthMemoryBytes(tomo) +
+            calcWidthMemoryBytes(tomo)
            );
 }
 
-inline bool isParallelOrFanbeamGeometry(CFG configs) {
-    return configs.geometry.magnitude_y == 1;
+inline bool isParallelOrFanbeamGeometry(GEO geometry) {
+    return geometry.magnitude.y == 1;
 }
 
-inline bool isConeGeometry(CFG configs) {
-    return configs.geometry.magnitude_y != 1;
+inline bool isConeGeometry(GEO geometry) {
+    return geometry.magnitude.y != 1;
 }
 
 struct GPU

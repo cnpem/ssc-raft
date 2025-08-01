@@ -6,17 +6,18 @@
 
 extern "C" {
 
-    void compute_contrast_kernel(DIM tomo, GEO geometry, CEF PaganinFilter, float *kernel)
+    void compute_contrast_kernel(DIM tomo, GEO geometry, CEF ContrastFilter, float *kernel)
     {
         /* Data sizes */
-        int sizex        = tomo.size.x * (1 + tomo.pad.x);
-        int sizey        = tomo.size.y * (1 + tomo.pad.y);
+        int sizex        = PDIM(tomo.size.x,tomo.pad.x); // tomo.size.x * (1 + tomo.pad.x);
+        int sizey        = PDIM(tomo.size.y,tomo.pad.y); // tomo.size.y * (1 + tomo.pad.y);
 
-        float z2         = geometry.z2x;
-        float pixel_objx = geometry.obj_pixel_x;
-        float pixel_objy = geometry.obj_pixel_y;
+        float z2         = geometry.z2.x / geometry.magnitude.x;
+        float pixel_objx = geometry.obj_pixel.x;
+        float pixel_objy = geometry.obj_pixel.y;
         float wavelength = geometry.wavelength;
-        float beta_delta = PaganinFilter.beta_delta;
+        float beta_delta = ContrastFilter.beta_delta;
+        float reg        = ContrastFilter.regularization;
 
 		cublasHandle_t handle = NULL;
         cublasCreate(&handle);
@@ -25,11 +26,15 @@ extern "C" {
         dim3 threadsPerBlock(TPBX,TPBY,1);
         dim3 gridBlock = opt::setGridBlock(dim3(sizex,sizey,1), threadsPerBlock);
 
-		switch (PaganinFilter.method){
+		switch (ContrastFilter.method){
             case contrast_enhance::ContrastEnhanceType::paganin:
-                /* code */
+                /* Paganin by frames, classic */
                 contrast_enhance::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
                 pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
+                break;
+            case contrast_enhance::ContrastEnhanceType::contrast:
+                contrast_enhance::contrast_paganin_based_Kernel<<<gridBlock,threadsPerBlock>>>(kernel, reg, 
+                pixel_objx, pixel_objy, dim3(sizex,sizey,1));
                 break;
             default:
                 contrast_enhance::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
@@ -56,13 +61,16 @@ extern "C" {
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-	void getContrastEnhencement(cufftHandle mplan, 
-    float *projections, float *kernel, dim3 size, dim3 size_pad, dim3 pad)
+	void getContrastEnhencement(CEF ContrastFilter, DIM tomo, cufftHandle mplan, 
+    float *projections, float *kernel, int subblock)
 	{	
-        contrast_enhance::apply_contrast_filter(mplan, projections, kernel, size, size_pad, pad);
+        dim3 size = dim3(tomo.size.x, tomo.size.y, subblock);
+        contrast_enhance::apply_contrast_filter(mplan, projections, kernel, size, tomo.pad, tomo.padding_mode);
+
+        if (ContrastFilter.post_process == 1) getlog(projections, size);
     }
 
-	void getContrastEnhencementGPU(DIM tomo, GEO geometry, CEF PaganinFilter,
+	void getContrastEnhencementGPU(DIM tomo, GEO geometry, CEF ContrastFilter,
 	float *projections, int sizez, int ngpu)
 	{	
 		/* Initialize GPU device */
@@ -71,15 +79,15 @@ extern "C" {
         /* Projection data sizes */
         int nrays      = tomo.size.x;
         int nslices    = tomo.size.y;
-        int nrayspad   =   nrays * (1 + tomo.pad.x);
-        int nslicespad = nslices * (1 + tomo.pad.y);
+        int nrayspad   = PDIM(  nrays,tomo.pad.x); // nrays * (1 + tomo.pad.x);
+        int nslicespad = PDIM(nslices,tomo.pad.y); // nslices * (1 + tomo.pad.y);
 
         /* Kernel Computation */
 
         size_t nsize   = nrayspad * nslicespad;
 		float *kernel  = opt::allocGPU<float>(nsize);
 
-        compute_contrast_kernel(tomo, geometry, PaganinFilter, kernel);
+        compute_contrast_kernel(tomo, geometry, ContrastFilter, kernel);
 
 		int i; 
         int blocksize = tomo.blocksize;
@@ -100,8 +108,8 @@ extern "C" {
 
 		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
 
-        cufftHandle mplan;
         /* Plan for Fourier transform - cufft */
+        cufftHandle mplan;
 		int n[] = {nslicespad,nrayspad};
 		HANDLE_FFTERROR(cufftPlanMany(&mplan, 2, n, n, 1, nslicespad*nrayspad, n, 1, nslicespad*nrayspad, CUFFT_C2C, blocksize));
 
@@ -125,11 +133,7 @@ extern "C" {
             opt::CPUToGPU<float>(projections + ptr_block, dprojections, 
                                 (size_t)nrays * nslices * subblock);
 
-			getContrastEnhencement( mplan, dprojections, kernel,
-                      dim3(nrays, nslices, subblock), 
-                      dim3(nrayspad, nslicespad, subblock),
-                      tomo.pad
-                    );
+			getContrastEnhencement( ContrastFilter, tomo, mplan, dprojections, kernel, subblock );
 
 			opt::GPUToCPU<float>(projections + ptr_block, dprojections, 
                                 (size_t)nrays * nslices * subblock);
@@ -146,7 +150,7 @@ extern "C" {
 
 	}
 
-    void getContrastEnhencementMultiGPU(DIM tomo, GEO geometry, CEF PaganinFilter,
+    void getContrastEnhencementMultiGPU(DIM tomo, GEO geometry, CEF ContrastFilter,
     int *gpus, int ngpus, float *projections)
 	{	
 		int i, Maxgpudev;
@@ -163,7 +167,7 @@ extern "C" {
 
 		if (ngpus == 1){ /* 1 device */
 
-			getContrastEnhencementGPU(tomo, geometry, PaganinFilter, projections, subvolume, gpus[0]);
+			getContrastEnhencementGPU(tomo, geometry, ContrastFilter, projections, subvolume, gpus[0]);
 
 		}else{
 		/* Launch async Threads for each device.
@@ -184,7 +188,7 @@ extern "C" {
 				threads.push_back( std::async(  std::launch::async, 
 												getContrastEnhencementGPU,
                                                 tomo, geometry, 
-                                                PaganinFilter,
+                                                ContrastFilter,
 												projections + ptr_volume, 
 												subblock, gpus[i]
 												));		

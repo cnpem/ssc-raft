@@ -49,27 +49,31 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
     angles        = CNICE(angles) #angles pointer
     angles_ptr    = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    padx          = 0
+    padding       = 0
+    pixel         = 1.0
+    z2            = 1.0
+    energy        = 1.0
+    wavelength    = 1.0
 
-    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
-    obj_size     = dim3(x = objsize, y = objsize, z = nslices)
+    tomo_dim      = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize)
+    obj_dim       = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize)
+    
+    geometry      = define_geometry(detector_pixel = (pixel, pixel),
+                                    obj_pixel      = (pixel, pixel),
+                                    z1             = (0,0),
+                                    z2             = (z2,z2),
+                                    magnitude      = (1.0,1.0), 
+                                    energy         = energy, 
+                                    wavelength     = wavelength)
 
-    tomo_pad     = dim3(x = padx, y =    0, z = 0)
-    obj_pad      = dim3(x = padx, y = padx, z = 0)
-
-    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
-    obj_dim      = DIM(size =  obj_size, pad =  obj_pad, blocksize = blocksize)
-
-    geometry     = GEO(detector_pixel_x = 1.0, detector_pixel_y = 1.0, 
-                       obj_pixel_x = 1.0, obj_pixel_y = 1.0, 
-                       energy = 1.0, wavelength = 1.0, 
-                       z1x = 0, z1y = 0, z2x = 0, z2y = 0, 
-                       magnitude_x = 1.0, magnitude_y = 1.0)
-
-    ReconParam   = REC( method = 0, filter = 0, filter_reg = 1.0,
-                        paganin_slices = 0.0, iterations = iterations, rotation_axis_offset = 0,
-                        total_variation = 0, interpolation = 0)
-
+    ReconParam   = REC(method               = 0, 
+                       filter               = 0, 
+                       filter_reg           = 1.0,  
+                       paganin_slices       = 0.0, 
+                       iterations           = iterations, 
+                       rotation_axis_offset = 0,
+                       total_variation      = 0, 
+                       interpolation        = 0)
 
     libraft.get_eEM_RT_MultiGPU(tomo_dim, obj_dim, geometry, ReconParam, 
                                 gpus_ptr, ctypes.c_int(ngpus),
@@ -104,7 +108,7 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
     else:
         nslices = counts.shape[0]
 
-    if len(counts.shape) == 2:
+    if len(flat.shape) == 2:
         nflats = 1
     else:
         nflats = flat.shape[0]
@@ -139,26 +143,31 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
     angles        = CNICE(angles) #angles pointer
     angles_ptr    = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    padx          = 0
+    padding       = 0
+    pixel         = 1.0
+    z2            = 1.0
+    energy        = 1.0
+    wavelength    = 1.0
 
-    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
-    obj_size     = dim3(x = objsize, y = objsize, z = nslices)
+    tomo_dim      = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize)
+    obj_dim       = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize)
+    
+    geometry      = define_geometry(detector_pixel = (pixel, pixel),
+                                    obj_pixel      = (pixel, pixel),
+                                    z1             = (0,0),
+                                    z2             = (z2,z2),
+                                    magnitude      = (1.0,1.0), 
+                                    energy         = energy, 
+                                    wavelength     = wavelength)
 
-    tomo_pad     = dim3(x = padx, y =    0, z = 0)
-    obj_pad      = dim3(x = padx, y = padx, z = 0)
-
-    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
-    obj_dim      = DIM(size =  obj_size, pad =  obj_pad, blocksize = blocksize)
-
-    geometry     = GEO(detector_pixel_x = 1.0, detector_pixel_y = 1.0, 
-                       obj_pixel_x = 1.0, obj_pixel_y = 1.0, 
-                       energy = 1.0, wavelength = 1.0, 
-                       z1x = 0, z1y = 0, z2x = 0, z2y = 0, 
-                       magnitude_x = 1.0, magnitude_y = 1.0)
-
-    ReconParam   = REC( method = 0, filter = 0, filter_reg = 1.0,
-                        paganin_slices = 0.0, iterations = iterations, rotation_axis_offset = 0,
-                        total_variation = 0, interpolation = 0)
+    ReconParam   = REC(method               = 0, 
+                       filter               = 0, 
+                       filter_reg           = 1.0,  
+                       paganin_slices       = 0.0, 
+                       iterations           = iterations, 
+                       rotation_axis_offset = 0,
+                       total_variation      = 0, 
+                       interpolation        = 0)
 
     libraft.get_tEM_RT_MultiGPU(tomo_dim, obj_dim, geometry, ReconParam,
                                 gpus_ptr, ctypes.c_int(ngpus),
@@ -230,28 +239,34 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
     angles      = CNICE(angles) 
     angles_ptr  = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    padx,_,_         = pad
-    det_pixelx, det_pixely = det_pixel
-    interp                 = setInterpolation(interpolation)
 
-    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
-    obj_size     = dim3(x = objsize, y = objsize, z = nslices)
+    interp      = setInterpolation(interpolation)
+    padding     = pad
+    pixel       = det_pixel
 
-    tomo_pad     = dim3(x = padx, y =    0, z = 0)
-    obj_pad      = dim3(x = padx, y = padx, z = 0)
+    z2          = 1.0
+    energy      = 1.0
+    wavelength  = 1.0
 
-    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
-    obj_dim      = DIM(size =  obj_size, pad =  obj_pad, blocksize = blocksize)
-
-    geometry     = GEO(detector_pixel_x = det_pixelx, detector_pixel_y = det_pixely, 
-                       obj_pixel_x = det_pixelx, det_pixely = det_pixel, 
-                       energy = 1.0, wavelength = 1.0, 
-                       z1x = 0, z1y = 0, z2x = 0, z2y = 0, 
-                       magnitude_x = 1.0, magnitude_y = 1.0)
+    tomo_dim    = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize)
+    obj_dim     = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize)
     
-    ReconParam   = REC( method = 0, filter = 0, filter_reg = 1.0,
-                        paganin_slices = 0.0, iterations = iterations, rotation_axis_offset = 0,
-                        total_variation = tv_reg, interpolation = interp)
+    geometry    = define_geometry(detector_pixel = (pixel, pixel),
+                                  obj_pixel      = (pixel, pixel),
+                                  z1             = (0,0),
+                                  z2             = (z2,z2),
+                                  magnitude      = (1.0,1.0), 
+                                  energy         = energy, 
+                                  wavelength     = wavelength)
+
+    ReconParam  = REC(method               = 0, 
+                      filter               = 0, 
+                      filter_reg           = 1.0,  
+                      paganin_slices       = 0.0, 
+                      iterations           = iterations, 
+                      rotation_axis_offset = 0,
+                      total_variation      = tv_reg, 
+                      interpolation        = interp)
 
     libraft.get_tEM_FQ_MultiGPU(tomo_dim, obj_dim, geometry, ReconParam, 
                                 gpus_ptr, ctypes.c_int(ngpus),

@@ -72,7 +72,7 @@ extern "C"{
 	{
         Process *process = (Process *) malloc(sizeof(Process) * total_number_of_processes);
 
-        if (isParallelOrFanbeamGeometry(configs)) {
+        if (isParallelOrFanbeamGeometry(configs.geometry)) {
             for (int p = 0; p < total_number_of_processes; p++)
                 setProcessParallel(configs, process, gpus, p, total_number_of_processes);
         } 
@@ -211,7 +211,7 @@ extern "C"{
 extern "C"{
     int getTotalProcesses(CFG configs, float gpu_memory, int sizeZ, bool using_fft)
     {
-        const float total_required_mem_per_slice_bytes = calcTotalRequiredMemoryBytes(configs);
+        const float total_required_mem_per_slice_bytes = calcTotalRequiredMemoryBytes(configs.tomo, configs.obj);
         const int blocksizeMax = compute_GPU_blocksize(sizeZ,
                                                 total_required_mem_per_slice_bytes,
                                                 using_fft,

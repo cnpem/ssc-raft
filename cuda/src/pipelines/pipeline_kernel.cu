@@ -24,8 +24,8 @@ extern "C"{
                         workspace->tomoPadd, 
                         workspace->angles, 
                         tomo_size, obj_size, 
-                        configs.geometry.detector_pixel_x, 
-                        configs.geometry.detector_pixel_y
+                        configs.geometry.detector_pixel.x, 
+                        configs.geometry.detector_pixel.y
                     );
                 break;
             case ReconstructionMethod::fbpBST:
@@ -93,7 +93,7 @@ extern "C"{
                             (int)ceil(     nyp / TPBY ) + 1,
                             (int)ceil( nslices / TPBZ ) + 1);
         
-        opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(workspace->tomo, workspace->tomoPadd, 
+        opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(workspace->tomo, workspace->tomoPadd, configs.tomo.padding_mode, 
             dim3(nrays, nangles, nslices), configs.tomo.pad);
 
         free(workspace->tomo); /* Dealocate variable we will not use anymore */

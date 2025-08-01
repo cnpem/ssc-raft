@@ -123,7 +123,7 @@ int blocksize, int gpu)
         - My preference is to always use METERS 
         - Be consistent with the units!!
     */
-    float dx = configs.geometry.detector_pixel_x;
+    float dx = configs.geometry.detector_pixel.x;
 
     /* tv_param:
         - Regularization parameter for total variation (TV) regularization
