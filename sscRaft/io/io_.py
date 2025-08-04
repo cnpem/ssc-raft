@@ -175,7 +175,8 @@ def SetDictionary(dic,required,optional,default):
         ValueError: If required keys provided are not present on input dictionary
     """
     
-    dic = _EvalRequiredDic(dic, required)
+    if required is not None:
+        dic = _EvalRequiredDic(dic, required)
 
     for key in range(len(optional)):
         dic = _SetDic(dic,optional[key], default[key])

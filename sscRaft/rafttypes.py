@@ -139,7 +139,7 @@ class GEO(ctypes.Structure):
                 ("z2", coord), 
                 ("magnitude", coord), 
                 ("energy", ctypes.c_float), 
-                ("wavelength", ctypes.c_float),
+                ("wavelength", ctypes.c_float)
                 ]
 
 def define_geometry(detector_pixel, obj_pixel, z1, z2, magnitude, energy, wavelength):

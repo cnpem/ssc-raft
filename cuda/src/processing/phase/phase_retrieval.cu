@@ -26,13 +26,19 @@ extern "C" {
         dim3 threadsPerBlock(TPBX,TPBY,1);
         dim3 gridBlock = opt::setGridBlock(dim3(sizex,sizey,1), threadsPerBlock);
 
+        printf("ContrastFilter.method: %d \n", ContrastFilter.method);
+        fflush(stdout);
 		switch (ContrastFilter.method){
             case contrast_enhance::ContrastEnhanceType::paganin:
                 /* Paganin by frames, classic */
+                printf("Using Paganin classico \n");
+                fflush(stdout);
                 contrast_enhance::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
                 pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
                 break;
             case contrast_enhance::ContrastEnhanceType::contrast:
+            printf("Using Contrast \n");
+            fflush(stdout);
                 contrast_enhance::contrast_paganin_based_Kernel<<<gridBlock,threadsPerBlock>>>(kernel, reg, 
                 pixel_objx, pixel_objy, dim3(sizex,sizey,1));
                 break;
@@ -41,13 +47,14 @@ extern "C" {
                 pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
                 break;
         }
-
         // Normalize kernel by maximum value
  		int max = 0;
         stat = cublasIsamax(handle, sizex * sizey, kernel, 1, &max);
 
-        if (stat != CUBLAS_STATUS_SUCCESS)
+        if (stat != CUBLAS_STATUS_SUCCESS){
             printf("Cublas Max failed in Phase Constrast Kernels\n");
+            fflush(stdout);
+        }
 
         HANDLE_ERROR(cudaDeviceSynchronize());
 
@@ -87,10 +94,12 @@ extern "C" {
         size_t nsize   = nrayspad * nslicespad;
 		float *kernel  = opt::allocGPU<float>(nsize);
 
+        printf("Here 1 \n");
+        fflush(stdout);
+
         compute_contrast_kernel(tomo, geometry, ContrastFilter, kernel);
 
-		int i; 
-        int blocksize = tomo.blocksize;
+		int i, blocksize = tomo.blocksize;
 
         size_t total_required_mem_per_frame_bytes = 8 * calcPaddedSliceMemoryBytes(tomo);
 
@@ -105,6 +114,9 @@ extern "C" {
         }
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
+
+        printf("Here 2; ind_block: %d \n", ind_block);
+        fflush(stdout);
 
 		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
 

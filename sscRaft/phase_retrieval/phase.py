@@ -46,7 +46,7 @@ def phase_retrieval(frames, dic):
 
     """  
 
-    required = ('required',)
+    required = None # ('required',)
     optional = ('gpu', 'method','beta/delta','padding','blocksize','z2[m]','energy[eV]','magn','detectorPixel[m]','regularization', 'post_process')
     default  = (  [0],'paganin',         0.0,     0.25,          0,    1.0,         1.0,   1.0,               1.0,             0.0,          False)
     
