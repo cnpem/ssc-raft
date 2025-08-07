@@ -101,8 +101,9 @@ build_docs:
 
 deploy_docs:
   stage: deploy
-  image: ubuntu:latest
+  image: alpine:latest
   script:
+    - apk add m4
     - cat ./docs/assets/index_redirect.html | m4 -DVERSION=$CI_COMMIT_TAG > ./docs/build/index.html
     - mkdir -p /var/www/html/ssc/ssc-raft/
     - rm -rf /var/www/html/ssc/ssc-raft/*
