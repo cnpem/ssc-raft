@@ -293,31 +293,35 @@ __global__ void contrast_enhance::padding(float *in, cufftComplex *inpadded, dim
     int j      = blockIdx.y*blockDim.y + threadIdx.y;
     int k      = blockIdx.z*blockDim.z + threadIdx.z;
 
+    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
+
     int ii     = (int)( i - padding_x );
     int jj     = (int)( j - padding_y );
 
-    long long int index  = size.x * k * size.y + size.x * jj + ii;
-    long long int indpad = Npadx  * k * Npady  + Npadx  *  j +  i;
-
-    if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
+    long long int indpad = Npadx * k * Npady  + Npadx  *  j +  i;
 
     inpadded[indpad].x = 1.0;
     inpadded[indpad].y = 0.0;
 
-    if ( ( i <=          (int)padding_x ) && ( j <=          (int)padding_y )) inpadded[indpad].x = in[size.x * k * size.y + size.x *            0 +            0];
-    if ( ( i >= size.x + (int)padding_x ) && ( j <=          (int)padding_y )) inpadded[indpad].x = in[size.x * k * size.y + size.x *            0 + (size.x - 1)];
+    long long int index  = size.x * k * size.y + size.x * jj + ii;
+
     if ( ( i <=          (int)padding_x ) && ( j >= size.y + (int)padding_y )) inpadded[indpad].x = in[size.x * k * size.y + size.x * (size.y - 1) +            0];
     if ( ( i >= size.x + (int)padding_x ) && ( j >= size.y + (int)padding_y )) inpadded[indpad].x = in[size.x * k * size.y + size.x * (size.y - 1) + (size.x - 1)];
 
-    if ( (jj < 0) || (jj >= size.y) ) return;
+    if ( ( i <=          (int)padding_x ) && ( j <=          (int)padding_y )) inpadded[indpad].x = in[size.x * k * size.y + size.x *            0 +            0];
+    if ( ( i >= size.x + (int)padding_x ) && ( j <=          (int)padding_y )) inpadded[indpad].x = in[size.x * k * size.y + size.x *            0 + (size.x - 1)];
+    
+    if ( (j > (int)padding_y) && ( j < size.y + (int)padding_y ) ){
+        if ( ( i <=          (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * jj +            0];
+        if ( ( i >= size.x + (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * jj + (size.x - 1)];
+    }
 
-    if ( ( i <=          (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * jj +            0];
-    if ( ( i >= size.x + (int)padding_x ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * jj + (size.x - 1)];
+    if ( (i > (int)padding_x) && ( i < size.x + (int)padding_x ) ){
+        if ( ( j <=          (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *            0 + ii];
+        if ( ( j >= size.y + (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * (size.y - 1) + ii];
+    }
 
-    if ( (ii < 0) || (ii >= size.x) ) return;
-
-    if ( ( j <=          (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x *            0 + ii];
-    if ( ( j >= size.y + (int)padding_y ) ) inpadded[indpad].x = in[size.x * k * size.y + size.x * (size.y - 1) + ii];
+    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) ) return;
 
     inpadded[indpad].x = in[index];
 }
