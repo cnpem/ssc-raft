@@ -165,13 +165,6 @@ extern "C" {
         int nrayspad   = configs.tomo.padsize.x;
         int nslicespad = configs.tomo.padsize.y;
 
-        /* Kernel Computation */
-
-        size_t nsize   = nrayspad * nslicespad;
-		float *kernel  = opt::allocGPU<float>(nsize);
-
-        compute_contrast_kernel(configs, kernel);
-
 		int i; 
         int blocksize = configs.blocksize;
 
@@ -188,6 +181,12 @@ extern "C" {
 
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
+        /* Kernel Computation */
+        size_t nsize   = nrayspad * nslicespad;
+        float *kernel  = opt::allocGPU<float>(nsize);
+
+        compute_contrast_kernel(configs, kernel);
+        
 		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
 
         /* Plan for Fourier transform - cufft */
