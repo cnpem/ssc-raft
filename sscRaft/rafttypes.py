@@ -389,7 +389,7 @@ try:
         ctypes.c_void_p, ctypes.c_int, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-        ctypes.c_int, ctypes.c_int, ctypes.c_int
+        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int
     ]
     
     libraft.getBackgroundCorrectionMultiGPU.restype  = None

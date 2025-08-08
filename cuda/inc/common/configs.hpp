@@ -250,7 +250,15 @@ struct Process{
 };
 
 
-inline size_t getTotalDeviceMemory(int device = 0) {
+inline size_t getTotalDeviceMemory() {
+    size_t total_mem, free_mem;
+
+    cudaMemGetInfo(&free_mem, &total_mem);
+
+    return total_mem;
+}
+
+inline size_t getTotalDeviceMemory(int device) {
     size_t total_mem, free_mem;
 
     cudaSetDevice(device);
@@ -258,6 +266,7 @@ inline size_t getTotalDeviceMemory(int device = 0) {
 
     return total_mem;
 }
+
 
 /* Processes - parallelization */
 

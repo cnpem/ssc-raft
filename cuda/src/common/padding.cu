@@ -53,12 +53,10 @@ int padding_mode, dim3 size, dim3 pad)
         case opt::PaddingMode::zero:
             /* Zero padding */
             outpadded[indpad].x = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;        
         case opt::PaddingMode::ones:
             /* Ones padding */
             outpadded[indpad].x = 1.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
         case opt::PaddingMode::edge:
             /* Edge padding */
@@ -67,22 +65,22 @@ int padding_mode, dim3 size, dim3 pad)
             if ( ( i <=          padx ) && ( j >= size.y + pady )) outpadded[indpad].x = in[IND(           0,(size.y - 1),k,size.x,size.y)];
             if ( ( i >= size.x + padx ) && ( j >= size.y + pady )) outpadded[indpad].x = in[IND((size.x - 1),(size.y - 1),k,size.x,size.y)];
         
-            if ( (jj < 0) || (jj >= size.y) ) return;
-        
-            if ( ( i <=          padx ) ) outpadded[indpad].x = in[IND(           0, jj,k,size.x,size.y)];
-            if ( ( i >= size.x + padx ) ) outpadded[indpad].x = in[IND((size.x - 1), jj,k,size.x,size.y)];
-        
-            if ( (ii < 0) || (ii >= size.x) ) return;
-        
-            if ( ( j <=          pady ) ) outpadded[indpad].x = in[IND(ii,           0,k,size.x,size.y)];
-            if ( ( j >= size.y + pady ) ) outpadded[indpad].x = in[IND(ii,(size.y - 1),k,size.x,size.y)];
+            if ( ( j > pady ) && ( j < size.y + pady ) ){
+                if ( ( i <=          padx ) ) outpadded[indpad].x = in[IND(           0, jj,k,size.x,size.y)];
+                if ( ( i >= size.x + padx ) ) outpadded[indpad].x = in[IND((size.x - 1), jj,k,size.x,size.y)];
+            }
+
+            if ( ( i > padx ) && ( i < size.x + padx ) ){
+                if ( ( j <=          pady ) ) outpadded[indpad].x = in[IND(ii,           0,k,size.x,size.y)];
+                if ( ( j >= size.y + pady ) ) outpadded[indpad].x = in[IND(ii,(size.y - 1),k,size.x,size.y)];
+            }
         break;
         default:
             /* Zero padding */
             outpadded[indpad].x = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
     }
+    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) ) return;
     outpadded[indpad].x = in[index];
 }
 
@@ -112,13 +110,11 @@ int padding_mode, dim3 size, dim3 pad)
             /* Zero padding */
             outpadded[indpad].x = 0.0; 
             outpadded[indpad].y = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
         case opt::PaddingMode::ones:
             /* Ones padding */
             outpadded[indpad].x = 1.0;
             outpadded[indpad].y = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
         case opt::PaddingMode::edge:
             /* Edge padding */
@@ -132,27 +128,27 @@ int padding_mode, dim3 size, dim3 pad)
             if ( ( i <=          padx ) && ( j >= size.y + pady )) outpadded[indpad].y = in[IND(           0,(size.y - 1),k,size.x,size.y)].y;
             if ( ( i >= size.x + padx ) && ( j >= size.y + pady )) outpadded[indpad].y = in[IND((size.x - 1),(size.y - 1),k,size.x,size.y)].y;
         
-            if ( (jj < 0) || (jj >= size.y) ) return;
-        
-            if ( ( i <=          padx ) ) outpadded[indpad].x = in[IND(           0, jj,k,size.x,size.y)].x;
-            if ( ( i >= size.x + padx ) ) outpadded[indpad].x = in[IND((size.x - 1), jj,k,size.x,size.y)].x;
-            if ( ( i <=          padx ) ) outpadded[indpad].y = in[IND(           0, jj,k,size.x,size.y)].y;
-            if ( ( i >= size.x + padx ) ) outpadded[indpad].y = in[IND((size.x - 1), jj,k,size.x,size.y)].y;
-        
-            if ( (ii < 0) || (ii >= size.x) ) return;
-        
-            if ( ( j <=          pady ) ) outpadded[indpad].x = in[IND(ii,           0,k,size.x,size.y)].x;
-            if ( ( j >= size.y + pady ) ) outpadded[indpad].x = in[IND(ii,(size.y - 1),k,size.x,size.y)].x;
-            if ( ( j <=          pady ) ) outpadded[indpad].y = in[IND(ii,           0,k,size.x,size.y)].y;
-            if ( ( j >= size.y + pady ) ) outpadded[indpad].y = in[IND(ii,(size.y - 1),k,size.x,size.y)].y;
+            if ( ( j > pady ) && ( j < size.y + pady ) ){
+                if ( ( i <=          padx ) ) outpadded[indpad].x = in[IND(           0, jj,k,size.x,size.y)].x;
+                if ( ( i >= size.x + padx ) ) outpadded[indpad].x = in[IND((size.x - 1), jj,k,size.x,size.y)].x;
+                if ( ( i <=          padx ) ) outpadded[indpad].y = in[IND(           0, jj,k,size.x,size.y)].y;
+                if ( ( i >= size.x + padx ) ) outpadded[indpad].y = in[IND((size.x - 1), jj,k,size.x,size.y)].y;
+            }
+
+            if ( ( i > padx ) && ( i < size.x + padx ) ){
+                if ( ( j <=          pady ) ) outpadded[indpad].x = in[IND(ii,           0,k,size.x,size.y)].x;
+                if ( ( j >= size.y + pady ) ) outpadded[indpad].x = in[IND(ii,(size.y - 1),k,size.x,size.y)].x;
+                if ( ( j <=          pady ) ) outpadded[indpad].y = in[IND(ii,           0,k,size.x,size.y)].y;
+                if ( ( j >= size.y + pady ) ) outpadded[indpad].y = in[IND(ii,(size.y - 1),k,size.x,size.y)].y;
+            }
         break;
         default:
             /* Zero padding */
             outpadded[indpad].x = 0.0; 
             outpadded[indpad].y = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
     }
+    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) ) return;
     outpadded[indpad].x = in[index].x;
     outpadded[indpad].y = in[index].y;
 }
@@ -182,12 +178,10 @@ int padding_mode, dim3 size, dim3 pad)
         case opt::PaddingMode::zero:
             /* Zero padding */
             outpadded[indpad] = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
         case opt::PaddingMode::ones:
             /* Ones padding */
             outpadded[indpad] = 1.0;
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
         case opt::PaddingMode::edge:
             /* Edge padding */
@@ -196,22 +190,21 @@ int padding_mode, dim3 size, dim3 pad)
             if ( ( i <=          padx ) && ( j >= size.y + pady )) outpadded[indpad] = in[IND(           0,(size.y - 1),k,size.x,size.y)].x;
             if ( ( i >= size.x + padx ) && ( j >= size.y + pady )) outpadded[indpad] = in[IND((size.x - 1),(size.y - 1),k,size.x,size.y)].x;
         
-            if ( (jj < 0) || (jj >= size.y) ) return;
-        
-            if ( ( i <=          padx ) ) outpadded[indpad] = in[IND(           0, jj,k,size.x,size.y)].x;
-            if ( ( i >= size.x + padx ) ) outpadded[indpad] = in[IND((size.x - 1), jj,k,size.x,size.y)].x;
-        
-            if ( (ii < 0) || (ii >= size.x) ) return;
-        
-            if ( ( j <=          pady ) ) outpadded[indpad] = in[IND(ii,           0,k,size.x,size.y)].x;
-            if ( ( j >= size.y + pady ) ) outpadded[indpad] = in[IND(ii,(size.y - 1),k,size.x,size.y)].x;
+            if ( ( j > pady ) && ( j < size.y + pady ) ){
+                if ( ( i <=          padx ) ) outpadded[indpad] = in[IND(           0, jj,k,size.x,size.y)].x;
+                if ( ( i >= size.x + padx ) ) outpadded[indpad] = in[IND((size.x - 1), jj,k,size.x,size.y)].x;
+            }
+            if ( ( i > padx ) && ( i < size.x + padx ) ){
+                if ( ( j <=          pady ) ) outpadded[indpad] = in[IND(ii,           0,k,size.x,size.y)].x;
+                if ( ( j >= size.y + pady ) ) outpadded[indpad] = in[IND(ii,(size.y - 1),k,size.x,size.y)].x;
+            }
         break;
         default:
             /* Zero padding */
             outpadded[indpad] = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
     }
+    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) ) return;
     outpadded[indpad] = in[index].x;
 }
 
@@ -240,12 +233,10 @@ int padding_mode, dim3 size, dim3 pad)
         case opt::PaddingMode::zero:
             /* Zero padding */
             outpadded[indpad] = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
         case opt::PaddingMode::ones:
             /* Ones padding */
             outpadded[indpad] = 1.0;
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
         case opt::PaddingMode::edge:
             /* Edge padding */
@@ -254,22 +245,21 @@ int padding_mode, dim3 size, dim3 pad)
             if ( ( i <=          padx ) && ( j >= size.y + pady )) outpadded[indpad] = in[IND(           0,(size.y - 1),k,size.x,size.y)];
             if ( ( i >= size.x + padx ) && ( j >= size.y + pady )) outpadded[indpad] = in[IND((size.x - 1),(size.y - 1),k,size.x,size.y)];
         
-            if ( (jj < 0) || (jj >= size.y) ) return;
-        
-            if ( ( i <=          padx ) ) outpadded[indpad] = in[IND(           0, jj,k,size.x,size.y)];
-            if ( ( i >= size.x + padx ) ) outpadded[indpad] = in[IND((size.x - 1), jj,k,size.x,size.y)];
-        
-            if ( (ii < 0) || (ii >= size.x) ) return;
-        
-            if ( ( j <=          pady ) ) outpadded[indpad] = in[IND(ii,           0,k,size.x,size.y)];
-            if ( ( j >= size.y + pady ) ) outpadded[indpad] = in[IND(ii,(size.y - 1),k,size.x,size.y)];
+            if ( ( j > pady ) && ( j < size.y + pady ) ){
+                if ( ( i <=          padx ) ) outpadded[indpad] = in[IND(           0, jj,k,size.x,size.y)];
+                if ( ( i >= size.x + padx ) ) outpadded[indpad] = in[IND((size.x - 1), jj,k,size.x,size.y)];
+            }
+            if ( ( i > padx ) && ( i < size.x + padx ) ){
+                if ( ( j <=          pady ) ) outpadded[indpad] = in[IND(ii,           0,k,size.x,size.y)];
+                if ( ( j >= size.y + pady ) ) outpadded[indpad] = in[IND(ii,(size.y - 1),k,size.x,size.y)];
+            }
         break;
         default:
             /* Zero padding */
             outpadded[indpad] = 0.0; 
-            if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y)) return;
         break;
     }
+    if ( (ii < 0) || (ii >= size.x) || (jj < 0) || (jj >= size.y) ) return;
     outpadded[indpad] = in[index];
 }
 

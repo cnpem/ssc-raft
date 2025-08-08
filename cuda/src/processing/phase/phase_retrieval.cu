@@ -5,7 +5,6 @@
 #include "common/opt.hpp"
 
 extern "C" {
-
     void compute_contrast_kernel(DIM tomo, GEO geometry, CEF ContrastFilter, float *kernel)
     {
         /* Data sizes */
@@ -37,10 +36,9 @@ extern "C" {
                 pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
                 break;
             case contrast_enhance::ContrastEnhanceType::contrast:
-            printf("Using Contrast \n");
-            fflush(stdout);
-                contrast_enhance::contrast_paganin_based_Kernel<<<gridBlock,threadsPerBlock>>>(kernel, reg, 
-                pixel_objx, pixel_objy, dim3(sizex,sizey,1));
+                printf("Using Contrast \n");
+                fflush(stdout);
+                contrast_enhance::contrast_paganin_based_Kernel<<<gridBlock,threadsPerBlock>>>(kernel, reg, dim3(sizex,sizey,1));
                 break;
             default:
                 contrast_enhance::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
@@ -55,26 +53,27 @@ extern "C" {
             printf("Cublas Max failed in Phase Constrast Kernels\n");
             fflush(stdout);
         }
-
         HANDLE_ERROR(cudaDeviceSynchronize());
 
-		float scale = 0;
+		float scale = 1.0f;
 		HANDLE_ERROR(cudaMemcpy(&scale, kernel + max, sizeof(float), cudaMemcpyDeviceToHost));
 
         opt::scale<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1), scale);
 
-        // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(kernel, dim3(sizex,sizey,1));
-
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-	void getContrastEnhencement(CEF ContrastFilter, DIM tomo, cufftHandle mplan, 
-    float *projections, float *kernel, int subblock)
+	void getContrastEnhencement(cufftHandle mplan, cufftComplex *proj, float *kernel, 
+    dim3 size)
 	{	
-        dim3 size = dim3(tomo.size.x, tomo.size.y, subblock);
-        contrast_enhance::apply_contrast_filter(mplan, projections, kernel, size, tomo.pad, tomo.padding_mode);
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
+        
+        HANDLE_FFTERROR(cufftExecC2C(mplan, proj, proj, CUFFT_FORWARD));
 
-        if (ContrastFilter.post_process == 1) getlog(projections, size);
+        contrast_enhance::multiplication<<<gridBlock,threadsPerBlock>>>(proj, kernel, proj, size);
+
+        HANDLE_FFTERROR(cufftExecC2C(mplan, proj, proj, CUFFT_INVERSE));
     }
 
 	void getContrastEnhencementGPU(DIM tomo, GEO geometry, CEF ContrastFilter,
@@ -89,16 +88,8 @@ extern "C" {
         int nrayspad   = PDIM(  nrays,tomo.pad.x); // nrays * (1 + tomo.pad.x);
         int nslicespad = PDIM(nslices,tomo.pad.y); // nslices * (1 + tomo.pad.y);
 
-        /* Kernel Computation */
-
-        size_t nsize   = nrayspad * nslicespad;
-		float *kernel  = opt::allocGPU<float>(nsize);
-
         printf("Here 1 \n");
         fflush(stdout);
-
-        compute_contrast_kernel(tomo, geometry, ContrastFilter, kernel);
-
 		int i, blocksize = tomo.blocksize;
 
         size_t total_required_mem_per_frame_bytes = 8 * calcPaddedSliceMemoryBytes(tomo);
@@ -112,13 +103,22 @@ extern "C" {
             blocksize          = min(sizez, blocksize_aux);
             blocksize          = min(32, blocksize);
         }
-
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
         printf("Here 2; ind_block: %d \n", ind_block);
         fflush(stdout);
 
-		float *dprojections = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
+        /* Kernel Computation */
+        size_t nsize   = nrayspad * nslicespad;
+		float *kernel  = opt::allocGPU<float>(nsize);
+
+        compute_contrast_kernel(tomo, geometry, ContrastFilter, kernel);
+
+		float *dprojections      = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
+        cufftComplex *dataPadded = opt::allocGPU<cufftComplex>((size_t) nrayspad * nslicespad * blocksize);
+
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock = opt::setGridBlock(dim3(nrayspad,nslicespad,blocksize), threadsPerBlock);
 
         /* Plan for Fourier transform - cufft */
         cufftHandle mplan;
@@ -145,11 +145,17 @@ extern "C" {
             opt::CPUToGPU<float>(projections + ptr_block, dprojections, 
                                 (size_t)nrays * nslices * subblock);
 
-			getContrastEnhencement( ContrastFilter, tomo, mplan, dprojections, kernel, subblock );
+            opt::paddR2C<<<gridBlock,threadsPerBlock>>>(dprojections, dataPadded, tomo.padding_mode, 
+                                                        dim3(nrayspad,nslicespad,subblock), tomo.pad);
+
+			getContrastEnhencement( mplan, dataPadded, kernel, dim3(nrayspad,nslicespad,subblock) );
+
+            opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, dprojections, dim3(nrayspad,nslicespad,subblock), tomo.pad);
+            
+            if ( ContrastFilter.post_process == 1) getlog(dprojections, dim3(nrays,nslices,subblock));
 
 			opt::GPUToCPU<float>(projections + ptr_block, dprojections, 
                                 (size_t)nrays * nslices * subblock);
-
 		}
 		HANDLE_ERROR(cudaDeviceSynchronize());
         
@@ -157,9 +163,9 @@ extern "C" {
 		HANDLE_FFTERROR(cufftDestroy(mplan));
 
         /* Free memory */
+        HANDLE_ERROR(cudaFree(dataPadded));
 		HANDLE_ERROR(cudaFree(dprojections));
         HANDLE_ERROR(cudaFree(kernel));
-
 	}
 
     void getContrastEnhencementMultiGPU(DIM tomo, GEO geometry, CEF ContrastFilter,
@@ -193,9 +199,6 @@ extern "C" {
 				
 				subblock   = min(tomo.size.z - ptr, subvolume);
 				ptr_volume = (size_t)tomo.size.x * tomo.size.y * ptr;
-
-				/* Update pointer */
-				ptr = ptr + subblock;
 				
 				threads.push_back( std::async(  std::launch::async, 
 												getContrastEnhencementGPU,
@@ -204,9 +207,9 @@ extern "C" {
 												projections + ptr_volume, 
 												subblock, gpus[i]
 												));		
-
+                /* Update pointer */
+				ptr = ptr + subblock;
 			}
-		
 			for (i = 0; i < ngpus; i++)
 				threads[i].get();
 		}	

@@ -67,9 +67,7 @@ extern "C"{
 
         if( configs.flags.do_flat_dark_correction )
         {
-            getBackgroundCorrection(workspace->tomo, workspace->flat, workspace->dark, configs.tomo.size.z, configs.nflats);
-            
-            getLog(workspace->tomo, configs.tomo.size.z);
+            getBackgroundCorrection_slices(workspace->tomo, workspace->flat, workspace->dark, configs.tomo.size, configs.nflats, 1, 0);
 
             free(workspace->flat); /* Dealocate variable we will not use anymore */
             free(workspace->dark); /* Dealocate variable we will not use anymore */

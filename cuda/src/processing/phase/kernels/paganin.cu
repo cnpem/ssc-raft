@@ -2,20 +2,6 @@
 #include "processing/processing.hpp"
 #include "common/opt.hpp"
 
-__global__ void contrast_enhance::copy(float *projection, float *kernel, dim3 size)
-{
-    int i      = blockIdx.x*blockDim.x + threadIdx.x;
-    int j      = blockIdx.y*blockDim.y + threadIdx.y;
-    int k      = blockIdx.z*blockDim.z + threadIdx.z;
-
-    size_t index  = size.x * k * size.y + size.x * j + i;
-    size_t ind = size.x * j + i;
-
-    if ( (i >= size.x) || (j >= size.y) || (k >= size.z) ) return;
-
-    projection[index] = kernel[ind];
-}
-
 __global__ void contrast_enhance::multiplication(cufftComplex *a, float *b, 
 cufftComplex *ans, dim3 size)
 {
@@ -28,8 +14,8 @@ cufftComplex *ans, dim3 size)
 
     if( (i >= size.x) || (j >= size.y) || (k >= size.z)) return;  
 
-    ans[index].x = a[index].x * b[ind];	
-    ans[index].y = a[index].y * b[ind];
+    ans[index].x = a[index].x * b[ind] / ( size.x * size.y );	
+    ans[index].y = a[index].y * b[ind] / ( size.x * size.y );
 }
 
 __global__ void contrast_enhance::paganinKernel(float *kernel, float beta_delta, float wavelength, 
@@ -56,8 +42,7 @@ float pixel_objx, float pixel_objy, float z2, dim3 size)
     kernel[ind]  = 1.0f / ( beta_delta + gamma * (wx*wx + wy*wy) );
 }
 
-__global__ void contrast_enhance::contrast_paganin_based_Kernel(float *kernel, float regularization, 
-float pixel_objx, float pixel_objy, dim3 size)
+__global__ void contrast_enhance::contrast_paganin_based_Kernel(float *kernel, float regularization, dim3 size)
 {
     int i        = blockIdx.x*blockDim.x + threadIdx.x;
     int j        = blockIdx.y*blockDim.y + threadIdx.y;
@@ -66,58 +51,17 @@ float pixel_objx, float pixel_objy, dim3 size)
 
     if ( (i >= size.x) || (j >= size.y) || (k >= 1) ) return;
 
+    float hx = 2.0f / size.x;
+    float hy = 2.0f / size.y;
+
     /* Reciprocal grid */
     float wx = fminf( i, size.x - i ) / (float)size.x;  
     float wy = fminf( j, size.y - j ) / (float)size.y;
 
-    wx       = wx / pixel_objx;
-    wy       = wy / pixel_objy;
+    wx       = wx / hx;
+    wy       = wy / hy;
 
     kernel[ind]  = 1.0f / ( 1.0f + regularization * (wx*wx + wy*wy) );
-}
-
-// __global__ void paganinKernel_tomopy(CFG configs, cufftComplex *data, dim3 size)
-// {
-//     /* Version of Paganin by frames implemented on Tomopy
-//     DOI:10.1107/S1600577514013939 */
-// }
-
-// __global__ void paganinKernel_v0(CFG configs, cufftComplex *data, dim3 size)
-// {
-//     /* Version of Paganin by frames on Miqueles and Guerrero (2020)
-//     https://doi.org/10.1016/j.rinam.2019.100088 and published by 
-//     Yu et al (2002) https://doi.org/10.1364/OE.26.011110 */
-// }
-
-void contrast_enhance::apply_contrast_filter(cufftHandle mplan, float *projections, float *kernel,
-dim3 size, dim3 pad, int padding_mode)
-{
-    dim3 size_pad = opt::compute_size_padded(size, pad);
-    size_t npad   = opt::get_total_points(size_pad);
-    float scale   = (float)( size_pad.x * size_pad.y);
-
-    cufftComplex *dataPadded = opt::allocGPU<cufftComplex>(npad);
-
-    dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-    dim3 gridBlock( (int)ceil( size_pad.x / threadsPerBlock.x ) + 1, 
-                    (int)ceil( size_pad.y / threadsPerBlock.y ) + 1, 
-                    (int)ceil( size_pad.z / threadsPerBlock.z ) + 1);
-    
-    opt::paddR2C<<<gridBlock,threadsPerBlock>>>(projections, dataPadded, padding_mode, size, pad);
-
-    HANDLE_FFTERROR(cufftExecC2C(mplan, dataPadded, dataPadded, CUFFT_FORWARD));
-
-    contrast_enhance::multiplication<<<gridBlock,threadsPerBlock>>>(dataPadded, kernel, dataPadded, size_pad);
-
-    HANDLE_FFTERROR(cufftExecC2C(mplan, dataPadded, dataPadded, CUFFT_INVERSE));
-
-    opt::scale<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad, scale);
-
-    // opt::fftshift2D<<<gridBlock,threadsPerBlock>>>(dataPadded, size_pad);
-
-    opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, projections, size, pad);
-
-    HANDLE_ERROR(cudaFree(dataPadded));
 }
 
 

@@ -9,20 +9,21 @@
 
 /* Background Correction */
 extern "C"{
-
 	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, 
-    int nrays, int nangles, int nslices, int numflats, int is_log, int blocksize);
+    int nrays, int nangles, int nslices, int numflats, int is_log, int input_slices, int blocksize);
 
 	void getBackgroundCorrectionGPU(int gpu, float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, int blocksize);
+    dim3 size, int numflats, int is_log, int input_slices, int blocksize);
 
-	void getBackgroundCorrection(float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, cudaStream_t stream = 0);
+    void getBackgroundCorrection_slices(float* frames, float* flat, float* dark, 
+        dim3 size, int numflats, int is_log, cudaStream_t stream);
+    
+    void getBackgroundCorrection_frames(float* frames, float* flat, float* dark, 
+            dim3 size, int numflats, int is_log, cudaStream_t stream);
 }
 
 /* Rings */
 extern "C"{
-    
     void getTitarenkoRingsMultiGPU(int *gpus, int ngpus, float *data, 
     int nrays, int nangles, int nslices, 
     float lambda_rings, int ring_blocks, int blocksize);
@@ -84,15 +85,9 @@ namespace contrast_enhance{ // Phase retrieval Paganin
     __global__ void paganinKernel(float *kernel, float beta_delta, float wavelength, 
     float pixel_objx, float pixel_objy, float z2, dim3 size);
 
-    void apply_contrast_filter(cufftHandle mplan, float *projections, float *kernel,
-    dim3 size, dim3 pad, int padding_mode);
-
     __global__ void multiplication(cufftComplex *a, float *b, cufftComplex *ans, dim3 size);
 
-    __global__ void copy(float *projection, float *kernel, dim3 size);
-
-    __global__ void contrast_paganin_based_Kernel(float *kernel, float regularization, 
-    float pixel_objx, float pixel_objy, dim3 size);
+    __global__ void contrast_paganin_based_Kernel(float *kernel, float regularization, dim3 size);
 }
 
 namespace denoise{}
