@@ -16,10 +16,10 @@ extern "C"{
     dim3 size, int numflats, int is_log, int input_slices, int blocksize);
 
     void getBackgroundCorrection_slices(float* frames, float* flat, float* dark, 
-        dim3 size, int numflats, int is_log, cudaStream_t stream);
+        dim3 size, int numflats, int is_log);
     
     void getBackgroundCorrection_frames(float* frames, float* flat, float* dark, 
-            dim3 size, int numflats, int is_log, cudaStream_t stream);
+            dim3 size, int numflats, int is_log);
 }
 
 /* Rings */

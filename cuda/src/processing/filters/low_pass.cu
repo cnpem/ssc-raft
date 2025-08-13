@@ -60,7 +60,6 @@ extern "C"{
                                                         BYTES_TO_GB * getTotalDeviceMemory());
             blocksize          = min(sizez, blocksize_aux);
         }
-
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
         float *dtomo    = opt::allocGPU<float>((size_t)   nrays * nangles * blocksize);
@@ -75,6 +74,12 @@ extern "C"{
                             (int)ceil(   nangles / TPBY ) + 1,
                             (int)ceil( blocksize / TPBZ ) + 1);
 
+        // printf("tomo.padding_mode = %d \n",tomo.padding_mode);
+        // printf("FilterParam.padding_mode = %d \n",FilterParam.filter);
+        // printf("blocksize = %d \n",blocksize);
+        // printf("ind_block = %d \n",ind_block);
+        // printf("sizez = %d \n",sizez);
+        // fflush(stdout);
         for (i = 0; i < ind_block; i++){
 
 			subblock       = min(sizez - ptr, blocksize);
@@ -93,7 +98,7 @@ extern "C"{
                                                                 dim3(nrays, nangles, subblock), 
                                                                 tomo.pad);
 
-            getFilterLowPass( geometry, FilterParam, dtomo,  
+            getFilterLowPass( geometry, FilterParam, dtomopad,  
                             dim3(nrayspad, nangles, subblock));  /* Tomogram padded size */
 
             /* Remove padd from the tomogram (reconstruction) */

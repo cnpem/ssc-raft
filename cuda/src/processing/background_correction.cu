@@ -24,15 +24,15 @@ dim3 size, int numflats, int is_log)
 
     if(idx < size.x && idy < size.y && idz < size.z){
         
-        dk          = dark[size.x * idz + idx];
-        flat_before = flat[size.x * idz + idx];
+        dk          = dark[size.x * idz + idx]; 
+        flat_before = flat[size.x * numflats * 0 + size.x * idz + idx]; /* size.x * numflats * 0 + size.x * idz + idx */
 
         line        = size.x * size.y * idz + size.x * idy + idx;
 
         if(numflats > 1){
             interp  = float( idy ) / float( size.y ); 
 
-            flat_after = flat[size.x * size.y + size.x * idz + idx];
+            flat_after = flat[size.x * numflats + size.x * idz + idx]; /* size.x * numflats * 1 + size.x * idz + idx */
 
             ft      = flat_before * ( 1.0f - interp ) + interp * flat_after;
         }else{
@@ -63,14 +63,14 @@ static __global__ void BackgroundCorrection_frames(float* data,
         if(idx < size.x && idy < size.y && idz < size.z){
             
             dk          = dark[size.x * idy + idx];
-            flat_before = flat[size.x * idy + idx];
+            flat_before = flat[size.x * idy + idx]; /* size.x * size.y * 0 + size.x * idy + idx */
     
             line        = size.x * size.y * idz + size.x * idy + idx;
     
             if(numflats > 1){
                 interp  = float( idz ) / float( size.z ); 
     
-                flat_after = flat[size.x * size.y + size.x * idy + idx];
+                flat_after = flat[size.x * size.y + size.x * idy + idx]; /* size.x * size.y * 1 + size.x * idy + idx */
     
                 ft      = flat_before * ( 1.0f - interp ) + interp * flat_after;
             }else{
@@ -86,29 +86,36 @@ static __global__ void BackgroundCorrection_frames(float* data,
         }
     }
 
-
 extern "C"{
 	void getBackgroundCorrection_slices(float* frames, float* flat, float* dark, 
-        dim3 size, int numflats, int is_log, cudaStream_t stream)
+        dim3 size, int numflats, int is_log)
 	{
+        /* 
+        frames: tomogram volume with axis (size.x,size.y,size.z) = (nrays, nangles, nslices):
+        flat: Axis ALWAYS (size.x,nslices,numflats) = (nrays, nslices, numflats)
+        dark: Axis ALWAYS (size.x,nslices,       1) = (nrays, nslices,        1)
+        */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
         
-        /* Do the dark subtraction and division by flat (without log) */
-        BackgroundCorrection_slices<<<gridBlock,threadsPerBlock, 0, stream>>>(frames, dark, flat, 
-                                                                                  size, numflats, is_log);
+        /* Do the dark subtraction and division by flat */
+        BackgroundCorrection_slices<<<gridBlock,threadsPerBlock>>>(frames, dark, flat, size, numflats, is_log);
         HANDLE_ERROR(cudaGetLastError());
 	}
 
     void getBackgroundCorrection_frames(float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, cudaStream_t stream)
+    dim3 size, int numflats, int is_log)
     {
+        /* 
+        frames: tomogram volume with axis (size.x,size.y,size.z) = (nrays, nslices, nangles):
+        flat: Axis ALWAYS (size.x,size.y,numflats) = (nrays, nslices, numflats)
+        dark: Axis ALWAYS (size.x,size.y,       1) = (nrays, nslices,        1)
+        */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
         
-        /* Do the dark subtraction and division by flat (without log) */
-        BackgroundCorrection_frames<<<gridBlock,threadsPerBlock, 0, stream>>>(frames, dark, flat, 
-                                                                                    size, numflats, is_log);
+        /* Do the dark subtraction and division by flat */
+        BackgroundCorrection_frames<<<gridBlock,threadsPerBlock>>>(frames, dark, flat, size, numflats, is_log);
 
         HANDLE_ERROR(cudaGetLastError());
     }
@@ -207,6 +214,16 @@ extern "C"{
     int sizex, int sizey, int sizez, int numflats,
     int is_log, int input_slices, int blocksize)
 	{
+        /* 
+        frames: tomogram volume with axis (sizex, sizey, sizez):
+            1. If input_slices = 1 (True), then the last axis represent the slices
+                (sizex, sizey, sizez) = (nrays, nangles, nslices)
+            2. If input_slices = 0 (False), then the last axis represent the angles
+                (sizex, sizey, sizez) = (nrays, nslices, nangles)
+        
+        flat: Axis ALWAYS (nrays, nslices, numflats)
+        dark: Axis ALWAYS (nrays, nslices, 1)
+        */
 		int i;
 		int blockgpu = (sizez + ngpus - 1) / ngpus;
 		int ptr = 0, subblock;

@@ -77,6 +77,9 @@ extern "C"{
         float filter_reg  = ReconParam.filter_reg;
         float axis_offset = ReconParam.rotation_axis_offset;
         int nangles       = tomo_size.y;
+        // configs->reconstruction_paganin      = configs->geometry.wavelength * configs->geometry.z2x * float(M_PI) * configs->beta_delta / (configs->geometry.obj_pixel_x * configs->geometry.obj_pixel_x); /* Reconstruction Paganin parameter. */
+
+
 
         /* Reconstruction GPUs padded Grd and Blocks */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
@@ -87,8 +90,11 @@ extern "C"{
         /* Filter and Paganin by slices (filter) */
         Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel_x);
 
-        if (filter.type != Filter::EType::none)
+        if (filter.type != Filter::EType::none){
+            printf("Using filter \n");
+            fflush(stdout);
             filterFBP(filter, tomogram, tomo_size);
+        }
 
         /* Sin and Cos tables for backprojection */
         float *sintable = opt::allocGPU<float>(nangles);
@@ -184,6 +190,7 @@ extern "C"{
         printf("OBJ: padImagex = %d; padImagey = %d \n", padImagex, padImagey);
         printf("OBJ: padx = %d; pady = %d \n", padx, pady);
         printf("padding_mode = %d \n", tomo.padding_mode);
+        printf("ReconParam.paganin_slices: %e\n",ReconParam.paganin_slices);
         fflush(stdout);
 
         /* Reconstruction GPUs padded Grd and Blocks */

@@ -3,7 +3,7 @@
 from ..rafttypes import *
 from ..io.io_ import *
 
-def _background_correctionGPU(frames, flat, dark, gpus = [0], is_log = False, blocksize = 0, input_slice = 1):
+def correct_background(frames, flat, dark, gpus = [0], is_log = False, blocksize = 0, axis_input = 'slices_angles_lenght'):
     """ GPU function to correct tomography projections (or frames) background 
     with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
     a sample, to measure the background.
@@ -22,15 +22,16 @@ def _background_correctionGPU(frames, flat, dark, gpus = [0], is_log = False, bl
     :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
 
     Args:
-        frames (ndarray): Frames (or projections) of size [slices, angles, lenght]
-        flat   (ndarray): Flat of size [slices, number of flats, lenght]
-        dark   (ndarray): Dark of size [slices, lenght]
+        frames (ndarray): Frames (or projections) with size (slices, angles, lenght) [Default: 0 (slices, angles, lenght)]
+        flat   (ndarray): Flat with size (number of flats, slices, lenght)
+        dark   (ndarray): Dark with size (slices, lenght)
         gpus  (int list, optional): List of GPUs [Default: [0]]
         is_log    (bool, optional): Apply ``- logarithm()`` or not [Default: False]
-        blocksize  (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [Default: 0]
+        blocksize  (int, optional): Block of slices size to be processed in one GPU. ``blocksize = 0`` computes it automatically considering the available GPU memory [Default: 0]
+        axis_input (str, optional): Set the order of the frames axis. Options: ``\'slices_angles_lenght\'`` (frames has axis (slices, angles, lenght)) or ``\'angles_slices_lenght\'`` (frames has axis (angles, slices, lenght))[Default: ``\'slices_angles_lenght\'``]
 
     Returns:
-        (ndarray): Corrected frames (or projections) of dimension [slices, angles, lenght]
+        (ndarray): Corrected frames (or projections) with the same dimension as the input volume ``frames``.
 
     * One or MultiGPUs. 
     """ 
@@ -42,6 +43,15 @@ def _background_correctionGPU(frames, flat, dark, gpus = [0], is_log = False, bl
 
     sizex    = frames.shape[-1]
     sizey  = frames.shape[-2]
+
+    if axis_input == 'slices_angles_lenght':
+        input_slice = 1
+    elif axis_input == 'angles_slices_lenght':
+        input_slice = 0
+    else:
+        input_slice = 1
+        message = f'The parameter axis_input does not exist. Setting as the default \'slices_angles_lenght\''
+        logger.warning(message)
     
     if is_log:
         is_log = 1
@@ -82,9 +92,6 @@ def _background_correctionGPU(frames, flat, dark, gpus = [0], is_log = False, bl
     if nflats > 1:
         logger.info(f'Interpolating flats before and after.')
 
-    logger.info(f'Flat dimension is {flat.shape} = (number of flats, slices, rays).')
-    logger.info(f'Dark dimension is {dark.shape} = (number of darks, slices, rays).')
-
     flat       = CNICE(flat)
     flat_ptr   = flat.ctypes.data_as(ctypes.c_void_p)
 
@@ -100,42 +107,3 @@ def _background_correctionGPU(frames, flat, dark, gpus = [0], is_log = False, bl
             ctypes.c_int(nflats), ctypes.c_int(is_log), ctypes.c_int(input_slice), ctypes.c_int(blocksize))
 
     return frames 
-
-def correct_background(frames, flat, dark, gpus = [0], is_log = False, blocksize = 0, input_slice = 1):
-    """ Function to correct tomography projections (or frames) background 
-    with flat (or empty) and dark. Flat (or empty). Flat is a measurement without
-    a sample, to measure the background. Dark is a measurements without a beam and sample, 
-    to measure detector pixel response.
-    
-    Can be computed in two ways.
-
-    .. math::
-        T = - \log{ ( \\frac{D - D_d}{D_f - D_d} ) }
-
-    for transmission tomography, and
-
-    .. math::
-        T = \\frac{D - D_d}{D_f - D_d}
-
-    for phase contrast tomography. Where :math:`T` is the corrected tomogram, :math:`D` is the measurements volume, 
-    :math:`D_f` is the flat measurement and :math:`D_d` is the dark measurement.
-
-    Args:
-        frames (ndarray): Frames (or projections) of size [slices, angles, lenght]
-        flat   (ndarray): Flat of size [slices, number of flats, lenght]
-        dark   (ndarray): Dark of size [slices, lenght]
-        gpus  (int list, optional): List of GPUs [Default: [0]].
-        is_log (bool, optional): Apply ``- logarithm()`` or not [Default: False]
-        blocksize (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [Default: 0]
-
-
-    Returns:
-        (ndarray): Corrected frames (or projections) of dimension [slices, angles, lenght].
-
-    * One or MultiGPUs. 
-    * Calls function ``_background_correctionGPU()``.
-    """        
-    
-    frames = _background_correctionGPU( frames, flat, dark, gpus, is_log, blocksize, input_slice ) 
-
-    return frames

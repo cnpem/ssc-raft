@@ -28,13 +28,14 @@ def lowpass(tomogram, dic = None, **kwargs):
 
             #. Related filters: \'gaussian\', \'lorentz\' and \'rectangle\'
 
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
+        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 0.25]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
+        * ``dic['padd_mode']`` (str,optional): Data padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
 
     """
     required = ('gpu',)        
-    optional = ('filter','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','detectorPixel[m]', 'magnitude')
-    default  = (  'ramp',        2,             0.0,         0.0,          0,         1.0,    1.0,               1.0,         1.0)
+    optional = ('filter','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','detectorPixel[m]')
+    default  = (  'ramp',     0.25,             1.0,         0.0,          0,         1.0,    1.0,               1.0)
     
     dic      = SetDictionary(dic,required,optional,default)  
 
@@ -58,31 +59,35 @@ def lowpass(tomogram, dic = None, **kwargs):
     blocksize      = dic['blocksize']
     energy         = dic['energy[eV]']
     z2             = dic['z2[m]']
-    pixelx, pixely = dic['detectorPixel[m]'],dic['detectorPixel[m]']
+    pixel          = dic['detectorPixel[m]']
     wavelength     = CONST/energy 
+    padding        = dic.get('padding', 0.0)*100 # Multiply by 100 to get an integer value
+    padd_mode      = PaddMode(dic.get('padd_mode', 'edge'))
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
-        paganin_slices_regularization = wavelength * z2 * numpy.pi * beta_delta / (pixelx * pixelx); 
+        paganin_slices_regularization = wavelength * z2 * numpy.pi * beta_delta / (pixel * pixel); 
     else:
         paganin_slices_regularization = 0.0
 
-    padx = dic['padding']
-
-    tomo_size    = dim3(x =   nrays, y = nangles, z = nslices)
-    tomo_pad     = dim3(x = padx, y =    0, z = 0)
-    tomo_dim     = DIM(size = tomo_size, pad = tomo_pad, blocksize = blocksize)
-
-    geometry     = GEO(detector_pixel_x = pixelx, detector_pixel_y = pixely, 
-                       obj_pixel_x = pixelx, obj_pixel_y = pixelx, 
-                       energy = energy, wavelength = wavelength, 
-                       z1x = 0, z1y = 0, z2x = z2, z2y = z2, 
-                       magnitude_x = 1.0, magnitude_y = 1.0)
+    tomo_dim     = dimension((nrays, nangles, nslices), (padding, 0, 0), blocksize = blocksize, padd_mode = padd_mode)
     
-    ReconParam   = REC( method = 0, filter = filter_type, filter_reg = regularization,
-                        beta_delta = paganin_slices_regularization, iterations = 0, 
-                        rotation_axis_offset = offset,
-                        total_variation = 0, interpolation = 0)
+    geometry     = define_geometry(detector_pixel = (pixel, pixel),
+                                   obj_pixel      = (pixel, pixel),
+                                   z1             = (0,0),
+                                   z2             = (z2,z2),
+                                   magnitude      = (1.0,1.0), 
+                                   energy         = energy, 
+                                   wavelength     = wavelength)
+
+    ReconParam   = REC(method               = 0, 
+                       filter               = filter_type, 
+                       filter_reg           = regularization,  
+                       paganin_slices       = paganin_slices_regularization, 
+                       iterations           = 0, 
+                       rotation_axis_offset = offset,
+                       total_variation      = 0, 
+                       interpolation        = 0)
 
     tomogram     = CNICE(tomogram) 
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)

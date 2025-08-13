@@ -555,7 +555,6 @@ extern "C"{
             blocksize          = min(sizez, blocksize_aux);
             blocksize          = min(32, blocksize);
         }
-
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
         float *dtomo  = opt::allocGPU<float>((size_t) nrays * nangles * blocksize);

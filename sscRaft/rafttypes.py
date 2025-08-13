@@ -128,7 +128,7 @@ def dimension(size, pad, blocksize = 0, padd_mode = 2):
     if int(pad_sum) == 0:
         padd_mode = 0
 
-    dim_size   = DIM(size = size_, pad = pad_, blocksize = blocksize, padding_mode = padd_mode)
+    dim_size = DIM(size = size_, pad = pad_, blocksize = blocksize, padding_mode = padd_mode)
 
     return dim_size
 
@@ -164,10 +164,10 @@ class FLAG(ctypes.Structure):
                 ("do_flat_dark_log", ctypes.c_int),
                 ("do_paganin_filter", ctypes.c_int),
                 ("do_rings", ctypes.c_int),
-                ("do_rotation", ctypes.c_int),
+                ("do_rotation_axis_offset", ctypes.c_int),
                 ("do_rotation_correction", ctypes.c_int),
                 ("do_alignment", ctypes.c_int),
-                ("do_eccentric", ctypes.c_int),
+                ("do_excentric", ctypes.c_int),
                 ("do_reconstruction", ctypes.c_int)]
 
 class CEF(ctypes.Structure):
@@ -177,17 +177,20 @@ class CEF(ctypes.Structure):
                 ("post_process", ctypes.c_int)]   
 
 def contrast_param(method, beta_delta, regularization = 0.0, post_process = 0):
-
     return CEF(method = method, 
                beta_delta = beta_delta, 
                regularization = regularization, 
                post_process = post_process)
 
-
 class RF(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
                 ("rings_block", ctypes.c_int), 
                 ("rings_lambda", ctypes.c_float)]   
+
+def rings_param(method, rings_block, rings_lambda):
+    return RF(method = method,
+              rings_block = rings_block,
+              rings_lambda = rings_lambda)
 
 class REC(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
@@ -210,7 +213,17 @@ class CFG(ctypes.Structure):
                 ("RingsParam", RF),
                 ("ReconParam", REC)
                 ] 
-    
+
+def configs_param(tomo_dim, obj_dim, geometry, rings_param, contrast_param, recon_param, nflats, flags):
+    return CFG(nflats        = nflats,
+               geometry      = geometry,
+               obj           = obj_dim,
+               tomo          = tomo_dim,
+               flags         = flags,
+               ContrastParam = contrast_param,
+               RingsParam    = rings_param,
+               ReconParam    = recon_param)
+
 #########################
 
 #########################
@@ -560,18 +573,16 @@ except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_CONEBEAM_RADON_MULTIGPU_RT-')
     pass
 
+try:
+    libraft.ReconstructionPipelineMultiGPU.argtypes = [
+        CFG, ctypes.c_void_p, ctypes.c_int,
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+        ctypes.c_void_p, ctypes.c_void_p
+    ]
+    libraft.ReconstructionPipelineMultiGPU.restype = None
 
-# try:
-#     libraft.ReconstructionPipeline.argtypes = [
-#         ctypes.c_void_p, ctypes.c_void_p,
-#         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-#         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-#         ctypes.c_void_p, ctypes.c_int
-#     ]
-#     libraft.ReconstructionPipeline.restype = None
-
-# except:
-#     logger.error('Cannot find C/CUDA library: -.RAFT_RECONSTRUCTION_PIPELINE-')
+except:
+    logger.error('Cannot find C/CUDA library: -.RAFT_RECONSTRUCTION_PIPELINE-')
 
 #########################
 #|      ssc-raft       |#

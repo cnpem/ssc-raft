@@ -105,7 +105,9 @@ extern "C" {
         }
         int ind_block = (int)ceil( (float) sizez / blocksize );
 
-        printf("Here 2; ind_block: %d \n", ind_block);
+        printf("ind_block: %d \n", ind_block);
+        printf("sizez: %d \n", sizez);
+        printf("blocksize: %d \n", blocksize);
         fflush(stdout);
 
         /* Kernel Computation */
@@ -113,9 +115,12 @@ extern "C" {
 		float *kernel  = opt::allocGPU<float>(nsize);
 
         compute_contrast_kernel(tomo, geometry, ContrastFilter, kernel);
+        HANDLE_ERROR(cudaDeviceSynchronize());
 
 		float *dprojections      = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
+        HANDLE_ERROR(cudaDeviceSynchronize());
         cufftComplex *dataPadded = opt::allocGPU<cufftComplex>((size_t) nrayspad * nslicespad * blocksize);
+        HANDLE_ERROR(cudaDeviceSynchronize());
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(dim3(nrayspad,nslicespad,blocksize), threadsPerBlock);
@@ -144,15 +149,19 @@ extern "C" {
 
             opt::CPUToGPU<float>(projections + ptr_block, dprojections, 
                                 (size_t)nrays * nslices * subblock);
-
+            
+            gridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
             opt::paddR2C<<<gridBlock,threadsPerBlock>>>(dprojections, dataPadded, tomo.padding_mode, 
-                                                        dim3(nrayspad,nslicespad,subblock), tomo.pad);
+                                                        dim3(nrays,nslices,subblock), tomo.pad);
 
 			getContrastEnhencement( mplan, dataPadded, kernel, dim3(nrayspad,nslicespad,subblock) );
 
-            opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, dprojections, dim3(nrayspad,nslicespad,subblock), tomo.pad);
+            opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, dprojections, dim3(nrays,nslices,subblock), tomo.pad);
             
-            if ( ContrastFilter.post_process == 1) getlog(dprojections, dim3(nrays,nslices,subblock));
+            printf("ContrastFilter.post_process = %d \n",ContrastFilter.post_process);
+            fflush(stdout);
+
+            if( ContrastFilter.post_process == 1) getlog(dprojections, dim3(nrays,nslices,subblock));
 
 			opt::GPUToCPU<float>(projections + ptr_block, dprojections, 
                                 (size_t)nrays * nslices * subblock);

@@ -67,68 +67,83 @@ extern "C"{
 }
 
 extern "C"{
-
-	Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes)
-	{
-        Process *process = (Process *) malloc(sizeof(Process) * total_number_of_processes);
-
-        if (isParallelOrFanbeamGeometry(configs.geometry)) {
-            for (int p = 0; p < total_number_of_processes; p++)
-                setProcessParallel(configs, process, gpus, p, total_number_of_processes);
-        } 
-        // else { //cone beam geometry
-        //     // for (int p = 0; p < total_number_of_processes; p++)
-        //     //     setProcessConebeam(configs, process, gpus, p, total_number_of_processes);
-        // }
-
-        return process;
-	}
-}
-
-extern "C"{
-    void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
+    int getTotalProcesses(int ngpus, int sizeZ, const size_t total_required_mem_per_slice_bytes, bool using_fft)
     {
-        /* 20/03/2025 - NEEDS TO FIX THIS FUNCTION BLOCKSIZE - LOOK INTO FDK */
-        /* Processes to parallelize the data z-axis by independent blocks */
-        /* Declare variables */
-        long long int  n_obj, n_tomo, ind_obj, ind_tomo;
-        int ind, ind_max, block;  
 
-        /* Set indexes */
-        block    = (int) ( configs.tomo.size.z / n_total_processes ); 
+        int gpu_subvolume = (sizeZ + ngpus - 1) / ngpus;
 
-        ind      = index * block;
+        const int blocksizeMax = compute_GPU_blocksize(gpu_subvolume,
+                                                       total_required_mem_per_slice_bytes,
+                                                       using_fft,
+                                                       BYTES_TO_GB * getTotalDeviceMemory());
+        int blocksize = min(gpu_subvolume, blocksizeMax);
+        blocksize     = min(           32,    blocksize);
 
-        ind_max  = (int) std::min( ( index + 1 ) * block, (int)configs.tomo.size.z);
+        const int n_total_processes = (int)ceil( (float) gpu_subvolume / blocksize ) * ngpus;
 
-        /* Indexes for Reconstruction division - same as Tomogram division */
-        n_obj    = (long long int) ( ind_max - ind ) * configs.obj.size.x * configs.obj.size.y;
-        ind_obj  = (long long int)             ind   * configs.obj.size.x * configs.obj.size.y;
+        ssc_assert(n_total_processes > 0, "Invalid number of total processes");
 
-        /* Indexes for Tomogram division - same as Reconstruction division */
-        n_tomo   = (long long int) ( ind_max - ind ) * configs.tomo.size.x * configs.tomo.size.y;
-        ind_tomo = (long long int)             ind   * configs.tomo.size.x * configs.tomo.size.y;
-
-        /* Set process struct */
-        process[index].index          = index;
-        process[index].index_gpu      = (int)gpus.gpus[index % gpus.ngpus];
-        process[index].batch_index    = (int)index % gpus.ngpus;
-        process[index].tomobatch_size = (int)( ind_max - ind );
-        process[index].objbatch_size  = (int)( ind_max - ind );
-
-        /* Tomogram division */
-        process[index].tomo_index_z   = ind;
-        process[index].tomoptr_index  = ind_tomo;
-        process[index].tomoptr_size   = n_tomo;
-
-        /* Reconstruction division */
-        process[index].objptr_size    = n_obj;
-        process[index].objptr_index   = ind_obj;
+        return n_total_processes;
     }
 }
 
+// extern "C"{
 
-extern "C"{
+// 	Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes)
+// 	{
+//         Process *process = (Process *) malloc(sizeof(Process) * total_number_of_processes);
+
+//         if (isParallelOrFanbeamGeometry(configs.geometry)) {
+//             for (int p = 0; p < total_number_of_processes; p++)
+//                 setProcessParallel(configs, process, gpus, p, total_number_of_processes);
+//         } 
+//         return process;
+// 	}
+// }
+
+// extern "C"{
+//     void setProcessParallel(CFG configs, Process* process, int *gpus, int ngpus, int index, int n_total_processes)
+//     {
+//         /* Processes to parallelize the data z-axis by independent blocks */
+//         /* Declare variables */
+//         long long int  n_obj, n_tomo, ind_obj, ind_tomo;
+//         int ind, ind_max, block;  
+
+//         /* Set indexes */
+//         block    = (int) ( configs.tomo.size.z / n_total_processes ); 
+
+//         ind      = index * block;
+
+//         ind_max  = (int) std::min( ( index + 1 ) * block, (int)configs.tomo.size.z);
+
+//         /* Indexes for Reconstruction division - same as Tomogram division */
+//         n_obj    = (long long int) ( ind_max - ind ) * configs.obj.size.x * configs.obj.size.y;
+//         ind_obj  = (long long int)             ind   * configs.obj.size.x * configs.obj.size.y;
+
+//         /* Indexes for Tomogram division - same as Reconstruction division */
+//         n_tomo   = (long long int) ( ind_max - ind ) * configs.tomo.size.x * configs.tomo.size.y;
+//         ind_tomo = (long long int)             ind   * configs.tomo.size.x * configs.tomo.size.y;
+
+//         /* Set process struct */
+//         process[index].index          = index;
+//         process[index].index_gpu      = (int)gpus[index % ngpus];
+//         process[index].batch_index    = (int)index % ngpus;
+//         process[index].tomobatch_size = (int)( ind_max - ind );
+//         process[index].objbatch_size  = (int)( ind_max - ind );
+
+//         /* Tomogram division */
+//         process[index].tomo_index_z   = ind;
+//         process[index].tomoptr_index  = ind_tomo;
+//         process[index].tomoptr_size   = n_tomo;
+
+//         /* Reconstruction division */
+//         process[index].objptr_size    = n_obj;
+//         process[index].objptr_index   = ind_obj;
+//     }
+// }
+
+
+// extern "C"{
 //     void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes)
 //     {   
 //         /* 20/03/2025 - NEEDS TO FIX THIS FUNCTION BLOCKSIZE - LOOK INTO FDK */
@@ -206,21 +221,4 @@ extern "C"{
 //         (*process).obj_posz        = posz;
 //         (*process).tomo_posz       = - configs.tomo.Lz + ind * configs.tomo.dz;
 //     }
-}
-
-extern "C"{
-    int getTotalProcesses(CFG configs, float gpu_memory, int sizeZ, bool using_fft)
-    {
-        const float total_required_mem_per_slice_bytes = calcTotalRequiredMemoryBytes(configs.tomo, configs.obj);
-        const int blocksizeMax = compute_GPU_blocksize(sizeZ,
-                                                total_required_mem_per_slice_bytes,
-                                                using_fft,
-                                                gpu_memory);
-
-        const int n_total_processes = (int)ceil( (float) sizeZ / blocksizeMax );
-
-        ssc_assert(n_total_processes > 0, "Invalid number of total processes");
-
-        return n_total_processes;
-    }
-}
+// }

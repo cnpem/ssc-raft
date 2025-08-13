@@ -73,19 +73,21 @@ typedef struct dimension
 } DIM; /* Data dimensions */
 
 inline float calcSliceMemoryBytes(DIM dimension) {
-   return dimension.size.x * dimension.size.y * sizeof(float);
+   return ( dimension.size.x * dimension.size.y * sizeof(float) );
 }
 
 inline float calcPaddedSliceMemoryBytes(DIM dimension) {
-    return ((dimension.size.x * ( 1 + dimension.pad.x )) + (dimension.size.y * ( 1 + dimension.pad.y) ))* sizeof(float);
+    int sizepadx = PDIM(dimension.size.x,dimension.pad.x);
+    int sizepady = PDIM(dimension.size.y,dimension.pad.y);
+    return ( sizepadx * sizepady * sizeof(float) );
 }
 
 inline float calcWidthMemoryBytes(DIM dimension) {
-    return dimension.size.y * sizeof(float);
+    return ( dimension.size.y * sizeof(float) );
 }
 
 inline float calcLengthMemoryBytes(DIM dimension) {
-    return dimension.size.x * sizeof(float);
+    return ( dimension.size.x * sizeof(float) );
 }
 
 typedef struct geometry
@@ -101,13 +103,16 @@ typedef struct geometry
 typedef struct flags
 {
     /* Bool variables - Pipeline */
-    int do_flat_dark_correction, do_flat_dark_log;
+    int do_flat_dark_correction;
+    int do_flat_dark_log;
     int do_paganin_filter;
     int do_rings;
-    int do_rotation, do_rotation_axis_offset, do_rotation_correction;
+    int do_rotation_axis_offset;
+    int do_rotation_correction;
     int do_alignment;
+    int do_excentric;
     int do_reconstruction;
-    int do_eccentric;
+    
 
 }FLAG;
 
@@ -146,23 +151,15 @@ typedef struct Reconstruction
 typedef struct config
 {
     int nflats;
-    
     GEO geometry;
-
     /* Reconstruction variables */
     DIM obj;
-
     /* Tomogram variables */
     DIM tomo; 
-
     FLAG flags;
-
     CEF ContrastParam;
-
     RF RingsParam;
-
     REC ReconParam;
-
 } CFG;
 
 inline void printDim(dim3 d) {
@@ -272,23 +269,23 @@ inline size_t getTotalDeviceMemory(int device) {
 
 extern "C" {
 
-    Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes);
+    // Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes);
 
-    void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
+    // void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
 
-    void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
+    // void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
 
-    int getTotalProcesses(CFG configs, float GPU_MEMORY, int sizeZ, bool using_fft);
+    int getTotalProcesses(int ngpus, int sizeZ, const size_t total_required_mem_per_slice_bytes, bool using_fft);
 
-    int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
-            bool using_fft, float GPU_MEMORY);
+    int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice, bool using_fft, float GPU_MEMORY);
 
 }
 
 /* Workspace - GPU pointers */
 extern "C"{
 
-	WKP *Initialize_workspace(CFG configs, size_t tomo_batch_size, size_t obj_batch_size);
+	WKP *Initialize_workspace(dim3 size_tomo, dim3 size_obj, 
+    dim3 size_flat, dim3 size_dark, dim3 tomo_pad, dim3 obj_pad);
 
 	void freeWorkspace(WKP *workspace);
 

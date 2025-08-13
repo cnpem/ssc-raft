@@ -7,9 +7,8 @@
 
 extern "C"{
 
-    void ReconstructionPipeline_GPU(CFG configs,
-        float *object, float *data, float *flats, float *darks, float *angles, 
-        int gpu_device);
+    void ReconstructionPipelineMultiGPU(CFG configs, int *gpus, int ngpus,
+    float *object, float *data, float *flats, float *darks, float *angles);
 
 }
 
