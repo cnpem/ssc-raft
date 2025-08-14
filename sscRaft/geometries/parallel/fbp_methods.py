@@ -57,13 +57,13 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     wavelength     = CONST/energy 
     padding        = dic.get('padding', 0.0)*100 # Multiply by 100 to get an integer value
     padd_mode      = PaddMode(dic.get('padd_mode', 'edge'))
+    delta_beta     = 0.0
 
     if beta_delta != 0.0:
-        beta_delta = 1.0 / beta_delta
-        paganin_slices_regularization = wavelength * z2 * numpy.pi * beta_delta / (pixel * pixel); 
+        delta_beta = 1.0 / beta_delta
 
-    else:
-        paganin_slices_regularization = 0.0
+    paganin_slices_regularization = wavelength * z2 * numpy.pi * delta_beta #  / (pixel)
+    print(f'Paganin values: beta/delta = {beta_delta}, beta/delta = {delta_beta}, reg = {paganin_slices_regularization}')
 
     # Object (reconstruction)
     objsize = nrays

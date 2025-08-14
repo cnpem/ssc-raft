@@ -424,7 +424,7 @@ extern "C" {
 
 __host__ __device__ inline float Filter::apply(float input)
 {
-	float param = 0.0f;
+	float param = 0.0f; 
 
 	if (type == EType::gaussian)
 	{

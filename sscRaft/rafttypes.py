@@ -584,6 +584,17 @@ try:
 except:
     logger.error('Cannot find C/CUDA library: -.RAFT_RECONSTRUCTION_PIPELINE-')
 
+try:
+    libraft.ReconstructionPipelineProcessMultiGPU.argtypes = [
+        CFG, ctypes.c_void_p, ctypes.c_int,
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+        ctypes.c_void_p, ctypes.c_void_p
+    ]
+    libraft.ReconstructionPipelineProcessMultiGPU.restype = None
+
+except:
+    logger.error('Cannot find C/CUDA library: -.RAFT_RECONSTRUCTION_PIPELINE_PROCESS-')
+
 #########################
 #|      ssc-raft       |#
 #|      Functions      |#

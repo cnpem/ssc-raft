@@ -67,17 +67,23 @@ extern "C"{
 }
 
 extern "C"{
-    int getTotalProcesses(int ngpus, int sizeZ, const size_t total_required_mem_per_slice_bytes, bool using_fft)
+    int getTotalProcesses(int ngpus, int sizeZ, const int blockSize, const size_t total_required_mem_per_slice_bytes, bool using_fft)
     {
-
+        int blocksize;
         int gpu_subvolume = (sizeZ + ngpus - 1) / ngpus;
 
-        const int blocksizeMax = compute_GPU_blocksize(gpu_subvolume,
-                                                       total_required_mem_per_slice_bytes,
-                                                       using_fft,
-                                                       BYTES_TO_GB * getTotalDeviceMemory());
-        int blocksize = min(gpu_subvolume, blocksizeMax);
-        blocksize     = min(           32,    blocksize);
+        if ( blockSize <= 0 ){
+
+            const int blocksizeMax = compute_GPU_blocksize( gpu_subvolume,
+                                                            total_required_mem_per_slice_bytes,
+                                                            using_fft,
+                                                            BYTES_TO_GB * getTotalDeviceMemory());
+            blocksize = min(gpu_subvolume, blocksizeMax);
+            blocksize = min(           32,    blocksize);
+
+        }else{
+            blocksize = blockSize;
+        }
 
         const int n_total_processes = (int)ceil( (float) gpu_subvolume / blocksize ) * ngpus;
 
@@ -87,60 +93,62 @@ extern "C"{
     }
 }
 
-// extern "C"{
+extern "C"{
 
-// 	Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes)
-// 	{
-//         Process *process = (Process *) malloc(sizeof(Process) * total_number_of_processes);
+	Process *setProcesses(CFG configs, int *gpus, int ngpus, int total_number_of_processes)
+	{
+        Process *process = (Process *) malloc(sizeof(Process) * total_number_of_processes);
 
-//         if (isParallelOrFanbeamGeometry(configs.geometry)) {
-//             for (int p = 0; p < total_number_of_processes; p++)
-//                 setProcessParallel(configs, process, gpus, p, total_number_of_processes);
-//         } 
-//         return process;
-// 	}
-// }
+        if (isParallelOrFanbeamGeometry(configs.geometry)) {
+            for (int p = 0; p < total_number_of_processes; p++)
+                setProcessParallel(configs, process, gpus, ngpus, p, total_number_of_processes);
+        } 
+        return process;
+	}
+}
 
-// extern "C"{
-//     void setProcessParallel(CFG configs, Process* process, int *gpus, int ngpus, int index, int n_total_processes)
-//     {
-//         /* Processes to parallelize the data z-axis by independent blocks */
-//         /* Declare variables */
-//         long long int  n_obj, n_tomo, ind_obj, ind_tomo;
-//         int ind, ind_max, block;  
+extern "C"{
+    void setProcessParallel(CFG configs, Process* process, int *gpus, int ngpus, int index, int n_total_processes)
+    {
+        /* Processes to parallelize the data z-axis by independent blocks */
+        /* Declare variables */
+        long long int  n_obj, n_tomo, ind_obj, ind_tomo;
+        int ind, ind_max, block;  
 
-//         /* Set indexes */
-//         block    = (int) ( configs.tomo.size.z / n_total_processes ); 
+        /* Set indexes */
+        block    = (int) ( configs.tomo.size.z / n_total_processes ); 
 
-//         ind      = index * block;
+        ind      = index * block;
 
-//         ind_max  = (int) std::min( ( index + 1 ) * block, (int)configs.tomo.size.z);
+        ind_max  = (int) std::min( ( index + 1 ) * block, (int)configs.tomo.size.z);
 
-//         /* Indexes for Reconstruction division - same as Tomogram division */
-//         n_obj    = (long long int) ( ind_max - ind ) * configs.obj.size.x * configs.obj.size.y;
-//         ind_obj  = (long long int)             ind   * configs.obj.size.x * configs.obj.size.y;
+        /* Indexes for Reconstruction division - same as Tomogram division */
+        n_obj    = (long long int) ( ind_max - ind ) * configs.obj.size.x * configs.obj.size.y;
+        ind_obj  = (long long int)             ind   * configs.obj.size.x * configs.obj.size.y;
 
-//         /* Indexes for Tomogram division - same as Reconstruction division */
-//         n_tomo   = (long long int) ( ind_max - ind ) * configs.tomo.size.x * configs.tomo.size.y;
-//         ind_tomo = (long long int)             ind   * configs.tomo.size.x * configs.tomo.size.y;
+        /* Indexes for Tomogram division - same as Reconstruction division */
+        n_tomo   = (long long int) ( ind_max - ind ) * configs.tomo.size.x * configs.tomo.size.y;
+        ind_tomo = (long long int)             ind   * configs.tomo.size.x * configs.tomo.size.y;
 
-//         /* Set process struct */
-//         process[index].index          = index;
-//         process[index].index_gpu      = (int)gpus[index % ngpus];
-//         process[index].batch_index    = (int)index % ngpus;
-//         process[index].tomobatch_size = (int)( ind_max - ind );
-//         process[index].objbatch_size  = (int)( ind_max - ind );
+        /* Set process struct */
+        process[index].process        = index;
+        process[index].gpu            = gpus[index % ngpus];
+        process[index].gpu_proc_ind   = (int)index % ngpus;
+        process[index].tomobatch_size = (int)( ind_max - ind );
+        process[index].objbatch_size  = (int)( ind_max - ind );
 
-//         /* Tomogram division */
-//         process[index].tomo_index_z   = ind;
-//         process[index].tomoptr_index  = ind_tomo;
-//         process[index].tomoptr_size   = n_tomo;
+        /* Tomogram division */
+        process[index].tomo_index     = ind;
+        process[index].tomoptr_index  = ind_tomo;
+        process[index].tomoptr_size   = n_tomo;
 
-//         /* Reconstruction division */
-//         process[index].objptr_size    = n_obj;
-//         process[index].objptr_index   = ind_obj;
-//     }
-// }
+        /* Reconstruction division */
+        process[index].objptr_size    = n_obj;
+        process[index].objptr_index   = ind_obj;
+
+        // printf("Function - Process number %d(%d) in gpu[%d(%d)] = %d(%d) \n", process[index].process, index, process[index].gpu_proc_ind, index % ngpus, process[index].gpu, gpus[index % ngpus]);
+    }
+}
 
 
 // extern "C"{

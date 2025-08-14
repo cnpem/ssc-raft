@@ -141,7 +141,7 @@ typedef struct Reconstruction
     int method;                  /* Reconstruction methods. Options: FBP*/
     int filter;                  /* Filter. Options: ramp, hamming, hann, ... */
     float filter_reg;            /* General regularization parameter for filter */
-    float paganin_slices = 0.0f; /* Paganin regularization parameter for slices method */
+    float paganin_slices;        /* Paganin regularization parameter for slices method */
     int iterations;              /* Iterations for iterative methods */
     float rotation_axis_offset;  /* Rotation axis offset */
     float total_variation;       /* Total variation regularization parameter */
@@ -225,19 +225,19 @@ struct Process{
     /* Process variables to parallelize the data z-axis by independent blocks */
 
     /* GPU */ 
-    int index, index_gpu;
+    int process, gpu;
 
     /* Processes*/
-    int tomobatch_size, objbatch_size, batch_index;
+    int tomobatch_size, objbatch_size, gpu_proc_ind;
 
     /* Tomogram (or detector) and reconstruction filter */
-    int tomo_index_z, filter_index_z;
+    int tomo_index, filter_index;
     long long int tomoptr_index, tomoptr_size, filterptr_index, filterptr_size;
-    float tomo_posz;
+    float tomo_pos;
 
     /* Object - Reconstruction */
     long long int objptr_index, objptr_size;
-    float obj_posz;
+    float obj_pos;
 
     long long int n_recon, n_recon_pad, n_tomo, n_filter; 
     int i, i_gpu, zi, z_filter, z_filter_pad, z_proj, z_recon;
@@ -269,13 +269,13 @@ inline size_t getTotalDeviceMemory(int device) {
 
 extern "C" {
 
-    // Process *setProcesses(CFG configs, GPU gpus, int total_number_of_processes);
+    Process *setProcesses(CFG configs, int *gpus, int ngpus, int total_number_of_processes);
 
-    // void setProcessParallel(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
+    void setProcessParallel(CFG configs, Process* process, int *gpus, int ngpus, int index, int n_total_processes);
 
     // void setProcessConebeam(CFG configs, Process* process, GPU gpus, int index, int n_total_processes);
 
-    int getTotalProcesses(int ngpus, int sizeZ, const size_t total_required_mem_per_slice_bytes, bool using_fft);
+    int getTotalProcesses(int ngpus, int sizeZ, const int blockSize, const size_t total_required_mem_per_slice_bytes, bool using_fft);
 
     int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice, bool using_fft, float GPU_MEMORY);
 
