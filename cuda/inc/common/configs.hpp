@@ -112,14 +112,12 @@ typedef struct flags
     int do_alignment;
     int do_excentric;
     int do_reconstruction;
-    
-
 }FLAG;
 
 typedef struct ContrastEnhancementFilter
 {
     /* Paganin Filter */
-    int method; /* Contrast Enhancement methods. Options: paganin, paganin_slices*/
+    int method; /* Contrast Enhancement methods. Options: paganin, paganin_slices */
     float beta_delta; /* beta/delta parameter */
     float regularization; /* regularization parameter */
     int post_process; /* Function applied after usual convolution: ex. aplly -log() after Paganin kernel */
