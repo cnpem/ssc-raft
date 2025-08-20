@@ -141,7 +141,7 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
     iterations    = dic['iterations']
     TV_iterations = 0 #dic['TV iterations']
 
-    det_pixel     = (dic['detectorPixel[m]'],dic['detectorPixel[m]']) # det_pixel = (det_pixelx, det_pixely)
+    det_pixel     = dic['detectorPixel[m]'] # det_pixel = det_pixelx
     pad           = (dic['padding'],0,0) # pad = (padx, pady, padz)
 
     # Regularization and smoothness parameter for the TV (Total Variation method)
@@ -168,19 +168,19 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
 
     if method == 'eEMRT':
 
-        output = eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj) / det_pixel
+        obj = eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj) / det_pixel
     
     elif method == 'tEMRT':
 
-        output = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj) / det_pixel
+        obj = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj) / det_pixel
 
     elif method == 'tEMFQ':
 
-        output = tEMFQ_GPU_(data, flat, angles, 
+        obj = tEMFQ_GPU_(data, flat, angles, 
                             pad, interpolation, det_pixel, 
                             tv_reg, iterations, gpus, blocksize, obj = obj)  
     else:
         logger.error(f'Invalid EM method:{method}')
         raise ValueError(f'Invalid EM method:{method}')
 
-    return output
+    return obj

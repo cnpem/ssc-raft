@@ -127,7 +127,8 @@ extern "C" {
         
         // printf("dth[%d] = %e \n",k,dth);
 
-        t = x * cosk + y * sink;
+        // t = x * cosk + y * sink; // original
+        t = x * cosk - y * sink;
       
         T = (int) ((t - tmin)/dt);	     
 
@@ -169,8 +170,14 @@ extern "C" {
       for( k = 0; k < nrays; k++ ) {
 
         s = - a + k * dt;
-        x = t * ctheta - s * stheta;
-        y = t * stheta + s * ctheta;
+
+        x =   t * ctheta + s * stheta;
+        y = - t * stheta + s * ctheta;
+
+        // original
+        // x = t * ctheta - s * stheta;
+        // y = t * stheta + s * ctheta;
+
         X = (int) ((x + 1)/dt);
         Y = (int) ((y + 1)/dt);	 
 
@@ -214,8 +221,14 @@ extern "C" {
       for( k = 0; k < nrays; k++ ) {
 
         s = - a + k * dt;
-        x = t * ctheta - s * stheta;
-        y = t * stheta + s * ctheta;
+
+        x =   t * ctheta + s * stheta;
+        y = - t * stheta + s * ctheta;
+
+        // original
+        // x = t * ctheta - s * stheta;
+        // y = t * stheta + s * ctheta;
+
         X = (int) ((x + 1)/dt);
         Y = (int) ((y + 1)/dt);	 
 
@@ -280,7 +293,8 @@ extern "C" {
           dth = abs(angles[k+1] - angles[k]);
         }
 
-        t = x * cosk + y * sink;
+        // t = x * cosk + y * sink; // original
+        t = x * cosk - y * sink;
       
         T = (int)((t - tmin)/dt);	     
          
@@ -333,7 +347,8 @@ extern "C" {
           dth = abs(angles[k+1] - angles[k]);
         }
 
-        t = x * cosk + y * sink;
+        // t = x * cosk + y * sink; // original
+        t = x * cosk - y * sink;
       
         T = (int) ((t - tmin)/dt);	     
 
