@@ -61,27 +61,6 @@ deploy_dgx:
   only:
     - tags
 
-pages:
-  stage: pages
-  image: gccdockers/python-builder
-  script:
-    - python3 -m pip install myst-parser sphinx-multiversion
-    - cd docs
-    - make
-    - cd ..
-    - mkdir -p public
-    - cd public
-    - cp -r ../docs/build/* .
-  tags:
-    - x86_64
-    - cuda11
-    - docker
-  artifacts:
-    paths:
-      - public
-  only:
-    - tags
-
 build_docs:
   stage: build
   image: gccdockers/python-builder
