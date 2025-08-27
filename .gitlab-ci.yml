@@ -4,7 +4,6 @@ variables:
 stages:
   - build
   - deploy
-  - pages
 
 build_dgx:
   stage: build
