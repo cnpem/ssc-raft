@@ -1,3 +1,8 @@
+Version 3.2.7 - 2025-08-27
+--------------------------
+*Corrections:*
+  - Update the transpose CPU function ``transpose_cpu_zyx2xyz`` in order to correct the observed load average of the HPC resources.
+
 Version 3.2.6 - 2025-08-07
 --------------------------
 *Added:*
