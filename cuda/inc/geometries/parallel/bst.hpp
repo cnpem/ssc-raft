@@ -5,22 +5,29 @@
 #include "common/operations.hpp"
 #include "common/types.hpp"
 
+typedef struct workspaceBST
+{	
+	cufftHandle plan1d, plan2d, filterplan;
+	cImage *filtersino, *cartesianblock, *polarblock, *realpolar;
+}WBST;
 
 extern "C" {
+
+    WBST *InitializeBST_workspace(dim3 tomo_size, dim3 obj_size, int bst_padd, int blocksize_bst);
+    void freeBSTWorkspace(WBST *workspace);
 
     void getBST(float* blockRecon, float* wholesinoblock, float* angles, 
         int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0, 
         float reg, float paganin, int filter_type, float offset, float pixel, 
-        cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan, 
-        cImage* filtersino, cImage* cartesianblock, cImage* polarblock, cImage* realpolar, 
-        int gpu);
+        WBST *bst_workspace);
 
     void getBST_stream(float* blockRecon, float* wholesinoblock, float* angles, 
         int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0, 
-        float reg, float paganin, int filter_type, float offset, float pixel, 
-        cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan, 
-        cImage* filtersino, cImage* cartesianblock, cImage* polarblock, cImage* realpolar, 
-        int gpu, cudaStream_t stream);
+        float reg, float paganin, int filter_type, float offset, float pixel,
+        WBST *bst_workspace, cudaStream_t stream); 
+        // cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan, 
+        // cImage* filtersino, cImage* cartesianblock, cImage* polarblock, cImage* realpolar, 
+        // int gpu, cudaStream_t stream);
 
     void EMFQ_BST(float* blockRecon, float *wholesinoblock, float *angles,
     int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0);
@@ -33,4 +40,5 @@ extern "C" {
     int pad0);
 
 }
+
 #endif

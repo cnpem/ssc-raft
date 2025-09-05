@@ -481,17 +481,47 @@ extern "C"{
 		
 		int offset = EccentricTomo_PhaseCorrelation(d_sino, sizex, sizey, sizez);
 		
+        HANDLE_ERROR(cudaFree(d_sino));
 		HANDLE_ERROR(cudaDeviceSynchronize());		
 		
 		return offset;
 	}
 	
+    void getEccentricTomo(float* data, 
+    int nrays, int nangles, int nslices, int offset)
+    {
+        size_t y_size = (size_t)nangles / 2;
+
+        const size_t ips = (size_t)nangles * nrays; // input place size
+        const size_t sxy = (size_t)y_size  * nrays; // output place size. Note that sxy != ips/2 if sizey%2 == 1
+
+        float *d_sino = opt::allocGPU<float>(ips);
+        float *temp   = opt::allocGPU<float>(ips);
+
+        for(int i = 0; i < nslices; i++){
+            float* temp1 = temp;
+            float* temp2 = temp1 + ips/2;
+
+            opt::GPUToGPU<float>(data + (size_t)i * ips, d_sino, ips);
+
+            TransferMemory<<<(sxy+127)/128,128>>>(d_sino, temp1, temp2, sxy, 0, 1);
+            cudaMemset(d_sino, 0, ips*sizeof(float));
+            KJoinX<<<dim3((nrays+127)/128,y_size,1),128>>>(d_sino, temp1, temp2, nrays, offset); // careful with odd sizey
+
+            opt::GPUToCPU<float>(d_sino, data + (size_t)i * ips, ips);
+
+        }
+        HANDLE_ERROR(cudaFree(d_sino));
+        HANDLE_ERROR(cudaFree(temp));
+
+        HANDLE_ERROR(cudaDeviceSynchronize());
+    }
+
 	void getEccentricTomoGPU(float* data, 
     int nrays, int nangles, int nslices, 
     int offset, int ngpu)
 	{
 		HANDLE_ERROR(cudaSetDevice(ngpu));
-		// printf("tomo360 gpu block: %d %d %d\n",nslices,nrays,nangles);
 
         size_t y_size = (size_t)nangles / 2;
 
@@ -514,8 +544,11 @@ extern "C"{
             opt::GPUToCPU<float>(data + (size_t)i * ips, d_sino, ips);
 
         }
-		
+        
+        HANDLE_ERROR(cudaFree(d_sino));
+        HANDLE_ERROR(cudaFree(temp));
         HANDLE_ERROR(cudaDeviceSynchronize());
+        
 	}
 
 	void getEccentricTomoMultiGPU(int* gpus, int ngpus, 

@@ -117,6 +117,10 @@ namespace opt{
     void GPUToCPU(Type *cpuptr, Type *gpuptr, size_t size)
     {HANDLE_ERROR(cudaMemcpy(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost));};
 
+    template<typename Type>
+    void GPUToGPU(Type *gpuptr1, Type *gpuptr2, size_t size)
+    {HANDLE_ERROR(cudaMemcpy(gpuptr2, gpuptr1, size * sizeof(Type), cudaMemcpyDeviceToDevice));};
+
     void MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE);
 
     dim3 setGridBlock(dim3 size, dim3 BT);

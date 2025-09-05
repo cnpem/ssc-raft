@@ -27,6 +27,7 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, gpus = [0], dic = Non
     nflats   = flat.shape[0] if flat.ndim > 2 else 1
     print('Python nflats:',nflats)
     print('Python nflats.ndim:',flat.ndim)
+
     if dark.ndim > 2:
         dark = dark[0]
 
@@ -36,6 +37,7 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, gpus = [0], dic = Non
     else:
         objsize = obj.shape[-1]
 
+    recon_method   = ReconMethod(dic.get('reconstruction method', 'fbp'))
     filter_type    = FilterNumber(dic.get('filter', 'ramp'))
     beta_delta     = dic.get('beta/delta', 0.0)
     regularization = dic.get('regularization', 1.0)
@@ -75,7 +77,7 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, gpus = [0], dic = Non
 
     Rings    = rings_param(method = 0, rings_block = 2, rings_lambda = -1)
 
-    Recon    = REC(method               = 1, # FBP_RT
+    Recon    = REC(method               = recon_method, 
                    filter               = filter_type, 
                    filter_reg           = regularization,  
                    paganin_slices       = paganin_slices_regularization, 

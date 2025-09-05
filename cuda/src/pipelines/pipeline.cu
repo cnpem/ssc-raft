@@ -26,6 +26,8 @@ extern "C"{
         int nxp     = PDIM(configs.obj.size.x,configs.obj.pad.x); 
         int nyp     = PDIM(configs.obj.size.y,configs.obj.pad.y);
 
+        WBST *bst_workspace; int bst_padd, blocksize_bst;
+
         /* Padding */
         /* Projection GPUs padded Grd and Blocks */
         dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
@@ -63,6 +65,19 @@ extern "C"{
             break;
             case ReconstructionMethod::fbpBST:
                 /* BST */
+                bst_padd = 2; blocksize_bst = 1;
+                
+                bst_workspace = InitializeBST_workspace(dim3(nraysp,nangles,tomoblock), 
+                                                        dim3(   nxp,    nxp, objblock), 
+                                                        bst_padd, blocksize_bst);
+
+                getBST( workspace->objPadd, workspace->tomoPadd, workspace->angles, 
+                        nraysp, nangles, tomoblock, nxp, bst_padd, 
+                        configs.ContrastParam.regularization, configs.ReconParam.paganin_slices, 
+                        configs.ReconParam.filter, configs.ReconParam.rotation_axis_offset, 
+                        configs.geometry.detector_pixel.x, bst_workspace);
+
+                freeBSTWorkspace(bst_workspace);
             break;
             case ReconstructionMethod::eEMRT:
                 /* EM RT eEM */
@@ -101,33 +116,30 @@ extern "C"{
         cudaStream_t nstream = 0;
         int nrays   = configs.tomo.size.x;
         int nangles = configs.tomo.size.y;
-        int nraysp  = PDIM(configs.tomo.size.x,configs.tomo.pad.x); 
 
         int nx      = configs.obj.size.x;
         int ny      = configs.obj.size.y;
-        int nxp     = PDIM(configs.obj.size.x,configs.obj.pad.x); 
-        int nyp     = PDIM(configs.obj.size.y,configs.obj.pad.y);
 
-        printf("tomo shape:\n");
-        printDim(configs.tomo.size);
-        printf("tomo pad shape:\n");
-        printDim(configs.tomo.pad);
-        printf("obj shape:\n");
-        printDim(configs.obj.size);
-        printf("obj pad shape:\n");
-        printDim(configs.obj.pad);
-        printf("configs.nflats: %d\n",configs.nflats);
-        printf("nraysp: %d\n",nraysp);
-        printf("nxp: %d\n",nxp);
-        printf("nyp: %d\n",nyp);
+        // printf("tomo shape:\n");
+        // printDim(configs.tomo.size);
+        // printf("tomo pad shape:\n");
+        // printDim(configs.tomo.pad);
+        // printf("obj shape:\n");
+        // printDim(configs.obj.size);
+        // printf("obj pad shape:\n");
+        // printDim(configs.obj.pad);
+        // printf("configs.nflats: %d\n",configs.nflats);
+        // printf("nraysp: %d\n",nraysp);
+        // printf("nxp: %d\n",nxp);
+        // printf("nyp: %d\n",nyp);
 
-        printf("configs.flags.do_flat_dark_correction: %d\n",configs.flags.do_flat_dark_correction);
-        printf("configs.flags.do_flat_dark_log: %d\n",configs.flags.do_flat_dark_log);
+        // printf("configs.flags.do_flat_dark_correction: %d\n",configs.flags.do_flat_dark_correction);
+        // printf("configs.flags.do_flat_dark_log: %d\n",configs.flags.do_flat_dark_log);
 
-        printf("configs.flags.do_rings: %d\n",configs.flags.do_rings);
+        // printf("configs.flags.do_rings: %d\n",configs.flags.do_rings);
 
-        printf("configs.flags.do_reconstruction: %d\n",configs.flags.do_reconstruction);
-        fflush(stdout);
+        // printf("configs.flags.do_reconstruction: %d\n",configs.flags.do_reconstruction);
+        // fflush(stdout);
 
         if( configs.flags.do_flat_dark_correction == 1 )
         {
@@ -150,6 +162,19 @@ extern "C"{
                                 configs.RingsParam.rings_lambda, 
                                 configs.RingsParam.rings_block,
                                 nstream);        
+        }
+
+        if( configs.flags.do_excentric == 1 )
+        {
+            printf("Excentric Tomo Stitching\n");
+            fflush(stdout);
+            getEccentricTomo(workspace->tomo, nrays, nangles, tomoblock, configs.ReconParam.rotation_axis_offset);
+
+            /* New shape of tomogam and object after excentric stitching */
+            configs.tomo.size.x = 2 * configs.tomo.size.x;
+            configs.tomo.size.y = int(configs.tomo.size.y / 2);
+            configs.obj.size.x  = 2 * configs.obj.size.x;
+            configs.obj.size.y  = 2 * configs.obj.size.y;
         }
 
         if( configs.flags.do_reconstruction == 1)

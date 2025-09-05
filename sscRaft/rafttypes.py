@@ -648,6 +648,24 @@ def dprint(*x):
 def nice(f): # scientific notation + 2 decimals
     return "{:.2e}".format(f)
 
+def ReconMethod(method):
+    if method.lower() == 'none':
+        return 0
+    elif method.lower() == 'fbp':
+        return 1
+    elif method.lower() == 'bst':
+        return 2
+    elif method.lower() == 'eEMRT':
+        return 3
+    elif method.lower() == 'tEMRT':
+        return 4
+    elif method.lower() == 'tEMFQ':
+        return 5
+    elif method.lower() == 'fdk':
+        return 6
+    else:
+        return 1
+    
 def FilterNumber(mfilter):
     if mfilter.lower() == 'none':
         return 0

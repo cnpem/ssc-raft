@@ -49,7 +49,9 @@ extern "C" {
     float axis_offset, dim3 tomo_size, int ngpu, int blocksize);
 }
 
-/* Centersino - Find offset for 180 degrees parallel tomogram */
+/* Centersino - Find offset for 180 degrees parallel tomogram 
+   Excentric Tomo - Find offset 
+*/
 extern "C"{
 
     float findcentersino_subpixel(float* frame0, float* frame180, 
@@ -60,6 +62,8 @@ extern "C"{
 
     int getCentersino(float* frame0, float* frame180, 
     float* dark, float* flat, size_t sizex, size_t sizey);
+
+    void getEccentricTomo(float* data, int nrays, int nangles, int nslices, int offset);
 }
 
 /* Contrast Enhancement Functions */
