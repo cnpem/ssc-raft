@@ -74,7 +74,7 @@ def phase_retrieval(frames, dic):
     pixel_obj  = pixel_det / magn
     reg        = dic.get('regularization', 0.0)
     padding    = dic.get('padding', 0.25)*100 # Multiply by 100 to get an integer value
-    padd_mode  = PaddMode(dic.get('padd_mode', 'edge'))
+    padd_mode  = dic.get('padd_mode', 'edge')
     blocksize  = dic.get('blocksize', 0)
     post_proc  = dic.get('post_process', False)
 

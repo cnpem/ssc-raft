@@ -38,6 +38,9 @@
 #define BYTES_TO_GB (1.0/(1024.0*1024.0*1024.0))
 #define A100_MEM 39.5 // A100 40GB device RAM memory, in GB.
 
+#define SLICES_ANGLES_RAYS 1
+#define ANGLES_SLICES_RAYS 0
+
 #include "cufft.h"
 #include <stdio.h>
 #include <cuda_runtime_api.h>
@@ -47,7 +50,7 @@
 #include <iostream>
 #include <future>
 
-enum ReconstructionMethod
+enum class ReconstructionMethod
 {
     none    = 0,
     fbpRT   = 1,
@@ -110,6 +113,7 @@ typedef struct flags
     int do_rotation_axis_offset;
     int do_rotation_correction;
     int do_alignment;
+    int do_excentric_offset;
     int do_excentric;
     int do_reconstruction;
 }FLAG;
@@ -130,13 +134,20 @@ typedef struct RingsFilter
     int method; /* Rings methods. Options: titarenko*/
     int rings_block;    /* Titarenko's parameter */
     float rings_lambda; /* Titarenko's regularization parameter */
-
 }RF;
+
+typedef struct Alignment
+{
+    /* Alignment methods */
+    int method; /* Alignment methods. Options: none yet */
+    int excentric_offset;    /* Excentric offset parameter */
+    float rotation_axis_offset; /* Rotation axis offset */
+}ALGN;
 
 typedef struct Reconstruction
 {
-    /* Paganin Filter */
-    int method;                  /* Reconstruction methods. Options: FBP*/
+    /* Reconstruction */
+    int method;                  /* Reconstruction methods. Options: FBP */
     int filter;                  /* Filter. Options: ramp, hamming, hann, ... */
     float filter_reg;            /* General regularization parameter for filter */
     float paganin_slices;        /* Paganin regularization parameter for slices method */
@@ -147,16 +158,18 @@ typedef struct Reconstruction
 }REC;
 
 typedef struct config
-{
-    int nflats;
+{ 
     GEO geometry;
     /* Reconstruction variables */
     DIM obj;
     /* Tomogram variables */
-    DIM tomo; 
+    DIM tomo;
+    DIM flat; 
+    DIM dark; 
     FLAG flags;
     CEF ContrastParam;
     RF RingsParam;
+    ALGN AlignParam;
     REC ReconParam;
 } CFG;
 
@@ -283,7 +296,7 @@ extern "C" {
 extern "C"{
 
 	WKP *Initialize_workspace(dim3 size_tomo, dim3 size_obj, 
-    dim3 size_flat, dim3 size_dark, dim3 tomo_pad, dim3 obj_pad);
+    dim3 size_flat, dim3 size_dark, dim3 tomo_pad, dim3 obj_pad, int nangles);
 
 	void freeWorkspace(WKP *workspace);
 

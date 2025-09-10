@@ -3,7 +3,7 @@
 from ..rafttypes import *
 from ..io.io_ import *
 
-def correct_background(frames, flat, dark, gpus = [0], is_log = False, blocksize = 0, axis_input = 'slices_angles_lenght'):
+def correct_background(frames, flat, dark, gpus = [0], is_log = False, blocksize = 0, axis_order = 'slices_angles_lenght', nstreams = 0):
     """ GPU function to correct tomography projections (or frames) background 
     with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
     a sample, to measure the background.
@@ -28,7 +28,7 @@ def correct_background(frames, flat, dark, gpus = [0], is_log = False, blocksize
         gpus  (int list, optional): List of GPUs [Default: [0]]
         is_log    (bool, optional): Apply ``- logarithm()`` or not [Default: False]
         blocksize  (int, optional): Block of slices size to be processed in one GPU. ``blocksize = 0`` computes it automatically considering the available GPU memory [Default: 0]
-        axis_input (str, optional): Set the order of the frames axis. Options: ``\'slices_angles_lenght\'`` (frames has axis (slices, angles, lenght)) or ``\'angles_slices_lenght\'`` (frames has axis (angles, slices, lenght))[Default: ``\'slices_angles_lenght\'``]
+        axis_order (str, optional): Set the order of the input frames axis. Options: ``\'slices_angles_lenght\'`` (frames has axis (slices, angles, lenght)) or ``\'angles_slices_lenght\'`` (frames has axis (angles, slices, lenght))[Default: ``\'slices_angles_lenght\'``]
 
     Returns:
         (ndarray): Corrected frames (or projections) with the same dimension as the input volume ``frames``.
@@ -42,23 +42,14 @@ def correct_background(frames, flat, dark, gpus = [0], is_log = False, blocksize
     gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     sizex    = frames.shape[-1]
-    sizey  = frames.shape[-2]
+    sizey    = frames.shape[-2]
 
-    if axis_input == 'slices_angles_lenght':
-        input_slice = 1
-    elif axis_input == 'angles_slices_lenght':
-        input_slice = 0
-    else:
-        input_slice = 1
-        message = f'The parameter axis_input does not exist. Setting as the default \'slices_angles_lenght\''
-        logger.warning(message)
+    order_axis = set_input_axis_order(axis_order)
     
     if is_log:
-        is_log = 1
-        logger.info(f'Returning corrected data with -log() applied.')
+        logger.info(f'Returning corrected data with \'-log()\' applied.')
     else:
-        is_log = 0
-        logger.info(f'Returning corrected data without -log() applied.')
+        logger.info(f'No \'-log()\' applied.')
 
     if len(frames.shape) == 2:
         sizez = 1
@@ -104,6 +95,7 @@ def correct_background(frames, flat, dark, gpus = [0], is_log = False, blocksize
     libraft.getBackgroundCorrectionMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
             frames_ptr, flat_ptr, dark_ptr, 
             ctypes.c_int(sizex), ctypes.c_int(sizey), ctypes.c_int(sizez), 
-            ctypes.c_int(nflats), ctypes.c_int(is_log), ctypes.c_int(input_slice), ctypes.c_int(blocksize))
+            ctypes.c_int(nflats), ctypes.c_int(is_log), ctypes.c_int(order_axis), 
+            ctypes.c_int(blocksize), ctypes.c_int(nstreams))
 
     return frames 

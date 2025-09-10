@@ -49,7 +49,9 @@ int padding_mode, dim3 size, dim3 pad)
 
     outpadded[indpad].y = 0.0;
 
-    switch(padding_mode){
+    opt::PaddingMode mode = static_cast<opt::PaddingMode>(padding_mode);
+
+    switch(mode){
         case opt::PaddingMode::zero:
             /* Zero padding */
             outpadded[indpad].x = 0.0; 
@@ -105,7 +107,9 @@ int padding_mode, dim3 size, dim3 pad)
 
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
-    switch(padding_mode){
+    opt::PaddingMode mode = static_cast<opt::PaddingMode>(padding_mode);
+
+    switch(mode){
         case opt::PaddingMode::zero:
             /* Zero padding */
             outpadded[indpad].x = 0.0; 
@@ -174,7 +178,9 @@ int padding_mode, dim3 size, dim3 pad)
 
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
-    switch(padding_mode){
+    opt::PaddingMode mode = static_cast<opt::PaddingMode>(padding_mode);
+
+    switch(mode){
         case opt::PaddingMode::zero:
             /* Zero padding */
             outpadded[indpad] = 0.0; 
@@ -229,7 +235,9 @@ int padding_mode, dim3 size, dim3 pad)
 
     if ( (i >= Npadx) || (j >= Npady) || (k >= size.z) ) return;
 
-    switch(padding_mode){
+    opt::PaddingMode mode = static_cast<opt::PaddingMode>(padding_mode);
+
+    switch(mode){
         case opt::PaddingMode::zero:
             /* Zero padding */
             outpadded[indpad] = 0.0; 

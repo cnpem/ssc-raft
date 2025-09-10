@@ -201,7 +201,9 @@ extern "C"{
 
         opt::CPUToGPU<float>(angles, dangles, nangles);
 
-        if ( tomo.padding_mode == opt::PaddingMode::nopad ){
+        opt::PaddingMode mode = static_cast<opt::PaddingMode>(tomo.padding_mode);
+
+        if ( mode == opt::PaddingMode::none ){
 
             for (i = 0; i < ind_block; i++){
 
@@ -318,13 +320,13 @@ extern "C"{
 				subblock   = min(nslices - ptr, subvolume);
 
 				threads.push_back( std::async( std::launch::async, 
-                    getFBPGPU, 
-                    tomo, obj, geometry, ReconParam, 
-                    object   + (size_t)sizeImagex * sizeImagey * ptr,
-                    tomogram + (size_t)     nrays *    nangles * ptr, 
-                    angles, 
-                    subblock,
-                    gpus[i]));
+                                   getFBPGPU, 
+                                   tomo, obj, geometry, ReconParam, 
+                                   object   + (size_t)sizeImagex * sizeImagey * ptr,
+                                   tomogram + (size_t)     nrays *    nangles * ptr, 
+                                   angles, 
+                                   subblock,
+                                   gpus[i]));
 
                 /* Update pointer */
 				ptr = ptr + subblock;		

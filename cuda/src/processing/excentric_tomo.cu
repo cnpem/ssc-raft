@@ -320,7 +320,7 @@ __global__ void TransferMemory(const float* sinos, Type* restrict img1, Type* re
 	}
 }
 
-int EccentricTomo_PhaseCorrelation(float* sinograms, size_t sizex, size_t sizey, size_t sizez)
+int ExcentricTomo_PhaseCorrelation(float* sinograms, size_t sizex, size_t sizey, size_t sizez)
 {
     const size_t inputplanesize = sizey*sizex;
     sizey /= 2;
@@ -466,7 +466,13 @@ __global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, 
 
 extern "C"{
 
-	int getOffsetEccentricTomoGPU(int ngpu, float* sinogram, 
+    int getOffsetExcentricTomo(float* sinogram, size_t sizex, size_t sizey, size_t sizez)
+    {
+        int offset = ExcentricTomo_PhaseCorrelation(sinogram, sizex, sizey, sizez);
+		return offset;
+    }
+
+	int getOffsetExcentricTomoGPU(int ngpu, float* sinogram, 
     int sizex, int sizey, int sizez)
 	{
 		HANDLE_ERROR(cudaSetDevice(ngpu));
@@ -479,7 +485,7 @@ extern "C"{
 
 		// rImage sinograms(cpusinograms, sizex, sizey*sizez);
 		
-		int offset = EccentricTomo_PhaseCorrelation(d_sino, sizex, sizey, sizez);
+		int offset = ExcentricTomo_PhaseCorrelation(d_sino, sizex, sizey, sizez);
 		
         HANDLE_ERROR(cudaFree(d_sino));
 		HANDLE_ERROR(cudaDeviceSynchronize());		
@@ -487,7 +493,7 @@ extern "C"{
 		return offset;
 	}
 	
-    void getEccentricTomo(float* data, 
+    void getExcentricTomo(float* data, 
     int nrays, int nangles, int nslices, int offset)
     {
         size_t y_size = (size_t)nangles / 2;
@@ -495,6 +501,7 @@ extern "C"{
         const size_t ips = (size_t)nangles * nrays; // input place size
         const size_t sxy = (size_t)y_size  * nrays; // output place size. Note that sxy != ips/2 if sizey%2 == 1
 
+        // float *d_sino = opt::allocGPU<float>((size_t)ips * nslices);
         float *d_sino = opt::allocGPU<float>(ips);
         float *temp   = opt::allocGPU<float>(ips);
 
@@ -502,22 +509,27 @@ extern "C"{
             float* temp1 = temp;
             float* temp2 = temp1 + ips/2;
 
+            // opt::GPUToGPU<float>(data + (size_t)i * ips, d_sino + (size_t)i * ips, ips);
             opt::GPUToGPU<float>(data + (size_t)i * ips, d_sino, ips);
 
             TransferMemory<<<(sxy+127)/128,128>>>(d_sino, temp1, temp2, sxy, 0, 1);
             cudaMemset(d_sino, 0, ips*sizeof(float));
             KJoinX<<<dim3((nrays+127)/128,y_size,1),128>>>(d_sino, temp1, temp2, nrays, offset); // careful with odd sizey
 
-            opt::GPUToCPU<float>(d_sino, data + (size_t)i * ips, ips);
+            opt::GPUToGPU<float>(d_sino, data + (size_t)i * ips, ips);
 
         }
+        // HANDLE_ERROR(cudaFree(data));
         HANDLE_ERROR(cudaFree(d_sino));
         HANDLE_ERROR(cudaFree(temp));
+
+        // data   = d_sino;
+        // d_sino = NULL; /* To avoid double free */
 
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-	void getEccentricTomoGPU(float* data, 
+	void getExcentricTomoGPU(float* data, 
     int nrays, int nangles, int nslices, 
     int offset, int ngpu)
 	{
@@ -551,7 +563,7 @@ extern "C"{
         
 	}
 
-	void getEccentricTomoMultiGPU(int* gpus, int ngpus, 
+	void getExcentricTomoMultiGPU(int* gpus, int ngpus, 
     float* data, 
     int nrays, int nangles, int nslices, 
     int offset)
@@ -565,14 +577,14 @@ extern "C"{
         threads.reserve(ngpus);
 
         if ( ngpus == 1 ){
-            getEccentricTomoGPU(data, nrays, nangles, blockgpu, offset, gpus[0]);
+            getExcentricTomoGPU(data, nrays, nangles, blockgpu, offset, gpus[0]);
         }else{
             for(t = 0; t < ngpus; t++){ 
                 
                 subblock = min(nslices - ptr, blockgpu);
      
                 threads.push_back(std::async( std::launch::async, 
-                    getEccentricTomoGPU, 
+                    getExcentricTomoGPU, 
                     data + (size_t)ptr * nrays * nangles, 
                     nrays, nangles, subblock, 
                     offset, gpus[t]));

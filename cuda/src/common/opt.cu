@@ -176,8 +176,20 @@ void opt::transpose_zyx2yzx_exp(int* gpus, int ngpus, float *data, int sizex, in
     }
 }
 
+void opt::set_excentric_tomo_dimensions(dim3 &tomo){
+    tomo.x = 2 * tomo.x;
+    tomo.y = int( tomo.y / 2 );
+}
 
-void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE) {
+int opt::get_angleList_dimension(dim3 tomo, int is_excentric){
+    int nangles;
+
+    if ( is_excentric == 1 ) nangles = int(tomo.y/2); else nangles = tomo.y;
+
+    return nangles;
+}
+
+void opt::MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE){
     /* rank:
     Dimensionality of the transform: 1D (1), 2D (2) or 3D (3) cufft */
 

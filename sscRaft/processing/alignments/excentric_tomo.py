@@ -2,7 +2,7 @@ from ...rafttypes import *
 import numpy
 import ctypes
 
-def getOffsetEccentricTomo(tomogram, gpus = [0]):
+def getOffsetExcentricTomo(tomogram, gpus = [0]):
         """Computes the offset of the 360 tomogram fullview to merge the two aquisitions.
         It is obtained by a correlation method of the two sides of the aquisition.
 
@@ -26,13 +26,13 @@ def getOffsetEccentricTomo(tomogram, gpus = [0]):
         tomogram     = CNICE(tomogram) 
         tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
 
-        offset = libraft.getOffsetEccentricTomoGPU(ctypes.c_int(gpu), tomogram_ptr, 
+        offset = libraft.getOffsetExcentricTomoGPU(ctypes.c_int(gpu), tomogram_ptr, 
                                                ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices))
     
         return int(offset)
 
     
-def stitchEccentricTomo(tomogram, offset, gpus = [0]):
+def stitchExcentricTomo(tomogram, offset, gpus = [0]):
     """Computes the transformation of a 360 degree measured tomogram fullview to a 180 degree measured tomogram.
     The transformation considers the input offset and gradually adjust the gray values on the offset interval
 
@@ -65,7 +65,7 @@ def stitchEccentricTomo(tomogram, offset, gpus = [0]):
         tomogram     = CNICE(tomogram)
         tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
     
-    libraft.getEccentricTomoMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
+    libraft.getExcentricTomoMultiGPU(gpus_ptr, ctypes.c_int(ngpus), 
                                     tomogram_ptr, 
                                     ctypes.c_int(nrays), ctypes.c_int(nangles), ctypes.c_int(nslices), 
                                     ctypes.c_int(offset))

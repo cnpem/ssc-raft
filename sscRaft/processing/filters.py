@@ -62,7 +62,7 @@ def lowpass(tomogram, dic = None, **kwargs):
     pixel          = dic['detectorPixel[m]']
     wavelength     = CONST/energy 
     padding        = dic.get('padding', 0.0)*100 # Multiply by 100 to get an integer value
-    padd_mode      = PaddMode(dic.get('padd_mode', 'edge'))
+    padd_mode      = dic.get('padd_mode', 'edge')
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta

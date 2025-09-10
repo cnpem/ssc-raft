@@ -118,8 +118,8 @@ namespace opt{
     {HANDLE_ERROR(cudaMemcpy(cpuptr, gpuptr, size * sizeof(Type), cudaMemcpyDeviceToHost));};
 
     template<typename Type>
-    void GPUToGPU(Type *gpuptr1, Type *gpuptr2, size_t size)
-    {HANDLE_ERROR(cudaMemcpy(gpuptr2, gpuptr1, size * sizeof(Type), cudaMemcpyDeviceToDevice));};
+    void GPUToGPU(Type *gpuptrIn, Type *gpuptrOut, size_t size)
+    {HANDLE_ERROR(cudaMemcpy(gpuptrOut, gpuptrIn, size * sizeof(Type), cudaMemcpyDeviceToDevice));};
 
     void MPlanFFT(cufftHandle *mplan, int RANK, dim3 DATASIZE, cufftType FFT_TYPE);
 
@@ -184,6 +184,9 @@ namespace opt{
         }
     };
 
+    void set_excentric_tomo_dimensions(dim3 &tomo);
+    int get_angleList_dimension(dim3 tomo, int is_excentric);
+
     dim3 compute_size_padded(dim3 size, dim3 pad);
     int compute_dim_padded(int size, int pad);
     int compute_padding_size(int size, int pad);
@@ -198,19 +201,19 @@ namespace opt{
     __global__ void remove_paddR2C(float *inpadded, cufftComplex *out, dim3 size, dim3 padsize);
     __global__ void remove_paddR2R(float *inpadded, float *out, dim3 size, dim3 pad);
 
-    enum TransposeOperation
+    enum class TransposeOperation
     {
         none = 0, /* Do nothing */
         log  = 1, /* Apply data = -log( data) */
         exp  = 2  /* Apply data =  exp(-data) */
     };
 
-    enum PaddingMode
+    enum class PaddingMode
     {
-        nopad = 0, /* No padding */
-        zero  = 1, /* Zero padding */
-        edge  = 2, /* Edge padding */
-        ones  = 3  /* Ones padding */
+        none = 0, /* No padding */
+        zero = 1, /* Zero padding */
+        edge = 2, /* Edge padding */
+        ones = 3  /* Ones padding */
     };
 
     extern "C" {

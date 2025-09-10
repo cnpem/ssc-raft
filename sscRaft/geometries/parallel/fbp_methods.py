@@ -56,7 +56,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     pixel          = dic.get('detectorPixel[m]', 1.0)
     wavelength     = CONST/energy 
     padding        = dic.get('padding', 0.0)*100 # Multiply by 100 to get an integer value
-    padd_mode      = PaddMode(dic.get('padd_mode', 'edge'))
+    padd_mode      = dic.get('padd_mode', 'edge')
     delta_beta     = 0.0
 
     if beta_delta != 0.0:
@@ -177,7 +177,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     pixel          = dic.get('detectorPixel[m]', 1.0)
     wavelength     = CONST/energy 
     padding        = dic.get('padding', 0.25)*100 # Multiply by 100 to get an integer value
-    padd_mode      = PaddMode(dic.get('padd_mode', 'edge'))
+    padd_mode      = dic.get('padd_mode', 'edge')
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta

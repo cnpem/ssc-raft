@@ -98,10 +98,96 @@ def load_library(lib,ext):
 
 libraft  = load_library(_lib, ext)
 
+############# Basic functions ##############
+
+def ReconMethod(method):
+    if method.lower() == 'none':
+        return 0
+    elif method.lower() == 'fbp':
+        return 1
+    elif method.lower() == 'bst':
+        return 2
+    elif method.lower() == 'eEMRT':
+        return 3
+    elif method.lower() == 'tEMRT':
+        return 4
+    elif method.lower() == 'tEMFQ':
+        return 5
+    elif method.lower() == 'fdk':
+        return 6
+    else:
+        return 1
+    
+def FilterNumber(mfilter):
+    if mfilter.lower() == 'none':
+        return 0
+    elif mfilter.lower() == 'gaussian':
+        return 1
+    elif mfilter.lower() == 'lorentz':
+        return 2
+    elif mfilter.lower() == 'cosine':
+        return 3
+    elif mfilter.lower() == 'rectangle':
+        return 4
+    elif mfilter.lower() == 'hann':
+        return 5
+    elif mfilter.lower() == 'hamming':
+        return 6
+    elif mfilter.lower() == 'ramp':
+        return 7
+    else:
+        return 6
+
+def ContrastFilterNumber(mfilter):
+    if mfilter.lower() == 'none':
+        return 0
+    elif mfilter.lower() == 'paganin':
+        return 1
+    elif mfilter.lower() == 'paganin_slices':
+        return 2
+    elif mfilter.lower() == 'contrast':
+        return 3
+    else:
+        return 1
+
+def PaddMode(pmode):
+    if pmode.lower() == 'none':
+        return 0
+    elif pmode.lower() == 'zero':
+        return 1
+    elif pmode.lower() == 'edge':
+        return 2
+    elif pmode.lower() == 'ones':
+        return 3
+    else:
+        return 2
+    
+def setInterpolation(name):
+    """ Set interpolation 
+
+    Args:
+        name (str): string name for the interpolation
+
+    Returns:
+        (int): Value defining the interpolation name
+
+    Options:
+        name (str): \'nearest\' and \'bilinear\'
+
+    """
+    if name.lower() == 'nearest':
+        return 0
+    elif name.lower() == 'bilinear':
+        return 1
+    elif name.lower() == 'none':
+        return -1
+    else:
+        logger.warning(f'Interpolation invalid. Using default \'nearest\' interpolation.')
+        return 0
+    
 #########################
-#########################
-#|       ssc-raft      |#
-#|   Struct prototypes |#
+#|      ssc-raft       |#
+#|  Struct prototypes  |#
 #########################
 
 class coord(ctypes.Structure):
@@ -113,8 +199,7 @@ class dim3(ctypes.Structure):
 class DIM(ctypes.Structure):
     _fields_ = [("size", dim3), ("pad", dim3), ("blocksize", ctypes.c_int), ("padding_mode", ctypes.c_int)]
 
-def dimension(size, pad, blocksize = 0, padd_mode = 2):
-    # padd_mode = 2 is the edge mode
+def dimension(size, pad = (0,0,0), blocksize = 0, padd_mode = 'none'):
     x, y, z = size
     px      = int(pad[0])
     py      = int(pad[1])
@@ -125,8 +210,9 @@ def dimension(size, pad, blocksize = 0, padd_mode = 2):
     size_   = dim3(x =  x, y =  y, z =  z)
     pad_    = dim3(x = px, y = py, z = pz)
 
+    padd_mode = PaddMode(padd_mode)
     if int(pad_sum) == 0:
-        padd_mode = 0
+        padd_mode = PaddMode('none')
 
     dim_size = DIM(size = size_, pad = pad_, blocksize = blocksize, padding_mode = padd_mode)
 
@@ -167,6 +253,7 @@ class FLAG(ctypes.Structure):
                 ("do_rotation_axis_offset", ctypes.c_int),
                 ("do_rotation_correction", ctypes.c_int),
                 ("do_alignment", ctypes.c_int),
+                ("do_excentric_offset", ctypes.c_int),
                 ("do_excentric", ctypes.c_int),
                 ("do_reconstruction", ctypes.c_int)]
 
@@ -177,20 +264,30 @@ class CEF(ctypes.Structure):
                 ("post_process", ctypes.c_int)]   
 
 def contrast_param(method, beta_delta, regularization = 0.0, post_process = 0):
-    return CEF(method = method, 
-               beta_delta = beta_delta, 
+    return CEF(method         = method, 
+               beta_delta     = beta_delta, 
                regularization = regularization, 
-               post_process = post_process)
+               post_process   = post_process)
 
 class RF(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
                 ("rings_block", ctypes.c_int), 
                 ("rings_lambda", ctypes.c_float)]   
 
-def rings_param(method, rings_block, rings_lambda):
-    return RF(method = method,
-              rings_block = rings_block,
+def rings_param(method = 0, rings_block = 1, rings_lambda = -1):
+    return RF(method       = method,
+              rings_block  = rings_block,
               rings_lambda = rings_lambda)
+
+class ALGN(ctypes.Structure):
+    _fields_ = [("method", ctypes.c_int), 
+                ("excentric_offset", ctypes.c_int), 
+                ("rotation_axis_offset", ctypes.c_float)]   
+
+def align_param(method = 0, excentric_offset = 0, rotation_axis_offset = 0):
+    return ALGN(method               = method,
+                excentric_offset     = excentric_offset,
+                rotation_axis_offset = rotation_axis_offset)
 
 class REC(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
@@ -202,26 +299,54 @@ class REC(ctypes.Structure):
                 ("total_variation", ctypes.c_float),
                 ("interpolation", ctypes.c_int)
                 ] 
+    
+def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp', 
+                beta_delta: float = 0.0, rotation_axis_offset: int = 0,
+                iterations: int = 0, filter_reg: float  = 1.0,
+                total_variation: float = 0.0, interpolation: str = 'none') -> REC:
+    
+    methodRecon       = ReconMethod(method)
+    filterType        = FilterNumber(filter)
+    interpolationType = setInterpolation(interpolation)
+
+    # Paganin by Slices here
+    paganin_slices_regularization = beta_delta
+    if beta_delta != 0.0:
+        beta_delta = 1.0 / beta_delta
+        paganin_slices_regularization = geometry.wavelength * geometry.z2.x * numpy.pi * beta_delta / (geometry.detector_pixel.x * geometry.detector_pixel.y); 
+
+    return REC( method               = methodRecon,
+                filter               = filterType, 
+                filter_reg           = filter_reg,  
+                paganin_slices       = paganin_slices_regularization, 
+                iterations           = iterations, 
+                rotation_axis_offset = rotation_axis_offset,
+                total_variation      = total_variation, 
+                interpolation        = interpolationType)
 
 class CFG(ctypes.Structure):
-    _fields_ = [("nflats", ctypes.c_int), 
-                ("geometry", GEO), 
+    _fields_ = [("geometry", GEO), 
                 ("obj", DIM),
                 ("tomo", DIM),
+                ("flat", DIM),
+                ("dark", DIM),
                 ("flags", FLAG),
                 ("ContrastParam", CEF),
                 ("RingsParam", RF),
+                ("AlignParam", ALGN),
                 ("ReconParam", REC)
                 ] 
 
-def configs_param(tomo_dim, obj_dim, geometry, rings_param, contrast_param, recon_param, nflats, flags):
-    return CFG(nflats        = nflats,
-               geometry      = geometry,
+def configs_param(tomo_dim, obj_dim, flat_dim, dark_dim, geometry, rings_param, contrast_param, align_param, recon_param, flags):
+    return CFG(geometry      = geometry,
                obj           = obj_dim,
                tomo          = tomo_dim,
+               flat          = flat_dim,
+               dark          = dark_dim,
                flags         = flags,
                ContrastParam = contrast_param,
                RingsParam    = rings_param,
+               AlignParam    = align_param,
                ReconParam    = recon_param)
 
 #########################
@@ -402,7 +527,8 @@ try:
         ctypes.c_void_p, ctypes.c_int, 
         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
-        ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_int
+        ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+        ctypes.c_int, ctypes.c_int
     ]
     
     libraft.getBackgroundCorrectionMultiGPU.restype  = None
@@ -412,26 +538,26 @@ except:
 
 ######## Raft - Stitching Offset 360 ##########
 try:
-    libraft.getOffsetEccentricTomoGPU.argtypes = [
+    libraft.getOffsetExcentricTomoGPU.argtypes = [
         ctypes.c_int, ctypes.c_void_p,  
         ctypes.c_int, ctypes.c_int, ctypes.c_int
     ]
     
-    libraft.getOffsetEccentricTomoGPU.restype  = ctypes.c_int
+    libraft.getOffsetExcentricTomoGPU.restype  = ctypes.c_int
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_OFFSET_EXCENTRIC_TOMO-')
     pass
 
 ######## Raft - Excentric Tomography Stitch ##########
 try:
-    libraft.getEccentricTomoMultiGPU.argtypes = [
+    libraft.getExcentricTomoMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int,
         ctypes.c_void_p, 
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
         ctypes.c_int
     ]
     
-    libraft.getEccentricTomoMultiGPU.restype  = None
+    libraft.getExcentricTomoMultiGPU.restype  = None
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_ECCENTRIC_TOMO_STITCH-')
     pass
@@ -647,89 +773,6 @@ def dprint(*x):
 
 def nice(f): # scientific notation + 2 decimals
     return "{:.2e}".format(f)
-
-def ReconMethod(method):
-    if method.lower() == 'none':
-        return 0
-    elif method.lower() == 'fbp':
-        return 1
-    elif method.lower() == 'bst':
-        return 2
-    elif method.lower() == 'eEMRT':
-        return 3
-    elif method.lower() == 'tEMRT':
-        return 4
-    elif method.lower() == 'tEMFQ':
-        return 5
-    elif method.lower() == 'fdk':
-        return 6
-    else:
-        return 1
-    
-def FilterNumber(mfilter):
-    if mfilter.lower() == 'none':
-        return 0
-    elif mfilter.lower() == 'gaussian':
-        return 1
-    elif mfilter.lower() == 'lorentz':
-        return 2
-    elif mfilter.lower() == 'cosine':
-        return 3
-    elif mfilter.lower() == 'rectangle':
-        return 4
-    elif mfilter.lower() == 'hann':
-        return 5
-    elif mfilter.lower() == 'hamming':
-        return 6
-    elif mfilter.lower() == 'ramp':
-        return 7
-    else:
-        return 6
-
-def ContrastFilterNumber(mfilter):
-    if mfilter.lower() == 'none':
-        return 0
-    elif mfilter.lower() == 'paganin':
-        return 1
-    elif mfilter.lower() == 'paganin_slices':
-        return 2
-    elif mfilter.lower() == 'contrast':
-        return 3
-    else:
-        return 1
-
-def PaddMode(pmode):
-    if pmode.lower() == 'nopad':
-        return 0
-    elif pmode.lower() == 'zero':
-        return 1
-    elif pmode.lower() == 'edge':
-        return 2
-    elif pmode.lower() == 'ones':
-        return 3
-    else:
-        return 2
-    
-def setInterpolation(name):
-    """ Set interpolation 
-
-    Args:
-        name (str): string name for the interpolation
-
-    Returns:
-        (int): Value defining the interpolation name
-
-    Options:
-        name (str): \'nearest\' and \'bilinear\'
-
-    """
-    if name.lower() == 'nearest':
-        return 0
-    elif name.lower() == 'bilinear':
-        return 1
-    else:
-        logger.warning(f'Interpolation invalid. Using default \'nearest\' interpolation.')
-        return 0
         
 def set_precision(precision):
     """Select datatype of numpy array.
@@ -761,6 +804,23 @@ def set_precision(precision):
         raise ValueError(f'Invalid datatype:{precision}. Options: `float32`, `uint16` and `uint8`.')
 
     return datatype, Ndatatype
+
+def get_excentric_obj_dimensions(nx,ny):
+     return 2 * nx, 2 * ny
+
+def set_input_axis_order(order: str = 'slices_angles_lenght'):
+    # Default is 'slices_angles_lenght'
+
+    if order.lower() == 'angles_slices_lenght':
+        return 0
+    elif order.lower() == 'slices_angles_lenght':
+        return 1
+    else:
+        message = f'The axis input parameter \'{order}\' does not exist. Setting \'slices_angles_lenght\' as default.'
+        logger.warning(message)
+        return 1 
+    
+
 
 def power_of_2_padding(size,pad):
     return int((pow(2, numpy.ceil(numpy.log2(size + 2 * pad))) - size) * 0.5)

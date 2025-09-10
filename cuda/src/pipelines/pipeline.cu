@@ -48,10 +48,10 @@ extern "C"{
                                                             configs.tomo.pad);
         switch (configs.ReconParam.method)
         {
-            case ReconstructionMethod::none:
+            case static_cast<int>(ReconstructionMethod::none):
                 /* No reconstruction done */
             break;
-            case ReconstructionMethod::fbpRT:
+            case static_cast<int>(ReconstructionMethod::fbpRT):
                 /* FBP */
                 getFBP( configs.ReconParam, 
                         workspace->objPadd, 
@@ -63,7 +63,7 @@ extern "C"{
                         configs.geometry.detector_pixel.y
                     );
             break;
-            case ReconstructionMethod::fbpBST:
+            case static_cast<int>(ReconstructionMethod::fbpBST):
                 /* BST */
                 bst_padd = 2; blocksize_bst = 1;
                 
@@ -79,33 +79,32 @@ extern "C"{
 
                 freeBSTWorkspace(bst_workspace);
             break;
-            case ReconstructionMethod::eEMRT:
+            case static_cast<int>(ReconstructionMethod::eEMRT):
                 /* EM RT eEM */
             break;
-            case ReconstructionMethod::tEMRT:
+            case static_cast<int>(ReconstructionMethod::tEMRT):
                 /* EM RT tEM */
             break;
-            case ReconstructionMethod::tEMFQ:
+            case static_cast<int>(ReconstructionMethod::tEMFQ):
                 /* EM FQ tEM */
             break;
-            case ReconstructionMethod::fdk:
+            case static_cast<int>(ReconstructionMethod::fdk):
                 /* FDK */
             break;
             default:
                 printf("No reconstruction method selected. Finishing run... \n");
-                exit(EXIT_SUCCESS);
             break;
         }
         /* Recuperate Padding for reconstruction */
         opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(workspace->objPadd, 
-                                                                 workspace->obj, 
-                                                                 dim3(nx, ny, objblock),
-                                                                 configs.obj.pad);
+                                                                    workspace->obj, 
+                                                                    dim3(nx, ny, objblock),
+                                                                    configs.obj.pad);
         /* Recuperate Padding for tomogram */
         opt::remove_paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(workspace->tomoPadd, 
-                                                                   workspace->tomo, 
-                                                                   dim3(nrays, nangles, tomoblock),
-                                                                   configs.tomo.pad);
+                                                                    workspace->tomo, 
+                                                                    dim3(nrays, nangles, tomoblock),
+                                                                    configs.tomo.pad);
     }
 
 }
@@ -114,8 +113,10 @@ extern "C"{
     void ReconstructionPipeline(CFG configs, WKP *workspace, int tomoblock, int objblock)
     {
         cudaStream_t nstream = 0;
+
         int nrays   = configs.tomo.size.x;
         int nangles = configs.tomo.size.y;
+        int nflats  = configs.flat.size.z;
 
         int nx      = configs.obj.size.x;
         int ny      = configs.obj.size.y;
@@ -143,20 +144,20 @@ extern "C"{
 
         if( configs.flags.do_flat_dark_correction == 1 )
         {
-            printf("Background Correction\n");
-            fflush(stdout);
+            // printf("Background Correction\n");
+            // fflush(stdout);
             getBackgroundCorrection_slices( workspace->tomo,
                                             workspace->flat, 
                                             workspace->dark, 
                                             dim3(nrays,nangles,tomoblock), 
-                                            configs.nflats, 
+                                            nflats, 
                                             configs.flags.do_flat_dark_log);
         }
 
         if( configs.flags.do_rings == 1 )
         {
-            printf("Rings\n");
-            fflush(stdout);
+            // printf("Rings\n");
+            // fflush(stdout);
             getTitarenkoRings(  workspace->tomo,
                                 dim3(nrays,nangles,tomoblock), 
                                 configs.RingsParam.rings_lambda, 
@@ -166,22 +167,26 @@ extern "C"{
 
         if( configs.flags.do_excentric == 1 )
         {
-            printf("Excentric Tomo Stitching\n");
+            printf("Excentric Tomo Stitching offset: %d\n",configs.AlignParam.excentric_offset);
             fflush(stdout);
-            getEccentricTomo(workspace->tomo, nrays, nangles, tomoblock, configs.ReconParam.rotation_axis_offset);
+            getExcentricTomo(workspace->tomo, nrays, nangles, tomoblock, configs.AlignParam.excentric_offset);
 
-            /* New shape of tomogam and object after excentric stitching */
-            configs.tomo.size.x = 2 * configs.tomo.size.x;
-            configs.tomo.size.y = int(configs.tomo.size.y / 2);
-            configs.obj.size.x  = 2 * configs.obj.size.x;
-            configs.obj.size.y  = 2 * configs.obj.size.y;
+            /* New shape of tomogram after excentric stitching */
+            opt::set_excentric_tomo_dimensions(configs.tomo.size);
+            // configs.tomo.size.x = 2 * nrays;
+            // configs.tomo.size.y = int( nangles / 2);
+
         }
+        printf("tomosize: \n");   
+        printDim(configs.tomo.size);
+        printDim(configs.obj.size);
+        fflush(stdout);
 
         if( configs.flags.do_reconstruction == 1)
         {
             /* Reconstruction */
-            printf("Reconstruction\n");
-            fflush(stdout);
+            // printf("Reconstruction\n");
+            // fflush(stdout);
             getReconstructionMethods(configs, workspace, tomoblock, objblock);
         }
     }
@@ -224,6 +229,8 @@ extern "C" {
         int nrays   = configs.tomo.size.x;
         int nangles = configs.tomo.size.y;
         int nslices = configs.tomo.size.z;
+        int nflats  = configs.flat.size.z;
+        int nAngles = opt::get_angleList_dimension(configs.tomo.size, configs.flags.do_excentric); /* True Angle value */
 
         int nx      = configs.obj.size.x;
         int ny      = configs.obj.size.y;
@@ -231,12 +238,13 @@ extern "C" {
         /* Local GPUs Pointers: allocation */
         WKP *workspace = Initialize_workspace(  dim3(nrays,nangles,blocksize),
                                                 dim3(nx,ny,blocksize),
-                                                dim3(nrays,blocksize,configs.nflats),
+                                                dim3(nrays,blocksize,nflats),
                                                 dim3(nrays,blocksize,1),
                                                 configs.tomo.pad,
-                                                configs.obj.pad);
+                                                configs.obj.pad,
+                                                nAngles);
 
-        opt::CPUToGPU<float>(angles, workspace->angles, nangles);
+        opt::CPUToGPU<float>(angles, workspace->angles, nAngles);
 
         printf("blocksize: %d\n",blocksize);
         printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
@@ -250,9 +258,9 @@ extern "C" {
             subblock = min(sizez - ptr, blocksize);
 
             /* Copy data from host to device */
-            opt::CPUToGPU<float>( data + (size_t)ptr * nrays *        nangles, workspace->tomo, (size_t)nrays *  nangles *       subblock);
-            opt::CPUToGPU<float>(flats + (size_t)ptr * nrays * configs.nflats, workspace->flat, (size_t)nrays * subblock * configs.nflats);
-            opt::CPUToGPU<float>(darks + (size_t)ptr * nrays                 , workspace->dark, (size_t)nrays * subblock                 );
+            opt::CPUToGPU<float>( data + (size_t)ptr * nrays * nangles, workspace->tomo, (size_t)nrays *  nangles * subblock);
+            opt::CPUToGPU<float>(flats + (size_t)ptr * nrays *  nflats, workspace->flat, (size_t)nrays * subblock *   nflats);
+            opt::CPUToGPU<float>(darks + (size_t)ptr * nrays          , workspace->dark, (size_t)nrays * subblock           );
 
             /* Enter Reconstruction Pipeline */
             ReconstructionPipeline(configs, workspace, subblock, subblock);
@@ -288,6 +296,7 @@ extern "C"{
         int nrays     = configs.tomo.size.x;
         int nangles   = configs.tomo.size.y;
         int nslices   = configs.tomo.size.z;
+        int nflats    = configs.flat.size.z;
 
         int nx        = configs.obj.size.x;
         int ny        = configs.obj.size.y;
@@ -304,7 +313,7 @@ extern "C"{
         printDim(configs.obj.size);
         printf("obj pad shape:\n");
         printDim(configs.obj.pad);
-        printf("configs.nflats: %d\n",configs.nflats);
+        printf("nflats: %d\n",nflats);
         printf("ngpus: %d\n",ngpus);
         printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
         printf("subvolume: %d\n",subvolume);
@@ -335,7 +344,7 @@ extern "C"{
                                     configs, 
                                     object + (size_t)ptr *    nx *      ny,
                                     data   + (size_t)ptr * nrays * nangles, 
-                                    flats  + (size_t)ptr * nrays * configs.nflats, 
+                                    flats  + (size_t)ptr * nrays * nflats, 
                                     darks  + (size_t)ptr * nrays, 
                                     angles, 
                                     subblock,
@@ -351,133 +360,134 @@ extern "C"{
     }
 }
 
-extern "C" {
+/* Launch independent processe each blocksize version */
+// extern "C" {
 
-    void _ReconstructionPipeline_GPU(CFG configs, Process process,
-    float *object, float *data, 
-    float *flats, float *darks, float *angles)
-    {
-        /* Initialize GPU device */
-        HANDLE_ERROR(cudaSetDevice(process.gpu));
+//     void _ReconstructionPipeline_GPU(CFG configs, Process process,
+//     float *object, float *data, 
+//     float *flats, float *darks, float *angles)
+//     {
+//         /* Initialize GPU device */
+//         HANDLE_ERROR(cudaSetDevice(process.gpu));
 
-        printf("Process number %d in gpu[%d] = %d \n", process.process, process.gpu_proc_ind, process.gpu);
-        fflush(stdout);
+//         printf("Process number %d in gpu[%d] = %d \n", process.process, process.gpu_proc_ind, process.gpu);
+//         fflush(stdout);
 
-        int nrays      = configs.tomo.size.x;
-        int nangles    = configs.tomo.size.y;
-        int nslices    = configs.tomo.size.z;
-        int tomoblock = process.tomobatch_size;
+//         int nrays      = configs.tomo.size.x;
+//         int nangles    = configs.tomo.size.y;
+//         int nslices    = configs.tomo.size.z;
+//         int tomoblock = process.tomobatch_size;
 
-        int nx         = configs.obj.size.x;
-        int ny         = configs.obj.size.y;
-        int objblock   = process.objbatch_size;
+//         int nx         = configs.obj.size.x;
+//         int ny         = configs.obj.size.y;
+//         int objblock   = process.objbatch_size;
 
-        size_t ptr     = process.tomo_index * tomoblock * nrays;
+//         size_t ptr     = process.tomo_index * tomoblock * nrays;
 
-        /* Local GPUs Pointers: allocation */
-        WKP *workspace = Initialize_workspace(  dim3(nrays,nangles,tomoblock),
-                                                dim3(nx,ny,objblock),
-                                                dim3(nrays,tomoblock,configs.nflats),
-                                                dim3(nrays,tomoblock,1),
-                                                configs.tomo.pad,
-                                                configs.obj.pad);
+//         /* Local GPUs Pointers: allocation */
+//         WKP *workspace = Initialize_workspace(  dim3(nrays,nangles,tomoblock),
+//                                                 dim3(nx,ny,objblock),
+//                                                 dim3(nrays,tomoblock,configs.nflats),
+//                                                 dim3(nrays,tomoblock,1),
+//                                                 configs.tomo.pad,
+//                                                 configs.obj.pad);
 
-        /* Copy data from host to device */
-        opt::CPUToGPU<float>(flats + ptr * configs.nflats         , workspace->flat  , (size_t)nrays * tomoblock * configs.nflats);
-        opt::CPUToGPU<float>(darks + ptr                          , workspace->dark  , (size_t)nrays * tomoblock                 );
-        opt::CPUToGPU<float>(angles                               , workspace->angles, nangles                                   );
-        opt::CPUToGPU<float>( data + (size_t)process.tomoptr_index, workspace->tomo  , (size_t)process.tomoptr_size              );
+//         /* Copy data from host to device */
+//         opt::CPUToGPU<float>(flats + ptr * configs.nflats         , workspace->flat  , (size_t)nrays * tomoblock * configs.nflats);
+//         opt::CPUToGPU<float>(darks + ptr                          , workspace->dark  , (size_t)nrays * tomoblock                 );
+//         opt::CPUToGPU<float>(angles                               , workspace->angles, nangles                                   );
+//         opt::CPUToGPU<float>( data + (size_t)process.tomoptr_index, workspace->tomo  , (size_t)process.tomoptr_size              );
 
-        /* Enter Reconstruction Pipeline */
-        ReconstructionPipeline(configs, workspace, tomoblock, objblock);
+//         /* Enter Reconstruction Pipeline */
+//         ReconstructionPipeline(configs, workspace, tomoblock, objblock);
 
-        /* Copy Reconstructed data from device to host */
-        opt::GPUToCPU<float>(object + (size_t)process.objptr_index, workspace->obj, (size_t)process.objptr_size);
+//         /* Copy Reconstructed data from device to host */
+//         opt::GPUToCPU<float>(object + (size_t)process.objptr_index, workspace->obj, (size_t)process.objptr_size);
 
-        /* Copy Processed tomogram data from device to host */
-        opt::GPUToCPU<float>(data + (size_t)process.tomoptr_index, workspace->tomo, (size_t)process.tomoptr_size);
+//         /* Copy Processed tomogram data from device to host */
+//         opt::GPUToCPU<float>(data + (size_t)process.tomoptr_index, workspace->tomo, (size_t)process.tomoptr_size);
 
-        /* Dealocate workspace variables */
-        freeWorkspace(workspace);
-        HANDLE_ERROR(cudaDeviceSynchronize());
-    }
-}
+//         /* Dealocate workspace variables */
+//         freeWorkspace(workspace);
+//         HANDLE_ERROR(cudaDeviceSynchronize());
+//     }
+// }
 
-extern "C"{
-    void ReconstructionPipelineProcessMultiGPU(CFG configs, int *gpus, int ngpus,
-        float *object, float *data, float *flats, float *darks, float *angles)
-    {
-        /* Multiples devices */
-        int Maxgpu;
-        cudaGetDeviceCount(&Maxgpu);
+// extern "C"{
+//     void ReconstructionPipelineProcessMultiGPU(CFG configs, int *gpus, int ngpus,
+//         float *object, float *data, float *flats, float *darks, float *angles)
+//     {
+//         /* Multiples devices */
+//         int Maxgpu;
+//         cudaGetDeviceCount(&Maxgpu);
 
-        /* If devices input are larger than actual devices on GPU, exit */
-        for(int i = 0; i < ngpus; i++)
-            assert(gpus[i] < Maxgpu && "Invalid device number.");
+//         /* If devices input are larger than actual devices on GPU, exit */
+//         for(int i = 0; i < ngpus; i++)
+//             assert(gpus[i] < Maxgpu && "Invalid device number.");
 
-        /* Compute total memory used on a singles slice */
-        size_t total_required_mem_per_slice_bytes = (
-                                                        calcSliceMemoryBytes(configs.tomo)           + // Tomo slice
-                                                        calcSliceMemoryBytes(configs.obj)            + // Reconstructed object slice
-                                                        calcPaddedSliceMemoryBytes(configs.obj)      + // Reconstructed padded object slice
-                                                        2 * calcPaddedSliceMemoryBytes(configs.tomo) + // Tomo padded slice
-                                                        configs.tomo.size.y * sizeof(float)            // angles
-                                                    );
+//         /* Compute total memory used on a singles slice */
+//         size_t total_required_mem_per_slice_bytes = (
+//                                                         calcSliceMemoryBytes(configs.tomo)           + // Tomo slice
+//                                                         calcSliceMemoryBytes(configs.obj)            + // Reconstructed object slice
+//                                                         calcPaddedSliceMemoryBytes(configs.obj)      + // Reconstructed padded object slice
+//                                                         2 * calcPaddedSliceMemoryBytes(configs.tomo) + // Tomo padded slice
+//                                                         configs.tomo.size.y * sizeof(float)            // angles
+//                                                     );
         
-        /* Set total number of processes to be sent to the GPUs */
-        int total_number_of_processes = getTotalProcesses(  ngpus, 
-                                                            configs.tomo.size.z, 
-                                                            configs.tomo.blocksize,
-                                                            total_required_mem_per_slice_bytes, 
-                                                            true);
-        /* Set processes pipeline for different geometries */
-        Process *process = setProcesses(configs, gpus, ngpus, total_number_of_processes);
+//         /* Set total number of processes to be sent to the GPUs */
+//         int total_number_of_processes = getTotalProcesses(  ngpus, 
+//                                                             configs.tomo.size.z, 
+//                                                             configs.tomo.blocksize,
+//                                                             total_required_mem_per_slice_bytes, 
+//                                                             true);
+//         /* Set processes pipeline for different geometries */
+//         Process *process = setProcesses(configs, gpus, ngpus, total_number_of_processes);
 
-        printf("Total number of process = %d \n", total_number_of_processes);
-        printf("ngpus = %d \n", ngpus);
-        printf("configs.tomo.blocksize = %d \n", configs.tomo.blocksize);
-        fflush(stdout);
+//         printf("Total number of process = %d \n", total_number_of_processes);
+//         printf("ngpus = %d \n", ngpus);
+//         printf("configs.tomo.blocksize = %d \n", configs.tomo.blocksize);
+//         fflush(stdout);
 
-        for(int i = 0; i < ngpus; i++)
-            printf("gpus[%d] = %d \n", i,gpus[i]);
+//         for(int i = 0; i < ngpus; i++)
+//             printf("gpus[%d] = %d \n", i,gpus[i]);
 
-        for (int i = 0; i < total_number_of_processes; i++)
-            printf("Init - Process number %d in gpu[%d] = %d \n", process[i].process, process[i].gpu_proc_ind, process[i].gpu);
+//         for (int i = 0; i < total_number_of_processes; i++)
+//             printf("Init - Process number %d in gpu[%d] = %d \n", process[i].process, process[i].gpu_proc_ind, process[i].gpu);
         
-        fflush(stdout);
+//         fflush(stdout);
 
-        /* Launch processes */
-        std::vector<std::future<void>> threads_pipeline = {};
-        threads_pipeline.reserve(ngpus); 
-        // std::vector<std::thread> threads_pipeline = {};
+//         /* Launch processes */
+//         std::vector<std::future<void>> threads_pipeline = {};
+//         threads_pipeline.reserve(ngpus); 
+//         // std::vector<std::thread> threads_pipeline = {};
 
-        for (int p = 0; p < total_number_of_processes; p++) {
+//         for (int p = 0; p < total_number_of_processes; p++) {
 
-            // threads_pipeline.emplace_back(  std::thread(
-            threads_pipeline.push_back(  std::async( std::launch::async,
-                                            _ReconstructionPipeline_GPU,
-                                            configs, 
-                                            process[p],
-                                            object, 
-                                            data, 
-                                            flats, 
-                                            darks,
-                                            angles));
+//             // threads_pipeline.emplace_back(  std::thread(
+//             threads_pipeline.push_back(  std::async( std::launch::async,
+//                                             _ReconstructionPipeline_GPU,
+//                                             configs, 
+//                                             process[p],
+//                                             object, 
+//                                             data, 
+//                                             flats, 
+//                                             darks,
+//                                             angles));
 
-            if (( p + 1 ) % ngpus == 0) {
+//             if (( p + 1 ) % ngpus == 0) {
 
-                for (int g = 0; g < ngpus; g++)
-                    threads_pipeline[g].get(); 
-                    // threads_pipeline[g].join();
+//                 for (int g = 0; g < ngpus; g++)
+//                     threads_pipeline[g].get(); 
+//                     // threads_pipeline[g].join();
 
-                threads_pipeline.clear();
-                HANDLE_ERROR(cudaDeviceSynchronize());
-            }
-        }
+//                 threads_pipeline.clear();
+//                 HANDLE_ERROR(cudaDeviceSynchronize());
+//             }
+//         }
 
-        HANDLE_ERROR(cudaGetLastError());
+//         HANDLE_ERROR(cudaGetLastError());
 
-        /* Free process (array of structs) */
-        free(process);
-    }
-}
+//         /* Free process (array of structs) */
+//         free(process);
+//     }
+// }

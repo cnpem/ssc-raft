@@ -10,10 +10,7 @@
 /* Background Correction */
 extern "C"{
 	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus, float* frames, float* flat, float* dark, 
-    int nrays, int nangles, int nslices, int numflats, int is_log, int input_slices, int blocksize);
-
-	void getBackgroundCorrectionGPU(int gpu, float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, int input_slices, int blocksize);
+    int nrays, int nangles, int nslices, int numflats, int is_log, int order, int blocksize, const int nstreams);
 
     void getBackgroundCorrection_slices(float* frames, float* flat, float* dark, 
         dim3 size, int numflats, int is_log);
@@ -63,7 +60,10 @@ extern "C"{
     int getCentersino(float* frame0, float* frame180, 
     float* dark, float* flat, size_t sizex, size_t sizey);
 
-    void getEccentricTomo(float* data, int nrays, int nangles, int nslices, int offset);
+    void getExcentricTomo(float* data, int nrays, int nangles, int nslices, int offset);
+
+    int getOffsetExcentricTomo(float* sinogram, size_t sizex, size_t sizey, size_t sizez);
+
 }
 
 /* Contrast Enhancement Functions */
