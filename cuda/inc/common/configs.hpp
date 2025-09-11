@@ -65,6 +65,7 @@ typedef struct coordinates
 {
     float x; /* Coordinates values on x-direction */
     float y; /* Coordinates values on y-direction */
+    float z; /* Coordinates values on z-direction */
 } coord; /* Coordinates values */
 
 typedef struct dimension
@@ -96,11 +97,8 @@ inline float calcLengthMemoryBytes(DIM dimension) {
 typedef struct geometry
 {
     /* General reconstruction variables*/
-    coord detector_pixel;
-    coord obj_pixel;
-    coord z1, z2;
-    coord magnitude;
-    float energy, wavelength;
+    coord detector_pixel, obj_pixel;
+    float z1, z2, magnitude, energy, wavelength;
 }GEO;
 
 typedef struct flags
@@ -188,11 +186,11 @@ inline float calcTotalRequiredMemoryBytes(DIM tomo, DIM obj) {
 }
 
 inline bool isParallelOrFanbeamGeometry(GEO geometry) {
-    return geometry.magnitude.y == 1;
+    return geometry.magnitude == 1;
 }
 
 inline bool isConeGeometry(GEO geometry) {
-    return geometry.magnitude.y != 1;
+    return geometry.magnitude != 1;
 }
 
 struct GPU

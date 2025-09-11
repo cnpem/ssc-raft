@@ -59,8 +59,7 @@ extern "C"{
                         workspace->angles, 
                         dim3(nraysp,nangles,tomoblock), 
                         dim3(nxp,nyp,objblock), 
-                        configs.geometry.detector_pixel.x, 
-                        configs.geometry.detector_pixel.y
+                        configs.geometry.detector_pixel.x
                     );
             break;
             case static_cast<int>(ReconstructionMethod::fbpBST):
@@ -121,26 +120,6 @@ extern "C"{
         int nx      = configs.obj.size.x;
         int ny      = configs.obj.size.y;
 
-        // printf("tomo shape:\n");
-        // printDim(configs.tomo.size);
-        // printf("tomo pad shape:\n");
-        // printDim(configs.tomo.pad);
-        // printf("obj shape:\n");
-        // printDim(configs.obj.size);
-        // printf("obj pad shape:\n");
-        // printDim(configs.obj.pad);
-        // printf("configs.nflats: %d\n",configs.nflats);
-        // printf("nraysp: %d\n",nraysp);
-        // printf("nxp: %d\n",nxp);
-        // printf("nyp: %d\n",nyp);
-
-        // printf("configs.flags.do_flat_dark_correction: %d\n",configs.flags.do_flat_dark_correction);
-        // printf("configs.flags.do_flat_dark_log: %d\n",configs.flags.do_flat_dark_log);
-
-        // printf("configs.flags.do_rings: %d\n",configs.flags.do_rings);
-
-        // printf("configs.flags.do_reconstruction: %d\n",configs.flags.do_reconstruction);
-        // fflush(stdout);
 
         if( configs.flags.do_flat_dark_correction == 1 )
         {
@@ -167,8 +146,8 @@ extern "C"{
 
         if( configs.flags.do_excentric == 1 )
         {
-            printf("Excentric Tomo Stitching offset: %d\n",configs.AlignParam.excentric_offset);
-            fflush(stdout);
+            // printf("Excentric Tomo Stitching offset: %d\n",configs.AlignParam.excentric_offset);
+            // fflush(stdout);
             getExcentricTomo(workspace->tomo, nrays, nangles, tomoblock, configs.AlignParam.excentric_offset);
 
             /* New shape of tomogram after excentric stitching */
@@ -177,10 +156,10 @@ extern "C"{
             // configs.tomo.size.y = int( nangles / 2);
 
         }
-        printf("tomosize: \n");   
-        printDim(configs.tomo.size);
-        printDim(configs.obj.size);
-        fflush(stdout);
+        // printf("tomosize: \n");   
+        // printDim(configs.tomo.size);
+        // printDim(configs.obj.size);
+        // fflush(stdout);
 
         if( configs.flags.do_reconstruction == 1)
         {
@@ -246,11 +225,11 @@ extern "C" {
 
         opt::CPUToGPU<float>(angles, workspace->angles, nAngles);
 
-        printf("blocksize: %d\n",blocksize);
-        printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
-        printf("ind_block: %d\n",ind_block);
-        printf("sizez: %d\n",sizez);
-        fflush(stdout);
+        // printf("blocksize: %d\n",blocksize);
+        // printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
+        // printf("ind_block: %d\n",ind_block);
+        // printf("sizez: %d\n",sizez);
+        // fflush(stdout);
        
         /* Centersino computation */
         for (i = 0; i < ind_block; i++){

@@ -191,7 +191,7 @@ def setInterpolation(name):
 #########################
 
 class coord(ctypes.Structure):
-    _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float)]
+    _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float), ("z", ctypes.c_float)]
 
 class dim3(ctypes.Structure):
     _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int), ("z", ctypes.c_int)]
@@ -221,26 +221,23 @@ def dimension(size, pad = (0,0,0), blocksize = 0, padd_mode = 'none'):
 class GEO(ctypes.Structure):
     _fields_ = [("detector_pixel", coord), 
                 ("obj_pixel", coord), 
-                ("z1", coord), 
-                ("z2", coord), 
-                ("magnitude", coord), 
+                ("z1", ctypes.c_float), 
+                ("z2", ctypes.c_float), 
+                ("magnitude", ctypes.c_float), 
                 ("energy", ctypes.c_float), 
                 ("wavelength", ctypes.c_float)
                 ]
 
 def define_geometry(detector_pixel, obj_pixel, z1, z2, magnitude, energy, wavelength):
 
-    detector_pixel_ = coord(x = detector_pixel[0], y = detector_pixel[1])
-    obj_pixel_      = coord(x =      obj_pixel[0], y =      obj_pixel[1])
-    z1_             = coord(x =             z1[0], y =             z1[1])
-    z2_             = coord(x =             z2[0], y =             z2[1])
-    magnitude_      = coord(x =      magnitude[0], y =      magnitude[1])
+    detector_pixel_ = coord(x = detector_pixel[0], y = detector_pixel[1], z = detector_pixel[2])
+    obj_pixel_      = coord(x =      obj_pixel[0], y =      obj_pixel[1], z =      obj_pixel[2])
 
     geometry_       = GEO(detector_pixel = detector_pixel_,
                           obj_pixel      = obj_pixel_,
-                          z1             = z1_,
-                          z2             = z2_,
-                          magnitude      = magnitude_, 
+                          z1             = z1,
+                          z2             = z2,
+                          magnitude      = magnitude, 
                           energy         = energy, 
                           wavelength     = wavelength)
     return geometry_
@@ -313,7 +310,7 @@ def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp',
     paganin_slices_regularization = beta_delta
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
-        paganin_slices_regularization = geometry.wavelength * geometry.z2.x * numpy.pi * beta_delta / (geometry.detector_pixel.x * geometry.detector_pixel.y); 
+        paganin_slices_regularization = geometry.wavelength * geometry.z2 * numpy.pi * beta_delta / (geometry.detector_pixel.x * geometry.detector_pixel.x); 
 
     return REC( method               = methodRecon,
                 filter               = filterType, 

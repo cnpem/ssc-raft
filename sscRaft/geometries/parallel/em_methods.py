@@ -58,11 +58,11 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
     tomo_dim      = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize)
     obj_dim       = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize)
     
-    geometry      = define_geometry(detector_pixel = (pixel, pixel),
-                                    obj_pixel      = (pixel, pixel),
-                                    z1             = (0,0),
-                                    z2             = (z2,z2),
-                                    magnitude      = (1.0,1.0), 
+    geometry      = define_geometry(detector_pixel = (pixel, pixel, pixel),
+                                    obj_pixel      = (pixel, pixel, pixel),
+                                    z1             = 0.0,
+                                    z2             = z2,
+                                    magnitude      = 1.0, 
                                     energy         = energy, 
                                     wavelength     = wavelength)
 
@@ -152,11 +152,11 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
     tomo_dim      = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize)
     obj_dim       = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize)
     
-    geometry      = define_geometry(detector_pixel = (pixel, pixel),
-                                    obj_pixel      = (pixel, pixel),
-                                    z1             = (0,0),
-                                    z2             = (z2,z2),
-                                    magnitude      = (1.0,1.0), 
+    geometry      = define_geometry(detector_pixel = (pixel, pixel, pixel),
+                                    obj_pixel      = (pixel, pixel, pixel),
+                                    z1             = 0.0,
+                                    z2             = z2,
+                                    magnitude      = 1.0, 
                                     energy         = energy, 
                                     wavelength     = wavelength)
 
@@ -251,11 +251,11 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
     tomo_dim    = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize)
     obj_dim     = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize)
     
-    geometry    = define_geometry(detector_pixel = (pixel, pixel),
-                                  obj_pixel      = (pixel, pixel),
-                                  z1             = (0,0),
-                                  z2             = (z2,z2),
-                                  magnitude      = (1.0,1.0), 
+    geometry    = define_geometry(detector_pixel = (pixel, pixel, pixel),
+                                  obj_pixel      = (pixel, pixel, pixel),
+                                  z1             = 0.0,
+                                  z2             = z2,
+                                  magnitude      = 1.0, 
                                   energy         = energy, 
                                   wavelength     = wavelength)
 

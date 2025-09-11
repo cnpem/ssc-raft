@@ -2,7 +2,7 @@ from ..rafttypes import *
 from ..io.io_ import *
 from .rings_methods.titarenko import * 
 
-def rings(tomogram, dic, **kwargs):
+def rings(tomogram, gpus = [0], dic = None, **kwargs):
     """Apply rings correction on tomogram.
 
     Args:

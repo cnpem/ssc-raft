@@ -7,7 +7,7 @@
 extern "C"{
     __global__ void BackProjection_SS(float *object, float *tomogram, 
     float *angles, float *sine, float *cosine, 
-    float pixel_size_x, float pixel_size_y,
+    float pixel_size,
     dim3 obj_size, dim3 tomo_size)
     {
         int i, j, k, t_index, angle_index;
@@ -24,13 +24,13 @@ extern "C"{
         // float tmin = -1.0;
         // float dt   = 2.0 / (nrays - 1);
 
-        float xmin = - pixel_size_x * obj_size.x / 2.0f;
-        float ymin = - pixel_size_y * obj_size.y / 2.0f;
-        float dx   =   pixel_size_x;
-        float dy   =   pixel_size_y;
+        float xmin = - pixel_size * obj_size.x / 2.0f;
+        float ymin = - pixel_size * obj_size.y / 2.0f;
+        float dx   =   pixel_size;
+        float dy   =   pixel_size;
 
-        float tmin = - pixel_size_x * nrays / 2.0f;
-        float dt   = pixel_size_x;
+        float tmin = - pixel_size * nrays / 2.0f;
+        float dt   =   pixel_size;
         
         float dangle; // = angles[1] - angles[0];
         
@@ -68,8 +68,7 @@ extern "C"{
 extern "C"{
     void getFBP(REC ReconParam, 
     float *obj, float *tomogram, float *angles, 
-    dim3 tomo_size, dim3 obj_size, 
-    float pixel_x, float pixel_y)
+    dim3 tomo_size, dim3 obj_size, float pixel)
     {
         int filter_type   = ReconParam.filter;
         float paganin_reg = ReconParam.paganin_slices;
@@ -84,7 +83,7 @@ extern "C"{
                         (int)ceil( obj_size.z / TPBZ ) + 1);
 
         /* Filter and Paganin by slices (filter) */
-        Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel_x);
+        Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel);
 
         if (filter.type != Filter::EType::none){
             filterFBP(filter, tomogram, tomo_size);
@@ -99,8 +98,7 @@ extern "C"{
 
         /* Backprojection */
         BackProjection_SS<<<gridBlock,threadsPerBlock>>>(obj, tomogram, angles,
-                                                        sintable, costable, 
-                                                        pixel_x, pixel_y,
+                                                        sintable, costable, pixel,
                                                         obj_size, tomo_size);
 
         HANDLE_ERROR(cudaDeviceSynchronize());
@@ -171,21 +169,21 @@ extern "C"{
         int pady  = PADS(sizeImagey,obj.pad.y); 
         int padt  = PADS(nrays,tomo.pad.x);
         
-        Log("Size tomo");
-        printDim(tomo.size);
-        Log("Pad tomo");
-        printDim(tomo.pad);
-        printf("TOMO: nrayspad = %d\n", nrayspad);
-        printf("TOMO: padx = %d; pady = %d \n", padx);
-        Log("Size obj");
-        printDim(obj.size);
-        Log("Pad obj");
-        printDim(obj.pad);
-        printf("OBJ: padImagex = %d; padImagey = %d \n", padImagex, padImagey);
-        printf("OBJ: padx = %d; pady = %d \n", padx, pady);
-        printf("padding_mode = %d \n", tomo.padding_mode);
-        printf("ReconParam.paganin_slices: %e\n",ReconParam.paganin_slices);
-        fflush(stdout);
+        // Log("Size tomo");
+        // printDim(tomo.size);
+        // Log("Pad tomo");
+        // printDim(tomo.pad);
+        // printf("TOMO: nrayspad = %d\n", nrayspad);
+        // printf("TOMO: padx = %d; pady = %d \n", padx);
+        // Log("Size obj");
+        // printDim(obj.size);
+        // Log("Pad obj");
+        // printDim(obj.pad);
+        // printf("OBJ: padImagex = %d; padImagey = %d \n", padImagex, padImagey);
+        // printf("OBJ: padx = %d; pady = %d \n", padx, pady);
+        // printf("padding_mode = %d \n", tomo.padding_mode);
+        // printf("ReconParam.paganin_slices: %e\n",ReconParam.paganin_slices);
+        // fflush(stdout);
 
         /* Reconstruction GPUs padded Grd and Blocks */
         dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
@@ -215,7 +213,7 @@ extern "C"{
                 getFBP( ReconParam, dobj, dtomo, dangles, 
                         dim3(     nrays,   nangles, subblock),  /* Tomogram padded size */
                         dim3(sizeImagex, padImagey, subblock),  /* Object (reconstruction) padded size */
-                        geometry.obj_pixel.x, geometry.obj_pixel.x); 
+                        geometry.obj_pixel.x); 
 
                 opt::GPUToCPU<float>(object + (size_t)nImage * ptr, 
                                      dobj, (size_t)nImage * subblock);
@@ -244,7 +242,7 @@ extern "C"{
                 getFBP( ReconParam, dobjPadded, dtomoPadded, dangles, 
                         dim3( nrayspad,   nangles, subblock),  /* Tomogram padded size */
                         dim3(padImagex, padImagey, subblock),  /* Object (reconstruction) padded size */
-                        geometry.obj_pixel.x, geometry.obj_pixel.x); 
+                        geometry.obj_pixel.x); 
 
                 /* Remove padd from the object (reconstruction) */
                 ObjgridBlock.z = TomogridBlock.z;
@@ -292,16 +290,6 @@ extern "C"{
 
 		int subvolume = (nslices + ngpus - 1) / ngpus;
 		int subblock, ptr = 0; 
-
-        printf("nslices, nrays, nangles = (%d, %d, %d) \n",nslices, nrays, nangles);
-        printf("sizeImagex, sizeImagey = (%d, %d) \n",sizeImagex, sizeImagey);
-        printf("tomo pad = %d, %d, %d \n",tomo.pad.x, tomo.pad.y, tomo.pad.z);
-        printf("obj pad = %d, %d, %d \n",obj.pad.x, obj.pad.y, obj.pad.z);
-        printf("padding_mode = %d \n",tomo.padding_mode);
-        printf("Blocksize = %d \n",tomo.blocksize);
-        printf("subvolume = %d \n",subvolume);
-        printf("ngpus = %d, %d \n",ngpus, gpus[0]);
-        fflush(stdout);
 
 		if (ngpus == 1){ /* 1 device */
             

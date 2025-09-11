@@ -72,11 +72,11 @@ def lowpass(tomogram, dic = None, **kwargs):
 
     tomo_dim     = dimension((nrays, nangles, nslices), (padding, 0, 0), blocksize = blocksize, padd_mode = padd_mode)
     
-    geometry     = define_geometry(detector_pixel = (pixel, pixel),
-                                   obj_pixel      = (pixel, pixel),
-                                   z1             = (0,0),
-                                   z2             = (z2,z2),
-                                   magnitude      = (1.0,1.0), 
+    geometry     = define_geometry(detector_pixel = (pixel, pixel, pixel),
+                                   obj_pixel      = (pixel, pixel, pixel),
+                                   z1             = 0.0,
+                                   z2             = z2,
+                                   magnitude      = 1.0, 
                                    energy         = energy, 
                                    wavelength     = wavelength)
 

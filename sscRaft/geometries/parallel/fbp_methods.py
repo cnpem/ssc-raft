@@ -84,11 +84,11 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     tomo_dim     = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize, padd_mode = padd_mode)
     obj_dim      = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize, padd_mode = padd_mode)
     
-    geometry     = define_geometry(detector_pixel = (pixel, pixel),
-                                   obj_pixel      = (pixel, pixel),
-                                   z1             = (0,0),
-                                   z2             = (z2,z2),
-                                   magnitude      = (1.0,1.0), 
+    geometry     = define_geometry(detector_pixel = (pixel, pixel, pixel),
+                                   obj_pixel      = (pixel, pixel, pixel),
+                                   z1             = 0.0,
+                                   z2             = z2,
+                                   magnitude      = 1.0, 
                                    energy         = energy, 
                                    wavelength     = wavelength)
 
@@ -204,11 +204,11 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     tomo_dim     = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize, padd_mode = padd_mode)
     obj_dim      = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize, padd_mode = padd_mode)
     
-    geometry     = define_geometry(detector_pixel = (pixel, pixel),
-                                   obj_pixel      = (pixel, pixel),
-                                   z1             = (0,0),
-                                   z2             = (z2,z2),
-                                   magnitude      = (1.0,1.0), 
+    geometry     = define_geometry(detector_pixel = (pixel, pixel, pixel),
+                                   obj_pixel      = (pixel, pixel, pixel),
+                                   z1             = 0.0,
+                                   z2             = z2,
+                                   magnitude      = 1.0, 
                                    energy         = energy, 
                                    wavelength     = wavelength)
 

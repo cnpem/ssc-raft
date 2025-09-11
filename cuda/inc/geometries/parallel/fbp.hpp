@@ -14,8 +14,7 @@ extern "C"{
 
     void getFBP(REC ReconParam, 
     float *obj, float *tomogram, float *angles, 
-    dim3 tomo_size, dim3 obj_size,
-    float pixel_x, float pixel_y);
+    dim3 tomo_size, dim3 obj_size, float pixel);
 }
 
 

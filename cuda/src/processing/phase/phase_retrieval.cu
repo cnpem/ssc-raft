@@ -11,7 +11,7 @@ extern "C" {
         int sizex        = PDIM(tomo.size.x,tomo.pad.x); // tomo.size.x * (1 + tomo.pad.x);
         int sizey        = PDIM(tomo.size.y,tomo.pad.y); // tomo.size.y * (1 + tomo.pad.y);
 
-        float z2         = geometry.z2.x / geometry.magnitude.x;
+        float z2         = geometry.z2 / geometry.magnitude;
         float pixel_objx = geometry.obj_pixel.x;
         float pixel_objy = geometry.obj_pixel.y;
         float wavelength = geometry.wavelength;

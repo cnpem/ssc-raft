@@ -92,11 +92,11 @@ def phase_retrieval(frames, dic):
 
     tomo_dim        = dimension((nrays, nslices, nangles), (padding, padding, 0), blocksize = blocksize, padd_mode = padd_mode)
     
-    geometry        = define_geometry(detector_pixel = (pixel_det, pixel_det),
-                                      obj_pixel      = (pixel_obj, pixel_obj),
-                                      z1             = (0,0),
-                                      z2             = (z2,z2),
-                                      magnitude      = (magn,magn), 
+    geometry        = define_geometry(detector_pixel = (pixel_det, pixel_det, pixel_det),
+                                      obj_pixel      = (pixel_obj, pixel_obj, pixel_obj),
+                                      z1             = 0.0,
+                                      z2             = z2,
+                                      magnitude      = magn, 
                                       energy         = energy, 
                                       wavelength     = wavelength)
     
