@@ -211,8 +211,12 @@ def dimension(size, pad = (0,0,0), blocksize = 0, padd_mode = 'none'):
     pad_    = dim3(x = px, y = py, z = pz)
 
     padd_mode = PaddMode(padd_mode)
+
     if int(pad_sum) == 0:
         padd_mode = PaddMode('none')
+
+    if padd_mode == PaddMode('none'):
+        pad_ = dim3(x = 0, y = 0, z = 0)
 
     dim_size = DIM(size = size_, pad = pad_, blocksize = blocksize, padding_mode = padd_mode)
 
@@ -307,10 +311,11 @@ def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp',
     interpolationType = setInterpolation(interpolation)
 
     # Paganin by Slices here
-    paganin_slices_regularization = beta_delta
     if beta_delta != 0.0:
-        beta_delta = 1.0 / beta_delta
-        paganin_slices_regularization = geometry.wavelength * geometry.z2 * numpy.pi * beta_delta / (geometry.detector_pixel.x * geometry.detector_pixel.x); 
+        delta_beta = ( 1.0 / beta_delta )
+        paganin_slices_regularization = geometry.wavelength * geometry.z2 * numpy.pi * delta_beta / ( geometry.detector_pixel.x * geometry.detector_pixel.x ); 
+    else:
+        paganin_slices_regularization = 0.0
 
     return REC( method               = methodRecon,
                 filter               = filterType, 
@@ -707,16 +712,16 @@ try:
 except:
     logger.error('Cannot find C/CUDA library: -.RAFT_RECONSTRUCTION_PIPELINE-')
 
-try:
-    libraft.ReconstructionPipelineProcessMultiGPU.argtypes = [
-        CFG, ctypes.c_void_p, ctypes.c_int,
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
-        ctypes.c_void_p, ctypes.c_void_p
-    ]
-    libraft.ReconstructionPipelineProcessMultiGPU.restype = None
+# try:
+#     libraft.ReconstructionPipelineProcessMultiGPU.argtypes = [
+#         CFG, ctypes.c_void_p, ctypes.c_int,
+#         ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p,
+#         ctypes.c_void_p, ctypes.c_void_p
+#     ]
+#     libraft.ReconstructionPipelineProcessMultiGPU.restype = None
 
-except:
-    logger.error('Cannot find C/CUDA library: -.RAFT_RECONSTRUCTION_PIPELINE_PROCESS-')
+# except:
+#     logger.error('Cannot find C/CUDA library: -.RAFT_RECONSTRUCTION_PIPELINE_PROCESS-')
 
 #########################
 #|      ssc-raft       |#

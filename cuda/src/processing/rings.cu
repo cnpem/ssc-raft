@@ -433,7 +433,7 @@ extern "C"
 
     // }
 
-    float TitarenkoRings(float *volume, int vsizex, int vsizey, int vsizez,
+    void TitarenkoRings(float *volume, int vsizex, int vsizey, int vsizez,
             float lambda, size_t slicesize, cudaStream_t stream = 0)
     {
         size_t msizex = vsizex;
@@ -464,8 +464,6 @@ extern "C"
         sinobar.DeallocGPU(stream);
 
         HANDLE_ERROR(cudaGetLastError());
-
-        return lambda;
     }
 }
 
@@ -474,62 +472,66 @@ extern "C"{
     void getTitarenkoRings(float *tomogram, dim3 size,
     float lambda_rings, int ring_blocks, cudaStream_t stream)
     {
-
         /* Projection data sizes */
         int nrays        = size.x;
         int nangles      = size.y;
         int blockslices  = size.z;
 
-        size_t step, offset = nrays * nangles;
+        size_t step   = (nangles / ring_blocks) * nrays;
+        size_t offset = nrays * nangles;
 
-        for (int m = 0; m < ring_blocks / 2; m++){
+        if ( ring_blocks > 1 )
+        {
 
-            TitarenkoRings(tomogram,
-                                nrays, nangles, blockslices,
+            for (int m = 0; m < ring_blocks / 2; m++){
+
+                TitarenkoRings( tomogram, nrays, nangles, blockslices,
                                 lambda_rings, offset, stream);
-            step = (nangles / ring_blocks) * nrays;
-            float *tomptr = tomogram;
+                
+                float *tomptr = tomogram;
 
-            for (int n = 0; n < ring_blocks - 1; n++) {
-                TitarenkoRings(tomogram,
-                                    nrays, nangles, blockslices,
+                for (int n = 0; n < ring_blocks - 1; n++) {
+
+                    TitarenkoRings( tomptr, nrays, nangles / ring_blocks, blockslices,
                                     lambda_rings, offset, stream);
-                tomptr += step;
-            }
-            TitarenkoRings(tomptr,
-                                nrays, nangles % ring_blocks + nangles / ring_blocks, blockslices,
-                                lambda_rings, offset, stream);
-        }
 
+                    tomptr += step;
+                }
+                TitarenkoRings( tomptr, nrays, ( nangles % ring_blocks ) + ( nangles / ring_blocks ), 
+                                blockslices, lambda_rings, offset, stream);
+            }
+            HANDLE_ERROR(cudaGetLastError());
+        }else{
+            /* rings_block == 1 */
+            
+            TitarenkoRings( tomogram, nrays, nangles, blockslices,
+                            lambda_rings, offset, stream);
+
+            HANDLE_ERROR(cudaGetLastError());
+        }
         HANDLE_ERROR(cudaGetLastError());
     }
 
     void getTitarenkoRingsGPU(int gpu,
     float *data, dim3 size, 
     float lambda_rings, int ring_blocks,
-    int blocksize)
+    int blockSize)
     {
         HANDLE_ERROR(cudaSetDevice(gpu));
 
-        const int nstreams = 3;
+        const int nstreams = 1;
 
         /* Projection data sizes */
         int nrays    = size.x;
         int nangles  = size.y;
         int nslices  = size.z;
 
-		int i;
-        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( nrays * nangles ) * nstreams;
+        size_t total_required_mem_per_slice_bytes = static_cast<float>(sizeof(float)) * ( nrays * nangles );
+        
+        if ( nstreams != 0 ) total_required_mem_per_slice_bytes *= nstreams;
 
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(nslices, total_required_mem_per_slice_bytes, 
-                                                        true, BYTES_TO_GB * getTotalDeviceMemory());
-            blocksize          = min(nslices, blocksize_aux);
-            blocksize          = min(32, blocksize);
-        }
-
-        int nblock = (int)ceil( (float) nslices / blocksize );
-        int ptr = 0, subblock;
+        int blocksize = getGPUBlocksize(blockSize, nslices, total_required_mem_per_slice_bytes, 32, true);
+        int nblock    = getNumberOfBlocks(nslices, blocksize); 
 
         float *tomogram[nstreams];
         cudaStream_t streams[nstreams];
@@ -540,17 +542,17 @@ extern "C"{
             tomogram[st] = opt::allocGPU<float>((size_t) nrays * nangles * blocksize, streams[st]);
         }
 
-        for (i = 0; i < nblock; i++){
+        int ptr = 0, subblock;
+
+        for (int i = 0; i < nblock; i++){
             int st = i % nstreams;
             cudaStream_t stream = streams[i % nstreams];
 
-            subblock = min(nslices - ptr, blocksize);
+            subblock = getSubblock(nslices - ptr, blocksize);
 
             opt::CPUToGPU<float>(data + (size_t)ptr * nrays * nangles, tomogram[st], (size_t)subblock * nrays * nangles, stream);
 
-            getTitarenkoRings(tomogram[st],
-                        dim3(nrays, nangles, subblock),
-                        lambda_rings, ring_blocks, stream);
+            getTitarenkoRings(tomogram[st], dim3(nrays, nangles, subblock), lambda_rings, ring_blocks, stream);
 
             opt::GPUToCPU<float>(data + (size_t)ptr * nrays * nangles, tomogram[st], (size_t)subblock * nrays * nangles, stream);
 
@@ -585,22 +587,20 @@ extern "C"{
 
         for (i = 0; i < ngpus; i++){
 
-            subblock = min(nslices - ptr, blockgpu);
+            subblock = getSubblock(nslices - ptr, blockgpu);
 
-            threads.push_back(std::async(std::launch::async,
-                getTitarenkoRingsGPU,
-                gpus[i],
-                data + (size_t)ptr * nrays * nangles,
-                dim3(nrays, nangles, subblock),
-                lambda_rings, ring_blocks,
-                blocksize));
+            threads.push_back(std::async(   std::launch::async,
+                                            getTitarenkoRingsGPU,
+                                            gpus[i],
+                                            data + (size_t)ptr * nrays * nangles,
+                                            dim3(nrays, nangles, subblock),
+                                            lambda_rings, ring_blocks,
+                                            blocksize));
 
             /* Update pointer */
             ptr = ptr + subblock;
         }
 
-        for (auto &t : threads)
-            t.get();
-
+        for (auto &t : threads) t.get();
     }
 }

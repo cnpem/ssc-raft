@@ -177,17 +177,15 @@ extern "C"{
             opt::GPUToGPU<float>(out, frames, nsize);
 
             HANDLE_ERROR(cudaFree(out));
-    
             HANDLE_ERROR(cudaGetLastError());
         }
 
     void getBackgroundCorrectionGPU_slicesStreams(int gpu, float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, int blocksize, const int nstreams)
+    dim3 size, int numflats, int is_log, int blockSize, const int nstreams)
     {
         // Supports 2 flats max
         HANDLE_ERROR(cudaSetDevice(gpu));
 
-        int i;
         size_t total_required_mem_per_slice_bytes = (static_cast<float>(sizeof(float)) * ( size.x * size.y            ) + // Raw data sinogram
                                                      static_cast<float>(sizeof(float)) * ( size.x * size.z * numflats ) + // Flat line
                                                      static_cast<float>(sizeof(float)) * ( size.x * size.z            )   // Dark line
@@ -195,15 +193,8 @@ extern "C"{
                                                     
         total_required_mem_per_slice_bytes *= nstreams;
 
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(size.z, 
-                                                       total_required_mem_per_slice_bytes, 
-                                                       true, 
-                                                       BYTES_TO_GB * getTotalDeviceMemory());
-            blocksize          = min(size.z, blocksize_aux);
-            blocksize          = min(32, blocksize); /* Set up a maximum blocksize for now */
-        }
-        int nblock = (int)ceil( (float) size.z / blocksize );
+        int blocksize = getGPUBlocksize(blockSize, size.z, total_required_mem_per_slice_bytes, 32, true);
+        int nblock    = getNumberOfBlocks(size.z, blocksize); 
         int ptr = 0, subblock;
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
@@ -226,11 +217,11 @@ extern "C"{
             opt::CPUToGPU<float>(dark, d_dark[st], (size_t)size.x * size.z           , streams[st]);
         }
 
-        for(i = 0; i < nblock; i++) {
+        for(int i = 0; i < nblock; i++) {
             int st = i % nstreams;
             cudaStream_t stream = streams[i % nstreams];
             
-            subblock = min(size.z - ptr, blocksize);
+            subblock = getSubblock(size.z - ptr, blocksize);
 
             opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames[st], (size_t)subblock * size.x * size.y, stream);
 
@@ -260,26 +251,18 @@ extern "C"{
     }
 
 	void getBackgroundCorrectionGPU_slices(int gpu, float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, int blocksize)
+    dim3 size, int numflats, int is_log, int blockSize)
 	{
 		// Supports 2 flats max
 		HANDLE_ERROR(cudaSetDevice(gpu));
-
-		int i;
 
         size_t total_required_mem_per_slice_bytes = (static_cast<float>(sizeof(float)) * ( size.x * size.y            ) + // Raw data sinogram
                                                      static_cast<float>(sizeof(float)) * ( size.x * size.z * numflats ) + // Flat line
                                                      static_cast<float>(sizeof(float)) * ( size.x * size.z            )   // Dark line
                                                     );
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(size.z, 
-                                                       total_required_mem_per_slice_bytes, 
-                                                       true, 
-                                                       BYTES_TO_GB * getTotalDeviceMemory());
-            blocksize          = min(size.z, blocksize_aux);
-            blocksize          = min(32, blocksize); /* Set up a maximum blocksize for now */
-        }
-        int nblock = (int)ceil( (float) size.z / blocksize );
+
+        int blocksize = getGPUBlocksize(blockSize, size.z, total_required_mem_per_slice_bytes, 32, true);
+        int nblock    = getNumberOfBlocks(size.z, blocksize); 
 		int ptr = 0, subblock;
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
@@ -292,9 +275,9 @@ extern "C"{
         opt::CPUToGPU<float>(flat, d_flat, (size_t)size.x * size.z * numflats);
         opt::CPUToGPU<float>(dark, d_dark, (size_t)size.x * size.z           );
 
-		for(i = 0; i < nblock; i++) {
+		for(int i = 0; i < nblock; i++) {
 
-			subblock = min(size.z - ptr, blocksize);
+			subblock = getSubblock(size.z - ptr, blocksize);
 
             opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames, (size_t)subblock * size.x * size.y);
 
@@ -317,27 +300,20 @@ extern "C"{
 	}
 
     void getBackgroundCorrectionGPU_framesStreams(int gpu, float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, int blocksize, const int nstreams)
+    dim3 size, int numflats, int is_log, int blockSize, const int nstreams)
     {
         // Supports 2 flats max
         HANDLE_ERROR(cudaSetDevice(gpu));
 
-        int i;
         size_t total_required_mem_per_slice_bytes = (static_cast<float>(sizeof(float)) * ( size.x * size.y            ) + // Raw data sinogram
                                                      static_cast<float>(sizeof(float)) * ( size.x * size.y * numflats ) + // Flat line
                                                      static_cast<float>(sizeof(float)) * ( size.x * size.y            )   // Dark line
                                                     );
         total_required_mem_per_slice_bytes *= nstreams;
 
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(size.z,
-                                                       total_required_mem_per_slice_bytes, 
-                                                       true, 
-                                                       BYTES_TO_GB * getTotalDeviceMemory());
-            blocksize          = min(size.z, blocksize_aux);
-            blocksize          = min(32, blocksize); /* Set up a maximum blocksize for now */
-        }
-        int nblock = (int)ceil( (float) size.z / blocksize );
+        int blocksize = getGPUBlocksize(blockSize, size.z, total_required_mem_per_slice_bytes, 32, true);
+        int nblock    = getNumberOfBlocks(size.z, blocksize); 
+
         int ptr = 0, subblock;
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
@@ -360,11 +336,11 @@ extern "C"{
             opt::CPUToGPU<float>(dark, d_dark[st], (size_t)size.x * size.y           , streams[st]);
         }
 
-        for(i = 0; i < nblock; i++) {
+        for(int i = 0; i < nblock; i++) {
             int st = i % nstreams;
             cudaStream_t stream = streams[i % nstreams];
             
-            subblock = min(size.z - ptr, blocksize);
+            subblock = getSubblock(size.z - ptr, blocksize);
 
             opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames[st], (size_t)subblock * size.x * size.y, stream);
 
@@ -390,37 +366,27 @@ extern "C"{
 
             cudaStreamDestroy(streams[st]);
         }
-
         HANDLE_ERROR(cudaDeviceSynchronize());
-
     }
 
     void getBackgroundCorrectionGPU_frames(int gpu, float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, int blocksize)
+    dim3 size, int numflats, int is_log, int blockSize)
     {
         // Supports 2 flats max
         HANDLE_ERROR(cudaSetDevice(gpu));
 
-        int i;
         size_t total_required_mem_per_slice_bytes = (static_cast<float>(sizeof(float)) * ( size.x * size.y            ) + // Raw data sinogram
                                                      static_cast<float>(sizeof(float)) * ( size.x * size.y * numflats ) + // Flat line
                                                      static_cast<float>(sizeof(float)) * ( size.x * size.y            )   // Dark line
                                                     );
 
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(size.z,
-                                                        total_required_mem_per_slice_bytes, 
-                                                        true, 
-                                                        BYTES_TO_GB * getTotalDeviceMemory());
-            blocksize          = min(size.z, blocksize_aux);
-            blocksize          = min(32, blocksize); /* Set up a maximum blocksize for now */
-        }
-        int nblock = (int)ceil( (float) size.z / blocksize );
+        int blocksize = getGPUBlocksize(blockSize, size.z, total_required_mem_per_slice_bytes, 32, true);
+        int nblock    = getNumberOfBlocks(size.z, blocksize); 
+
         int ptr = 0, subblock;
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
-
 
         float *d_frames = opt::allocGPU<float>((size_t) size.x * size.y * blocksize);
         float *d_flat   = opt::allocGPU<float>((size_t) size.x * size.y *  numflats);
@@ -429,9 +395,9 @@ extern "C"{
         opt::CPUToGPU<float>(flat, d_flat, (size_t)size.x * size.y * numflats);
         opt::CPUToGPU<float>(dark, d_dark, (size_t)size.x * size.y           );
 
-        for(i = 0; i < nblock; i++) {
+        for(int i = 0; i < nblock; i++) {
 
-            subblock = min(size.z - ptr, blocksize);
+            subblock = getSubblock(size.z - ptr, blocksize);
 
             opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames, (size_t)subblock * size.x * size.y);
 
@@ -480,7 +446,7 @@ extern "C"{
         if ( ( order == SLICES_ANGLES_RAYS ) && ( nstreams == 0 ) ){
 
             for (i = 0; i < ngpus; i++) {
-                subblock = min(sizez - ptr, blockgpu);
+                subblock = getSubblock(sizez - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async,
                     getBackgroundCorrectionGPU_slices,
@@ -501,7 +467,7 @@ extern "C"{
         }else if ( ( order == SLICES_ANGLES_RAYS ) && ( nstreams > 0 ) ){
 
             for (i = 0; i < ngpus; i++) {
-                subblock = min(sizez - ptr, blockgpu);
+                subblock = getSubblock(sizez - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async,
                     getBackgroundCorrectionGPU_slicesStreams,
@@ -522,7 +488,7 @@ extern "C"{
         }else if ( ( order == ANGLES_SLICES_RAYS ) && ( nstreams == 0 ) ){
 
             for (i = 0; i < ngpus; i++) {
-                subblock = min(sizez - ptr, blockgpu);
+                subblock = getSubblock(sizez - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async,
                     getBackgroundCorrectionGPU_frames,
@@ -543,7 +509,7 @@ extern "C"{
         }else if ( ( order == ANGLES_SLICES_RAYS ) && ( nstreams > 0 ) ){
 
             for (i = 0; i < ngpus; i++) {
-                subblock = min(sizez - ptr, blockgpu);
+                subblock = getSubblock(sizez - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async,
                     getBackgroundCorrectionGPU_framesStreams,

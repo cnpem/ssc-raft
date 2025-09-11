@@ -85,42 +85,27 @@ extern "C" {
         /* Projection data sizes */
         int nrays      = tomo.size.x;
         int nslices    = tomo.size.y;
-        int nrayspad   = PDIM(  nrays,tomo.pad.x); // nrays * (1 + tomo.pad.x);
-        int nslicespad = PDIM(nslices,tomo.pad.y); // nslices * (1 + tomo.pad.y);
-
-        printf("Here 1 \n");
-        fflush(stdout);
-		int i, blocksize = tomo.blocksize;
+        int nrayspad   = PDIM(  nrays,tomo.pad.x); 
+        int nslicespad = PDIM(nslices,tomo.pad.y); 
 
         size_t total_required_mem_per_frame_bytes = 8 * calcPaddedSliceMemoryBytes(tomo);
 
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize( sizez, 
-                                                        total_required_mem_per_frame_bytes, 
-                                                        true, 
-                                                        BYTES_TO_GB * getTotalDeviceMemory());
+        int blocksize = getGPUBlocksize(tomo.blocksize, sizez, total_required_mem_per_frame_bytes, 32, true);
+        int ind_block = getNumberOfBlocks(sizez, blocksize); 
 
-            blocksize          = min(sizez, blocksize_aux);
-            blocksize          = min(32, blocksize);
-        }
-        int ind_block = (int)ceil( (float) sizez / blocksize );
-
-        printf("ind_block: %d \n", ind_block);
-        printf("sizez: %d \n", sizez);
-        printf("blocksize: %d \n", blocksize);
-        fflush(stdout);
+        // printf("ind_block: %d \n", ind_block);
+        // printf("sizez: %d \n", sizez);
+        // printf("blocksize: %d \n", blocksize);
+        // fflush(stdout);
 
         /* Kernel Computation */
         size_t nsize   = nrayspad * nslicespad;
 		float *kernel  = opt::allocGPU<float>(nsize);
 
         compute_contrast_kernel(tomo, geometry, ContrastFilter, kernel);
-        HANDLE_ERROR(cudaDeviceSynchronize());
 
 		float *dprojections      = opt::allocGPU<float>((size_t) nrays * nslices * blocksize);
-        HANDLE_ERROR(cudaDeviceSynchronize());
-        cufftComplex *dataPadded = opt::allocGPU<cufftComplex>((size_t) nrayspad * nslicespad * blocksize);
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        cufftComplex *dataPadded = opt::allocGPU<cufftComplex>((size_t) nsize * blocksize);
 
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(dim3(nrayspad,nslicespad,blocksize), threadsPerBlock);
@@ -133,9 +118,9 @@ extern "C" {
 		/* Loop for each batch of size 'batch' in threads */
 		int ptr = 0, subblock; size_t ptr_block = 0;
 
-		for (i = 0; i < ind_block; i++){
+		for (int i = 0; i < ind_block; i++){
 
-			subblock  = min(sizez - ptr, blocksize);
+			subblock  = getSubblock(sizez - ptr, blocksize);
 			ptr_block = (size_t)nrays * nslices * ptr;
 
 			/* Update pointer */
@@ -206,7 +191,7 @@ extern "C" {
 
 			for (i = 0; i < ngpus; i++){
 				
-				subblock   = min(tomo.size.z - ptr, subvolume);
+				subblock   = getSubblock(tomo.size.z - ptr, subvolume);
 				ptr_volume = (size_t)tomo.size.x * tomo.size.y * ptr;
 				
 				threads.push_back( std::async(  std::launch::async, 
@@ -219,8 +204,7 @@ extern "C" {
                 /* Update pointer */
 				ptr = ptr + subblock;
 			}
-			for (i = 0; i < ngpus; i++)
-				threads[i].get();
+			for (i = 0; i < ngpus; i++) threads[i].get();
 		}	
 
 		HANDLE_ERROR(cudaDeviceSynchronize());

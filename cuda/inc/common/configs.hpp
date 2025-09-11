@@ -9,11 +9,10 @@
 #define FFT_RANK_2D 2
 #define FFT_RANK_1D 1
 
-#define IND(I,J,K,NX,NY) (long long int)( (I) + (J) * (NX) + (K) * (NX) * (NY) )
-
+#define IND(I,J,K,NX,NY) (long long int)( (I) + ( (J) * (NX) ) + ( (K) * (NX) * (NY) ) )
 #define PADS(X, P) (int)( ( X * P) / 100 )
-
-#define PDIM(X,P) (int)( X + 2 * ((int)( (X * P) / 100 )) )
+#define PDIM(X,P) (int)( X + ( 2 * ( (int)( (X * P) / 100 ) ) ) )
+// #define COMPUTE_SUBBLOCK 
 
 #define vc 299792458           /* Velocity of Light [m/s] */ 
 #define plank 4.135667696E-15  /* Plank constant [ev*s] */
@@ -52,13 +51,13 @@
 
 enum class ReconstructionMethod
 {
-    none    = 0,
-    fbpRT   = 1,
-    fbpBST  = 2,
-    eEMRT   = 3,
-    tEMRT   = 4,
-    tEMFQ   = 5,
-    fdk     = 6
+    none  = 0,
+    fbp   = 1,
+    bst   = 2,
+    eEMRT = 3,
+    tEMRT = 4,
+    tEMFQ = 5,
+    fdk   = 6
 };
 
 typedef struct coordinates
@@ -169,7 +168,7 @@ typedef struct config
     RF RingsParam;
     ALGN AlignParam;
     REC ReconParam;
-} CFG;
+}CFG;
 
 inline void printDim(dim3 d) {
     printf("dim3 {%d, %d, %d}\n", d.x, d.y, d.z);
@@ -193,20 +192,13 @@ inline bool isConeGeometry(GEO geometry) {
     return geometry.magnitude != 1;
 }
 
-struct GPU
-{
-    /* GPU variables */
-    int ngpus, *gpus;
-    cudaStream_t *streams;
-    int num_streams;
-    dim3 BT, Grd;
+static inline int getSubblock(int a, int b) {
+    return (a < b) ? a : b;
+}
 
-    /* Fourier Transforms */
-    /* Plan FFTs*/
-    cufftHandle mplan;
-    cufftHandle mplanI;
-};
-
+static inline int getNumberOfBlocks(int totalsize, int blocksize) {
+    return (int)ceil( (float) totalsize / blocksize );
+}
 
 extern "C" {
 
@@ -287,6 +279,9 @@ extern "C" {
     int getTotalProcesses(int ngpus, int sizeZ, const int blockSize, const size_t total_required_mem_per_slice_bytes, bool using_fft);
 
     int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice, bool using_fft, float GPU_MEMORY);
+
+    int getGPUBlocksize(int input_blocksize, int gpu_block, 
+    float total_required_memory_per_unitary_block_bytes, int max_blocksize, bool using_fft);
 
 }
 

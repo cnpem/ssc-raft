@@ -12,7 +12,7 @@ extern "C"{
         int filter_type   = FilterParam.filter;
         float paganin_reg = FilterParam.paganin_slices;
         float filter_reg  = FilterParam.filter_reg;
-        float axis_offset = 0.0;
+        float axis_offset = FilterParam.rotation_axis_offset;
         float pixel_x     = geometry.obj_pixel.x;
 
         Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel_x);
@@ -41,38 +41,23 @@ extern "C"{
         /* Projection data sizes */
         int nrays    = tomo.size.x;
         int nangles  = tomo.size.y;
-        int nrayspad = PDIM(nrays,tomo.pad.x); // nrays * (1 + tomo.pad.x);
-
-        int i;
-
-        int blocksize = tomo.blocksize;
+        int nrayspad = PDIM(nrays,tomo.pad.x); 
 
         /* Compute total memory used on a singles slice */
         size_t total_required_mem_per_slice_bytes = (
-            calcSliceMemoryBytes(tomo)       + // Tomo slice
-            calcPaddedSliceMemoryBytes(tomo)  // Tomo padded slice
+                calcSliceMemoryBytes(tomo)       + // Tomo slice
+                calcPaddedSliceMemoryBytes(tomo)  // Tomo padded slice
             ); 
-
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize( sizez, 
-                                                        2 * total_required_mem_per_slice_bytes, 
-                                                        true, 
-                                                        BYTES_TO_GB * getTotalDeviceMemory());
-            blocksize          = min(sizez, blocksize_aux);
-        }
-        int ind_block = (int)ceil( (float) sizez / blocksize );
+        
+        int blocksize = getGPUBlocksize(tomo.blocksize, sizez, 2 * total_required_mem_per_slice_bytes, 64, true);
+        int ind_block = getNumberOfBlocks(sizez, blocksize); 
 
         float *dtomo    = opt::allocGPU<float>((size_t)   nrays * nangles * blocksize);
         float *dtomopad = opt::allocGPU<float>((size_t)nrayspad * nangles * blocksize);
 
-        /* Loop for each batch of size 'batch' in threads */
-		int ptr = 0, subblock; size_t ptr_block_tomo = 0;
-
         /* Projection GPUs padded Grd and Blocks */
         dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 TomogridBlock( (int)ceil(  nrayspad / TPBX ) + 1,
-                            (int)ceil(   nangles / TPBY ) + 1,
-                            (int)ceil( blocksize / TPBZ ) + 1);
+        dim3 TomogridBlock = opt::setGridBlock(dim3(nrayspad,nangles,blocksize), TomogridBlock);
 
         // printf("tomo.padding_mode = %d \n",tomo.padding_mode);
         // printf("FilterParam.padding_mode = %d \n",FilterParam.filter);
@@ -80,10 +65,13 @@ extern "C"{
         // printf("ind_block = %d \n",ind_block);
         // printf("sizez = %d \n",sizez);
         // fflush(stdout);
-        for (i = 0; i < ind_block; i++){
 
-			subblock       = min(sizez - ptr, blocksize);
+        /* Loop for each batch of size 'batch' in threads */
+		int ptr = 0, subblock; size_t ptr_block_tomo = 0;
 
+        for (int i = 0; i < ind_block; i++){
+
+			subblock       = getSubblock(sizez - ptr, blocksize);
 			ptr_block_tomo = (size_t)nrays * nangles * ptr;
 
 			/* Update pointer */
@@ -149,23 +137,22 @@ extern "C"{
 
 			for (i = 0; i < ngpus; i++){
 				
-				subblock   = min(nslices - ptr, subvolume);
+				subblock = getSubblock(nslices - ptr, subvolume);
 
-				threads.push_back( std::async( std::launch::async, 
-                    getFilterLowPassGPU, 
-                    tomo, 
-                    geometry, 
-                    FilterParam,
-                    tomogram + (size_t)nrays * nangles * ptr, 
-                    subblock,
-                    gpus[i]));
+				threads.push_back(  std::async( std::launch::async, 
+                                    getFilterLowPassGPU, 
+                                    tomo, 
+                                    geometry, 
+                                    FilterParam,
+                                    tomogram + (size_t)nrays * nangles * ptr, 
+                                    subblock,
+                                    gpus[i]));
 
                 /* Update pointer */
 				ptr = ptr + subblock;		
 
 			}
-			for (i = 0; i < ngpus; i++)
-				threads[i].get();
+			for (i = 0; i < ngpus; i++) threads[i].get();
 		}
     }
 

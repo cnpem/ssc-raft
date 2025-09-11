@@ -297,7 +297,9 @@ void getexp(float *data, dim3 size) {
 }
 
 dim3 opt::setGridBlock(dim3 size, dim3 BT) {
-    dim3 gridBlock((int)ceil(size.x / BT.x) + 1, (int)ceil(size.y / BT.y) + 1, (int)ceil(size.z / BT.z) + 1);
+    dim3 gridBlock( (int)ceil(size.x / BT.x) + 1, 
+                    (int)ceil(size.y / BT.y) + 1, 
+                    (int)ceil(size.z / BT.z) + 1);
 
     return gridBlock;
 }

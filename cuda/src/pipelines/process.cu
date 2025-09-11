@@ -29,7 +29,7 @@ extern "C"{
     }
 
     int compute_GPU_blocksize(int nslices, float total_required_mem_per_slice,
-    bool using_fft, float gpu_memory)
+    bool using_fft, float GPU_MEMORY)
     {
         const float empiric_const = using_fft? 4.0 : 1.0; // the GPU needs some free memory to perform the FFTs.
         const float epsilon = 4.0;       // how much free memory we want to leave, in GB.
@@ -44,10 +44,10 @@ extern "C"{
 
         float total_mem_per_slice_GB = BYTES_TO_GB * total_required_mem_per_slice;
 
-        raw_blocksize = static_cast<long>( - epsilon + ( gpu_memory / ( total_mem_per_slice_GB * empiric_const ) ) );
+        raw_blocksize = static_cast<long>( - epsilon + ( GPU_MEMORY / ( total_mem_per_slice_GB * empiric_const ) ) );
         
         std::cout << "\t  total_required_mem_per_slice GB: " << total_mem_per_slice_GB << std::endl;
-        std::cout << "\t  gpu_memory: " << gpu_memory << std::endl;
+        std::cout << "\t  gpu_memory: " << GPU_MEMORY << std::endl;
         std::cout << "\t  Raw blocksize: " << raw_blocksize << std::endl;
 
         if (nslices < raw_blocksize) {
@@ -63,6 +63,23 @@ extern "C"{
         std::cout << "\t  Blocksize: " << blocksize << std::endl;
 
         return blocksize;
+    }
+
+    int getGPUBlocksize(int input_blocksize, int gpu_block, 
+    float total_required_memory_per_unitary_block_bytes, int max_blocksize, bool using_fft)
+    {
+        int computed_blocksize = input_blocksize;
+
+        if ( input_blocksize == 0 ){
+            int blocksize_aux  = compute_GPU_blocksize( gpu_block, 
+                                                        total_required_memory_per_unitary_block_bytes, 
+                                                        using_fft, 
+                                                        BYTES_TO_GB * getTotalDeviceMemory());
+
+            blocksize_aux      = min(    gpu_block, blocksize_aux); 
+            computed_blocksize = min(max_blocksize, blocksize_aux); /* Set up a maximum blocksize for now *//* Set up a maximum blocksize for now */
+        }
+        return computed_blocksize;
     }
 }
 

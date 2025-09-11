@@ -4,7 +4,6 @@
 #include "common/opt.hpp"
 #include "geometries/parallel/radon.hpp"
 
-
 extern "C"{
 
     __global__ void Radon_RT_version_Pyraft_Giov(float* projections, float* phantom, float *angles, dim3 proj_size, dim3 phantom_size)
@@ -128,10 +127,8 @@ extern "C" {
         }
     }		
 
-    __global__ void Radon_RT_version_sscRadon(
-                    float *projections, float *phantom, float *angles,
-                    dim3 proj_size, dim3 phantom_size, 
-                    float ax, float ay)
+    __global__ void Radon_RT_version_sscRadon(float *projections, float *phantom, float *angles,
+    dim3 proj_size, dim3 phantom_size, float ax, float ay)
     {
         /* dim3 proj_size    = (rays,angles,slices) */
         /* dim3 phantom_size = (   x,     y,     z) */
@@ -182,19 +179,16 @@ extern "C" {
     void getRadonRT(float* projection, float* obj, float *angles, 
     dim3 tomo_size, dim3 obj_size, float ax, float ay)
     {
-        int nrays   = tomo_size.x;
-        int nangles = tomo_size.y;
-        int nslices = tomo_size.z;
-
+        /*  nrays   = tomo_size.x;
+            nangles = tomo_size.y;
+            nslices = tomo_size.z;
+        */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock((int)ceil( nrays   / threadsPerBlock.x ) + 1,
-                       (int)ceil( nangles / threadsPerBlock.y ) + 1,
-                       (int)ceil( nslices / threadsPerBlock.z ) + 1);
-        
+        dim3 gridBlock = opt::setGridBlock(tomo_size, threadsPerBlock);
+
         Radon_RT_version_sscRadon<<<gridBlock, threadsPerBlock>>>(  projection, obj, angles, 
                                                                     tomo_size, obj_size, 
                                                                     ax, ay);
-
     }
 }
 
@@ -214,7 +208,7 @@ extern "C"{
         int nslices = tomo_size.z;
 
         int b;
-        int blocksize = min(nslices,64); // Herança do Giovanni -> Mudar
+        int blocksize = min(nslices,32); // Herança do Giovanni -> Mudar
 
 		int nblock = (int)ceil( (float) nslices / blocksize );
         int ptr = 0, subblock;
@@ -228,12 +222,12 @@ extern "C"{
 
         for(b = 0; b < nblock; b++){
             
-            subblock   = min(nslices - ptr, blocksize);
+            subblock = getSubblock(nslices - ptr, blocksize);
 
             opt::CPUToGPU<float>(   obj + (size_t)ptr * obj_size.x * obj_size.y, 
                                     dobj, (size_t)obj_size.x * obj_size.y * subblock);
 
-            getRadonRT(dproj, dobj, dangles, 
+            getRadonRT( dproj, dobj, dangles, 
                         dim3(nrays, nangles, subblock), 
                         dim3(obj_size.x, obj_size.y, subblock), 
                         ax, ay);
@@ -244,13 +238,11 @@ extern "C"{
             /* Update pointer */
 			ptr = ptr + subblock;
         }
-
         HANDLE_ERROR(cudaDeviceSynchronize());        
 
         HANDLE_ERROR(cudaFree(dproj));
         HANDLE_ERROR(cudaFree(dobj));
         HANDLE_ERROR(cudaFree(dangles));
-        // cudaDeviceReset();
     }
 
     void getRadonRTMultiGPU(int* gpus, int ngpus, 
@@ -277,24 +269,22 @@ extern "C"{
 
             for(t = 0; t < ngpus; t++){ 
                 
-                subblock   = min(nslices - ptr, blockgpu);
+                subblock = getSubblock(nslices - ptr, blockgpu);
 
-                threads.push_back(std::async( std::launch::async, getRadonRTGPU, 
+                threads.push_back(std::async(   std::launch::async, getRadonRTGPU, 
                                                 projection + (size_t)ptr *      nrays *    nangles, 
                                                 obj        + (size_t)ptr * sizeImagex * sizeImagey, 
                                                 angles, 
                                                 dim3(nrays, nangles, subblock), 
                                                 dim3(sizeImagex,sizeImagey,subblock), 
                                                 ax,ay,
-                                                gpus[t]
-                                                ));
+                                                gpus[t]));
 
                 /* Update pointer */
                 ptr = ptr + subblock;
             }
         
-            for(auto& t : threads)
-                t.get();
+            for(auto& t : threads) t.get();
         }
     }
 

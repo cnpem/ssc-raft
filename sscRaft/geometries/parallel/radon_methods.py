@@ -15,7 +15,7 @@ def radon_RT(phantom, angles, gpus, pixel = 1.0):
 
     * MultiGPU function 
     """
-    a = 1.0
+    a = 1.0 # Half detector size in meters: a = npixels * pixel / 2.0
 
     ngpus      = len(gpus)
     gpus       = numpy.array(gpus)
@@ -31,19 +31,17 @@ def radon_RT(phantom, angles, gpus, pixel = 1.0):
 
     _, img_sizey, img_sizex   = phantom.shape
     
-    phantom    = CNICE(phantom)
-    phantom_ptr = phantom.ctypes.data_as(ctypes.c_void_p)
+    phantom      = CNICE(phantom)
+    phantom_ptr  = phantom.ctypes.data_as(ctypes.c_void_p)
       
-    angles      = numpy.array(angles)
-    nangles     = angles.shape[0]
-    angles      = CNICE(angles)
-    angles_ptr  = angles.ctypes.data_as(ctypes.c_void_p)  
+    angles       = numpy.array(angles)
+    nangles      = angles.shape[0]
+    angles       = CNICE(angles)
+    angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p)  
     
-    tomogram    = numpy.ones((nslices,nangles,nrays), dtype=numpy.float32)
-    tomogram    *= -1
+    tomogram     = numpy.zeros((nslices,nangles,nrays), dtype=numpy.float32)
     tomogram     = CNICE(tomogram)
     tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
-
 
     libraft.getRadonRTMultiGPU(gpusptr, ctypes.c_int(ngpus), 
         tomogram_ptr, phantom_ptr, angles_ptr, 

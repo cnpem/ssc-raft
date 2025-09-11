@@ -217,12 +217,10 @@ extern "C"{
         return interp;
     }
 
-
     int getCentersino(float* frame0, float* frame180, 
     float* dark, float* flat, 
     size_t sizex, size_t sizey)
     {
-
         dim3 blocks((sizex+127)/128,sizey,1);
         dim3 threads(fminf(sizex,128),1,1);
 
@@ -361,7 +359,6 @@ extern "C"{
         fflush(stdout);
         return -bestpos/2.0f;
     }
-
 
     __global__ void KCorrectRotationAxis(float* tomoin, float* tomoout,
             int sizex, int sizey, int sizez, int deviation) {
@@ -532,7 +529,7 @@ extern "C"{
 extern "C"{   
 
     void getRotAxisCorrectionGPU(float *tomogram, 
-    float axis_offset, dim3 tomo_size, int ngpu, int blocksize)
+    float axis_offset, dim3 tomo_size, int ngpu, int blockSize)
     {
         HANDLE_ERROR(cudaSetDevice(ngpu));
 
@@ -541,31 +538,22 @@ extern "C"{
         int nangles = tomo_size.y;
         int sizez   = tomo_size.z;
 
-        int i; 
-
         size_t total_required_mem_per_slice_bytes = (
             static_cast<float>(sizeof(float)) * nangles * nrays     + // Tomo slice
             static_cast<float>(sizeof(float)) * nangles * nrays * 6   // Tomo padded slice + filter kernel
         ); 
 
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize( sizez, 
-                                                        total_required_mem_per_slice_bytes, true, 
-                                                        BYTES_TO_GB * getTotalDeviceMemory());
-            blocksize          = min(sizez, blocksize_aux);
-            blocksize          = min(32, blocksize);
-        }
-        int ind_block = (int)ceil( (float) sizez / blocksize );
+        int blocksize = getGPUBlocksize(blockSize, sizez, total_required_mem_per_slice_bytes, 32, true);
+        int ind_block = getNumberOfBlocks(sizez, blocksize); 
 
         float *dtomo  = opt::allocGPU<float>((size_t) nrays * nangles * blocksize);
 
         /* Loop for each batch of size 'batch' in threads */
 		int ptr = 0, subblock; size_t ptr_block_tomo = 0;
 
-        for (i = 0; i < ind_block; i++){
+        for (int i = 0; i < ind_block; i++){
 
-			subblock       = min(sizez - ptr, blocksize);
-
+			subblock       = getSubblock(sizez - ptr, blocksize);
 			ptr_block_tomo = (size_t)nrays * nangles * ptr;
 
 			/* Update pointer */
@@ -618,7 +606,7 @@ extern "C"{
 
 			for (i = 0; i < ngpus; i++){
 				
-				subblock   = min(nslices - ptr, subvolume);
+				subblock   = getSubblock(nslices - ptr, subvolume);
 
 				threads.push_back( std::async( std::launch::async, 
                     getRotAxisCorrectionGPU, 

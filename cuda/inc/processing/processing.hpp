@@ -16,7 +16,7 @@ extern "C"{
         dim3 size, int numflats, int is_log);
     
     void getBackgroundCorrection_frames(float* frames, float* flat, float* dark, 
-            dim3 size, int numflats, int is_log);
+        dim3 size, int numflats, int is_log);
 }
 
 /* Rings */
@@ -26,7 +26,7 @@ extern "C"{
     float lambda_rings, int ring_blocks, int blocksize);
 
     void getTitarenkoRingsGPU(int gpu, float *data, dim3 size, 
-    float lambda_rings, int ring_blocks, int blocksize);
+    float lambda_rings, int ring_blocks, int blockSize);
 
     void getTitarenkoRings(float *tomogram, dim3 size, 
     float lambda_rings, int ring_blocks, cudaStream_t stream = 0);
@@ -43,7 +43,7 @@ extern "C" {
     int nrays, int nangles, int nslices, int blocksize);
 
     void getRotAxisCorrectionGPU(float *tomogram, 
-    float axis_offset, dim3 tomo_size, int ngpu, int blocksize);
+    float axis_offset, dim3 tomo_size, int ngpu, int blockSize);
 }
 
 /* Centersino - Find offset for 180 degrees parallel tomogram 

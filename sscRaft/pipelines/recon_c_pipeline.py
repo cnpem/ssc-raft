@@ -85,7 +85,7 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0
                            iterations = iterations, 
                            filter_reg = regularization,
                            total_variation = 0.0, 
-                           interpolation= 'none')
+                           interpolation = 'none')
 
     Flags    = FLAG(do_flat_dark_correction = do_norm,
                     do_flat_dark_log        = do_log,

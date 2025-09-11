@@ -31,15 +31,11 @@ extern "C"{
         /* Padding */
         /* Projection GPUs padded Grd and Blocks */
         dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 TomogridBlock( (int)ceil(    nraysp / TPBX ) + 1,
-                            (int)ceil(   nangles / TPBY ) + 1,
-                            (int)ceil( tomoblock / TPBZ ) + 1);
+        dim3 TomogridBlock = opt::setGridBlock(dim3(nraysp,nangles,tomoblock), TomothreadsPerBlock);
         
         /* Reconstruction GPUs padded Grd and Blocks */
         dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 ObjgridBlock(  (int)ceil(      nxp / TPBX ) + 1,
-                            (int)ceil(      nyp / TPBY ) + 1,
-                            (int)ceil( objblock / TPBZ ) + 1);
+        dim3 ObjgridBlock = opt::setGridBlock(dim3(nxp,nyp,objblock), ObjthreadsPerBlock);
         
         opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(workspace->tomo, 
                                                             workspace->tomoPadd, 
@@ -51,7 +47,7 @@ extern "C"{
             case static_cast<int>(ReconstructionMethod::none):
                 /* No reconstruction done */
             break;
-            case static_cast<int>(ReconstructionMethod::fbpRT):
+            case static_cast<int>(ReconstructionMethod::fbp):
                 /* FBP */
                 getFBP( configs.ReconParam, 
                         workspace->objPadd, 
@@ -62,7 +58,7 @@ extern "C"{
                         configs.geometry.detector_pixel.x
                     );
             break;
-            case static_cast<int>(ReconstructionMethod::fbpBST):
+            case static_cast<int>(ReconstructionMethod::bst):
                 /* BST */
                 bst_padd = 2; blocksize_bst = 1;
                 
@@ -72,7 +68,7 @@ extern "C"{
 
                 getBST( workspace->objPadd, workspace->tomoPadd, workspace->angles, 
                         nraysp, nangles, tomoblock, nxp, bst_padd, 
-                        configs.ContrastParam.regularization, configs.ReconParam.paganin_slices, 
+                        configs.ReconParam.filter_reg, configs.ReconParam.paganin_slices, 
                         configs.ReconParam.filter, configs.ReconParam.rotation_axis_offset, 
                         configs.geometry.detector_pixel.x, bst_workspace);
 
@@ -120,11 +116,8 @@ extern "C"{
         int nx      = configs.obj.size.x;
         int ny      = configs.obj.size.y;
 
-
         if( configs.flags.do_flat_dark_correction == 1 )
         {
-            // printf("Background Correction\n");
-            // fflush(stdout);
             getBackgroundCorrection_slices( workspace->tomo,
                                             workspace->flat, 
                                             workspace->dark, 
@@ -135,8 +128,6 @@ extern "C"{
 
         if( configs.flags.do_rings == 1 )
         {
-            // printf("Rings\n");
-            // fflush(stdout);
             getTitarenkoRings(  workspace->tomo,
                                 dim3(nrays,nangles,tomoblock), 
                                 configs.RingsParam.rings_lambda, 
@@ -152,9 +143,6 @@ extern "C"{
 
             /* New shape of tomogram after excentric stitching */
             opt::set_excentric_tomo_dimensions(configs.tomo.size);
-            // configs.tomo.size.x = 2 * nrays;
-            // configs.tomo.size.y = int( nangles / 2);
-
         }
         // printf("tomosize: \n");   
         // printDim(configs.tomo.size);
@@ -164,8 +152,6 @@ extern "C"{
         if( configs.flags.do_reconstruction == 1)
         {
             /* Reconstruction */
-            // printf("Reconstruction\n");
-            // fflush(stdout);
             getReconstructionMethods(configs, workspace, tomoblock, objblock);
         }
     }
@@ -181,35 +167,23 @@ extern "C" {
         /* Initialize GPU device */
         HANDLE_ERROR(cudaSetDevice(gpu_device));
 
-        int i;
-        int blocksize = configs.tomo.blocksize;
-        int ptr = 0;
-        int subblock; 
-
         /* Compute total memory used on a singles slice */
         size_t total_required_mem_per_slice_bytes = (
             calcSliceMemoryBytes(configs.tomo)           + // Tomo slice
             calcSliceMemoryBytes(configs.obj)            + // Reconstructed object slice
             calcPaddedSliceMemoryBytes(configs.obj)      + // Reconstructed padded object slice
             2 * calcPaddedSliceMemoryBytes(configs.tomo) + // Tomo padded slice
-            configs.tomo.size.y * sizeof(float)                 // angles
+            configs.tomo.size.y * sizeof(float)            // angles
             );
-
-        if ( blocksize == 0 ){
-            int blocksize_aux  = compute_GPU_blocksize(sizez, 
-                                                       total_required_mem_per_slice_bytes, 
-                                                       true, 
-                                                       BYTES_TO_GB * getTotalDeviceMemory());
-            blocksize          = min(sizez, blocksize_aux);
-            blocksize          = min(   32,     blocksize);
-        }
-        int ind_block = (int)ceil( (float) sizez / blocksize );
+        
+        int blocksize = getGPUBlocksize(configs.tomo.blocksize, sizez, total_required_mem_per_slice_bytes, 32, true);
+        int ind_block = getNumberOfBlocks(sizez, blocksize); 
         
         int nrays   = configs.tomo.size.x;
         int nangles = configs.tomo.size.y;
         int nslices = configs.tomo.size.z;
         int nflats  = configs.flat.size.z;
-        int nAngles = opt::get_angleList_dimension(configs.tomo.size, configs.flags.do_excentric); /* True Angle value */
+        int nAngles = opt::get_angleList_dimension(configs.tomo.size, configs.flags.do_excentric); /* True Angle value - excentric tomo */
 
         int nx      = configs.obj.size.x;
         int ny      = configs.obj.size.y;
@@ -231,10 +205,11 @@ extern "C" {
         // printf("sizez: %d\n",sizez);
         // fflush(stdout);
        
-        /* Centersino computation */
-        for (i = 0; i < ind_block; i++){
+        int ptr = 0, subblock; 
 
-            subblock = min(sizez - ptr, blocksize);
+        for (int i = 0; i < ind_block; i++){
+
+            subblock = getSubblock(sizez - ptr, blocksize);
 
             /* Copy data from host to device */
             opt::CPUToGPU<float>( data + (size_t)ptr * nrays * nangles, workspace->tomo, (size_t)nrays *  nangles * subblock);
@@ -316,7 +291,7 @@ extern "C"{
 
             for (i = 0; i < ngpus; i++){
 				
-				subblock = min(nslices - ptr, subvolume);
+				subblock = getSubblock(nslices - ptr, subvolume);
 
 				threads.push_back(  std::async( std::launch::async, 
                                     ReconstructionPipeline_GPU, 
