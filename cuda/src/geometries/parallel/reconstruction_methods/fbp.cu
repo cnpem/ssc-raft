@@ -188,9 +188,6 @@ extern "C"{
 
             subblock = getSubblock(sizez - ptr, blocksize); // min(sizez - ptr, blocksize);
 
-            printf("subblock: %d \n", subblock);
-            fflush(stdout);
-
             opt::CPUToGPU<float>(tomogram + (size_t)nTomo * ptr, dtomo, (size_t)nTomo * subblock);
             
             /* Padding the tomogram data */

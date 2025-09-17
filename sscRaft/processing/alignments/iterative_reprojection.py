@@ -12,6 +12,58 @@ except:
 
 from .common import find_common_non_null_area, remove_zeroed_borders, shift_slices_via_fourier_transform_parallel
 
+def iter_reproj(tomogram, original_tomogram, angles, iterations = 5, pixel = 1.0,
+                method = 'fbp', iterationsEM = 10, gpus = [0]):
+    
+    nangles = len(angles)
+    nrays   = tomogram.shape[-1]
+
+    shift_cummulative = np.zeros((nangles,2))
+
+    dic = { 'gpu': [0], 'method': method, 'angles[rad]': angles,
+            'filter': 'hamming', 'rotation axis offset': 0.0, 'beta/delta': 0.0, 
+            'detectorPixel[m]': pixel, 'iterationsEM': iterationsEM,
+            'energy[eV]': 1.0, 'z1[m]':1.0, 'z1+z2[m]':1.0, 'z2[m]': 1.0, 
+            'padding': 0.25, 'blocksize': 0, 'regularization': 1.0}
+    
+    for i in range(iterations):
+
+        if method == 'fbp' or method == 'RT':
+            dic['method'] = 'RT'
+            reconstructed = fbp(tomogram, dic = dic)
+        elif method == 'eEMRT' or method == 'tEMRT':
+            reconstructed = em(tomogram, dic = dic) / ( pixel * nrays )
+        else:
+            dic['method'] = 'RT'
+            reconstructed = fbp(tomogram, dic = dic)
+        
+        reproject     = radon_RT(reconstructed, angles, gpus = gpus, pixel = pixel)
+
+        error         = 0
+        error_data    = 0
+        shifts        = np.zeros((nangles,2))
+        
+        for j in range(nangles):
+            frame           = reproject[:,j,:]
+            error          += np.sqrt( np.mean( (     tomogram[:,j,:] - frame )**2 ) )
+            error_data     += np.sqrt( np.mean( (original_tomogram[:,j,:] - frame )**2 ) )
+            
+            shift, error, _ = skimage.registration.phase_cross_correlation(frame,
+                                                                           tomogram[:,j,:],
+                                                                           upsample_factor= 10,
+                                                                           normalization= None)
+            shifts[j]       = shift
+            
+        for j in range(nangles):
+            tomogram[:,j,:] = scipy.ndimage.shift(tomogram[:,j,:],
+                                                  (shifts[j,0], shifts[j,1]),
+                                                  mode= 'reflect')
+        
+        
+        shift_cummulative += shifts 
+        
+    return tomogram, shift_cummulative
+
 def derivative_via_fourier_transform(data):
     ft = numpy.fft.fft2(data)
     freqy = numpy.fft.fftfreq(data.shape[0])

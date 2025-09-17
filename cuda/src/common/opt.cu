@@ -33,15 +33,18 @@ void opt::flip_x(float *data, int sizex, int sizey, int sizez) {
 }
 
 void _transpose_zyx2xyz_worker(float* out, float* in,
-        size_t i, size_t sizex, size_t sizey, size_t sizez) {
+    size_t i_start, size_t i_end, size_t sizex, size_t sizey, size_t sizez) {
     const size_t sizexy = sizex * sizey;
     const size_t sizezy = sizez * sizey;
-    for (size_t j = 0; j < sizey; ++j) {
+    for (size_t i = i_start; i < i_end; ++i) {
+        for (size_t j = 0; j < sizey; ++j) {
             for (size_t k = 0; k < sizez; ++k) {
                 out[i * sizezy + j * sizez + k] = in[k * sizexy + j * sizex + i];
             }
         }
+    }
 }
+
 
 void opt::transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez) {
     const size_t sizexyz = size_t(sizex) * size_t(sizey) * size_t(sizez);
@@ -50,12 +53,14 @@ void opt::transpose_cpu_zyx2xyz(float *data, int sizex, int sizey, int sizez) {
 
     mlock(data, sizeof(float) * sizexyz);
 
+    const size_t batch_size = 32;
     std::vector<std::thread> threads;
-    threads.reserve(sizex);
+    threads.reserve(sizex / batch_size + 1);
 
-    for(size_t i = 0; i < sizex; ++i) {
+    for(size_t i = 0; i < sizex; i += batch_size) {
         threads.emplace_back(_transpose_zyx2xyz_worker,
-                temp, data, i, sizex, sizey, sizez);
+                temp, data, i, std::min(i + batch_size, size_t(sizex)),
+                sizex, sizey, sizez);
     }
 
     for(auto& t: threads) {
@@ -74,13 +79,13 @@ size_t sizex, size_t sizey, size_t sizez, size_t blocksize, opt::TransposeOperat
 {
     float alpha = 1.0f, beta = 0.0f;
 
-    cudaSetDevice(gpu);
+    HANDLE_ERROR(cudaSetDevice(gpu));
 
     cublasHandle_t handle;
     float *d_data_block_in, *d_data_block_out;
 
-    cudaMalloc(&d_data_block_in, sizez * sizey * blocksize * sizeof(float));
-    cudaMalloc(&d_data_block_out, sizez * sizey * blocksize * sizeof(float));
+    HANDLE_ERROR(cudaMalloc(&d_data_block_in, sizez * sizey * blocksize * sizeof(float)));
+    HANDLE_ERROR(cudaMalloc(&d_data_block_out, sizez * sizey * blocksize * sizeof(float)));
     cublasCreate_v2(&handle);
 
     for (size_t i = start_x; i < end_x; i += blocksize) {
@@ -123,11 +128,10 @@ size_t sizex, size_t sizey, size_t sizez, size_t blocksize, opt::TransposeOperat
                 cur_blocksize * sizeof(float),  sizez * sizey, cudaMemcpyDeviceToHost);
 
     }
-
-    cudaDeviceSynchronize();
+    HANDLE_ERROR(cudaDeviceSynchronize());
     cublasDestroy_v2(handle);
-    cudaFree(d_data_block_in);
-    cudaFree(d_data_block_out);
+    HANDLE_ERROR(cudaFree(d_data_block_in));
+    HANDLE_ERROR(cudaFree(d_data_block_out));
 }
 
 
