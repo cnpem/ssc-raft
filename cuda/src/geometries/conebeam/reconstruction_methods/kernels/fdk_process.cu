@@ -168,9 +168,10 @@ extern "C" {
 
         int n_process = (int)ceil( (float) blockgpu / blocksize ) * ndev;
 
-        // printf("Blocksize: %d \n", blocksize);
-        // printf("n_process: %d \n", n_process);
-        // printf("blockgpu: %d \n", blockgpu);
+        printf("Blocksize: %d \n", blocksize);
+        printf("n_process: %d \n", n_process);
+        printf("blockgpu: %d \n", blockgpu);
+        fflush(stdout);
 
         return n_process;
     }

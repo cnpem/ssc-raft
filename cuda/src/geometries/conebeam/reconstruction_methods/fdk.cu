@@ -126,6 +126,8 @@ extern "C"
             }
 
             // printf("process i filter = %ld \n", k % ndevs);
+            // fflush(stdout);
+
             threads_filt.emplace_back(thread(fft, lab, c_filter[k % ndevs], c_signal[k % ndevs], c_W[k % ndevs], process[k]));
             k = k + 1;
 

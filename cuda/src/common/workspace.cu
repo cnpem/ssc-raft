@@ -10,9 +10,10 @@ extern "C"{
     dim3 tomo_pad, dim3 obj_pad, int nangles)
 	{  
         /* Allocate the local GPU variables:
-        size_tomo = (nrays,nangles,nslices_gpu_block) = (size_tomo.x, size_tomo.y, size_tomo.z)
-        size_obj  = (nrays,  nrays,nslices_gpu_block) = ( size_obj.x,  size_obj.y,  size_obj.z)
+        size_tomo: (nrays,nangles,nslices_gpu_block) = (size_tomo.x, size_tomo.y, size_tomo.z)
+        size_obj:  (nrays,  nrays,nslices_gpu_block) = ( size_obj.x,  size_obj.y,  size_obj.z)
 
+        size_data: (nrays,nslices_gpu_block,nangles) = (size_tomo.x, size_tomo.z, size_tomo.y)
         size_flat: (size_tomo.x, size_tomo.z, nflats) = (nrays, nslices_gpu_block, nflats)
         size_dark: (size_tomo.x, size_tomo.z,      1) = (nrays, nslices_gpu_block,      1)
 
@@ -36,6 +37,7 @@ extern "C"{
 
         workspace->obj      = opt::allocGPU<float>( objptr_size);
         workspace->tomo     = opt::allocGPU<float>(tomoptr_size);
+        // workspace->data     = opt::allocGPU<float>(tomoptr_size);
         workspace->flat     = opt::allocGPU<float>(flatptr_size);
         workspace->dark     = opt::allocGPU<float>(darkptr_size);
         workspace->angles   = opt::allocGPU<float>( angles_size);
@@ -56,6 +58,7 @@ extern "C"{
         HANDLE_ERROR(cudaFree(workspace->objPadd ));
 		HANDLE_ERROR(cudaFree(workspace->tomo    ));
         HANDLE_ERROR(cudaFree(workspace->tomoPadd));
+        // HANDLE_ERROR(cudaFree(workspace->data    ));
 		HANDLE_ERROR(cudaFree(workspace->flat    ));
 		HANDLE_ERROR(cudaFree(workspace->dark    ));
 		HANDLE_ERROR(cudaFree(workspace->angles  ));

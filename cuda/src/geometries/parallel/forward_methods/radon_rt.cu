@@ -10,9 +10,9 @@ extern "C"{
     {
         /* dim3 proj_size    = (rays,angles,slices) */
         /* dim3 phantom_size = (   x,     y,     z) */
-        int i = blockIdx.x*blockDim.x + threadIdx.x; /* rays */
-        int j = blockIdx.y*blockDim.y + threadIdx.y; /* angles */
-        int k = blockIdx.z*blockDim.z + threadIdx.z; /* slices */
+        int i = blockIdx.x * blockDim.x + threadIdx.x; /* rays */
+        int j = blockIdx.y * blockDim.y + threadIdx.y; /* angles */
+        int k = blockIdx.z * blockDim.z + threadIdx.z; /* slices */
         const size_t total_proj_size = proj_size.x * proj_size.y * proj_size.z;
         const size_t index           = proj_size.y * proj_size.x * k + proj_size.x * j + i;
         
@@ -156,8 +156,8 @@ extern "C" {
         for( int indray = 0; indray < phantom_size.y; indray++ ){
             s = - ay + indray * dy;
 
-            x =   t * ctheta + s * stheta;
-            y = - t * stheta + s * ctheta;
+            x =    t * ctheta + s * stheta;
+            y =  - t * stheta + s * ctheta;
 
             // Original
             // x = t * ctheta - s * stheta;
@@ -186,7 +186,7 @@ extern "C" {
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(tomo_size, threadsPerBlock);
 
-        Radon_RT_version_sscRadon<<<gridBlock, threadsPerBlock>>>(  projection, obj, angles, 
+        Radon_RT_version_sscRadon<<<gridBlock,threadsPerBlock>>>(  projection, obj, angles, 
                                                                     tomo_size, obj_size, 
                                                                     ax, ay);
     }

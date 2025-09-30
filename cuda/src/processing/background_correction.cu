@@ -13,7 +13,7 @@
 static __global__ void BackgroundCorrection_slices(float* data, 
 float* dark, float* flat, dim3 size, int numflats, int is_log)
 {  
-    // Supports 2 flats only
+    /* Supports 2 flats only */
     long long int idx = threadIdx.x + blockIdx.x*blockDim.x;
     long long int idy = threadIdx.y + blockIdx.y*blockDim.y;
     long long int idz = threadIdx.z + blockIdx.z*blockDim.z;
@@ -24,14 +24,14 @@ float* dark, float* flat, dim3 size, int numflats, int is_log)
     if(idx < size.x && idy < size.y && idz < size.z){
         
         dk          = dark[size.x * idz + idx]; 
-        flat_before = flat[size.x * numflats * 0 + size.x * idz + idx]; /* size.x * numflats * 0 + size.x * idz + idx */
+        flat_before = flat[size.x * idz + idx]; /* size.x * size.z * 0 + size.x * idz + idx */
 
         line        = size.x * size.y * idz + size.x * idy + idx;
 
         if(numflats > 1){
             interp  = float( idy ) / float( size.y ); 
 
-            flat_after = flat[size.x * numflats + size.x * idz + idx]; /* size.x * numflats * 1 + size.x * idz + idx */
+            flat_after = flat[size.x * size.z + size.x * idz + idx]; /* size.x * size.z * 1 + size.x * idz + idx */
 
             ft      = flat_before * ( 1.0f - interp ) + interp * flat_after;
         }else{
@@ -50,7 +50,7 @@ float* dark, float* flat, dim3 size, int numflats, int is_log)
 static __global__ void BackgroundCorrection_frames(float* data, 
 float* dark, float* flat, dim3 size, int numflats, int is_log)
 {  
-    // Supports 2 flats only
+    /* Supports 2 flats only */
     long long int idx = threadIdx.x + blockIdx.x*blockDim.x;
     long long int idy = threadIdx.y + blockIdx.y*blockDim.y;
     long long int idz = threadIdx.z + blockIdx.z*blockDim.z;
@@ -84,10 +84,10 @@ float* dark, float* flat, dim3 size, int numflats, int is_log)
     }
 }
 
-static __global__ void BackgroundCorrection_framesTranspose(float* data, float *out,
+static __global__ void BackgroundCorrection_transpose(float* data, float *out,
 float* dark, float* flat, dim3 size, int numflats, int is_log)
 {  
-    // Supports 2 flats only
+    /* Supports 2 flats only */ 
     long long int idx = threadIdx.x + blockIdx.x*blockDim.x;
     long long int idy = threadIdx.y + blockIdx.y*blockDim.y;
     long long int idz = threadIdx.z + blockIdx.z*blockDim.z;
@@ -156,31 +156,99 @@ extern "C"{
         HANDLE_ERROR(cudaGetLastError());
     }
 
-    void getBackgroundCorrection_framesTranspose(float* frames, float* flat, float* dark, 
+    void getBackgroundCorrection_transpose(float* frames, float* flat, float* dark, float *output,
         dim3 size, int numflats, int is_log)
         {
             /* 
-            frames: tomogram volume with axis (size.x,size.y,size.z) = (nrays, nslices, nangles):
+            frames: tomogram volume with axis (size.x,size.y,size.z) = (nrays, nslices, nangles)
+            output: corrected tomogram volume with axis (size.x,size.y,size.z) = (nrays, nangles, nslices)
             flat: Axis ALWAYS (size.x,size.y,numflats) = (nrays, nslices, numflats)
             dark: Axis ALWAYS (size.x,size.y,       1) = (nrays, nslices,        1)
             */
             dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
             dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
-
-            size_t nsize = size.x * size.y * size.z;
-
-            float *out = opt::allocGPU<float>((nsize));
             
             /* Do the dark subtraction and division by flat */
-            BackgroundCorrection_framesTranspose<<<gridBlock,threadsPerBlock>>>(frames, out, dark, flat, size, numflats, is_log);
+            BackgroundCorrection_transpose<<<gridBlock,threadsPerBlock>>>(frames, output, dark, flat, size, numflats, is_log);
 
-            opt::GPUToGPU<float>(out, frames, nsize);
-
-            HANDLE_ERROR(cudaFree(out));
             HANDLE_ERROR(cudaGetLastError());
         }
 
-    void getBackgroundCorrectionGPU_slicesStreams(int gpu, float* frames, float* flat, float* dark, 
+    void getBackgroundCorrectionGPU_transpose(int gpu, float* frames, float* flat, float* dark, 
+    dim3 size, int numflats, int is_log, int blockSize, const int nstreams)
+    {
+        // Supports 2 flats max
+        HANDLE_ERROR(cudaSetDevice(gpu));
+
+        size_t total_required_mem_per_slice_bytes = (static_cast<float>(sizeof(float)) * ( size.x * size.y            ) + // Raw data sinogram
+                                                     static_cast<float>(sizeof(float)) * ( size.x * size.y * numflats ) + // Flat line
+                                                     static_cast<float>(sizeof(float)) * ( size.x * size.y            )   // Dark line
+                                                    );
+        total_required_mem_per_slice_bytes *= nstreams;
+
+        int blocksize = getGPUBlocksize(blockSize, size.z, total_required_mem_per_slice_bytes, 32, true);
+        int nblock    = getNumberOfBlocks(size.z, blocksize); 
+
+        int ptr = 0, subblock;
+
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
+
+        float *d_frames[nstreams];
+        float *d_flat[nstreams];
+        float *d_dark[nstreams];
+        float *d_outp[nstreams];
+        cudaStream_t streams[nstreams], stream;
+
+        for (int st = 0; st < nstreams; ++st) 
+        {
+            cudaStreamCreate(&streams[st]);
+
+            d_frames[st] = opt::allocGPU<float>((size_t) size.x * size.y * blocksize, streams[st]);
+            d_outp[st]   = opt::allocGPU<float>((size_t) size.x * size.y * blocksize, streams[st]);
+            d_flat[st]   = opt::allocGPU<float>((size_t) size.x * size.y *  numflats, streams[st]);
+            d_dark[st]   = opt::allocGPU<float>((size_t) size.x * size.y            , streams[st]);
+
+            opt::CPUToGPU<float>(flat, d_flat[st], (size_t)size.x * size.y * numflats, streams[st]);
+            opt::CPUToGPU<float>(dark, d_dark[st], (size_t)size.x * size.y           , streams[st]);
+        }
+
+        for(int i = 0; i < nblock; i++) {
+            int st = i % nstreams;
+            stream = streams[i % nstreams];
+            
+            subblock = getSubblock(size.z - ptr, blocksize);
+
+            opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames[st], (size_t)subblock * size.x * size.y, stream);
+
+            BackgroundCorrection_transpose<<<gridBlock,threadsPerBlock, 0, stream>>>(d_frames[st],
+                                                                                     d_outp[st],
+                                                                                     d_dark[st],
+                                                                                     d_flat[st], 
+                                                                                     dim3(size.x,size.y,subblock),
+                                                                                     numflats,
+                                                                                     is_log);
+
+            opt::GPUToCPU<float>(frames + (size_t)ptr * size.x * size.y, d_outp[st], (size_t)subblock * size.x * size.y, stream);
+
+            /* Update pointer */
+            ptr = ptr + subblock;
+        }
+        
+        for (int st = 0; st < nstreams; ++st) {
+            cudaStreamSynchronize(streams[st]);
+
+            HANDLE_ERROR(cudaFreeAsync(d_frames[st], streams[st]));
+            HANDLE_ERROR(cudaFreeAsync(d_outp[st]  , streams[st]));
+            HANDLE_ERROR(cudaFreeAsync(d_flat[st]  , streams[st]));
+            HANDLE_ERROR(cudaFreeAsync(d_dark[st]  , streams[st]));
+
+            cudaStreamDestroy(streams[st]);
+        }
+        HANDLE_ERROR(cudaDeviceSynchronize());
+    }
+
+    void getBackgroundCorrectionGPU_slices(int gpu, float* frames, float* flat, float* dark, 
     dim3 size, int numflats, int is_log, int blockSize, const int nstreams)
     {
         // Supports 2 flats max
@@ -203,7 +271,7 @@ extern "C"{
         float *d_frames[nstreams];
         float *d_flat[nstreams];
         float *d_dark[nstreams];
-        cudaStream_t streams[nstreams];
+        cudaStream_t streams[nstreams], stream;
 
         for (int st = 0; st < nstreams; ++st) 
         {
@@ -219,7 +287,7 @@ extern "C"{
 
         for(int i = 0; i < nblock; i++) {
             int st = i % nstreams;
-            cudaStream_t stream = streams[i % nstreams];
+            stream = streams[i % nstreams];
             
             subblock = getSubblock(size.z - ptr, blocksize);
 
@@ -250,56 +318,7 @@ extern "C"{
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-	void getBackgroundCorrectionGPU_slices(int gpu, float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, int blockSize)
-	{
-		// Supports 2 flats max
-		HANDLE_ERROR(cudaSetDevice(gpu));
-
-        size_t total_required_mem_per_slice_bytes = (static_cast<float>(sizeof(float)) * ( size.x * size.y            ) + // Raw data sinogram
-                                                     static_cast<float>(sizeof(float)) * ( size.x * size.z * numflats ) + // Flat line
-                                                     static_cast<float>(sizeof(float)) * ( size.x * size.z            )   // Dark line
-                                                    );
-
-        int blocksize = getGPUBlocksize(blockSize, size.z, total_required_mem_per_slice_bytes, 32, true);
-        int nblock    = getNumberOfBlocks(size.z, blocksize); 
-		int ptr = 0, subblock;
-
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
-
-        float *d_frames = opt::allocGPU<float>((size_t) size.x * size.y * blocksize);
-        float *d_flat   = opt::allocGPU<float>((size_t) size.x * size.z *  numflats);
-        float *d_dark   = opt::allocGPU<float>((size_t) size.x * size.z            );
-
-        opt::CPUToGPU<float>(flat, d_flat, (size_t)size.x * size.z * numflats);
-        opt::CPUToGPU<float>(dark, d_dark, (size_t)size.x * size.z           );
-
-		for(int i = 0; i < nblock; i++) {
-
-			subblock = getSubblock(size.z - ptr, blocksize);
-
-            opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames, (size_t)subblock * size.x * size.y);
-
-            BackgroundCorrection_slices<<<gridBlock,threadsPerBlock>>>(d_frames,
-                                                                       d_dark + (size_t)ptr * size.x,
-                                                                       d_flat + (size_t)ptr * size.x * numflats, 
-                                                                       dim3(size.x,size.y,subblock),
-                                                                       numflats,
-                                                                       is_log);
-
-            opt::GPUToCPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames, (size_t)subblock * size.x * size.y);
-
-			/* Update pointer */
-			ptr = ptr + subblock;
-        }
-        HANDLE_ERROR(cudaFree(d_frames));
-        HANDLE_ERROR(cudaFree(d_flat  ));
-        HANDLE_ERROR(cudaFree(d_dark  ));
-        HANDLE_ERROR(cudaDeviceSynchronize());
-	}
-
-    void getBackgroundCorrectionGPU_framesStreams(int gpu, float* frames, float* flat, float* dark, 
+    void getBackgroundCorrectionGPU_frames(int gpu, float* frames, float* flat, float* dark, 
     dim3 size, int numflats, int is_log, int blockSize, const int nstreams)
     {
         // Supports 2 flats max
@@ -322,7 +341,7 @@ extern "C"{
         float *d_frames[nstreams];
         float *d_flat[nstreams];
         float *d_dark[nstreams];
-        cudaStream_t streams[nstreams];
+        cudaStream_t streams[nstreams], stream;
 
         for (int st = 0; st < nstreams; ++st) 
         {
@@ -338,7 +357,7 @@ extern "C"{
 
         for(int i = 0; i < nblock; i++) {
             int st = i % nstreams;
-            cudaStream_t stream = streams[i % nstreams];
+            stream = streams[i % nstreams];
             
             subblock = getSubblock(size.z - ptr, blocksize);
 
@@ -369,56 +388,6 @@ extern "C"{
         HANDLE_ERROR(cudaDeviceSynchronize());
     }
 
-    void getBackgroundCorrectionGPU_frames(int gpu, float* frames, float* flat, float* dark, 
-    dim3 size, int numflats, int is_log, int blockSize)
-    {
-        // Supports 2 flats max
-        HANDLE_ERROR(cudaSetDevice(gpu));
-
-        size_t total_required_mem_per_slice_bytes = (static_cast<float>(sizeof(float)) * ( size.x * size.y            ) + // Raw data sinogram
-                                                     static_cast<float>(sizeof(float)) * ( size.x * size.y * numflats ) + // Flat line
-                                                     static_cast<float>(sizeof(float)) * ( size.x * size.y            )   // Dark line
-                                                    );
-
-        int blocksize = getGPUBlocksize(blockSize, size.z, total_required_mem_per_slice_bytes, 32, true);
-        int nblock    = getNumberOfBlocks(size.z, blocksize); 
-
-        int ptr = 0, subblock;
-
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
-
-        float *d_frames = opt::allocGPU<float>((size_t) size.x * size.y * blocksize);
-        float *d_flat   = opt::allocGPU<float>((size_t) size.x * size.y *  numflats);
-        float *d_dark   = opt::allocGPU<float>((size_t) size.x * size.y            );
-
-        opt::CPUToGPU<float>(flat, d_flat, (size_t)size.x * size.y * numflats);
-        opt::CPUToGPU<float>(dark, d_dark, (size_t)size.x * size.y           );
-
-        for(int i = 0; i < nblock; i++) {
-
-            subblock = getSubblock(size.z - ptr, blocksize);
-
-            opt::CPUToGPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames, (size_t)subblock * size.x * size.y);
-
-            BackgroundCorrection_frames<<<gridBlock,threadsPerBlock>>>(d_frames,
-                                                                       d_dark,
-                                                                       d_flat, 
-                                                                       dim3(size.x,size.y,subblock),
-                                                                       numflats,
-                                                                       is_log);
-
-            opt::GPUToCPU<float>(frames + (size_t)ptr * size.x * size.y, d_frames, (size_t)subblock * size.x * size.y);
-
-            /* Update pointer */
-            ptr = ptr + subblock;
-        }
-        HANDLE_ERROR(cudaFree(d_frames));
-        HANDLE_ERROR(cudaFree(d_flat  ));
-        HANDLE_ERROR(cudaFree(d_dark  ));
-        HANDLE_ERROR(cudaDeviceSynchronize());
-    }
-
 	void getBackgroundCorrectionMultiGPU(int* gpus, int ngpus,
     float* frames, float* flat, float* dark,
     int sizex, int sizey, int sizez, int numflats,
@@ -427,11 +396,15 @@ extern "C"{
         /* 
         frames: tomogram volume with axis (sizex, sizey, sizez):
 
-            1. If order = 1 (True), then the last axis represent the slices
-                (sizex, sizey, sizez) = (nrays, nangles, nslices)
+            1. If order = 0 (ANGLES_SLICES_RAYS), then the last axis represent the angles
+            (sizex, sizey, sizez) = (nrays, nslices, nangles)
 
-            2. If order = 0 (False), then the last axis represent the angles
-                (sizex, sizey, sizez) = (nrays, nslices, nangles)
+            2. If order = 1 (SLICES_ANGLES_RAYS), then the last axis represent the slices
+            (sizex, sizey, sizez) = (nrays, nangles, nslices)
+
+            3. If order = 2 (TRANSPOSE_RAYS), then the INPUT ARRAY last axis represent the angles
+            (sizex, sizey, sizez) = (nrays, nslices, nangles) and the OUTPUT ARRAY last axis represent the
+            slices (sizex, sizey, sizez) = (nrays, nangles, nslices)
         
         flat: Axis ALWAYS (nrays, nslices, numflats)
         dark: Axis ALWAYS (nrays, nslices, 1)
@@ -443,34 +416,13 @@ extern "C"{
 		std::vector<std::future<void>> threads;
         threads.reserve(ngpus);
 
-        if ( ( order == SLICES_ANGLES_RAYS ) && ( nstreams == 0 ) ){
+        if ( order == SLICES_ANGLES_RAYS ){
 
             for (i = 0; i < ngpus; i++) {
                 subblock = getSubblock(sizez - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async,
                     getBackgroundCorrectionGPU_slices,
-                    gpus[i],
-                    frames + (size_t)ptr * sizex * sizey,
-                    flat   + (size_t)ptr * sizex * numflats,
-                    dark   + (size_t)ptr * sizex,
-                    dim3(sizex, sizey, subblock),
-                    numflats, is_log, blocksize
-                    ));
-
-                /* Update pointer */
-                ptr = ptr + subblock;
-            }
-
-            for(auto& t : threads) t.get();
-
-        }else if ( ( order == SLICES_ANGLES_RAYS ) && ( nstreams > 0 ) ){
-
-            for (i = 0; i < ngpus; i++) {
-                subblock = getSubblock(sizez - ptr, blockgpu);
-
-                threads.push_back(std::async( std::launch::async,
-                    getBackgroundCorrectionGPU_slicesStreams,
                     gpus[i],
                     frames + (size_t)ptr * sizex * sizey,
                     flat   + (size_t)ptr * sizex * numflats,
@@ -485,9 +437,10 @@ extern "C"{
 
             for(auto& t : threads) t.get();
 
-        }else if ( ( order == ANGLES_SLICES_RAYS ) && ( nstreams == 0 ) ){
+        }else if ( order == ANGLES_SLICES_RAYS ){
 
             for (i = 0; i < ngpus; i++) {
+
                 subblock = getSubblock(sizez - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async,
@@ -497,22 +450,23 @@ extern "C"{
                     flat,
                     dark,
                     dim3(sizex, sizey, subblock),
-                    numflats, is_log, blocksize
+                    numflats, is_log, blocksize, nstreams
                     ));
 
                 /* Update pointer */
                 ptr = ptr + subblock;
             }
-
+        
             for(auto& t : threads) t.get();
 
-        }else if ( ( order == ANGLES_SLICES_RAYS ) && ( nstreams > 0 ) ){
-
+        }else if ( order == TRANSPOSE_RAYS ){
+        
             for (i = 0; i < ngpus; i++) {
+
                 subblock = getSubblock(sizez - ptr, blockgpu);
 
                 threads.push_back(std::async( std::launch::async,
-                    getBackgroundCorrectionGPU_framesStreams,
+                    getBackgroundCorrectionGPU_transpose,
                     gpus[i],
                     frames + (size_t)ptr * sizex * sizey,
                     flat,

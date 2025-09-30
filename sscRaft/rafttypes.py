@@ -616,7 +616,8 @@ class Lab(ctypes.Structure):
                 ("padh", ctypes.c_int),
                 ("energy", ctypes.c_float),
                 ("rotation_axis_offset", ctypes.c_int),
-                ("blocksize", ctypes.c_int)
+                ("blocksize", ctypes.c_int),
+                ("padmode", ctypes.c_int)
                 ]
 
 try:
@@ -810,6 +811,9 @@ def set_precision(precision):
 def get_excentric_obj_dimensions(nx,ny):
      return 2 * nx, 2 * ny
 
+def get_padding_size(n,pad):
+     return int( (pad * n) / 100 )
+
 def set_input_axis_order(order: str = 'slices_angles_lenght'):
     # Default is 'slices_angles_lenght'
 
@@ -817,13 +821,13 @@ def set_input_axis_order(order: str = 'slices_angles_lenght'):
         return 0
     elif order.lower() == 'slices_angles_lenght':
         return 1
+    elif order.lower() == 'transpose_lenght':
+        return 2
     else:
         message = f'The axis input parameter \'{order}\' does not exist. Setting \'slices_angles_lenght\' as default.'
         logger.warning(message)
         return 1 
     
-
-
 def power_of_2_padding(size,pad):
     return int((pow(2, numpy.ceil(numpy.log2(size + 2 * pad))) - size) * 0.5)
        

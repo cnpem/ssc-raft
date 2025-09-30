@@ -9,7 +9,7 @@ cufftComplex** c_signal, float** W,
 Process process) 
 {
     long long int Npad = process.n_filter_pad;
-
+    
     // clock_t begin = clock();
     HANDLE_ERROR(cudaSetDevice(process.i_gpu));
 
@@ -30,7 +30,7 @@ Process process)
                         (int)ceil( process.z_filter / TPBZ ) + 1);
     
     /* Copy GPU sinograms to padded GPU sinograms *c_proj*/
-    opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(c_tomo, *c_proj, 2,
+    opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(c_tomo, *c_proj, lab.padmode,
                                                         dim3(lab.nh, lab.nbeta, process.z_filter),
                                                         dim3(lab.padh, 0, 0));
     

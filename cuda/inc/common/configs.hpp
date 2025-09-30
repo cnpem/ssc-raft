@@ -37,8 +37,10 @@
 #define BYTES_TO_GB (1.0/(1024.0*1024.0*1024.0))
 #define A100_MEM 39.5 // A100 40GB device RAM memory, in GB.
 
+#define TRANSPOSE_RAYS 2
 #define SLICES_ANGLES_RAYS 1
 #define ANGLES_SLICES_RAYS 0
+
 
 #include "cufft.h"
 #include <stdio.h>
@@ -217,7 +219,7 @@ extern "C" {
 typedef struct workspace
 {	/* GPU */
 	float *tomo, *obj, *tomoPadd, *objPadd;
-	float *flat, *dark, *angles; 
+	float *data, *flat, *dark, *angles; 
 }WKP;
 
 struct Process{

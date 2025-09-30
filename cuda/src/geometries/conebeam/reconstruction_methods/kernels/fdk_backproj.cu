@@ -12,77 +12,6 @@
 #include <string>
 
 extern "C"{
-    __global__ void fdk_backprojection(float* recon, float* proj, float* angles,  
-    dim3 Tsize, dim3 Osize, float detector_pixel_x, float detector_pixel_z,
-    float obj_pixel_xy, float obj_pixel_z, float Oz, int Tblock, int Oblock,
-    int Tblock_init, float Tz_init,
-    float source_detector_dist, float source_sample_distance)
-    {
-        int i = (blockDim.x * blockIdx.x + threadIdx.x);
-        int j = (blockDim.y * blockIdx.y + threadIdx.y);
-        int k = (blockDim.z * blockIdx.z + threadIdx.z);
-
-        size_t Tomoindex, Objindex; int yj;
-
-        float    x, y, z;    /* Object variables */
-        float u, v, X, Z;    /* Tomo variables */
-        float cosb, sinb, Q; /* Auxiliar variables*/
-        int xi, zk;          /* Other variables */
-        float sine, cosine, dangle;
-
-        float Ox = obj_pixel_xy * Osize.x / 2.0f; /* Half Object size in meters - x-direction */
-        float Oy = obj_pixel_xy * Osize.y / 2.0f; /* Half Object size in meters - y-direction - beam direction */
-        
-        float Tx = detector_pixel_x * Tsize.x / 2.0f; /* Half Projection size in meters - x-direction */
-
-        if ( (i < 0) || (i >= Osize.x) || (j < 0) || (j >= Osize.y) || (k < 0) || (k >= Osize.z) ) return;
-
-        Objindex = IND(i,j,k,Osize.x,Osize.y);
-
-        /* Compute object lengths */
-        x = - Ox + i * obj_pixel_xy;
-        y = - Oy + j * obj_pixel_xy; 
-        z =   Oz + k * obj_pixel_z; 
-
-        // int block = process.z_proj;
-        
-        recon[Objindex] = 0.0;
-
-        for(yj = 0; yj < Tsize.y; yj++){
-
-            /* Compute angle step size (dangle) */
-            if ( yj == (Tsize.y - 1) )
-                dangle = abs(angles[yj] - angles[yj - 1]);
-            else
-                dangle = abs(angles[yj + 1] - angles[yj]);
-
-            cosine = cosf(angles[yj]);
-            sine   = sinf(angles[yj]);
-
-            u = x * cosine - y *   sine;
-            v = x *   sine + y * cosine;
-
-            X = ( source_detector_dist * u ) / ( source_sample_distance + v );
-            Z = ( source_detector_dist * z ) / ( source_sample_distance + v );    
-
-            xi = (int) ( ( X +      Tx ) / detector_pixel_x );
-            zk = (int) ( ( Z - Tz_init ) / detector_pixel_z );
-        
-            if( ( xi < 0 ) || ( xi >= Tsize.x ) || ( zk < 0 ) || ( zk >= Tblock ) ) continue;             
-            if( zk + Tblock_init >= Tsize.z ) continue; 
-
-            Tomoindex = IND(xi,yj,zk,Tsize.x,Tsize.y); // (size_t)(zk*lab.nbeta*lab.nph + m*lab.nph + xi); 
-            
-            recon[Objindex] = ( recon[Objindex] + 
-                                proj[Tomoindex] * 
-                                __powf(source_detector_dist/(source_sample_distance + v), 2)
-                              );
-        }
-        recon[Objindex] = recon[Objindex] * dangle / 2.0f;
-    }
-}
-
-extern "C"{
 __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process){
 
     size_t n = (size_t)(blockDim.x * blockIdx.x + threadIdx.x);
@@ -175,7 +104,7 @@ float** c_proj, float** c_recon, float** c_beta, Process process)
                         (int)ceil( process.z_proj / TPBZ ) + 1);
     
     /* Copy GPU sinograms to padded GPU sinograms *c_proj*/
-    opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(c_tomo, *c_proj, 2, 
+    opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(c_tomo, *c_proj, lab.padmode, 
                                                         dim3(lab.nh, lab.nbeta, process.z_proj),
                                                         dim3(lab.padh, 0, 0));
 

@@ -46,16 +46,14 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     nangles = tomogram.shape[-2]
 
     if len(tomogram.shape) == 2:
-            nslices = 1
+        nslices = 1
 
     elif len(tomogram.shape) == 3:
-            nslices = tomogram.shape[0]
+        nslices = tomogram.shape[0]
     else:
         message_error = f'Data has wrong shape = {tomogram.shape}. It needs to be 2D or 3D.'
         logger.error(message_error)
         raise ValueError(message_error)
-    
-    padh = dic.get('padding', 0)
 
     if angles is None:
         try:
@@ -78,7 +76,15 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
 
     nh, nv = int(nrays), int(nslices)
     h, v   = nh*dh/2, nv*dv/2
-    nph    = int( nh * ( 1 + padh ) )
+
+    padmode = PaddMode(dic.get('padd_mode', 'edge'))
+    padh   = int( dic.get('padding', 0.25)*100 )# Multiply by 100 to get an integer value
+    npadh  = get_padding_size(nh,padh)
+    nph    = int( nh + 2 * npadh )
+
+    print('padh:',padh)
+    print('npadh:',npadh)
+    print('nph:',nph)
 
     nbeta  = len(angles)
 
@@ -120,7 +126,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
                 slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice,
                 nph = nph, padh = padh,
                 energy = energy, rotation_axis_offset = offset,
-                blocksize = blocksize)
+                blocksize = blocksize, padmode = padmode)
 
     time = numpy.zeros(2)
     time = numpy.ascontiguousarray(time.astype(numpy.float64))
@@ -149,11 +155,12 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     libraft.gpu_fdk(lab, obj_ptr, proj_p, angles_p, gpus_p, 
                     ctypes.c_int(ndev), time_p)
     
-    angles_range = numpy.abs(angles[-1] - angles[0])
-    last_angle   = max( numpy.abs( angles[-1] ), numpy.abs( angles[0] ) )
-    scale        = 2.0
+    # Conferir isso aqui para caso 180 graus e conebeam tomogram
+    # angles_range = numpy.abs(angles[-1] - angles[0])
+    # last_angle   = max( numpy.abs( angles[-1] ), numpy.abs( angles[0] ) )
+    # scale        = 2.0
 
-    if angles_range <= numpy.pi:
-         obj *= scale
+    # if angles_range <= numpy.pi:
+    #      obj *= scale
          
     return obj
