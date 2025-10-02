@@ -120,9 +120,9 @@ extern "C" {
         __sincosf(angles[k], &sink, &cosk);
 
         if ( k == (nangles - 1) ){
-          dth = abs(angles[k] - angles[k-1]);
+          dth = fabs(angles[k] - angles[k-1]);
         }else{
-          dth = abs(angles[k+1] - angles[k]);
+          dth = fabs(angles[k+1] - angles[k]);
         }
         
         // printf("dth[%d] = %e \n",k,dth);
@@ -288,9 +288,9 @@ extern "C" {
         __sincosf(angles[k], &sink, &cosk);
         
         if ( k == (nangles - 1) ){
-          dth = abs(angles[k] - angles[k-1]);
+          dth = fabs(angles[k] - angles[k-1]);
         }else{
-          dth = abs(angles[k+1] - angles[k]);
+          dth = fabs(angles[k+1] - angles[k]);
         }
 
         // t = x * cosk + y * sink; // original
@@ -342,9 +342,9 @@ extern "C" {
         __sincosf(angles[k], &sink, &cosk);
         
         if ( k == (nangles - 1) ){
-          dth = abs(angles[k] - angles[k-1]);
+          dth = fabs(angles[k] - angles[k-1]);
         }else{
-          dth = abs(angles[k+1] - angles[k]);
+          dth = fabs(angles[k+1] - angles[k]);
         }
 
         // t = x * cosk + y * sink; // original

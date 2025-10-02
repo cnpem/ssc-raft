@@ -47,9 +47,9 @@ extern "C"{
 
                 /* Compute angle step size (dangle)*/
                 if ( angle_index == (nangles - 1) )
-                    dangle = abs(angles[angle_index] - angles[angle_index - 1]);
+                    dangle = fabs(angles[angle_index] - angles[angle_index - 1]);
                 else
-                    dangle = abs(angles[angle_index + 1] - angles[angle_index]);
+                    dangle = fabs(angles[angle_index + 1] - angles[angle_index]);
                 
                 /* Compute t variable */
                 t = x * cosine[angle_index] - y * sine[angle_index]; 
