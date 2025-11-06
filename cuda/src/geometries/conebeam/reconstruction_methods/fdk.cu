@@ -33,7 +33,6 @@ extern "C"
         
         n_process = memory(lab, ndevs);
 
-
         Process *process = (Process *)malloc(sizeof(Process) * n_process);
         
         for (i = 0; i < n_process; i++)

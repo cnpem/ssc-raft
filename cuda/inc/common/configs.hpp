@@ -149,6 +149,8 @@ typedef struct Reconstruction
     int method;                  /* Reconstruction methods. Options: FBP */
     int filter;                  /* Filter. Options: ramp, hamming, hann, ... */
     float filter_reg;            /* General regularization parameter for filter */
+    int filter_pad;            /* Padding dimension for filter */
+    int filter_padMode;          /* Padding Mode (values) to be filled for filter */
     float paganin_slices;        /* Paganin regularization parameter for slices method */
     int iterations;              /* Iterations for iterative methods */
     float rotation_axis_offset;  /* Rotation axis offset */

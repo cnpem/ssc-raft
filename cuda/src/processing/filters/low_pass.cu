@@ -15,13 +15,14 @@ extern "C"{
         float axis_offset = FilterParam.rotation_axis_offset;
         float pixel_x     = geometry.obj_pixel.x;
 
-        Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel_x);
+        Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel_x, FilterParam.filter_pad, FilterParam.filter_padMode);
+
+        int filterXpad = PDIM(tomo_size.x,FilterParam.filter_pad); 
 
         cufftHandle mplan;
         cufftHandle mplanI;
-
-        cufftPlan1d(&mplan , tomo_size.x, CUFFT_R2C, tomo_size.y);
-        cufftPlan1d(&mplanI, tomo_size.x, CUFFT_C2R, tomo_size.y);
+        cufftPlan1d(&mplan , filterXpad, CUFFT_R2C, tomo_size.y);
+        cufftPlan1d(&mplanI, filterXpad, CUFFT_C2R, tomo_size.y);
 
         if (filter.type != Filter::EType::none)
             filter_lowpass(mplan, mplanI, filter, tomogram, tomo_size);
@@ -41,7 +42,6 @@ extern "C"{
         /* Projection data sizes */
         int nrays    = tomo.size.x;
         int nangles  = tomo.size.y;
-        int nrayspad = PDIM(nrays,tomo.pad.x); 
 
         /* Compute total memory used on a singles slice */
         size_t total_required_mem_per_slice_bytes = (
@@ -52,12 +52,7 @@ extern "C"{
         int blocksize = getGPUBlocksize(tomo.blocksize, sizez, 2 * total_required_mem_per_slice_bytes, 64, true);
         int ind_block = getNumberOfBlocks(sizez, blocksize); 
 
-        float *dtomo    = opt::allocGPU<float>((size_t)   nrays * nangles * blocksize);
-        float *dtomopad = opt::allocGPU<float>((size_t)nrayspad * nangles * blocksize);
-
-        /* Projection GPUs padded Grd and Blocks */
-        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 TomogridBlock = opt::setGridBlock(dim3(nrayspad,nangles,blocksize), TomogridBlock);
+        float *dtomo  = opt::allocGPU<float>((size_t)nrays * nangles * blocksize);
 
         // printf("tomo.padding_mode = %d \n",tomo.padding_mode);
         // printf("FilterParam.padding_mode = %d \n",FilterParam.filter);
@@ -79,20 +74,9 @@ extern "C"{
 			
             opt::CPUToGPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);
-            
-            /* Padding the tomogram data */
-            TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
-            opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomopad, tomo.padding_mode,
-                                                                dim3(nrays, nangles, subblock), 
-                                                                tomo.pad);
 
-            getFilterLowPass( geometry, FilterParam, dtomopad,  
-                            dim3(nrayspad, nangles, subblock));  /* Tomogram padded size */
-
-            /* Remove padd from the tomogram (reconstruction) */
-            opt::remove_paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomopad, dtomo, 
-                                                                       dim3(nrays, nangles, subblock), 
-                                                                       tomo.pad);
+            getFilterLowPass( geometry, FilterParam, dtomo,  
+                              dim3(nrays, nangles, subblock));  /* Tomogram size */
 
             opt::GPUToCPU<float>(tomogram + ptr_block_tomo, dtomo, 
                                 (size_t)nrays * nangles * subblock);

@@ -49,30 +49,30 @@ extern "C"{
             break;
             case static_cast<int>(ReconstructionMethod::fbp):
                 /* FBP */
-                getFBP( configs.ReconParam, 
-                        workspace->objPadd, 
-                        workspace->tomoPadd, 
-                        workspace->angles, 
-                        dim3(nraysp,nangles,tomoblock), 
-                        dim3(nxp,nyp,objblock), 
-                        configs.geometry.detector_pixel.x
-                    );
+                // getFBP( configs.ReconParam, 
+                //         workspace->objPadd, 
+                //         workspace->tomoPadd, 
+                //         workspace->angles, 
+                //         dim3(nraysp,nangles,tomoblock), 
+                //         dim3(nxp,nyp,objblock), 
+                //         configs.geometry.detector_pixel.x
+                //     );
             break;
             case static_cast<int>(ReconstructionMethod::bst):
                 /* BST */
-                bst_padd = 2; blocksize_bst = 1;
+                // bst_padd = 2; blocksize_bst = 1;
                 
-                bst_workspace = InitializeBST_workspace(dim3(nraysp,nangles,tomoblock), 
-                                                        dim3(   nxp,    nxp, objblock), 
-                                                        bst_padd, blocksize_bst);
+                // bst_workspace = InitializeBST_workspace(dim3(nraysp,nangles,tomoblock), 
+                //                                         dim3(   nxp,    nxp, objblock), 
+                //                                         bst_padd, blocksize_bst);
 
-                getBST( workspace->objPadd, workspace->tomoPadd, workspace->angles, 
-                        nraysp, nangles, tomoblock, nxp, bst_padd, 
-                        configs.ReconParam.filter_reg, configs.ReconParam.paganin_slices, 
-                        configs.ReconParam.filter, configs.ReconParam.rotation_axis_offset, 
-                        configs.geometry.detector_pixel.x, bst_workspace);
+                // getBST( workspace->objPadd, workspace->tomoPadd, workspace->angles, 
+                //         nraysp, nangles, tomoblock, nxp, bst_padd, 
+                //         configs.ReconParam.filter_reg, configs.ReconParam.paganin_slices, 
+                //         configs.ReconParam.filter, configs.ReconParam.rotation_axis_offset, 
+                //         configs.geometry.detector_pixel.x, bst_workspace);
 
-                freeBSTWorkspace(bst_workspace);
+                // freeBSTWorkspace(bst_workspace);
             break;
             case static_cast<int>(ReconstructionMethod::eEMRT):
                 /* EM RT eEM */
@@ -90,6 +90,7 @@ extern "C"{
                 printf("No reconstruction method selected. Finishing run... \n");
             break;
         }
+        
         /* Recuperate Padding for reconstruction */
         opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(workspace->objPadd, 
                                                                     workspace->obj, 

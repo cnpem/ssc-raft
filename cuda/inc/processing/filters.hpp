@@ -13,8 +13,10 @@
 struct Filter{
 
 	Filter() = default;
-	explicit Filter(int _type, float _paganin, float _reg, float _axis_offset, float _pixel): type((EType)_type), paganin(_paganin), reg(_reg), axis_offset(_axis_offset), pixel(_pixel) {}; 
-
+	explicit Filter(int _type, float _paganin, float _reg, float _axis_offset, 
+					float _pixel, int _pad, int _paddMode): type((EType)_type), paganin(_paganin), 
+																reg(_reg), axis_offset(_axis_offset), 
+																pixel(_pixel), pad(_pad), paddMode(_paddMode) {}; 
 	enum EType
 	{
 		none         = 0,
@@ -34,6 +36,8 @@ struct Filter{
 	float paganin     = 0.0f;
 	float axis_offset = 0.0f;
     float pixel       = 1.0f;
+	int pad           = 1;
+	int paddMode      = 1;
 
 	__host__ __device__ inline float apply(float input);
 };
@@ -63,15 +67,15 @@ extern "C"{
     size_t nrays, size_t nangles, int csino, 
     struct Filter reg, float pixel);
 
-    void BSTFilter_stream(cufftHandle plan,
-    complex* filtersino, float* sinoblock,
-    size_t nrays, size_t nangles, int csino, Filter reg, float pixel, 
-    cudaStream_t stream) ;
+    void BSTFilter_pad(cufftHandle plan,
+	complex* filtersino, float* sinoblock,
+	size_t nrays, size_t nangles, Filter reg, 
+	cudaStream_t stream);
 
-	void filterFBPpad(Filter filter, 
-    float *tomogram, dim3 size, dim3 size_pad, dim3 pad);
+	// void filterFBPpad(Filter filter, 
+    // float *tomogram, dim3 size, dim3 size_pad, dim3 pad);
 
-    void filterFBP(Filter filter, float *tomogram, dim3 size);
+    // void filterFBP(Filter filter, float *tomogram, dim3 size);
 
     void filterFBP_Complex(Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad, float pixel);

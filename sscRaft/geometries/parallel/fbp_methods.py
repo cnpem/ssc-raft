@@ -20,14 +20,16 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
         * ``dic['filter']`` (str): Filter type [required]
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
-        
+
+        * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 2.0]
+        * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
         * ``dic['detectorPixel[m]']`` (float,optional): Detector pixel size in meters [Default: 1.0]
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 1.0]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0 ]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
-        * ``dic['padding']`` (float,optional): Data padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.0]
-        * ``dic['padd_mode']`` (str,optional): Data padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
+        * ``dic['zoom padding']`` (float,optional): Data padding for zoom - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.0]
+        * ``dic['zoom padd_mode']`` (str,optional): Data padding mode for zoom - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
         * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
@@ -54,23 +56,18 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     z2             = dic.get('z2[m]', 1.0)
     pixel          = dic.get('detectorPixel[m]', 1.0)
     wavelength     = CONST/energy 
-    padding        = dic.get('padding', 0.25)*100 # Multiply by 100 to get an integer value
-    padd_mode      = dic.get('padd_mode', 'edge')
 
-    # if beta_delta != 0.0:
-    #     delta_beta = 1.0 / beta_delta
-    #     paganin_slices_regularization = wavelength * z2 * numpy.pi * delta_beta / ( pixel * pixel )
-    # else:
-    #     paganin_slices_regularization = 0.0
-
-    # print(f'Paganin values: beta/delta = {beta_delta}, reg = {paganin_slices_regularization}')
+    padding        = dic.get('padding', 2.0)*100 # Multiply by 100 to get an integer value
+    padMode        = dic.get('padd_mode', 'zero')
+    zoom_padding   = dic.get('zoom padding', 0.0)*100 # Multiply by 100 to get an integer value
+    zoom_padd_mode = dic.get('zoom padd_mode', 'edge')
 
     # Object (reconstruction)
     objsize = nrays
     logger.info(f'Object size: (nslices, ny, nx) = ({nslices},{objsize},{objsize}).')
 
-    tomo_dim     = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize, padd_mode = padd_mode)
-    obj_dim      = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize, padd_mode = padd_mode)
+    tomo_dim     = dimension((  nrays, nangles, nslices), (zoom_padding,            0, 0), blocksize = blocksize, padd_mode = zoom_padd_mode)
+    obj_dim      = dimension((objsize, objsize, nslices), (zoom_padding, zoom_padding, 0), blocksize = blocksize, padd_mode = zoom_padd_mode)
     
     geometry     = define_geometry(detector_pixel = (pixel, pixel, pixel),
                                    obj_pixel      = (pixel, pixel, pixel),
@@ -80,18 +77,11 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
                                    energy         = energy, 
                                    wavelength     = wavelength)
     
-    # ReconParam   = REC(method               = 0, 
-    #                    filter               = filter_type, 
-    #                    filter_reg           = regularization,  
-    #                    paganin_slices       = paganin_slices_regularization, 
-    #                    iterations           = 0, 
-    #                    rotation_axis_offset = offset,
-    #                    total_variation      = 0, 
-    #                    interpolation        = 0)
-    
     ReconParam   = recon_param(geometry, 
                                method               = 'fbp', 
-                               filter               = filter_type, 
+                               filter               = filter_type,
+                               filter_pad           = padding, 
+                               filter_padMode       = padMode,  
                                beta_delta           = beta_delta, 
                                rotation_axis_offset = offset,
                                iterations           = 0, 
@@ -129,7 +119,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
     return obj
 
-def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
+def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 1):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
     tomogram using the Backprojection Slice Theorem (BST) method.
 
@@ -149,13 +139,15 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
         
+        * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 2.0]
+        * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
         * ``dic['detectorPixel[m]']`` (float,optional): Detector pixel size in meters [Default: 1.0]
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 1.0]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
-        * ``dic['padding']`` (float,optional): Data padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.0]
-        * ``dic['padd_mode']`` (str,optional): Data padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
+        * ``dic['zoom padding']`` (float,optional): Data padding for zoom - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.0]
+        * ``dic['zoom padd_mode']`` (str,optional): Data padding mode for zoom - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [Default: 0 (automatically)]
         * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
@@ -164,6 +156,7 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
         .. [1] Miqueles, X. E. and Koshev, N. and Helou, E. S. (2018). A Backprojection Slice Theorem for Tomographic Reconstruction. IEEE Transactions on Image Processing, 27(2), p. 894-906. DOI: https://doi.org/10.1109/TIP.2017.2766785.
     
     """         
+    nstreams = 1 if nstreams <= 0 else nstreams
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
     gpus     = numpy.ascontiguousarray(gpus.astype(numpy.intc))
@@ -173,9 +166,9 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     nangles  = tomogram.shape[-2]
     
     if len(tomogram.shape) == 2:
-            nslices = 1
+        nslices = 1
     else:
-            nslices = tomogram.shape[0]
+        nslices = tomogram.shape[0]
 
     filter_type    = dic.get('filter', 'ramp')
     beta_delta     = dic.get('beta/delta', 0.0)
@@ -186,14 +179,11 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     z2             = dic.get('z2[m]', 1.0)
     pixel          = dic.get('detectorPixel[m]', 1.0)
     wavelength     = CONST/energy 
-    padding        = dic.get('padding', 0.25)*100 # Multiply by 100 to get an integer value
-    padd_mode      = dic.get('padd_mode', 'edge')
 
-    # if beta_delta != 0.0:
-    #     beta_delta = 1.0 / beta_delta
-    #     paganin_slices_regularization = wavelength * z2 * numpy.pi * beta_delta / (pixel * pixel); 
-    # else:
-    #     paganin_slices_regularization = 0.0
+    padding        = dic.get('padding', 2.0)*100 # Multiply by 100 to get an integer value
+    padMode        = dic.get('padd_mode', 'zero')
+    zoom_padding   = dic.get('zoom padding', 0.0)*100 # Multiply by 100 to get an integer value
+    zoom_padd_mode = dic.get('zoom padd_mode', 'edge')
         
     # Object (reconstruction)
     objsize = nrays
@@ -211,8 +201,8 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
     angles       = CNICE(angles) 
     angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p) 
 
-    tomo_dim     = dimension((  nrays, nangles, nslices), (padding,       0, 0), blocksize = blocksize, padd_mode = padd_mode)
-    obj_dim      = dimension((objsize, objsize, nslices), (padding, padding, 0), blocksize = blocksize, padd_mode = padd_mode)
+    tomo_dim     = dimension((  nrays, nangles, nslices), (zoom_padding,            0, 0), blocksize = blocksize, padd_mode = zoom_padd_mode)
+    obj_dim      = dimension((objsize, objsize, nslices), (zoom_padding, zoom_padding, 0), blocksize = blocksize, padd_mode = zoom_padd_mode)
     
     geometry     = define_geometry(detector_pixel = (pixel, pixel, pixel),
                                    obj_pixel      = (pixel, pixel, pixel),
@@ -224,7 +214,9 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 0):
 
     ReconParam   = recon_param(geometry, 
                                method               = 'bst', 
-                               filter               = filter_type, 
+                               filter               = filter_type,
+                               filter_pad           = padding, 
+                               filter_padMode       = padMode, 
                                beta_delta           = beta_delta, 
                                rotation_axis_offset = offset,
                                iterations           = 0, 

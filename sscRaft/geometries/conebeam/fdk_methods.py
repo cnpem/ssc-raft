@@ -22,11 +22,14 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
         * ``dic['filter']`` (str,optional): Filter type [Default: \'lorentz\']
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
-          
+
+        * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 2.0]
+        * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
         * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 2]
+        * ``dic['zoom padding']`` (float,optional): Data padding for zoom - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.0]
+        * ``dic['zoom padd_mode']`` (str,optional): Data padding mode for zoom - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
 
     """
@@ -77,14 +80,25 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     nh, nv = int(nrays), int(nslices)
     h, v   = nh*dh/2, nv*dv/2
 
-    padmode = PaddMode(dic.get('padd_mode', 'edge'))
-    padh   = int( dic.get('padding', 0.25)*100 )# Multiply by 100 to get an integer value
-    npadh  = get_padding_size(nh,padh)
-    nph    = int( nh + 2 * npadh )
+    # Zoom padding
+    zoom_padmode = PaddMode(dic.get('zoom padd_mode', 'edge'))
+    zoom_padh    = int( dic.get('zoom padding', 0.0)*100 )# Multiply by 100 to get an integer value
+    zoom_npadh   = get_padding_size(nh,zoom_padh)
+    nph          = int( nh + 2 * zoom_npadh )
 
-    print('padh:',padh)
-    print('npadh:',npadh)
-    print('nph:',nph)
+    # print('padh:',zoom_padh)
+    # print('npadh:',zoom_npadh)
+    # print('nph:',nph)
+
+    # Filter padding
+    padMode = PaddMode(dic.get('padd_mode', 'zero'))
+    padding = int( dic.get('padding', 2.0)*100 )# Multiply by 100 to get an integer value
+    npadfh  = get_padding_size(nph,padding)
+    npfh    = int( nph + 2 * npadfh )
+
+    # print('padfh:',padding)
+    # print('npadfh:',npadfh)
+    # print('npfh:',npfh)
 
     nbeta  = len(angles)
 
@@ -124,9 +138,11 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
                 is_slice = is_slice,
                 slice_recon_start = start_recon_slice, slice_recon_end = end_recon_slice,  
                 slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice,
-                nph = nph, padh = padh,
+                nph = nph, padh = zoom_padh,
                 energy = energy, rotation_axis_offset = offset,
-                blocksize = blocksize, padmode = padmode)
+                blocksize = blocksize, 
+                padmode = zoom_padmode,
+                npfh = npfh, padfh = padding, padfmode = padMode)
 
     time = numpy.zeros(2)
     time = numpy.ascontiguousarray(time.astype(numpy.float64))

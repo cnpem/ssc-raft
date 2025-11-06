@@ -34,14 +34,6 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     long long int n_filter, idx_filter, n_filter_pad, idx_filter_pad;
     int zi_filter, zi_filter_pad;
 
-    // --- Divide the reconstruction volume among processes ---
-    // Paola version:
-    // nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
-    // // nz_gpu_recon = (lab.nz + n_process - 1) / n_process;
-    // zi_min_recon = i * nz_gpu_recon;
-    // block        = std::min(nz_gpu_recon, lab.nz - zi_min_recon);
-    // zi_max_recon = zi_min_recon + block;
-
     // Original version:
     nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
     zi_min_recon = i * nz_gpu_recon;
@@ -97,20 +89,12 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     zi_min_filter = i * nv_gpu_filter;
     zi_max_filter = std::min((i + 1) * nv_gpu_filter, lab.nv);
 
-    // Paola version:
-    // block         = 0.0f;
-    // nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
-    // // nv_gpu_filter = (lab.nv + n_process - 1) / n_process;
-    // zi_min_filter = i * nv_gpu_filter;
-    // block         = std::min(nv_gpu_filter, lab.nv - zi_min_filter);
-    // zi_max_filter = zi_min_filter + block;
-
     n_filter   = (long long int) (zi_max_filter - zi_min_filter)*lab.nbeta*lab.nh;
     idx_filter = (long long int) zi_min_filter*lab.nbeta*lab.nh;
     zi_filter  = zi_max_filter - zi_min_filter;
 
-    n_filter_pad   = (long long int) (zi_max_filter - zi_min_filter) * lab.nbeta * lab.nph;
-    idx_filter_pad = (long long int) zi_min_filter * lab.nbeta * lab.nph;
+    n_filter_pad   = (long long int) (zi_max_filter - zi_min_filter) * lab.nbeta * lab.npfh;
+    idx_filter_pad = (long long int) zi_min_filter * lab.nbeta * lab.npfh;
     zi_filter_pad  = zi_max_filter - zi_min_filter;
 
     // --- Populate the process structure ---
@@ -148,11 +132,12 @@ extern "C" {
         int blockgpu = (int) ceil((float) lab.nz / ndev); //(lab.nv + ndev - 1) / ndev;
 
         size_t total_required_mem_per_slice_bytes = (
-        5 * static_cast<float>(sizeof(float)) * lab.nh  * lab.nbeta + // Tomo slic e
-            static_cast<float>(sizeof(float)) * lab.nh  * lab.nh    + // Reconstructed object slice
-            static_cast<float>(sizeof(float)) * lab.nph * lab.nph   + // Reconstructed object padded slice
-        5 * static_cast<float>(sizeof(float)) * lab.nph * lab.nbeta + // Tomo padded slice + filter kernel
-            static_cast<float>(sizeof(float)) * lab.nbeta             // angles
+        6 * static_cast<float>(sizeof(float)) * lab.nh   * lab.nbeta + // Tomo slic e
+            static_cast<float>(sizeof(float)) * lab.nh   * lab.nh    + // Reconstructed object slice
+            static_cast<float>(sizeof(float)) * lab.nph  * lab.nph   + // Reconstructed object padded slice
+        6 * static_cast<float>(sizeof(float)) * lab.nph  * lab.nbeta + // Tomo zoom padded slice 
+        2 * static_cast<float>(sizeof(float)) * lab.npfh * lab.nbeta + // Tomo padded filtered slice 
+            static_cast<float>(sizeof(float)) * lab.nbeta              // angles
         ); 
 
         int blocksize = lab.blocksize;
@@ -168,10 +153,10 @@ extern "C" {
 
         int n_process = (int)ceil( (float) blockgpu / blocksize ) * ndev;
 
-        printf("Blocksize: %d \n", blocksize);
-        printf("n_process: %d \n", n_process);
-        printf("blockgpu: %d \n", blockgpu);
-        fflush(stdout);
+        // printf("Blocksize: %d \n", blocksize);
+        // printf("n_process: %d \n", n_process);
+        // printf("blockgpu: %d \n", blockgpu);
+        // fflush(stdout);
 
         return n_process;
     }

@@ -294,6 +294,8 @@ class REC(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
                 ("filter", ctypes.c_int), 
                 ("filter_reg", ctypes.c_float),
+                ("filter_pad", ctypes.c_int),
+                ("filter_padMode", ctypes.c_int),
                 ("paganin_slices", ctypes.c_float),
                 ("iterations", ctypes.c_int),
                 ("rotation_axis_offset", ctypes.c_float),
@@ -302,6 +304,7 @@ class REC(ctypes.Structure):
                 ] 
     
 def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp', 
+                filter_pad: int = 1, filter_padMode: str = 'zero',
                 beta_delta: float = 0.0, rotation_axis_offset: int = 0,
                 iterations: int = 0, filter_reg: float  = 1.0,
                 total_variation: float = 0.0, interpolation: str = 'none') -> REC:
@@ -309,6 +312,12 @@ def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp',
     methodRecon       = ReconMethod(method)
     filterType        = FilterNumber(filter)
     interpolationType = setInterpolation(interpolation)
+
+    padd      = int(filter_pad)
+    padd_mode = PaddMode(filter_padMode)
+
+    if padd_mode == PaddMode('none'):
+        padd = 0
 
     # Paganin by Slices here
     if beta_delta != 0.0:
@@ -319,7 +328,9 @@ def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp',
 
     return REC( method               = methodRecon,
                 filter               = filterType, 
-                filter_reg           = filter_reg,  
+                filter_reg           = filter_reg,
+                filter_pad           = padd,
+                filter_padMode       = padd_mode,  
                 paganin_slices       = paganin_slices_regularization, 
                 iterations           = iterations, 
                 rotation_axis_offset = rotation_axis_offset,
@@ -594,7 +605,7 @@ except:
 
 ######## Raft - FDK ##########
 class Lab(ctypes.Structure):
-        _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float), ("z", ctypes.c_float),
+    _fields_ = [("x", ctypes.c_float), ("y", ctypes.c_float), ("z", ctypes.c_float),
                 ("dx", ctypes.c_float), ("dy", ctypes.c_float),("dz", ctypes.c_float),
                 ("nx", ctypes.c_int), ("ny", ctypes.c_int), ("nz", ctypes.c_int),
                 ("h", ctypes.c_float), ("v", ctypes.c_float),
@@ -617,8 +628,10 @@ class Lab(ctypes.Structure):
                 ("energy", ctypes.c_float),
                 ("rotation_axis_offset", ctypes.c_int),
                 ("blocksize", ctypes.c_int),
-                ("padmode", ctypes.c_int)
-                ]
+                ("padmode", ctypes.c_int),
+                ("npfh", ctypes.c_int), 
+                ("padfh", ctypes.c_int), ("padfmode", ctypes.c_int)
+            ]
 
 try:
     libraft.gpu_fdk.argtypes = [

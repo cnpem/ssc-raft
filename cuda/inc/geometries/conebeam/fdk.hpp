@@ -33,11 +33,13 @@ typedef struct {
     int is_slice; // (bool) Reconstruct a block of slices or not
     int slice_recon_start, slice_recon_end; // Slices: start slice = slice_recon_start, end slice = slice_recon_end
     int slice_tomo_start, slice_tomo_end; // Slices: start slice = slice_tomo_start, end slice = slice_tomo_end
-    int nph, padh;
+    int nph, padh; // Padding for backprojection
     float energy;
     int rotation_axis_offset;
     int blocksize;
-    int padmode;
+    int padmode; // Padding for backprojection
+    int npfh, padfh, padfmode; // Padding for filter
+
 
     /* Filter Types definitions
     enum EType
@@ -69,8 +71,8 @@ typedef struct {
 extern "C"{
     void gpu_fdk(Lab lab,  float *recon, float *proj, float *angles, int* gpus, int ndev, double *time);
     void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
-    void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
-    void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
+    // void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
+    // void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
     int memory(Lab lab, int ndev);
 
     void set_filtering_fft(Lab lab, float* proj, int n_process,  int ndevs, Process* process);

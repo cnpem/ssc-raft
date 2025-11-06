@@ -18,16 +18,8 @@ extern "C" {
 
     void getBST(float* blockRecon, float* wholesinoblock, float* angles, 
         int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0, 
-        float reg, float paganin, int filter_type, float offset, float pixel, 
-        WBST *bst_workspace);
-
-    void getBST_stream(float* blockRecon, float* wholesinoblock, float* angles, 
-        int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0, 
         float reg, float paganin, int filter_type, float offset, float pixel,
         WBST *bst_workspace, cudaStream_t stream); 
-        // cufftHandle plan1d, cufftHandle plan2d, cufftHandle filterplan, 
-        // cImage* filtersino, cImage* cartesianblock, cImage* polarblock, cImage* realpolar, 
-        // int gpu, cudaStream_t stream);
 
     void EMFQ_BST(float* blockRecon, float *wholesinoblock, float *angles,
     int Nrays, int Nangles, int trueblocksize, int sizeimage, int pad0);

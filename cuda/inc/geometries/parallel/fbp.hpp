@@ -12,9 +12,10 @@ extern "C"{
     float *object, float *tomogram, float *angles, 
     int sizez, int ngpu);
 
-    void getFBP(REC ReconParam, 
-    float *obj, float *tomogram, float *angles, 
-    dim3 tomo_size, dim3 obj_size, float pixel);
+    void getFBP(REC ReconParam, DIM tomo, DIM obj, 
+    float *object, float *tomogram, float *angles, 
+    float *objPadded, float *tomoPadded,
+    int blocksize, float pixel);
 }
 
 

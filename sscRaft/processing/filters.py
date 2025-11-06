@@ -61,8 +61,8 @@ def lowpass(tomogram, dic = None, **kwargs):
     z2             = dic['z2[m]']
     pixel          = dic['detectorPixel[m]']
     wavelength     = CONST/energy 
-    padding        = dic.get('padding', 0.0)*100 # Multiply by 100 to get an integer value
-    padd_mode      = dic.get('padd_mode', 'edge')
+    padding        = dic.get('padding', 1.0)*100 # Multiply by 100 to get an integer value
+    padd_mode      = dic.get('padd_mode', 'zero')
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
@@ -70,7 +70,7 @@ def lowpass(tomogram, dic = None, **kwargs):
     else:
         paganin_slices_regularization = 0.0
 
-    tomo_dim     = dimension((nrays, nangles, nslices), (padding, 0, 0), blocksize = blocksize, padd_mode = padd_mode)
+    tomo_dim     = dimension((nrays, nangles, nslices), (0, 0, 0), blocksize = blocksize, padd_mode = padd_mode)
     
     geometry     = define_geometry(detector_pixel = (pixel, pixel, pixel),
                                    obj_pixel      = (pixel, pixel, pixel),
@@ -83,6 +83,8 @@ def lowpass(tomogram, dic = None, **kwargs):
     ReconParam   = REC(method               = 0, 
                        filter               = filter_type, 
                        filter_reg           = regularization,  
+                       filter_pad           = padding, 
+                       filter_padMode       = padd_mode,
                        paganin_slices       = paganin_slices_regularization, 
                        iterations           = 0, 
                        rotation_axis_offset = offset,

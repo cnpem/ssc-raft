@@ -118,105 +118,71 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(mplan));
 	}
 
-	void filterFBPpad(Filter filter, 
-    float *tomogram, dim3 size, dim3 size_pad, dim3 pad)
-	{	
-        /* int dim = { 1, 2 }
-            1: if plan 1D multiples cuffts
-            2: if plan 2D multiples cuffts */
-        // int dim = 1;
+    // void filterFBP(Filter filter, 
+    // float *tomogram, dim3 size)
+	// {	
+    //     dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+    //     dim3 gridBlock( (int)ceil( size.x / TPBX ) + 1,
+    //                     (int)ceil( size.y / TPBY ) + 1,
+    //                     (int)ceil( size.z / TPBZ ) + 1);
 
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock( (int)ceil( size_pad.x / TPBX ) + 1,
-                        (int)ceil( size_pad.y / TPBY ) + 1,
-                        (int)ceil( size_pad.z / TPBZ ) + 1);
+    //     dim3 fft_size = dim3( size.x / 2 + 1, size.y, 1 );
 
-        dim3 fft_size = dim3( size_pad.x / 2 + 1, size.y, 1 );
+    //     cufftHandle mplan;
+    //     cufftHandle mplanI;
 
-        size_t npad = opt::get_total_points(size_pad);
+	// 	cufftPlan1d(&mplan , size.x, CUFFT_R2C, size.y);
+	// 	cufftPlan1d(&mplanI, size.x, CUFFT_C2R, size.y);
 
-        cufftHandle mplan;
-        cufftHandle mplanI;
-
-		cufftPlan1d(&mplan , size_pad.x, CUFFT_R2C, size_pad.y);
-		cufftPlan1d(&mplanI, size_pad.x, CUFFT_C2R, size_pad.y);
-
-        float *dataPadded = opt::allocGPU<float>(npad);
-
-        opt::paddR2R<<<gridBlock,threadsPerBlock>>>(tomogram, dataPadded, 2, size, pad);
-
-        size_t offset; 
-        for( int k = 0; k < size.z; k++){  
+    //     size_t offset; 
+    //     for( int k = 0; k < size.z; k++){  
             
-            offset = (size_t)k * size_pad.x * size_pad.y;
+    //         offset = (size_t)k * size.x * size.y;
 
-            convolution_R2C_C2R_1D(mplan, mplanI, dataPadded + offset, fft_size, filter);
-        }
+    //         convolution_R2C_C2R_1D(mplan, mplanI, tomogram + offset, fft_size, filter);
+    //     }
         
-        opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(dataPadded, tomogram, size, pad);
+    //     float scale = (float)(size.x) * filter.pixel;
 
-        float scale = (float)(size_pad.x) * filter.pixel;
+    //     opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
 
-        opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
-
-        HANDLE_ERROR(cudaFree(dataPadded));
-		HANDLE_FFTERROR(cufftDestroy(mplan));
-        HANDLE_FFTERROR(cufftDestroy(mplanI));
-	}
-
-    void filterFBP(Filter filter, 
-    float *tomogram, dim3 size)
-	{	
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock( (int)ceil( size.x / TPBX ) + 1,
-                        (int)ceil( size.y / TPBY ) + 1,
-                        (int)ceil( size.z / TPBZ ) + 1);
-
-        dim3 fft_size = dim3( size.x / 2 + 1, size.y, 1 );
-
-        cufftHandle mplan;
-        cufftHandle mplanI;
-
-		cufftPlan1d(&mplan , size.x, CUFFT_R2C, size.y);
-		cufftPlan1d(&mplanI, size.x, CUFFT_C2R, size.y);
-
-        size_t offset; 
-        for( int k = 0; k < size.z; k++){  
-            
-            offset = (size_t)k * size.x * size.y;
-
-            convolution_R2C_C2R_1D(mplan, mplanI, tomogram + offset, fft_size, filter);
-        }
-        
-        float scale = (float)(size.x) * filter.pixel;
-
-        opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
-
-		HANDLE_FFTERROR(cufftDestroy(mplan));
-        HANDLE_FFTERROR(cufftDestroy(mplanI));
-	}
+	// 	HANDLE_FFTERROR(cufftDestroy(mplan));
+    //     HANDLE_FFTERROR(cufftDestroy(mplanI));
+	// }
 
     void filter_lowpass(cufftHandle mplan, cufftHandle mplanI, Filter filter, 
     float *tomogram, dim3 size)
     {	
-        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 gridBlock( (int)ceil( size.x / TPBX ) + 1,
-                        (int)ceil( size.y / TPBY ) + 1,
-                        (int)ceil( size.z / TPBZ ) + 1);
+        int sizeXpad = PDIM(size.x,filter.pad); 
 
-        dim3 fft_size = dim3( size.x / 2 + 1, size.y, 1 );
+        dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 gridBlockPad = opt::setGridBlock(dim3(sizeXpad,size.y,1), threadsPerBlock);
+
+        float *tomoPadd = opt::allocGPU<float>((size_t)sizeXpad * size.y);
+        dim3 fft_size   = dim3( sizeXpad / 2 + 1, size.y, 1 );
+        float scale     = (float)(sizeXpad) * filter.pixel;
 
         size_t offset; 
         for( int k = 0; k < size.z; k++){  
             
             offset = (size_t)k * size.x * size.y;
 
-            convolution_R2C_C2R_1D(mplan, mplanI, tomogram + offset, fft_size, filter);
-        }
-        
-        float scale = (float)(size.x) * filter.pixel;
+            opt::paddR2R<<<gridBlockPad,threadsPerBlock>>>(tomogram + offset, 
+                                                           tomoPadd, 
+                                                           filter.paddMode,
+                                                           dim3(size.x,size.y,1), 
+                                                           dim3(filter.pad, 0.0f, 0.0f));
 
-        opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
+            convolution_R2C_C2R_1D(mplan, mplanI, tomoPadd, fft_size, filter);
+
+            opt::scale<<<gridBlockPad,threadsPerBlock>>>(tomoPadd, dim3(sizeXpad,size.y,1), scale);
+
+            opt::remove_paddR2R<<<gridBlockPad,threadsPerBlock>>>(tomoPadd, 
+                                                                  tomogram + offset, 
+                                                                  dim3(size.x,size.y,1), 
+                                                                  dim3(filter.pad, 0.0f, 0.0f));
+        }
+        HANDLE_ERROR(cudaFree(tomoPadd));
     }
 }
 
@@ -372,28 +338,37 @@ extern "C" {
         BasicOps::set_pixel(out, fpixel, tx, ty, sizex, threshold, raftDataType);
     }
 
-    void BSTFilter_stream(cufftHandle plan,
+    void BSTFilter_pad(cufftHandle plan,
     complex* filtersino, float* sinoblock,
-    size_t nrays, size_t nangles, int csino, Filter reg, float pixel, 
+    size_t nrays, size_t nangles, Filter reg, 
     cudaStream_t stream) 
     {
-
+        // int filterXpad = PDIM(nrays,reg.pad);
+        // dim3 filterblock((filterXpad+255)/256,nangles,1);
         dim3 filterblock((nrays+255)/256,nangles,1);
         dim3 filterthread(256,1,1);
 
+        /* Put padding R2C here */
         SetX<<<filterblock,filterthread, 0, stream>>>(filtersino, sinoblock, nrays);
+        // opt::paddR2C<<<filterblock,filterthread, 0, stream>>>(sinoblock, 
+        //                                                       (cufftComplex *)filtersino, 
+        //                                                       reg.paddMode,
+        //                                                       dim3(nrays,nangles,1), 
+        //                                                       dim3(reg.pad,0,0));
 
         HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_FORWARD));
 
-        BandFilterC2C<<<filterblock,filterthread, 0, stream>>>(filtersino, nrays, csino, pixel, reg);
+        // BandFilterC2C<<<filterblock,filterthread, 0, stream>>>(filtersino, filterXpad, reg.axis_offset, reg.pixel, reg);
+        BandFilterC2C<<<filterblock,filterthread, 0, stream>>>(filtersino, nrays, reg.axis_offset, reg.pixel, reg);
 
         HANDLE_FFTERROR(cufftExecC2C(plan, filtersino, filtersino, CUFFT_INVERSE));
 
-        float scale = 1.0f; //(float)nrays * pixel;
-
-        GetX<<<filterblock,filterthread, 0, stream>>>(sinoblock, filtersino, nrays, scale);
-
-        //cudaMemset(sinoblock, 0, nrays*nangles*4);
+        /* Put remove padding C2R here */
+        GetX<<<filterblock,filterthread, 0, stream>>>(sinoblock, filtersino, nrays, 1.0f);
+        // opt::paddC2R<<<filterblock,filterthread, 0, stream>>>((cufftComplex *)filtersino, 
+        //                                                        sinoblock, 
+        //                                                        dim3(nrays,nangles,1), 
+        //                                                        dim3(reg.pad,0,0));
     }
 
     void BSTFilter(cufftHandle plan,
