@@ -1,10 +1,17 @@
-Version 3.2.6 - 2025-xx-xx
+Version 3.2.7 - 2025-08-27
+--------------------------
+*Corrections:*
+  - Update the transpose CPU function ``transpose_cpu_zyx2xyz`` in order to correct the observed load average of the HPC resources.
+
+Version 3.2.6 - 2025-08-07
 --------------------------
 *Added:*
   - Centersino function to compute subpixel rotation axis deviation. 
   - Option to apply ``-log(*)`` and ``exp(-*)`` on the transpose ``GPU`` function.
 
 *Corrections:*
+  - Paganin by frames bug for multiGPU version with ``blocksize = 0``.
+  - Paganin by frames padding values for reflecting the edges.
 
 *Known Bugs:*
   - ``BST`` works for 180 degrees only on a regular angle mesh.
@@ -33,6 +40,7 @@ Version 3.2.5 - 2025-05-19
   - No cuda streams on ``FBP by BST``: bug.
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
   - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
+  - Paganin by frames function has a bug for multiGPU version with ``blocksize = 0``.
 
 *To be done:*
   - Refactoring ``FDK``.

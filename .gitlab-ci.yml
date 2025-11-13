@@ -4,7 +4,6 @@ variables:
 stages:
   - build
   - deploy
-  - pages
 
 build_dgx:
   stage: build
@@ -62,32 +61,11 @@ deploy_dgx:
   only:
     - tags
 
-pages:
-  stage: pages
-  image: gccdockers/python-builder
-  script:
-    - python3 -m pip install myst-parser
-    - cd docs
-    - make
-    - cd ..
-    - mkdir -p public
-    - cd public
-    - cp -r ../docs/build/* .
-  tags:
-    - x86_64
-    - cuda11
-    - docker
-  artifacts:
-    paths:
-      - public
-  only:
-    - tags
-
 build_docs:
   stage: build
   image: gccdockers/python-builder
   script:
-    - python3 -m pip install myst-parser
+    - python3 -m pip install myst-parser sphinx-multiversion
     - cd docs
     - make
   tags:
@@ -96,11 +74,15 @@ build_docs:
   artifacts:
     paths:
       - ./docs/build/
+  only:
+    - tags
 
 deploy_docs:
   stage: deploy
-  image: ubuntu:latest
+  image: alpine:latest
   script:
+    - apk add m4
+    - cat ./docs/assets/index_redirect.html | m4 -DVERSION=$CI_COMMIT_TAG > ./docs/build/index.html
     - mkdir -p /var/www/html/ssc/ssc-raft/
     - rm -rf /var/www/html/ssc/ssc-raft/*
     - cp -r ./docs/build/* /var/www/html/ssc/ssc-raft/
