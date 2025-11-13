@@ -8,7 +8,7 @@ In the case of ``sscRaft`` processing and reconstruction methods, zero-padding a
 
 ## General Usage
 
-For all methods that uses FFT, we implemented a padding strategy. It can be accessed by the dictionary entries ``'padding'`` and ``'padd_mode\'``, as the ``FDK`` example below:  
+For all methods that uses FFT, we implemented a padding strategy. It can be accessed by the dictionary entries ``'padding'`` and ``'padd_mode'``, as the ``FDK`` example below:  
 
 ```python
     import numpy
