@@ -8,7 +8,7 @@ In the case of ``sscRaft`` processing and reconstruction methods, zero-padding a
 
 ## General Usage
 
-For all methods that uses FFT, we implemented a padding strategy. It can be accessed by the dictionary entries ``\'padding\'`` and ``\'padd_mode\'``, as the ``FDK`` example below:  
+For all methods that uses FFT, we implemented a padding strategy. It can be accessed by the dictionary entries ``'padding'`` and ``'padd_mode\'``, as the ``FDK`` example below:  
 
 ```python
     import numpy
@@ -20,7 +20,7 @@ For all methods that uses FFT, we implemented a padding strategy. It can be acce
 
     angles = numpy.linspace(0, 2.0*numpy.pi, tomogram.shape[1])
 
-    reconstruction = sscRaft.fdk(tomogram, dic = {'gpu': [0,1], 'angles[rad]': angles, 'beta/delta': 0.0,
+    reconstruction = sscRaft.fdk(tomogram, dic = {'gpu': [0,1], 'angles[rad]': angles, 'beta/delta': 0.0
                                                   'detectorPixel[m]': 3.61e-6, 'z1[m]':1000e-3, 'z1+z2[m]':2000e-3, 'z2[m]':500e-3, 
                                                   'energy[eV]': 22e3, 'filter': 'hamming',
                                                   'padding': 0.25,
