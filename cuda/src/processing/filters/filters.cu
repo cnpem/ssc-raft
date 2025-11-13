@@ -376,7 +376,6 @@ extern "C" {
     size_t nrays, size_t nangles, int csino, 
     Filter reg, float pixel) 
     {
-
         dim3 filterblock((nrays+255)/256,nangles,1);
         dim3 filterthread(256,1,1);
 
@@ -391,7 +390,6 @@ extern "C" {
         float scale = 1.0f; 
 
         GetX<<<filterblock,filterthread>>>(sinoblock, filtersino, nrays, scale);
-
     }
 
 

@@ -23,15 +23,15 @@ float* dark, float* flat, dim3 size, int numflats, int is_log)
 
     if(idx < size.x && idy < size.y && idz < size.z){
         
-        dk          = dark[size.x * idz + idx]; 
-        flat_before = flat[size.x * idz + idx]; /* size.x * size.z * 0 + size.x * idz + idx */
+        dk          = dark[           size.x * idz + idx]; /*        1 * size.x * idz + size.x * 0 + idx */
+        flat_before = flat[numflats * size.x * idz + idx]; /* numflats * size.x * idz + size.x * 0 + idx */
 
         line        = size.x * size.y * idz + size.x * idy + idx;
 
         if(numflats > 1){
             interp  = float( idy ) / float( size.y ); 
 
-            flat_after = flat[size.x * size.z + size.x * idz + idx]; /* size.x * size.z * 1 + size.x * idz + idx */
+            flat_after = flat[numflats * size.x * idz + size.x + idx]; /* numflats * size.x * idz + size.x * 1 + idx */
 
             ft      = flat_before * ( 1.0f - interp ) + interp * flat_after;
         }else{
@@ -128,8 +128,8 @@ extern "C"{
 	{
         /* 
         frames: tomogram volume with axis (size.x,size.y,size.z) = (nrays, nangles, nslices):
-        flat: Axis ALWAYS (size.x,nslices,numflats) = (nrays, nslices, numflats)
-        dark: Axis ALWAYS (size.x,nslices,       1) = (nrays, nslices,        1)
+        flat: Axis (size.x,numflats,nslices,) = (nrays, numflats, nslices)
+        dark: Axis (size.x,        1,nslices) = (nrays,        1, nslices)
         */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
@@ -144,8 +144,8 @@ extern "C"{
     {
         /* 
         frames: tomogram volume with axis (size.x,size.y,size.z) = (nrays, nslices, nangles):
-        flat: Axis ALWAYS (size.x,size.y,numflats) = (nrays, nslices, numflats)
-        dark: Axis ALWAYS (size.x,size.y,       1) = (nrays, nslices,        1)
+        flat: Axis (size.x,size.y,numflats) = (nrays, nslices, numflats)
+        dark: Axis (size.x,size.y,       1) = (nrays, nslices,        1)
         */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);
@@ -162,8 +162,8 @@ extern "C"{
             /* 
             frames: tomogram volume with axis (size.x,size.y,size.z) = (nrays, nslices, nangles)
             output: corrected tomogram volume with axis (size.x,size.y,size.z) = (nrays, nangles, nslices)
-            flat: Axis ALWAYS (size.x,size.y,numflats) = (nrays, nslices, numflats)
-            dark: Axis ALWAYS (size.x,size.y,       1) = (nrays, nslices,        1)
+            flat: Axis (size.x,size.y,numflats) = (nrays, nslices, numflats)
+            dark: Axis (size.x,size.y,       1) = (nrays, nslices,        1)
             */
             dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
             dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);

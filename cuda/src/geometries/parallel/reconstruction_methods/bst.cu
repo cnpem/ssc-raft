@@ -385,7 +385,7 @@ extern "C" {
         int ptr = 0, subblock;
 
         /* Projection data sizes */
-        int nrays    = PDIM(tomo.size.x,tomo.pad.x); // tomo.size.x * (1 + tomo.pad.x);
+        int nrays    = PDIM(tomo.size.x,tomo.pad.x);
         int nangles  = tomo.size.y;
 
         /* Projection GPUs padded Grd and Blocks */
@@ -395,7 +395,7 @@ extern "C" {
                             (int)ceil( blocksize / TPBZ ) + 1);
 
         /* Reconstruction sizes */
-        int sizeImagex = PDIM(obj.size.x,obj.pad.x); // obj.size.x * (1 + obj.pad.x);
+        int sizeImagex = PDIM(obj.size.x,obj.pad.x); 
 
         /* Reconstruction GPUs padded Grd and Blocks */
         dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
@@ -403,24 +403,6 @@ extern "C" {
                             (int)ceil( sizeImagex / TPBY ) + 1,
                             (int)ceil(  blocksize / TPBZ ) + 1);
 
-        // int padx  = PADS(obj.size.x,obj.pad.x); 
-        // int padt  = PADS(tomo.size.x,tomo.pad.x);
-        // Log("Streams: Size tomo");
-        // printDim(tomo.size);
-        // Log("Pad tomo");
-        // printDim(tomo.pad);
-        // printf("TOMO: nrayspad = %d\n", nrays);
-        // printf("TOMO: padx = %d\n", padt);
-        // Log("Size obj");
-        // printDim(obj.size);
-        // Log("Pad obj");
-        // printDim(obj.pad);
-        // printf("OBJ: padImagex = %d \n", sizeImagex);
-        // printf("OBJ: padx = %d \n", padx);
-        // printf("padding_mode = %d \n", tomo.padding_mode);
-        // fflush(stdout);
-
-                            
         int bst_padd      = 8; /* Fix this padding for we will padd the data before this */
         int filter_type   = ReconParam.filter;
         float paganin_reg = ReconParam.paganin_slices;

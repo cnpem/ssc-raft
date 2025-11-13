@@ -25,19 +25,13 @@ extern "C" {
         dim3 threadsPerBlock(TPBX,TPBY,1);
         dim3 gridBlock = opt::setGridBlock(dim3(sizex,sizey,1), threadsPerBlock);
 
-        printf("ContrastFilter.method: %d \n", ContrastFilter.method);
-        fflush(stdout);
 		switch (ContrastFilter.method){
             case contrast_enhance::ContrastEnhanceType::paganin:
                 /* Paganin by frames, classic */
-                printf("Using Paganin classico \n");
-                fflush(stdout);
                 contrast_enhance::paganinKernel<<<gridBlock,threadsPerBlock>>>(kernel, beta_delta, wavelength, 
                 pixel_objx, pixel_objy, z2, dim3(sizex,sizey,1));
                 break;
             case contrast_enhance::ContrastEnhanceType::contrast:
-                printf("Using Contrast \n");
-                fflush(stdout);
                 contrast_enhance::contrast_paganin_based_Kernel<<<gridBlock,threadsPerBlock>>>(kernel, reg, dim3(sizex,sizey,1));
                 break;
             default:
@@ -93,11 +87,6 @@ extern "C" {
         int blocksize = getGPUBlocksize(tomo.blocksize, sizez, total_required_mem_per_frame_bytes, 32, true);
         int ind_block = getNumberOfBlocks(sizez, blocksize); 
 
-        // printf("ind_block: %d \n", ind_block);
-        // printf("sizez: %d \n", sizez);
-        // printf("blocksize: %d \n", blocksize);
-        // fflush(stdout);
-
         /* Kernel Computation */
         size_t nsize   = nrayspad * nslicespad;
 		float *kernel  = opt::allocGPU<float>(nsize);
@@ -142,9 +131,6 @@ extern "C" {
 			getContrastEnhencement( mplan, dataPadded, kernel, dim3(nrayspad,nslicespad,subblock) );
 
             opt::remove_paddC2R<<<gridBlock,threadsPerBlock>>>(dataPadded, dprojections, dim3(nrays,nslices,subblock), tomo.pad);
-            
-            printf("ContrastFilter.post_process = %d \n",ContrastFilter.post_process);
-            fflush(stdout);
 
             if( ContrastFilter.post_process == 1) getlog(dprojections, dim3(nrays,nslices,subblock));
 
