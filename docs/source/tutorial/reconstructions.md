@@ -41,7 +41,7 @@ The input and output data is on the following format:
                                                   'energy[eV]': 22e3, 'filter': 'hamming'})
 ```
 
-For padding usage, we refer to {ref}`Padding documentation <padd>`
+For padding usage, we refer to [Padding documentation](padding.md).
 
 The reference to all the input parameters can be found on the {ref}`FDK API documentation <apifdk>`.
 
