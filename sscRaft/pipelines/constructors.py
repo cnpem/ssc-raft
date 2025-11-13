@@ -1,6 +1,6 @@
 from ..rafttypes import *
-import sys
 import time
+import numpy
 import numpy as np
 # from .io.saver import async_save_worker, async_save_worker_phase
 

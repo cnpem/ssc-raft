@@ -25,20 +25,21 @@ The input and output data is on the following format:
 
     output = sscRaft.phase_retrieval(tomogram, dic = {'gpu': [0,1], 'method': 'paganin', 'beta/delta': 1e-3,
                                                       'detectorPixel[m]': 3.61e-6, 'z2[m]':500e-3, 
-                                                      'energy[eV]': 22e3, 'magn': 1.1,
-                                                      'blocksize': 0})
+                                                      'energy[eV]': 22e3, 'magn': 1.1})
 ```
 
-For the classic Paganin method, we have to apply $-\log()$ on the output
+For the classic Paganin method, we have to apply $-\log()$ on the output using the dictionary entry  ``\'post_process\': True``
 
 ```python
-    import numpy
+    import sscRaft
 
-    output = -numpy.log(output)
+    '''Load data-set
+    tomogram = ...
+    '''
+
+    output = sscRaft.phase_retrieval(tomogram, dic = {'gpu': [0,1], 'method': 'paganin', 'beta/delta': 1e-3,
+                                                      'detectorPixel[m]': 3.61e-6, 'z2[m]':500e-3, 
+                                                      'energy[eV]': 22e3, 'magn': 1.1, 'post_process': True})
 ```
-
----
-> **Caution:** The logarithm is not implemented inside the function.
----
 
 The reference to all the input parameters can be found on the {ref}`Phase Retrieval API documentation <apiphaseretrieval>`.

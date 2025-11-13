@@ -86,19 +86,11 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     zoom_npadh   = get_padding_size(nh,zoom_padh)
     nph          = int( nh + 2 * zoom_npadh )
 
-    # print('padh:',zoom_padh)
-    # print('npadh:',zoom_npadh)
-    # print('nph:',nph)
-
     # Filter padding
     padMode = PaddMode(dic.get('padd_mode', 'zero'))
     padding = int( dic.get('padding', 2.0)*100 )# Multiply by 100 to get an integer value
     npadfh  = get_padding_size(nph,padding)
     npfh    = int( nph + 2 * npadfh )
-
-    # print('padfh:',padding)
-    # print('npadfh:',npadfh)
-    # print('npfh:',npfh)
 
     nbeta  = len(angles)
 
@@ -171,12 +163,12 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     libraft.gpu_fdk(lab, obj_ptr, proj_p, angles_p, gpus_p, 
                     ctypes.c_int(ndev), time_p)
     
-    # Conferir isso aqui para caso 180 graus e conebeam tomogram
-    # angles_range = numpy.abs(angles[-1] - angles[0])
-    # last_angle   = max( numpy.abs( angles[-1] ), numpy.abs( angles[0] ) )
-    # scale        = 2.0
+    # Case 180 degrees and conebeam tomogram
+    angles_range = numpy.abs(angles[-1] - angles[0])
+    last_angle   = max( numpy.abs( angles[-1] ), numpy.abs( angles[0] ) )
+    scale        = 2.0
 
-    # if angles_range <= numpy.pi:
-    #      obj *= scale
+    if angles_range <= numpy.pi:
+         obj *= scale
          
     return obj

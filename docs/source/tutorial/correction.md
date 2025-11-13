@@ -34,7 +34,7 @@ The input and output data is on the following format:
 
 * {math}`D_d` - ``dark``
 
-  * Three-dimensional dark measurement. The axes are ``[slices, 1, rays]`` in python syntax.
+  * Three or two-dimensional dark measurement. The axes are ``[slices, 1, rays]`` or ``[slices, rays]`` in python syntax.
 
 The function also allows for a linear interpolation of a _before_ and _after_ flat. Because of this, the ``numberFlats`` needs to be at most 2, where the first entry is
 the _before_ flat, taken before the begining of data acquisition, and the second entry the _after_ flat, taken after data acquisition.

@@ -1,7 +1,7 @@
 (excentric)=
 # Excentric tomography
 
-Here you will find examples of usage of algorithms for excentric tomography implemented in the package `sscRaft`.
+Here you will find examples of usage of algorithms for excentric tomography implemented in the package ``sscRaft``.
 
 ## Finding the offset
 
@@ -48,6 +48,6 @@ The resulting stitched tomogram have 180 degrees.
     tomogram = sscRaft.stitchExcentricTomo(tomogram, offset, gpus = [0])
 ```
 
-The offset value can be found through the function ``getOffsetExcentricTomo()``.
+The offset value can be found through the function ``getOffsetExcentricTomo()`` above.
 
 The reference to all the input parameters can be found on the {ref}`Alignment API documentation <apistitch>`.

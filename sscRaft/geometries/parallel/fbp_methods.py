@@ -1,4 +1,3 @@
-# Authors: Giovanni L. Baraldi, Gilberto Martinez
 from ...rafttypes import *
 
 def fbpGPU(tomogram, angles, gpus, dic, obj=None):

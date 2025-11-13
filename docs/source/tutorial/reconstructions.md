@@ -1,7 +1,7 @@
 (reconstructions)=
 # Reconstruction methods
 
-Here you will find examples of usage of the reconstruction algorithms implemented in the package `sscRaft`.
+Here you will find examples of usage of the reconstruction algorithms implemented in the package ``sscRaft``.
 The methods are divided by beam geometry: cone-beam and parallel-beam.
 
 ## Cone-beam Geometry
@@ -26,10 +26,6 @@ The input and output data is on the following format:
 - ``tomogram``: Three-dimensional tomogram data. The axes are ``[slices, angles, rays]`` in python syntax.
 - ``reconstruction``: Three-dimensional output reconstructed data. The axes are ``[z, y, x]`` in python syntax.
 
----
-> **Note:** As of now, the `FDK` method does not compute individual (or block) of slices.
----
-
 ```python
     import numpy
     import sscRaft
@@ -42,9 +38,10 @@ The input and output data is on the following format:
 
     reconstruction = sscRaft.fdk(tomogram, dic = {'gpu': [0,1], 'angles[rad]': angles, 'beta/delta': 0.0,
                                                   'detectorPixel[m]': 3.61e-6, 'z1[m]':1000e-3, 'z1+z2[m]':2000e-3, 'z2[m]':500e-3, 
-                                                  'energy[eV]': 22e3, 'filter': 'hamming', 
-                                                  'padding': 1, 'blocksize': 0})
+                                                  'energy[eV]': 22e3, 'filter': 'hamming'})
 ```
+
+For padding usage, we refer to {ref}`Padding documentation <padd>`
 
 The reference to all the input parameters can be found on the {ref}`FDK API documentation <apifdk>`.
 
@@ -87,8 +84,7 @@ The input and output data is on the following format:
     reconstruction = sscRaft.fbp(tomogram, dic = {'gpu': [0,1], 'method': 'RT', 'angles[rad]': angles, 
                                                   'beta/delta': 0.0, 'detectorPixel[m]': 3.61e-6, 
                                                   'z1[m]': 1000e-3, 'z1+z2[m]':2000e-3, 'z2[m]':500e-3, 
-                                                  'energy[eV]': 22e3, 'filter': 'hamming', 
-                                                  'padding': 2, 'blocksize': 0})
+                                                  'energy[eV]': 22e3, 'filter': 'hamming'})
 ```
 
 The reference to all the input parameters can be found on the {ref}`FBP API documentation <apifbp>`.
@@ -139,7 +135,7 @@ The input and output data the transmission EM methods is on the following format
     angles = numpy.linspace(0, numpy.pi, tomogram.shape[1])
 
     reconstruction = sscRaft.em(tomogram, dic = {'gpu': [0,1], 'method': 'eEMRT', 'angles[rad]': angles, 
-                                                  'iterations': 10, 'padding': 2, 'blocksize': 0})
+                                                  'iterations': 10})
 ```
 
 - Example for Expectation Maximization by Ray Tracing for parallel-beam Transmission
@@ -157,7 +153,7 @@ The input and output data the transmission EM methods is on the following format
 
     reconstruction = sscRaft.em(counts, dic = {'gpu': [0,1], 'method': 'tEMRT', 
                                                'angles[rad]': angles, 'flat':flat,
-                                               'iterations': 10, 'padding': 2, 'blocksize': 0})
+                                               'iterations': 10})
 ```
 
 - Example for Expectation Maximization on frequency domain for parallel-beam Transmission
@@ -175,7 +171,7 @@ The input and output data the transmission EM methods is on the following format
 
     reconstruction = sscRaft.em(counts, dic = {'gpu': [0,1], 'method': 'tEMFQ', 
                                                'angles[rad]': angles, 'flat':flat, 'detectorPixel[m]': 3.61e-6,
-                                               'iterations': 10, 'padding': 2, 'blocksize': 0})
+                                               'iterations': 10})
 ```
 
 The reference to all the input parameters can be found on the {ref}`EM API documentation <apiem>`.

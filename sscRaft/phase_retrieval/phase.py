@@ -36,7 +36,7 @@ def phase_retrieval(frames, dic):
         * ``dic['magn']`` (float): Beam magnification [default: 1.0] 
         * ``dic['regularization']`` (float,optional): Regularization parameter for \'contrast\' method [default: 0.0] 
         * ``dic['post_process']`` (bool,optional): Apply post kernel function. Ex: apply ``-log()`` after Paganin kernel [default: False]
-        * ``dic['padding']`` (float,optional): Data padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.25]
+        * ``dic['padding']`` (float,optional): Data padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 1.0]
         * ``dic['padd_mode']`` (str,optional): Data padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
         * ``dic['blocksize']`` (int,optional): Size of projection blocks to be processed simultaneously [default: 0 (automatic computation)]
  
@@ -47,7 +47,7 @@ def phase_retrieval(frames, dic):
     """  
     required = None # ('required',)
     optional = ('gpu', 'method','beta/delta','padding','blocksize','z2[m]','energy[eV]','magn','detectorPixel[m]','regularization', 'post_process')
-    default  = (  [0],'paganin',         0.0,     0.25,          0,    1.0,         1.0,   1.0,               1.0,             0.0,          False)
+    default  = (  [0],'paganin',         0.0,      1.0,          0,    1.0,         1.0,   1.0,               1.0,             0.0,          False)
     
     dic      = SetDictionary(dic,required,optional,default)
 
@@ -73,7 +73,7 @@ def phase_retrieval(frames, dic):
     wavelength = CONST/energy 
     pixel_obj  = pixel_det / magn
     reg        = dic.get('regularization', 0.0)
-    padding    = dic.get('padding', 0.25)*100 # Multiply by 100 to get an integer value
+    padding    = dic.get('padding', 1.0)*100 # Multiply by 100 to get an integer value
     padd_mode  = dic.get('padd_mode', 'edge')
     blocksize  = dic.get('blocksize', 0)
     post_proc  = dic.get('post_process', False)
