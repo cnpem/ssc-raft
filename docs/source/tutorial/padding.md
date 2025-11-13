@@ -27,15 +27,15 @@ For all methods that uses FFT, we implemented a padding strategy. It can be acce
                                                   'padd_mode': 'zero'})
 ```
 
-The filtering step on the ``FDK`` method requires a FFT and the user has the option to change the size of the padding and its strategy.
+The filtering step on the ``fdk`` method requires a FFT and the user has the option to change the size of the padding and its strategy.
 
-1. ``'padding'`` ({math}`p`):  a float value that controls the size of the padding. It is a percentage of the data size {math}`n`,
+1. ``'padding'`` ({math}`p`):  a float value that controls the size of the padding. It is a percentage of the data size {math}`N`,
 
 ```{math}
-padsize = floor(p * n).
+padsize = floor(p * N).
 ```
 
-The final dimension of the padded data is {math}`n + 2 * padsize`, as explained below.
+The final dimension of the padded data is {math}`N + 2 * padsize`, as explained below.
 
 
 2. ``'padd_mode'``: a string that sets the padding strategy. The strategies implemented are zero-padding ``'zero'`` and edge-padding ``'edge'``.
@@ -76,4 +76,4 @@ The ``fdk`` example below shows how to call the paddin for zoom images. By defau
                                                   'zoom padd_mode': 'edge'})
 ```
 
-This padding can be, and is by default, applied together with the FFT strategy.
+This padding can be, and is by default, applied together with the FFT strategy one.
