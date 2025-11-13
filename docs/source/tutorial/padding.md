@@ -8,7 +8,7 @@ In the case of ``sscRaft`` processing and reconstruction methods, zero-padding a
 
 ## General Usage
 
-For all methods that uses FFT, we implemented a padding strategy. It can be accessed by the dictionary entries ``'padding'`` and ``'padd_mode'``, as the ``FDK`` example below:  
+For all methods that uses FFT, we implemented a padding strategy. It can be accessed by the dictionary entries ``'padding'`` and ``'padd_mode'``, as the ``fdk`` example below:  
 
 ```python
     import numpy
@@ -50,13 +50,14 @@ The edge-padding replicates the last column, as seen in Figure 2.
 
 ### Zoom images
 
-The padding strategy is also very useful to remove the cicle artifact that appears in zoom reconstructions, illustrated in Figure 3. 
-
+The edge-padding strategy is also very useful to remove the cicle artifact that appears in zoom reconstructions, illustrated in Figure 3. 
+This strategy is applied on the data after the filtering part, and is implemented for now in the functions ``fdk()`` and ``fbp(RT)``.
 
 | ![img](images/padzoom.png) |
 | :-------: | 
 | Figure 3: Zoom reconstruction. On the left, illustration of the cicle artifact. On the right, the artifact removal through edge-padding. | 
 
+The ``fdk`` example below shows how to call the paddin for zoom images. By default, it is not applied at the moment.
 
 ```python
     import numpy
@@ -74,3 +75,5 @@ The padding strategy is also very useful to remove the cicle artifact that appea
                                                   'zoom padding': 0.25,
                                                   'zoom padd_mode': 'edge'})
 ```
+
+This padding can be, and is by default, applied together with the FFT strategy.
