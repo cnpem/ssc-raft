@@ -30,12 +30,12 @@ def lowpass(tomogram, dic = None, **kwargs):
 
         * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 0.25]
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
-        * ``dic['padd_mode']`` (str,optional): Data padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
+        * ``dic['padd_mode']`` (str,optional): Data padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
 
     """
     required = ('gpu',)        
     optional = ('filter','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','detectorPixel[m]')
-    default  = (  'ramp',     0.25,             1.0,         0.0,          0,         1.0,    1.0,               1.0)
+    default  = (  'ramp',     2.0,             1.0,         0.0,          0,         1.0,    1.0,               1.0)
     
     dic      = SetDictionary(dic,required,optional,default)  
 
@@ -61,7 +61,7 @@ def lowpass(tomogram, dic = None, **kwargs):
     z2             = dic['z2[m]']
     pixel          = dic['detectorPixel[m]']
     wavelength     = CONST/energy 
-    padding        = dic.get('padding', 1.0)*100 # Multiply by 100 to get an integer value
+    padding        = dic.get('padding', 2.0)*100 # Multiply by 100 to get an integer value
     padd_mode      = dic.get('padd_mode', 'zero')
 
     if beta_delta != 0.0:

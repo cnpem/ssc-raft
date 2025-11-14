@@ -4,8 +4,8 @@ from ..io import SetDictionary
 from .parallel.fbp_methods import *
 from .parallel.em_methods import *
 
-def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs):
-    """Computes the reconstruction of a parallel beam tomogram using the Filtered Backprojection (RT) method 
+def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 1, **kwargs):
+    """Computes the reconstruction of a parallel beam tomogram using the classical Filtered Backprojection Ray Tracing (RT) method 
     or the Backprojection Slice Theorem (BST) method [1]_.
     
     Args:
@@ -13,7 +13,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs)
         angles (float list, optional):  List of angles in radians [default: None]
         obj (ndarray, optional): Reconstructed 3D object array [default: None]
         dic (dict, optional): Dictionary with the experiment info [default: None]
-        nstreams (int, optional): Number of streams for cuda stream acceleration Ex: 0,1,2 [default: 0 (no streams used)]
+        nstreams (int, optional): Number of streams for cuda stream acceleration Ex: 1,2,... [default: 1]
 
     Returns:
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x]
@@ -24,8 +24,9 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs)
 
     Dictionary parameters:
 
-        * ``dic['gpu']`` (ndarray): List of gpus  [required]
+        * ``dic['gpu']`` (int list,optional): List of gpus  [Default: [0]]
         * ``dic['angles[rad]']`` (list,optional): List of angles in radians [Default: None]
+        * ``dic['detectorPixel[m]']`` (float,optional): Detector pixel size in meters [Default: 1.0]
         * ``dic['method']`` (str,optional):  [Default: 'RT']
 
              #. Options = (\'RT\',\'BST\')
@@ -34,7 +35,8 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs)
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
         
-        * ``dic['detectorPixel[m]']`` (float,optional): Detector pixel size in meters [Default: 1.0]
+        * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 2.0]
+        * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 1.0]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0 ]
@@ -42,7 +44,8 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs)
 
             #. Related filters: \'gaussian\', \'lorentz\' and \'rectangle\'
 
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [Default: 0]
+        * ``dic['zoom padding']`` (float,optional): Data padding for zoom - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.0]
+        * ``dic['zoom padd_mode']`` (str,optional): Data padding mode for zoom - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\']         
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
         * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
@@ -51,14 +54,16 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 0, **kwargs)
         .. [1] Miqueles, X. E. and Koshev, N. and Helou, E. S. (2018). A Backprojection Slice Theorem for Tomographic Reconstruction. IEEE Transactions on Image Processing, 27(2), p. 894-906. DOI: https://doi.org/10.1109/TIP.2017.2766785.
     
     """
-    required = ('gpu',)        
-    optional = ('filter','rotation axis offset','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method','detectorPixel[m]')
-    default  = (  'ramp',                   0.0,        0,             0.0,         0.0,          0,         1.0,    1.0,    'RT',               1.0)
+    required = None        
+    optional = ('gpu','filter','rotation axis offset','padding','padd_mode','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method','detectorPixel[m]', 'zoom padding', 'zoom padd_mode')
+    default  = (  [0],  'ramp',                   0.0,      2.0,     'zero',             0.0,         0.0,          0,         1.0,    1.0,    'RT',               1.0,            0.0,           'edge')
     
     dic = SetDictionary(dic,required,optional,default)  
 
     method                = dic['method']
     gpus                  = dic['gpu']
+
+    nstreams = 1 if nstreams <= 0 else nstreams
 
     if method == 'RT':
         try:
@@ -107,7 +112,6 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
     
     Dictionary parameters:
     
-        * ``dic['gpu']`` (int list):  List of GPU devices used for computation [required]
         * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters [required for ``tEMFQ``]
         * ``dic['method']`` (str): Choose EM-method. Options: [required]
     
@@ -117,19 +121,18 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
 
             #. ``tEMFQ``: Transmission EM using the Fourier Slice Theorem (FST) for the forward operator and Backprojection Slice Theorem (BST) for the inverse operator.
         
-        * ``dic['beamgeometry']`` (str): Beam geometry - \'parallel\', \'conebeam\' or \'fanbeam`\' [default: \'parallel\'] [required]
+        * ``dic['gpu']`` (int list, optional):  List of GPU devices used for computation [default: [0]]
         * ``dic['flat']`` (ndarray, optional):  Flat 2D data. Tha axis are (slices,rays) [default: None]
         * ``dic['angles[rad]']`` (float list, optional):  List of angles in radians [default: None]
         * ``dic['iterations']`` (int, optional): Global number of iterations [default: 100]
         * ``dic['interpolation']`` (str, optional):  Type of interpolation. Options: \'nearest\' or \'bilinear\' [default: \'bilinear\']
-        * ``dic['padding']`` (int,optional): Data padding - Integer multiple of the data size (0,1,2, etc...) [default: 0]  
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [default: 0 (automatically)]
 
     """
     # Set default dictionary parameters:
-    required = ('gpu',)
-    optional = ('iterations','detectorPixel[m]','padding','beamgeometry','interpolation','blocksize')
-    default  = (          10,               1.0,        0,    'parallel',     'bilinear',          0)
+    required = None
+    optional = ('gpu','iterations','detectorPixel[m]','interpolation','blocksize')
+    default  = (  [0],          10,               1.0,     'bilinear',          0)
 
     dic      = SetDictionary(dic,required,optional,default)
 
@@ -142,7 +145,7 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
     TV_iterations = 0 #dic['TV iterations']
 
     det_pixel     = dic['detectorPixel[m]'] # det_pixel = det_pixelx
-    pad           = (dic['padding'],0,0) # pad = (padx, pady, padz)
+    pad           = (0.0,0.0,0.0) # pad = (padx, pady, padz)
 
     # Regularization and smoothness parameter for the TV (Total Variation method)
     tv_reg        = 0.0 # dic['regularization'] 
@@ -168,11 +171,11 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
 
     if method == 'eEMRT':
 
-        obj = eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj) / det_pixel
+        obj = 2 * eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj) / ( det_pixel * obj.shape[-1])
     
     elif method == 'tEMRT':
 
-        obj = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj) / det_pixel
+        obj = 2 * tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj) / ( det_pixel * obj.shape[-1])
 
     elif method == 'tEMFQ':
 

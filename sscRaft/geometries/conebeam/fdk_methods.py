@@ -14,11 +14,12 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
 
     Dictionary parameters:
 
-        * ``dic['gpu']`` (ndarray): List of gpus for processing [required]
         * ``dic['angles[rad]']`` (list): List of angles in radians [required]
         * ``dic['z1[m]']`` (float): Source-sample distance in meters [required]
         * ``dic['z1+z2[m]']`` (float): Source-detector distance in meters [required]
         * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters [required]
+        * ``dic['gpu']`` (int list, optional): List of gpus for processing [Default: [0]]
+
         * ``dic['filter']`` (str,optional): Filter type [Default: \'lorentz\']
 
             #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')

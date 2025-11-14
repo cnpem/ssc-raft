@@ -3,7 +3,7 @@ from ..io.io_ import *
 
 def phase_retrieval(frames, dic):
     """ Application of phase retrieval methods based on the Transport of Equation (TIE) approach [1]_, and/or 
-    contrast filters methods.
+    other contrast filters methods.
     The data measurement needs to be corrected by flat (or empty) and dark previously.
     Flat is a measurement without a sample, to measure the background. 
     Dark is a measurement without a beam and sample, to measure detector pixel response.

@@ -24,7 +24,7 @@ def iter_reproj(tomogram, original_tomogram, angles, iterations = 5, pixel = 1.0
             'filter': 'hamming', 'rotation axis offset': 0.0, 'beta/delta': 0.0, 
             'detectorPixel[m]': pixel, 'iterationsEM': iterationsEM,
             'energy[eV]': 1.0, 'z1[m]':1.0, 'z1+z2[m]':1.0, 'z2[m]': 1.0, 
-            'padding': 0.25, 'blocksize': 0, 'regularization': 1.0}
+            'padding': 2.0, 'padd_mode': 'zero', 'blocksize': 0, 'regularization': 1.0}
     
     for i in range(iterations):
 
@@ -32,7 +32,7 @@ def iter_reproj(tomogram, original_tomogram, angles, iterations = 5, pixel = 1.0
             dic['method'] = 'RT'
             reconstructed = fbp(tomogram, dic = dic)
         elif method == 'eEMRT' or method == 'tEMRT':
-            reconstructed = em(tomogram, dic = dic) / ( pixel * nrays )
+            reconstructed = 2 * em(tomogram, dic = dic) / ( pixel * nrays )
         else:
             dic['method'] = 'RT'
             reconstructed = fbp(tomogram, dic = dic)

@@ -2,7 +2,9 @@ Version 3.3.0 - 2025-11-13
 --------------------------
 *Added:*
   - New padding implementation as percentage. See documentation.
-  - New padding implementation on function ``FDK`` and ``FBP``
+  - New padding implementation on function ``FDK`` and ``FBP``.
+  - Simplified version of alignment method iterative reprojection (``iter_reproj()``).
+  - Internal changes on the ``ctypes`` and ``cuda`` input argument structures.
 
 *Corrections:*
   - Minor bug on the angle step size computation on the ``EM`` methods.
