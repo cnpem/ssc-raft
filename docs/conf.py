@@ -110,10 +110,10 @@ html_theme = 'sphinx_rtd_theme'
 html_style = 'css/my_theme.css'
 # html_theme = 'alabaster'
 
-smv_remote_whitelist = None
+# smv_remote_whitelist = None
 # no branches only tags for multiversion
-smv_branch_whitelist = 'fdk_refactor'
-smv_tag_whitelist = None
+smv_branch_whitelist = None
+# smv_tag_whitelist = None
 
 
 
