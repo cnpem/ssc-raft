@@ -5,6 +5,5 @@ dist/
 .github/*
 *.egg-info/
 .vscode/
-*.png
 *.sh
 *.out
