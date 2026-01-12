@@ -9,7 +9,9 @@ build_dgx:
   stage: build
   image: gccdockers/python-builder
   script:
-    - python3 -m build --wheel
+    - python3.9  -m build --wheel
+    - python3.10 -m build --wheel
+    - python3.11 -m build --wheel
   tags:
     - x86_64
     - cuda11
