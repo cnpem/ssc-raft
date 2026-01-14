@@ -11,8 +11,7 @@ requires = [
 [project]
 dynamic = ["version"]
 name = "sscRaft"
-license = "GPL-3.0-or-later"
-license-files = ["LICENSE.txt"]
+license = {file = "LICENSE.txt" }
 readme = "README.md"
 
 requires-python = ">=3.7"
