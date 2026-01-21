@@ -35,7 +35,7 @@ The input and output data is on the following format:
 - ``tomogram``: Three-dimensional tomogram data. The axes are ``[slices, angles, rays]`` in python syntax.
 - ``tomogram``: Three-dimensional stitched tomogram data. The axes are ``[slices, angles / 2, 2 * rays]`` in python syntax.
 
-The resulting stitched tomogram have 180 degrees. 
+The resulting stitched tomogram have 180 degrees and is already centered (rotation axis corrected).
 
 ```python
     import numpy

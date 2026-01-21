@@ -4,6 +4,7 @@ Version 3.3.0 - 2025-11-13
   - New padding implementation as percentage. See documentation.
   - New padding implementation on function ``FDK`` and ``FBP``.
   - Simplified version of alignment method iterative reprojection (``iter_reproj()``).
+  - Stitching for excentric tomo has an option to stitch with or without intensity intepolation on the overlapping area.
   - Internal changes on the ``ctypes`` and ``cuda`` input argument structures.
 
 *Corrections:*

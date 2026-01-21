@@ -415,25 +415,105 @@ int ExcentricTomo_PhaseCorrelation(float* sinograms, size_t sizex, size_t sizey,
     return posx/2;
 }
 
-__global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, size_t sizex, int offset)
-{
-    size_t outdx = threadIdx.x + blockDim.x*blockIdx.x;
+extern "C" {
 
-    if(outdx < sizex){
-        size_t indx = offset > 0 ? outdx : (sizex-1-outdx);
-        offset = abs(offset);
+	__device__ float computeCoef(int outdx, int offset, int sizex, int method)
+	{
+		float x = (float)(outdx - offset);
+		float w = 0.0f;
+		float L = (float)(offset + 1e-3f);
 
-        float coef  = fminf(0.5f+((int)outdx-offset)*0.5f/(offset+1E-3f),1.0f);
+		switch(method)
+		{
+			case 0:  // ------------------ Linear (atual)
+				w = 0.5f + 0.5f * x / L;
+				break;
 
-        atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef*temp1[blockIdx.y*sizex + indx]);
-        atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
+			case 1:  // ------------------ Gaussian
+				float sigma = L * 0.4f;  // empirical adjustment
+				w = expf(-0.5f * (x*x) / (sigma*sigma));
+				w = 1.0f - w; // inverted for [0,1]
+				break;
 
-        if(outdx <= offset){   
-            sinogram[blockIdx.y*sizex*2 + outdx] = temp1[blockIdx.y*sizex + 0];
-            sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp2[blockIdx.y*sizex + 0];
-        }
-    }
+			case 2:  // ------------------ Cosine (Hann / Raised Cosine)
+				float t = fminf(fmaxf((x + L) / (2.0f * L), 0.0f), 1.0f);
+				w = 0.5f * (1.0f - cosf(M_PI * t)); 
+				break;
+
+			case 3:  // ------------------ Sigmoid
+				float steep = 6.0f / L;
+				w = 1.0f / (1.0f + expf(-steep * x));
+				break;
+
+			case 10:  // ------------------ None
+				w = 0.5f + 0.5f * x / L;
+				w = (w >= 0.5f);
+				break;
+
+			default:  // ------------------ None
+				w = 0.5f + 0.5f * x / L;
+				w = (w >= 0.5f);
+				break;
+		}
+
+		return fminf(fmaxf(w, 0.0f), 1.0f);
+	}
+
+	__global__ void KJoinX(
+		float* sinogram,
+		const float* temp1,
+		const float* temp2,
+		size_t sizex,
+		int offset,
+		int method  
+	)
+	{
+		size_t outdx = threadIdx.x + blockDim.x * blockIdx.x;
+
+		if(outdx < sizex){
+
+			size_t indx = offset > 0 ? outdx : (sizex - 1 - outdx);
+			offset = abs(offset);
+
+			float coef = computeCoef(outdx, offset, sizex, method);
+
+			atomicAdd(
+				sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,
+				coef * temp1[blockIdx.y*sizex + indx]
+			);
+
+			atomicAdd(
+				sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,
+				coef * temp2[blockIdx.y*sizex + indx]
+			);
+
+			if(outdx <= offset){   
+				sinogram[blockIdx.y*sizex*2 + outdx] = temp1[blockIdx.y*sizex + 0];
+				sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp2[blockIdx.y*sizex + 0];
+			}
+		}
+	}
 }
+
+//__global__ void KJoinX(float* sinogram, const float* temp1, const float* temp2, size_t sizex, int offset)
+//{
+//    size_t outdx = threadIdx.x + blockDim.x*blockIdx.x;
+//
+//    if(outdx < sizex){
+//        size_t indx = offset > 0 ? outdx : (sizex-1-outdx);
+//        offset = abs(offset);
+//
+//        float coef  = fminf(0.5f+((int)outdx-offset)*0.5f/(offset+1E-3f),1.0f);
+//
+//        atomicAdd(sinogram + blockIdx.y*sizex*2 + sizex-1-outdx+offset,coef*temp1[blockIdx.y*sizex + indx]);
+//        atomicAdd(sinogram + blockIdx.y*sizex*2 + outdx + sizex-offset,coef*temp2[blockIdx.y*sizex + indx]);
+//
+//        if(outdx <= offset){   
+//            sinogram[blockIdx.y*sizex*2 + outdx] = temp1[blockIdx.y*sizex + 0];
+//            sinogram[blockIdx.y*sizex*2 + 2*sizex - 1 - outdx] = temp2[blockIdx.y*sizex + 0];
+//        }
+//    }
+//}
 
 // void Tomo360_To_180(float* sinograms, 
 // size_t sizex, size_t sizey, size_t sizez, int offset)
@@ -482,8 +562,6 @@ extern "C"{
         float *d_sino = opt::allocGPU<float>(nsize);
 
         opt::CPUToGPU<float>(sinogram, d_sino, nsize);
-
-		// rImage sinograms(cpusinograms, sizex, sizey*sizez);
 		
 		int offset = ExcentricTomo_PhaseCorrelation(d_sino, sizex, sizey, sizez);
 		
@@ -514,7 +592,9 @@ extern "C"{
 
             TransferMemory<<<(sxy+127)/128,128>>>(d_sino, temp1, temp2, sxy, 0, 1);
             cudaMemset(d_sino, 0, ips*sizeof(float));
-            KJoinX<<<dim3((nrays+127)/128,y_size,1),128>>>(d_sino, temp1, temp2, nrays, offset); // careful with odd sizey
+
+			int method = 0;
+            KJoinX<<<dim3((nrays+127)/128,y_size,1),128>>>(d_sino, temp1, temp2, nrays, offset, method); // careful with odd sizey
 
             opt::GPUToGPU<float>(d_sino, data + (size_t)i * ips, ips);
 
@@ -531,7 +611,7 @@ extern "C"{
 
 	void getExcentricTomoGPU(float* data, 
     int nrays, int nangles, int nslices, 
-    int offset, int ngpu)
+    int offset, int ngpu, int method)
 	{
 		HANDLE_ERROR(cudaSetDevice(ngpu));
 
@@ -551,7 +631,8 @@ extern "C"{
 
             TransferMemory<<<(sxy+127)/128,128>>>(d_sino, temp1, temp2, sxy, 0, 1);
             cudaMemset(d_sino, 0, ips*sizeof(float));
-            KJoinX<<<dim3((nrays+127)/128,y_size,1),128>>>(d_sino, temp1, temp2, nrays, offset); // careful with odd sizey
+
+            KJoinX<<<dim3((nrays+127)/128,y_size,1),128>>>(d_sino, temp1, temp2, nrays, offset, method); // careful with odd sizey
 
             opt::GPUToCPU<float>(data + (size_t)i * ips, d_sino, ips);
 
@@ -566,7 +647,7 @@ extern "C"{
 	void getExcentricTomoMultiGPU(int* gpus, int ngpus, 
     float* data, 
     int nrays, int nangles, int nslices, 
-    int offset)
+    int offset, int method)
 	{
         // Before called getExcentricTomoGPU()
         int t;
@@ -577,7 +658,7 @@ extern "C"{
         threads.reserve(ngpus);
 
         if ( ngpus == 1 ){
-            getExcentricTomoGPU(data, nrays, nangles, blockgpu, offset, gpus[0]);
+            getExcentricTomoGPU(data, nrays, nangles, blockgpu, offset, gpus[0], method);
         }else{
             for(t = 0; t < ngpus; t++){ 
                 
@@ -587,7 +668,7 @@ extern "C"{
                     getExcentricTomoGPU, 
                     data + (size_t)ptr * nrays * nangles, 
                     nrays, nangles, subblock, 
-                    offset, gpus[t]));
+                    offset, gpus[t], method));
 
                 /* Update pointer */
 				ptr = ptr + subblock;

@@ -567,12 +567,13 @@ try:
         ctypes.c_void_p, ctypes.c_int,
         ctypes.c_void_p, 
         ctypes.c_int, ctypes.c_int, ctypes.c_int, 
+        ctypes.c_int,
         ctypes.c_int
     ]
     
     libraft.getExcentricTomoMultiGPU.restype  = None
 except:
-    logger.error(f'Cannot find C/CUDA library: -.RAFT_ECCENTRIC_TOMO_STITCH-')
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_EXCENTRIC_TOMO_STITCH-')
     pass
 
 ######## Raft - Phase Retrieval Paganin method and similar methods ##########
