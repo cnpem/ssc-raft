@@ -659,8 +659,9 @@ struct Image2D {
      * Computes the maximum element in array.
      * */
     Type max() {
-        return thrust::transform_reduce(thrust::device, gpuptr, gpuptr + size, thrust::identity<Type>(),
-                                        std::numeric_limits<Type>::lowest(), thrust::maximum<Type>());
+        return thrust::transform_reduce(thrust::device, gpuptr, gpuptr + size,
+                [] __device__ (const Type& x) -> const Type { return x; },
+                std::numeric_limits<Type>::lowest(), thrust::maximum<Type>());
     }
 
     float maxAbs2() {
