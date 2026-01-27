@@ -124,7 +124,7 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
         * ``dic['gpu']`` (int list, optional):  List of GPU devices used for computation [default: [0]]
         * ``dic['flat']`` (ndarray, optional):  Flat 2D data. Tha axis are (slices,rays) [default: None]
         * ``dic['angles[rad]']`` (float list, optional):  List of angles in radians [default: None]
-        * ``dic['iterations']`` (int, optional): Global number of iterations [default: 100]
+        * ``dic['iterations']`` (int, optional): Global number of iterations [default: 10]
         * ``dic['interpolation']`` (str, optional):  Type of interpolation. Options: \'nearest\' or \'bilinear\' [default: \'bilinear\']
         * ``dic['blocksize']`` (int,optional): Block of slices to be simulteneously computed [default: 0 (automatically)]
 
@@ -176,7 +176,7 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
     
     elif method == 'tEMRT':
 
-        obj = 2 * tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj)
+        obj = tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj)
         obj = 2 * obj / ( det_pixel * obj.shape[-1])
 
     elif method == 'tEMFQ':
