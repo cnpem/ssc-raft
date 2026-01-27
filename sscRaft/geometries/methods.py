@@ -171,11 +171,13 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
 
     if method == 'eEMRT':
 
-        obj = 2 * eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj) / ( det_pixel * obj.shape[-1])
+        obj = eEMRT_GPU_(data, angles, iterations, gpus, blocksize, obj = obj)
+        obj = 2 * obj / ( det_pixel * obj.shape[-1])
     
     elif method == 'tEMRT':
 
         obj = 2 * tEMRT_GPU_(data, flat, angles, iterations, gpus, blocksize, obj = obj) / ( det_pixel * obj.shape[-1])
+        obj = 2 * obj / ( det_pixel * obj.shape[-1])
 
     elif method == 'tEMFQ':
 
