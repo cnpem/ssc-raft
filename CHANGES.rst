@@ -2,7 +2,7 @@ Version 3.3.1 - 2026-01-28
 --------------------------
 *Corrections:*
   - Minor bug on the units computation of the ``EM`` methods.
-  - Fixed compilation issues for ``CUDA >= 12.X.Y``.
+  - Fixed support for ``CUDA >= 12.X.Y``.
   - Update documentation of reconstruction functions.
 
 *Known Bugs:*
