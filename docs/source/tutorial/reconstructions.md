@@ -2,6 +2,10 @@
 # Reconstruction methods
 
 Here you will find examples of usage of the reconstruction algorithms implemented in the package ``sscRaft``.
+
+All methods discussed here returns reconstructions with physical units in SI, i.e. in reciprocal meter ({math}`m^-1`), considering the pixel size in the ``dic['detectorPixel[m]']`` parameter. 
+If no pixel size is passed, the algorithm consider ``dic['detectorPixel[m]'] = 1.0`` by default.
+
 The methods are divided by beam geometry: cone-beam and parallel-beam.
 
 ## Cone-beam Geometry
