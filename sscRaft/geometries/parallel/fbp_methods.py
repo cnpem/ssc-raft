@@ -14,6 +14,10 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     Returns:
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
 
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``dic['detectorPixel[m]']`` parameter. 
+    If no pixel size is passed, the algorithm consider ``dic['detectorPixel[m]'] = 1.0`` by default.
+
     Dictionary parameters:
             
         * ``dic['detectorPixel[m]']`` (float,optional): Detector pixel size in meters [Default: 1.0]
@@ -131,6 +135,10 @@ def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 1):
 
     Returns:
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
+
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``dic['detectorPixel[m]']`` parameter. 
+    If no pixel size is passed, the algorithm consider ``dic['detectorPixel[m]'] = 1.0`` by default.
 
     Dictionary parameters:
 

@@ -18,6 +18,10 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 1, **kwargs)
     Returns:
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x]
 
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``dic['detectorPixel[m]']`` parameter. 
+    If no pixel size is passed, the algorithm consider ``dic['detectorPixel[m]'] = 1.0`` by default.
+
     * One or MultiGPUs. 
     * Calls function ``bstGPU()``
     * Calls function ``fbpGPU()``
@@ -104,6 +108,10 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
         
     Returns:
         (ndarray): stacking 3D reconstructed volume, reconstructed sinograms (z,y,x)
+
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``dic['detectorPixel[m]']`` parameter. 
+    If no pixel size is passed, the algorithm consider ``dic['detectorPixel[m]'] = 1.0`` by default.
 
     * One or MultiGPUs. 
     * Calls function ``eEMRT_GPU_()``.

@@ -17,6 +17,9 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
         
     Returns:
         (ndarray): stacking 3D reconstructed volume (z,y,x) or 2D reconstructed sinograms (y,x)
+
+    The resulted reconstruction returns nondimensional coefficients. To add physical units one need to multiply the result by :math:`2/(pN)`, where :math:`N` is the x-dimension of 
+    the reconstruction and :math:`p` is the pixel size.
     """
     # MultiGPU without semafaros
 
@@ -100,6 +103,9 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
         
     Returns:
         (ndarray): stacking 3D reconstructed volume (z,y,x) or 2D reconstructed sinograms (y,x)
+
+    The resulted reconstruction returns nondimensional coefficients. To add physical units one need to multiply the result by :math:`2/(pN)`, where :math:`N` is the x-dimension of 
+    the reconstruction and :math:`p` is the pixel size.        
     """
     # MultiGPU withou semafaros
 
@@ -200,6 +206,10 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
         
     Returns:
         (ndarray): stacking 3D reconstructed volume (z,y,x) or 2D reconstructed sinograms (y,x)
+
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``dic['detectorPixel[m]']`` parameter. 
+    If no pixel size is passed, the algorithm consider ``dic['detectorPixel[m]'] = 1.0`` by default.
     """
     if len(count.shape) == 2:
         nslices = 1

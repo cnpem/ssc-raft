@@ -13,6 +13,10 @@ def radon_RT(phantom, angles, gpus, pixel = 1.0):
     Returns:
         (ndarray): Radon transform 2D or 3D. Axis are (slices, angles, lenght)
 
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``pixel`` input argument. 
+    If no pixel size is passed, the algorithm consider ``pixel = 1.0`` by default.
+
     * MultiGPU function 
     """
     a = 1.0 # Half detector size in meters: a = npixels * pixel / 2.0

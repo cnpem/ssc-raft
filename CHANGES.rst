@@ -1,3 +1,22 @@
+Version 3.3.1 - 2026-01-28
+--------------------------
+*Corrections:*
+  - Minor bug on the units computation of the ``EM`` methods.
+  - Fixed compilation issues for ``CUDA >= 12.X.Y``.
+  - Update documentation of reconstruction functions.
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+  - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
+
+*To be done:*
+  - Refactoring ``FDK``.
+  - Refactoring ``EM`` conebeam ray tracing.
+  - Refactoring ``FST`` frequency domain forward method for parallel beam.
+  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
+
 Version 3.3.0 - 2025-11-13
 --------------------------
 *Added:*

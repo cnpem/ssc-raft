@@ -12,6 +12,10 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     Returns:
         (ndarray): Reconstructed sample object with dimension n^3 (3D). The axes are [z, y, x].
 
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``dic['detectorPixel[m]']`` parameter. 
+    If no pixel size is passed, the algorithm consider ``dic['detectorPixel[m]'] = 1.0`` by default.
+
     Dictionary parameters:
 
         * ``dic['angles[rad]']`` (list): List of angles in radians [required]
