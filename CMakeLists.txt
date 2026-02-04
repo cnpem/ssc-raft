@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
