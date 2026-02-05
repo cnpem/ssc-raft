@@ -1,7 +1,5 @@
 import numpy as np
-from ...rings_all_stripes import _remove_all_stripes, _remove_all_stripes_multiaxis
-from .class_rings import TomoAttributes_
-
+from ...rafttypes import *
 
 def set_tomo_attributes(size, settings):
     (n_slice, n_angle, n_length)    = size
@@ -11,39 +9,37 @@ def set_tomo_attributes(size, settings):
     background_ratio                = settings['background_ratio']
     drop_ratio                      = settings['drop_ratio']
 
-    return TomoAttributes_( n_length, n_angle, n_slice,
+    return TomoAttributes( n_length, n_angle, n_slice,
                             size_median, dim, large_stripes_size,
                             background_ratio, drop_ratio)
 
 def rings_remove_all_stripes(tomo, ngpus, settings, batch = 256):
 
     tomo_attributes = set_tomo_attributes(tomo.shape, settings)
-    if tomo.dtype != np.float32:
-        tomo = tomo.astype('float32')
-    if not tomo.data.c_contiguous:
-        tomo = np.ascontiguousarray(tomo)
+    # if tomo.dtype != np.float32:
+    #     tomo = tomo.astype('float32')
+    # if not tomo.data.c_contiguous:
+    #     tomo = np.ascontiguousarray(tomo)
 
-    remove_all_stripes(tomo, ngpus, batch, tomo_attributes)
+    tomo     = CNICE(tomo)
+    tomo_ptr = tomo.ctypes.data_as(ctypes.c_void_p)
+
+    libraft.remove_all_stripes(tomo_ptr, tomo_attributes, ctypes.c_int(ngpus), ctypes.c_int(batch))
 
     return np.reshape(tomo, (tomo_attributes.n_slice, tomo_attributes.n_angle, tomo_attributes.n_length))
 
-def remove_all_stripes(tomo, ngpus: int, batch:int, tomo_attributes: TomoAttributes_):
-    _remove_all_stripes(tomo, ngpus, batch, tomo_attributes.n_length, tomo_attributes.n_angle, tomo_attributes.n_slice,
-                                            tomo_attributes.size_median, tomo_attributes.dim, tomo_attributes.large_stripes_size,
-                                            tomo_attributes.background_ratio, tomo_attributes.drop_ratio)
-
 def rings_remove_all_stripes_multiaxis(tomo, ngpus, settings, batch = 256):
+    
     tomo_attributes = set_tomo_attributes(tomo.shape, settings)
-    if tomo.dtype != np.float32:
-        tomo = tomo.astype('float32')
-    if not tomo.data.c_contiguous:
-        tomo = np.ascontiguousarray(tomo)
+    # if tomo.dtype != np.float32:
+    #     tomo = tomo.astype('float32')
+    # if not tomo.data.c_contiguous:
+    #     tomo = np.ascontiguousarray(tomo)
 
-    _remove_all_stripes_multiaxis(tomo, ngpus, batch,
-                        tomo_attributes.n_length, tomo_attributes.n_angle, tomo_attributes.n_slice,
-                        tomo_attributes.size_median, tomo_attributes.dim,
-                        tomo_attributes.large_stripes_size, tomo_attributes.background_ratio,
-                        tomo_attributes.drop_ratio)
+    tomo     = CNICE(tomo)
+    tomo_ptr = tomo.ctypes.data_as(ctypes.c_void_p)
+
+    libraft.remove_all_stripes_transposed(tomo_ptr, tomo_attributes, ctypes.c_int(ngpus), ctypes.c_int(batch))
 
     return np.reshape(tomo, (tomo_attributes.n_slice, tomo_attributes.n_angle, tomo_attributes.n_length))
 

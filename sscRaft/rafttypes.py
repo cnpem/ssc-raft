@@ -520,7 +520,7 @@ except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_CORRECTION_AXIS_SUB_PIXEL-')
     pass
 
-######## Raft - Rings ##########
+######## Raft - Rings Titarenko ##########
 try:
     libraft.getTitarenkoRingsMultiGPU.argtypes = [
         ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p,  
@@ -532,6 +532,41 @@ try:
     
 except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_TITARENKO_RINGS-')
+    pass
+
+######## Raft - Rings All Stripes & All Stripes Multiaxis ##########
+class TomoAttributes(ctypes.Structure):
+    _fields_ = [("n_length", ctypes.c_int), 
+                ("n_angle", ctypes.c_int), 
+                ("n_slice", ctypes.c_int),
+                ("size_median", ctypes.c_int), 
+                ("dim", ctypes.c_int), 
+                ("large_stripes_size", ctypes.c_int),
+                ("background_ratio", ctypes.c_float), 
+                ("drop_ratio", ctypes.c_float)
+            ]
+try:
+    libraft.remove_all_stripes.argtypes = [
+        ctypes.c_void_p, TomoAttributes, 
+        ctypes.c_int, ctypes.c_int
+    ]
+    
+    libraft.remove_all_stripes.restype  = None
+    
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_ALL_STRIPES_RINGS-')
+    pass
+
+try:
+    libraft.remove_all_stripes_transposed.argtypes = [
+        ctypes.c_void_p, TomoAttributes, 
+        ctypes.c_int, ctypes.c_int
+    ]
+    
+    libraft.remove_all_stripes_transposed.restype  = None
+    
+except:
+    logger.error(f'Cannot find C/CUDA library: -.RAFT_ALL_STRIPES_MULTIAXIS_RINGS-')
     pass
 
 ######## Raft - Flat/Dark Correction ##########
