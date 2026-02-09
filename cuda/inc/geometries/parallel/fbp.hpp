@@ -14,7 +14,6 @@ extern "C"{
 
     void getFBP(REC ReconParam, DIM tomo, DIM obj, 
     float *object, float *tomogram, float *angles, 
-    float *objPadded, float *tomoPadded,
     int blocksize, float pixel);
 }
 

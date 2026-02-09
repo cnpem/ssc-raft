@@ -3,7 +3,7 @@ from .constructors import dont_process
 from .constructors import apply_filter_constructor
 from .pre_process import apply_log
 from ..processing.opt import transpose_gpu
-from ..processing.rings import *
+from ..processing.rings_methods.titarenko import *
 from ..phase_retrieval.phase import *
 
 import time
@@ -13,7 +13,7 @@ def remove_rings_titarenko(tomogram: numpy.ndarray, recon: numpy.ndarray, dic: d
     dic['regularization'] = dic.get('rings_regularization', -1)
     dic['blocks'] = dic.get('rings_block', 1)
 
-    tomogram = rings(tomogram, dic)
+    tomogram = titarenko(tomogram, dic)
 
     return tomogram
 

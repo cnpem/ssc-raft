@@ -6,155 +6,28 @@
 #include "common/configs.hpp"
 #include "common/opt.hpp"
 #include "pipelines/pipeline.hpp"
-#include "geometries/parallel/em.hpp"
-#include "geometries/parallel/fbp.hpp"
-#include "geometries/parallel/bst.hpp"
-#include "processing/processing.hpp"
 
 #include <thread>
-
-extern "C"{
-
-    void getReconstructionMethods(CFG configs, WKP *workspace, int tomoblock, int objblock)
-    {
-        int nrays   = configs.tomo.size.x;
-        int nangles = configs.tomo.size.y;
-        int nraysp  = PDIM(configs.tomo.size.x,configs.tomo.pad.x); 
-
-        int nx      = configs.obj.size.x;
-        int ny      = configs.obj.size.y;
-        int nxp     = PDIM(configs.obj.size.x,configs.obj.pad.x); 
-        int nyp     = PDIM(configs.obj.size.y,configs.obj.pad.y);
-
-        WBST *bst_workspace; int bst_padd, blocksize_bst;
-
-        /* Padding */
-        /* Projection GPUs padded Grd and Blocks */
-        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 TomogridBlock = opt::setGridBlock(dim3(nraysp,nangles,tomoblock), TomothreadsPerBlock);
-        
-        /* Reconstruction GPUs padded Grd and Blocks */
-        dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 ObjgridBlock = opt::setGridBlock(dim3(nxp,nyp,objblock), ObjthreadsPerBlock);
-        
-        opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(workspace->tomo, 
-                                                            workspace->tomoPadd, 
-                                                            configs.tomo.padding_mode, 
-                                                            dim3(nrays, nangles, tomoblock), 
-                                                            configs.tomo.pad);
-        switch (configs.ReconParam.method)
-        {
-            case static_cast<int>(ReconstructionMethod::none):
-                /* No reconstruction done */
-            break;
-            case static_cast<int>(ReconstructionMethod::fbp):
-                /* FBP */
-                // getFBP( configs.ReconParam, 
-                //         workspace->objPadd, 
-                //         workspace->tomoPadd, 
-                //         workspace->angles, 
-                //         dim3(nraysp,nangles,tomoblock), 
-                //         dim3(nxp,nyp,objblock), 
-                //         configs.geometry.detector_pixel.x
-                //     );
-            break;
-            case static_cast<int>(ReconstructionMethod::bst):
-                /* BST */
-                // bst_padd = 2; blocksize_bst = 1;
-                
-                // bst_workspace = InitializeBST_workspace(dim3(nraysp,nangles,tomoblock), 
-                //                                         dim3(   nxp,    nxp, objblock), 
-                //                                         bst_padd, blocksize_bst);
-
-                // getBST( workspace->objPadd, workspace->tomoPadd, workspace->angles, 
-                //         nraysp, nangles, tomoblock, nxp, bst_padd, 
-                //         configs.ReconParam.filter_reg, configs.ReconParam.paganin_slices, 
-                //         configs.ReconParam.filter, configs.ReconParam.rotation_axis_offset, 
-                //         configs.geometry.detector_pixel.x, bst_workspace);
-
-                // freeBSTWorkspace(bst_workspace);
-            break;
-            case static_cast<int>(ReconstructionMethod::eEMRT):
-                /* EM RT eEM */
-            break;
-            case static_cast<int>(ReconstructionMethod::tEMRT):
-                /* EM RT tEM */
-            break;
-            case static_cast<int>(ReconstructionMethod::tEMFQ):
-                /* EM FQ tEM */
-            break;
-            case static_cast<int>(ReconstructionMethod::fdk):
-                /* FDK */
-            break;
-            default:
-                printf("No reconstruction method selected. Finishing run... \n");
-            break;
-        }
-        
-        /* Recuperate Padding for reconstruction */
-        opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(workspace->objPadd, 
-                                                                    workspace->obj, 
-                                                                    dim3(nx, ny, objblock),
-                                                                    configs.obj.pad);
-        /* Recuperate Padding for tomogram */
-        opt::remove_paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(workspace->tomoPadd, 
-                                                                    workspace->tomo, 
-                                                                    dim3(nrays, nangles, tomoblock),
-                                                                    configs.tomo.pad);
-    }
-
-}
 
 extern "C"{
     void ReconstructionPipeline(CFG configs, WKP *workspace, int tomoblock, int objblock)
     {
         cudaStream_t nstream = 0;
 
-        int nrays   = configs.tomo.size.x;
-        int nangles = configs.tomo.size.y;
-        int nflats  = configs.flat.size.z;
+        // int nrays   = configs.tomo.size.x;
+        // int nangles = configs.tomo.size.y;
+        // int nflats  = configs.flat.size.z;
 
-        int nx      = configs.obj.size.x;
-        int ny      = configs.obj.size.y;
+        // int nx      = configs.obj.size.x;
+        // int ny      = configs.obj.size.y;
 
-        if( configs.flags.do_flat_dark_correction == 1 )
-        {
-            getBackgroundCorrection_slices( workspace->tomo,
-                                            workspace->flat, 
-                                            workspace->dark, 
-                                            dim3(nrays,nangles,tomoblock), 
-                                            nflats, 
-                                            configs.flags.do_flat_dark_log);
-        }
+        getBackgroundCorrectionMethods(configs, workspace, tomoblock, nstream);
 
-        if( configs.flags.do_rings == 1 )
-        {
-            getTitarenkoRings(  workspace->tomo,
-                                dim3(nrays,nangles,tomoblock), 
-                                configs.RingsParam.rings_lambda, 
-                                configs.RingsParam.rings_block,
-                                nstream);        
-        }
+        getAlignMethods(configs, workspace, tomoblock, nstream);
 
-        if( configs.flags.do_excentric == 1 )
-        {
-            // printf("Excentric Tomo Stitching offset: %d\n",configs.AlignParam.excentric_offset);
-            // fflush(stdout);
-            getExcentricTomo(workspace->tomo, nrays, nangles, tomoblock, configs.AlignParam.excentric_offset);
+        getRingsMethods(configs, workspace, tomoblock, nstream);
 
-            /* New shape of tomogram after excentric stitching */
-            opt::set_excentric_tomo_dimensions(configs.tomo.size);
-        }
-        // printf("tomosize: \n");   
-        // printDim(configs.tomo.size);
-        // printDim(configs.obj.size);
-        // fflush(stdout);
-
-        if( configs.flags.do_reconstruction == 1)
-        {
-            /* Reconstruction */
-            getReconstructionMethods(configs, workspace, tomoblock, objblock);
-        }
+        getReconstructionMethods(configs, workspace, tomoblock, objblock, nstream);
     }
 }
 
@@ -184,7 +57,7 @@ extern "C" {
         int nangles = configs.tomo.size.y;
         int nslices = configs.tomo.size.z;
         int nflats  = configs.flat.size.z;
-        int nAngles = opt::get_angleList_dimension(configs.tomo.size, configs.flags.do_excentric); /* True Angle value - excentric tomo */
+        int nAngles = opt::get_angleList_dimension(configs.tomo.size, configs.AlignParam.method); /* True Angle value - excentric tomo */
 
         int nx      = configs.obj.size.x;
         int ny      = configs.obj.size.y;
@@ -200,11 +73,11 @@ extern "C" {
 
         opt::CPUToGPU<float>(angles, workspace->angles, nAngles);
 
-        // printf("blocksize: %d\n",blocksize);
-        // printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
-        // printf("ind_block: %d\n",ind_block);
-        // printf("sizez: %d\n",sizez);
-        // fflush(stdout);
+        printf("blocksize: %d\n",blocksize);
+        printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
+        printf("ind_block: %d\n",ind_block);
+        printf("sizez: %d\n",sizez);
+        fflush(stdout);
        
         int ptr = 0, subblock; 
 
@@ -237,7 +110,8 @@ extern "C" {
 
 extern "C"{
     void ReconstructionPipelineMultiGPU(CFG configs, int *gpus, int ngpus,
-    float *object, float *data, float *flats, float *darks, float *angles)
+    float *object, float *data, float *flats, float *darks, float *angles,
+    float *frames)
     {
         int i, Maxgpu;
 

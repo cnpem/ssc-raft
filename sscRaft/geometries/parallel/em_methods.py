@@ -49,6 +49,7 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
     tomo_ptr      = tomo.ctypes.data_as(ctypes.c_void_p) 
     
     angles        = numpy.array(angles)
+    angles        = sanitize_angles(angles)
     angles        = CNICE(angles) #angles pointer
     angles_ptr    = angles.ctypes.data_as(ctypes.c_void_p) 
 
@@ -146,6 +147,7 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
     flat_ptr      = flat.ctypes.data_as(ctypes.c_void_p) 
     
     angles        = numpy.array(angles)
+    angles        = sanitize_angles(angles)
     angles        = CNICE(angles) #angles pointer
     angles_ptr    = angles.ctypes.data_as(ctypes.c_void_p) 
 
@@ -246,6 +248,7 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
     flat_ptr    = flat.ctypes.data_as(ctypes.c_void_p) 
     
     angles      = numpy.array(angles)
+    angles      = sanitize_angles(angles)
     angles      = CNICE(angles) 
     angles_ptr  = angles.ctypes.data_as(ctypes.c_void_p) 
 

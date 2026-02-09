@@ -3,7 +3,7 @@ from ...rafttypes import *
 from ...io.io_ import *
 from ...phase_retrieval.phase import *
 from ...processing.alignments.rotationaxis import *
-from ...processing.rings import *
+from ...processing.rings_methods.titarenko import *
 
 from ..constructors import process_tomogram_volume
 from ...processing.background_correction import *

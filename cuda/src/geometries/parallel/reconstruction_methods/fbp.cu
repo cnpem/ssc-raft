@@ -67,7 +67,6 @@ extern "C"{
 extern "C"{
     void getFBP(REC ReconParam, DIM tomo, DIM obj, 
     float *object, float *tomogram, float *angles, 
-    float *objPadded, float *tomoPadded,
     int blocksize, float pixel)
     {
         /* Projection data sizes */
@@ -78,9 +77,9 @@ extern "C"{
         /* Projection padded size */
         int nrayspad = PDIM(nrays,tomo.pad.x); 
 
-        /* Projection GPUs padded Grd and Blocks */
-        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
-        dim3 TomogridBlock = opt::setGridBlock(dim3(nrayspad,nangles,blocksize), TomothreadsPerBlock);
+        // /* Projection GPUs padded Grd and Blocks */
+        // dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
+        // dim3 TomogridBlock = opt::setGridBlock(dim3(nrayspad,nangles,blocksize), TomothreadsPerBlock);
 
         /* Reconstruction sizes */
         /* Reconstruction size */
@@ -103,11 +102,11 @@ extern "C"{
         int filter_padMode = ReconParam.filter_padMode;
         float axis_offset  = ReconParam.rotation_axis_offset;
 
-        /* Padding the tomogram data */
-        opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(tomogram, tomoPadded, 
-                                                            tomo.padding_mode,
-                                                            dim3(nrays, nangles, blocksize), 
-                                                            tomo.pad);
+        // /* Padding the tomogram data */
+        // opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(tomogram, tomoPadded, 
+        //                                                     tomo.padding_mode,
+        //                                                     dim3(nrays, nangles, blocksize), 
+        //                                                     tomo.pad);
 
         /* Filter and Paganin by slices (filter) */
         Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel, filter_pad, filter_padMode);
@@ -120,7 +119,7 @@ extern "C"{
         cufftPlan1d(&mplanI, filterXpad, CUFFT_C2R, nangles);
 
         if (filter.type != Filter::EType::none)
-            filter_lowpass(mplan, mplanI, filter, tomoPadded, dim3(nrayspad, nangles, blocksize));
+            filter_lowpass(mplan, mplanI, filter, tomogram, dim3(nrayspad, nangles, blocksize));
 
         /* Sin and Cos tables for backprojection */
         float *sintable = opt::allocGPU<float>(nangles);
@@ -131,21 +130,22 @@ extern "C"{
 
 
         /* Backprojection */
-        FBPBackProjectionRT<<<ObjgridBlock,ObjthreadsPerBlock>>>(   objPadded, tomoPadded, angles,
+        FBPBackProjectionRT<<<ObjgridBlock,ObjthreadsPerBlock>>>(   object, tomogram, angles,
                                                                     sintable, costable, pixel,
                                                                     dim3(padImagex, padImagey, blocksize), 
                                                                     dim3(nrayspad, nangles, blocksize));
-        /* Remove padd from the object (reconstruction) */
-        opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(objPadded, object, 
-                                                                 dim3(sizeImagex, sizeImagey, blocksize), 
-                                                                 obj.pad);
 
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        // /* Remove padd from the object (reconstruction) */
+        // opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(objPadded, object, 
+        //                                                          dim3(sizeImagex, sizeImagey, blocksize), 
+        //                                                          obj.pad);
+
+        // HANDLE_ERROR(cudaDeviceSynchronize());
         HANDLE_ERROR(cudaFree(sintable));
         HANDLE_ERROR(cudaFree(costable));  
         HANDLE_FFTERROR(cufftDestroy(mplan));
         HANDLE_FFTERROR(cufftDestroy(mplanI));  
-        HANDLE_ERROR(cudaDeviceSynchronize());
+        // HANDLE_ERROR(cudaDeviceSynchronize());
     }
 }
 
@@ -180,7 +180,6 @@ extern "C"{
         int nTomopad = nrayspad * nangles;
 
         /* Reconstruction sizes */
-        /* Reconstruction size */
         int sizeImagex = obj.size.x;
         int sizeImagey = obj.size.y;
         int nImage     = sizeImagex * sizeImagey;
@@ -189,6 +188,14 @@ extern "C"{
         int padImagex  = PDIM(sizeImagex,obj.pad.x); 
         int padImagey  = PDIM(sizeImagey,obj.pad.y); 
         int npadImage  = padImagex * padImagey;
+
+        /* Projection GPUs padded Grd and Blocks */
+        dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 TomogridBlock = opt::setGridBlock(dim3(nrayspad,nangles,blocksize), TomothreadsPerBlock);
+
+        /* Reconstruction GPUs padded Grd and Blocks */
+        dim3 ObjthreadsPerBlock(TPBX,TPBY,TPBZ);
+        dim3 ObjgridBlock = opt::setGridBlock(dim3(padImagex,padImagey,blocksize), ObjthreadsPerBlock);
 
         float *dtomo       = opt::allocGPU<float>((size_t)    nTomo * blocksize);
         float *dobj        = opt::allocGPU<float>((size_t)   nImage * blocksize);   
@@ -206,9 +213,22 @@ extern "C"{
 
             opt::CPUToGPU<float>(tomogram + (size_t)nTomo * ptr, dtomo, (size_t)nTomo * subblock);
 
+            /* Padding the tomogram data */
+            TomogridBlock.z = (int)ceil( subblock / TPBZ ) + 1;
+            opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(dtomo, dtomoPadded, 
+                                                                tomo.padding_mode,
+                                                                dim3(nrays, nangles, subblock), 
+                                                                tomo.pad);
+
             getFBP( ReconParam, tomo, obj, 
-                    dobj, dtomo, dangles, dobjPadded, dtomoPadded,
+                    dobjPadded, dtomoPadded, dangles,
                     subblock, geometry.obj_pixel.x); 
+
+            /* Remove padd from the object (reconstruction) */
+            ObjgridBlock.z = TomogridBlock.z;
+            opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(dobjPadded, dobj, 
+                                                                     dim3(sizeImagex, sizeImagey, subblock), 
+                                                                     obj.pad);
 
             opt::GPUToCPU<float>(object + (size_t)nImage * ptr, dobj, (size_t)nImage * subblock);
 

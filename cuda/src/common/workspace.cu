@@ -17,7 +17,7 @@ extern "C"{
         size_flat: (size_tomo.x, size_tomo.z, nflats) = (nrays, nslices_gpu_block, nflats)
         size_dark: (size_tomo.x, size_tomo.z,      1) = (nrays, nslices_gpu_block,      1)
 
-        nangles: True dimension size of angles (related to excentric measurements)
+        nangles: Dimension size of angles
         */
 		WKP *workspace = (WKP *)malloc(sizeof(WKP));
 
@@ -28,7 +28,7 @@ extern "C"{
         const int tomosizepadx    = PDIM(size_tomo.x,tomo_pad.x); 
         const size_t tomoptr_pad  = tomosizepadx * size_tomo.y * size_tomo.z;
 
-        const size_t objptr_size  = 2 * size_obj.x *  2 * size_obj.y *  size_obj.z;
+        const size_t objptr_size  = size_obj.x *  size_obj.y *  size_obj.z;
         const int objsizepadx     = PDIM( size_obj.x, size_obj.x); 
         const int objsizepady     = PDIM( size_obj.y, size_obj.y); 
         const size_t objptr_pad   = objsizepadx * objsizepady *  size_obj.z;

@@ -150,7 +150,9 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     gpus = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_p = gpus.ctypes.data_as(ctypes.c_void_p)
 
-    angles = CNICE(angles, numpy.float32)
+    angles   = numpy.array(angles)
+    angles   = sanitize_angles(angles)
+    angles   = CNICE(angles, numpy.float32)
     angles_p = angles.ctypes.data_as(ctypes.c_void_p)
 
     logger.info(f'Tomogram data shape: {tomogram.shape} = (slices,angles,rays).')

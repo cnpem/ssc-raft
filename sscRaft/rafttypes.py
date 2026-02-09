@@ -117,6 +117,40 @@ def ReconMethod(method):
         return 6
     else:
         return 1
+
+def RingsMethod(method):
+    if method.lower() == 'none':
+        return 0
+    elif method.lower() == 'all stripes':
+        return 1
+    elif method.lower() == 'all stripes multiaxis':
+        return 2
+    elif method.lower() == 'titarenko':
+        return 3
+    else:
+        return 1
+
+def AlignMethod(method):
+    if method.lower() == 'none':
+        return 0
+    elif method.lower() == 'rot axis recon':
+        return 1
+    elif method.lower() == 'rot axis':
+        return 2
+    elif method.lower() == 'excentric':
+        return 3
+    else:
+        return 1
+    
+def BckCorrMethod(method):
+    if method.lower() == 'none':
+        return 0
+    elif method.lower() == 'classic':
+        return 1
+    elif method.lower() == 'excentric':
+        return 2
+    else:
+        return 1
     
 def FilterNumber(mfilter):
     if mfilter.lower() == 'none':
@@ -246,17 +280,17 @@ def define_geometry(detector_pixel, obj_pixel, z1, z2, magnitude, energy, wavele
                           wavelength     = wavelength)
     return geometry_
    
-class FLAG(ctypes.Structure):
-    _fields_ = [("do_flat_dark_correction", ctypes.c_int),
-                ("do_flat_dark_log", ctypes.c_int),
-                ("do_paganin_filter", ctypes.c_int),
-                ("do_rings", ctypes.c_int),
-                ("do_rotation_axis_offset", ctypes.c_int),
-                ("do_rotation_correction", ctypes.c_int),
-                ("do_alignment", ctypes.c_int),
-                ("do_excentric_offset", ctypes.c_int),
-                ("do_excentric", ctypes.c_int),
-                ("do_reconstruction", ctypes.c_int)]
+# class FLAG(ctypes.Structure):
+#     _fields_ = [("do_flat_dark_correction", ctypes.c_int),
+#                 ("do_flat_dark_log", ctypes.c_int),
+#                 ("do_paganin_filter", ctypes.c_int),
+#                 ("do_rings", ctypes.c_int),
+#                 ("do_rotation_axis_offset", ctypes.c_int),
+#                 ("do_rotation_correction", ctypes.c_int),
+#                 ("do_alignment", ctypes.c_int),
+#                 ("do_excentric_offset", ctypes.c_int),
+#                 ("do_excentric", ctypes.c_int),
+#                 ("do_reconstruction", ctypes.c_int)]
 
 class CEF(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
@@ -270,13 +304,59 @@ def contrast_param(method, beta_delta, regularization = 0.0, post_process = 0):
                regularization = regularization, 
                post_process   = post_process)
 
+class TomoAttributes(ctypes.Structure):
+    _fields_ = [("n_length", ctypes.c_int), 
+                ("n_angle", ctypes.c_int), 
+                ("n_slice", ctypes.c_int),
+                ("size_median", ctypes.c_int), 
+                ("dim", ctypes.c_int), 
+                ("large_stripes_size", ctypes.c_int),
+                ("background_ratio", ctypes.c_float), 
+                ("drop_ratio", ctypes.c_float)
+            ]
+    
 class RF(ctypes.Structure):
     _fields_ = [("method", ctypes.c_int), 
                 ("rings_block", ctypes.c_int), 
-                ("rings_lambda", ctypes.c_float)]   
+                ("rings_lambda", ctypes.c_float),
+                ("all_stripes", TomoAttributes)
+                ]   
+    
+def set_all_tripes_attributes(size, settings):
+    
+    if len(size) == 2:
+        n_angle, n_length = size
+        n_slice           = 1
+    elif len(size) == 3:
+        n_slice, n_angle, n_length = size
+    else:
+        logger.warning(f'Tomogram shape {size} needs to have size 3. Results may be wrong!')
+        n_slice, n_angle, n_length = size
 
-def rings_param(method = 0, rings_block = 1, rings_lambda = -1):
-    return RF(method       = method,
+    size_median                     = settings['size_median'] + 1 if settings['size_median'] % 2 == 0 else settings['size_median']
+    dim                             = settings['dim']
+    large_stripes_size              = settings['large_stripes_size'] + 1 if settings['large_stripes_size'] % 2 == 0 else settings['large_stripes_size']
+    background_ratio                = settings['background_ratio']
+    drop_ratio                      = settings['drop_ratio']
+
+    return TomoAttributes( n_length, n_angle, n_slice,
+                            size_median, dim, large_stripes_size,
+                            background_ratio, drop_ratio)
+
+def rings_param(method = 'all stripes', tomosize = (1,1,1), median_s = 21, large_s = 61, 
+                b_ratio = 10.0, d_ratio = 0.1, d = 1, 
+                rings_block = 1, rings_lambda = -1) -> RF:
+    
+    methodRings = RingsMethod(method)
+    print(method,methodRings)
+
+    all_stripes = set_all_tripes_attributes(size = tomosize, settings = {'size_median': median_s,
+                                                                        'large_stripes_size': large_s,
+                                                                        'background_ratio': b_ratio,
+                                                                        'drop_ratio': d_ratio,
+                                                                        'dim': d})
+    return RF(method       = methodRings,
+              all_stripes  = all_stripes,
               rings_block  = rings_block,
               rings_lambda = rings_lambda)
 
@@ -285,7 +365,7 @@ class ALGN(ctypes.Structure):
                 ("excentric_offset", ctypes.c_int), 
                 ("rotation_axis_offset", ctypes.c_float)]   
 
-def align_param(method = 0, excentric_offset = 0, rotation_axis_offset = 0):
+def align_param(method = 0, excentric_offset = 0, rotation_axis_offset = 0) -> ALGN:
     return ALGN(method               = method,
                 excentric_offset     = excentric_offset,
                 rotation_axis_offset = rotation_axis_offset)
@@ -338,29 +418,31 @@ def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp',
                 interpolation        = interpolationType)
 
 class CFG(ctypes.Structure):
-    _fields_ = [("geometry", GEO), 
+    _fields_ = [("back_corr_method", ctypes.c_int),
+                ("geometry", GEO), 
                 ("obj", DIM),
                 ("tomo", DIM),
                 ("flat", DIM),
                 ("dark", DIM),
-                ("flags", FLAG),
                 ("ContrastParam", CEF),
                 ("RingsParam", RF),
                 ("AlignParam", ALGN),
                 ("ReconParam", REC)
                 ] 
 
-def configs_param(tomo_dim, obj_dim, flat_dim, dark_dim, geometry, rings_param, contrast_param, align_param, recon_param, flags):
-    return CFG(geometry      = geometry,
-               obj           = obj_dim,
-               tomo          = tomo_dim,
-               flat          = flat_dim,
-               dark          = dark_dim,
-               flags         = flags,
-               ContrastParam = contrast_param,
-               RingsParam    = rings_param,
-               AlignParam    = align_param,
-               ReconParam    = recon_param)
+def configs_param(tomo_dim, obj_dim, flat_dim, dark_dim, geometry, rings_param, contrast_param, align_param, recon_param, back_corr_method = 'classic'):
+    methodBckCorr = BckCorrMethod(back_corr_method)
+    
+    return CFG(back_corr_method = methodBckCorr,
+               geometry         = geometry,
+               obj              = obj_dim,
+               tomo             = tomo_dim,
+               flat             = flat_dim,
+               dark             = dark_dim,
+               ContrastParam    = contrast_param,
+               RingsParam       = rings_param,
+               AlignParam       = align_param,
+               ReconParam       = recon_param)
 
 #########################
 
@@ -535,16 +617,6 @@ except:
     pass
 
 ######## Raft - Rings All Stripes & All Stripes Multiaxis ##########
-class TomoAttributes(ctypes.Structure):
-    _fields_ = [("n_length", ctypes.c_int), 
-                ("n_angle", ctypes.c_int), 
-                ("n_slice", ctypes.c_int),
-                ("size_median", ctypes.c_int), 
-                ("dim", ctypes.c_int), 
-                ("large_stripes_size", ctypes.c_int),
-                ("background_ratio", ctypes.c_float), 
-                ("drop_ratio", ctypes.c_float)
-            ]
 try:
     libraft.remove_all_stripes.argtypes = [
         ctypes.c_void_p, TomoAttributes, 
@@ -856,6 +928,13 @@ def set_precision(precision):
         raise ValueError(f'Invalid datatype:{precision}. Options: `float32`, `uint16` and `uint8`.')
 
     return datatype, Ndatatype
+
+def sanitize_angles(angles: numpy.ndarray) -> numpy.ndarray:
+    ''' Set angles to start at 0 (zero) radians. 
+    '''
+    angles = angles - min(angles)
+
+    return angles
 
 def get_excentric_obj_dimensions(nx,ny):
      return 2 * nx, 2 * ny

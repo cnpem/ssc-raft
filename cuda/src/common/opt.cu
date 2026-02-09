@@ -188,7 +188,7 @@ void opt::set_excentric_tomo_dimensions(dim3 &tomo){
 int opt::get_angleList_dimension(dim3 tomo, int is_excentric){
     int nangles;
 
-    if ( is_excentric == 1 ) nangles = int(tomo.y/2); else nangles = tomo.y;
+    if ( is_excentric == static_cast<int>(AlignMethod::excentric) ) nangles = int(tomo.y/2); else nangles = tomo.y;
 
     return nangles;
 }

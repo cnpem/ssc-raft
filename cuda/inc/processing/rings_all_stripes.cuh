@@ -16,26 +16,19 @@
 #include <driver_types.h>
 #include <cuda_runtime_api.h>
 #include <device_launch_parameters.h>
-
-typedef struct {
-  int n_length;
-  int n_angle;
-  int n_slice;
-  int size_median;
-  int dim;
-  int large_stripes_size;
-  float background_ratio;
-  float drop_ratio;
-} TomoAttributes;
-
+#include "common/configs.hpp"
 
 // Remove Stripes Algorithms
+extern "C"{
 
-void remove_all_stripes(float *tomo, TomoAttributes attribute, int ndevs, int batch);
-void _remove_all_stripes(float *tomo, TomoAttributes attribute, int n_slices, int device);
+  void remove_all_stripes(float *tomo, TomoAttributes attribute, int ndevs, int batch);
+  void _remove_all_stripes(float *tomo, TomoAttributes attribute, int n_slices, int device);
+  void get_remove_all_stripes(float *tomo, TomoAttributes attribute, int nslices, int nangles, int nrays);
 
-void remove_all_stripes_transposed(float *tomo, TomoAttributes attribute, int ndevs, int batch);
-void _remove_all_stripes_transposed(float *tomo_, TomoAttributes attribute, int start_x, int n_length, int device);
+  void remove_all_stripes_transposed(float *tomo, TomoAttributes attribute, int ndevs, int batch);
+  void _remove_all_stripes_transposed(float *tomo_, TomoAttributes attribute, int start_x, int n_length, int device);
+
+}
 
 // void remove_unresponsive_and_fluctuating_stripes(float *tomo, TomoAttributes attribute);
 // void remove_large_stripe(float *tomo, TomoAttributes attribute);

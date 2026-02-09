@@ -15,70 +15,115 @@
 #include <cuda_runtime_api.h>
 #include <driver_types.h>
 
+extern "C"{
+    void remove_all_stripes(float *tomo, TomoAttributes attribute, int ndevs, int batch) {
 
-void remove_all_stripes(float *tomo, TomoAttributes attribute, int ndevs, int batch) {
+        int slice_blocks = std::min(attribute.n_slice / ndevs, std::min(attribute.n_slice, batch));
+        int n_process = (attribute.n_slice + slice_blocks - 1) / slice_blocks;
 
-	int slice_blocks = std::min(attribute.n_slice / ndevs, std::min(attribute.n_slice, batch));
-	int n_process = (attribute.n_slice + slice_blocks - 1) / slice_blocks;
+        std::vector<std::thread> threads_all_stripes;
+        threads_all_stripes.reserve(ndevs);
 
-	std::vector<std::thread> threads_all_stripes;
-	threads_all_stripes.reserve(ndevs);
+        for (int k = 0; k < n_process; ++k) {
+            int idx = k * slice_blocks * attribute.n_angle * attribute.n_length;
+            int size = (k == n_process - 1) ? (attribute.n_slice % slice_blocks ? attribute.n_slice % slice_blocks : slice_blocks): slice_blocks;
 
-	for (int k = 0; k < n_process; ++k) {
-		int idx = k * slice_blocks * attribute.n_angle * attribute.n_length;
-		int size = (k == n_process - 1) ? (attribute.n_slice % slice_blocks ? attribute.n_slice % slice_blocks : slice_blocks): slice_blocks;
+            fprintf(stderr, "Process %d %d %d %d!\n", slice_blocks, k, k * slice_blocks, size);
 
-		fprintf(stderr, "Process %d %d %d %d!\n", slice_blocks, k, k * slice_blocks, size);
+            threads_all_stripes.emplace_back(std::thread(_remove_all_stripes, tomo + idx, attribute, size, k % ndevs));
 
-		threads_all_stripes.emplace_back(std::thread(_remove_all_stripes, tomo + idx, attribute, size, k % ndevs));
+            if (threads_all_stripes.size() == ndevs || k == n_process - 1) {
+                for (auto &thread : threads_all_stripes) thread.join();
+                threads_all_stripes.clear();
+            }
+    }
+    }
 
-		if (threads_all_stripes.size() == ndevs || k == n_process - 1) {
-			for (auto &thread : threads_all_stripes) thread.join();
-			threads_all_stripes.clear();
-		}
-  }
-}
+    void _remove_all_stripes(float *tomo_, TomoAttributes attribute, int n_slices, int device) {
 
-void _remove_all_stripes(float *tomo_, TomoAttributes attribute, int n_slices, int device) {
+        float *tomo;
+        int *index_sorting;
+        float *sorted_data;
+        checkCuda(cudaSetDevice(device));
 
-    float *tomo;
-    int *index_sorting;
-    float *sorted_data;
-    checkCuda(cudaSetDevice(device));
+        int n = n_slices * attribute.n_angle * attribute.n_length;
+        // Allocating Memory for Sorting Arrays
+        checkCuda(cudaMalloc((void **)&tomo, n * sizeof(float)));
+        checkCuda(cudaMalloc((void **)&sorted_data, n * sizeof(float)));
+        checkCuda(cudaMalloc((void **)&index_sorting, n * sizeof(int)));
 
-    int n = n_slices * attribute.n_angle * attribute.n_length;
-    // Allocating Memory for Sorting Arrays
-    checkCuda(cudaMalloc((void **)&tomo, n * sizeof(float)));
-    checkCuda(cudaMalloc((void **)&sorted_data, n * sizeof(float)));
-    checkCuda(cudaMalloc((void **)&index_sorting, n * sizeof(int)));
+        // Copying Tomography to GPU
+        checkCuda(cudaMemcpy(tomo, tomo_, n * sizeof(float), cudaMemcpyHostToDevice));
+        checkCuda(cudaMemcpy(sorted_data, tomo_, n * sizeof(float), cudaMemcpyHostToDevice));
 
-    // Copying Tomography to GPU
-    checkCuda(cudaMemcpy(tomo, tomo_, n * sizeof(float), cudaMemcpyHostToDevice));
-    checkCuda(cudaMemcpy(sorted_data, tomo_, n * sizeof(float), cudaMemcpyHostToDevice));
+        bool *list_mask;
+        float *list_data;
+        float *sorted_list;
 
-    bool *list_mask;
-    float *list_data;
-    float *sorted_list;
+        n = n_slices * attribute.n_length;
 
-    n = n_slices * attribute.n_length;
+        // Allocating Memory for Masks
+        checkCuda(cudaMalloc((void **)&list_data, n * sizeof(double)));
+        checkCuda(cudaMalloc((void **)&list_mask, n * sizeof(bool)));
+        checkCuda(cudaMalloc((void **)&sorted_list, n * sizeof(double)));
 
-    // Allocating Memory for Masks
-    checkCuda(cudaMalloc((void **)&list_data, n * sizeof(double)));
-    checkCuda(cudaMalloc((void **)&list_mask, n * sizeof(bool)));
-    checkCuda(cudaMalloc((void **)&sorted_list, n * sizeof(double)));
+        // Kernel CUDA and Operations
+        execute_remove_all_stripes(tomo, sorted_data, index_sorting, list_data, sorted_list, list_mask, attribute, n_slices);
 
-    // Kernel CUDA and Operations
-    execute_remove_all_stripes(tomo, sorted_data, index_sorting, list_data, sorted_list, list_mask, attribute, n_slices);
+        n = n_slices * attribute.n_angle * attribute.n_length;
+        checkCuda(cudaMemcpy(tomo_, tomo, n * sizeof(float), cudaMemcpyDeviceToHost));
 
-    n = n_slices * attribute.n_angle * attribute.n_length;
-    checkCuda(cudaMemcpy(tomo_, tomo, n * sizeof(float), cudaMemcpyDeviceToHost));
+        checkCuda(cudaFree(tomo));
+        checkCuda(cudaFree(index_sorting));
+        checkCuda(cudaFree(sorted_data));
+        checkCuda(cudaFree(list_data));
+        checkCuda(cudaFree(sorted_list));
+        checkCuda(cudaFree(list_mask));
+    }
 
-    checkCuda(cudaFree(tomo));
-    checkCuda(cudaFree(index_sorting));
-    checkCuda(cudaFree(sorted_data));
-    checkCuda(cudaFree(list_data));
-    checkCuda(cudaFree(sorted_list));
-    checkCuda(cudaFree(list_mask));
+    void get_remove_all_stripes(float *tomo, TomoAttributes attribute, int nslices, int nangles, int nrays)
+    {
+        // float *tomo;
+        int *index_sorting;
+        float *sorted_data;
+        // checkCuda(cudaSetDevice(device));
+
+        // printf("Dentro da funcão get_remove_all_stripes() \n");
+
+        int n = nslices * nangles * nrays;
+        // Allocating Memory for Sorting Arrays
+        // checkCuda(cudaMalloc((void **)&tomo, n * sizeof(float)));
+        checkCuda(cudaMalloc((void **)&sorted_data, n * sizeof(float)));
+        checkCuda(cudaMalloc((void **)&index_sorting, n * sizeof(int)));
+
+        // Copying Tomography to GPU
+        // checkCuda(cudaMemcpy(tomo, tomo_, n * sizeof(float), cudaMemcpyHostToDevice));
+        checkCuda(cudaMemcpy(sorted_data, tomo, n * sizeof(float), cudaMemcpyDeviceToDevice));
+
+        bool *list_mask;
+        float *list_data;
+        float *sorted_list;
+
+        n = nslices * nrays;
+
+        // Allocating Memory for Masks
+        checkCuda(cudaMalloc((void **)&list_data, n * sizeof(double)));
+        checkCuda(cudaMalloc((void **)&list_mask, n * sizeof(bool)));
+        checkCuda(cudaMalloc((void **)&sorted_list, n * sizeof(double)));
+
+        // Kernel CUDA and Operations
+        execute_remove_all_stripes(tomo, sorted_data, index_sorting, list_data, sorted_list, list_mask, attribute, nslices);
+
+        // n = n_slices * attribute.n_angle * attribute.n_length;
+        // checkCuda(cudaMemcpy(tomo_, tomo, n * sizeof(float), cudaMemcpyDeviceToHost));
+
+        // checkCuda(cudaFree(tomo));
+        checkCuda(cudaFree(index_sorting));
+        checkCuda(cudaFree(sorted_data));
+        checkCuda(cudaFree(list_data));
+        checkCuda(cudaFree(sorted_list));
+        checkCuda(cudaFree(list_mask));
+    }
 }
 
 void execute_remove_all_stripes(float *tomo, float *sorted_data, int *index_sorting, float *list_data, float *sorted_list, bool *list_mask, TomoAttributes attribute, int n_slices) {

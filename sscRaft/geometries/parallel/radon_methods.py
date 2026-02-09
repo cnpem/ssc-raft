@@ -39,6 +39,7 @@ def radon_RT(phantom, angles, gpus, pixel = 1.0):
     phantom_ptr  = phantom.ctypes.data_as(ctypes.c_void_p)
       
     angles       = numpy.array(angles)
+    angles       = sanitize_angles(angles)
     nangles      = angles.shape[0]
     angles       = CNICE(angles)
     angles_ptr   = angles.ctypes.data_as(ctypes.c_void_p)  

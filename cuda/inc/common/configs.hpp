@@ -51,7 +51,7 @@
 #include <iostream>
 #include <future>
 
-enum class ReconstructionMethod
+enum struct ReconstructionMethod
 {
     none  = 0,
     fbp   = 1,
@@ -60,6 +60,28 @@ enum class ReconstructionMethod
     tEMRT = 4,
     tEMFQ = 5,
     fdk   = 6
+};
+
+enum struct RingsMethod
+{
+    none        = 0, /* No method */
+    allstripes  = 1, /* All Stripes */
+    allstripesM = 2, /* All Stripes Multiaxis */
+    titarenko   = 3, /* Titarenko */
+};
+
+enum struct AlignMethod
+{
+    none        = 0, /* No method */
+    rotaxisM    = 1, /* Rotation axis correction in reconstruction methods */
+    rotaxis     = 2, /* Rotation axis correction */
+    excentric   = 3, /* Excentric tomo stitching */
+};
+
+enum struct BackCorrectionMethod
+{
+    none        = 0, /* No method */
+    classic     = 1, /* Classic background correction by slices with log*/
 };
 
 typedef struct coordinates
@@ -127,12 +149,24 @@ typedef struct ContrastEnhancementFilter
 
 }CEF;
 
+typedef struct { /* Rings All Stripes & Multiaxis parameters */
+    int n_length;
+    int n_angle;
+    int n_slice;
+    int size_median;
+    int dim;
+    int large_stripes_size;
+    float background_ratio;
+    float drop_ratio;
+  } TomoAttributes;
+
 typedef struct RingsFilter
 {
-    /* Paganin Filter */
-    int method; /* Rings methods. Options: titarenko*/
-    int rings_block;    /* Titarenko's parameter */
-    float rings_lambda; /* Titarenko's regularization parameter */
+    /* Rings Filter */
+    int method;                 /* Rings methods. Options: titarenko, all stripes*/
+    int rings_block;            /* Titarenko's parameter */
+    float rings_lambda;         /* Titarenko's regularization parameter */
+    TomoAttributes all_stripes; /* All Stripes/Multiaxis parameter */
 }RF;
 
 typedef struct Alignment
@@ -160,6 +194,7 @@ typedef struct Reconstruction
 
 typedef struct config
 { 
+    int back_corr_method;
     GEO geometry;
     /* Reconstruction variables */
     DIM obj;
@@ -167,7 +202,7 @@ typedef struct config
     DIM tomo;
     DIM flat; 
     DIM dark; 
-    FLAG flags;
+    // FLAG flags;
     CEF ContrastParam;
     RF RingsParam;
     ALGN AlignParam;
