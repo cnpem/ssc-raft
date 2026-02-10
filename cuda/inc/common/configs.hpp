@@ -80,8 +80,9 @@ enum struct AlignMethod
 
 enum struct BackCorrectionMethod
 {
-    none        = 0, /* No method */
-    classic     = 1, /* Classic background correction by slices with log*/
+    none         = 0, /* No method */
+    classic      = 1, /* Classic background correction by slices with log*/
+    classicNoLog = 2, /* Classic background correction by slices with no log*/
 };
 
 typedef struct coordinates
@@ -124,21 +125,6 @@ typedef struct geometry
     float z1, z2, magnitude, energy, wavelength;
 }GEO;
 
-typedef struct flags
-{
-    /* Bool variables - Pipeline */
-    int do_flat_dark_correction;
-    int do_flat_dark_log;
-    int do_paganin_filter;
-    int do_rings;
-    int do_rotation_axis_offset;
-    int do_rotation_correction;
-    int do_alignment;
-    int do_excentric_offset;
-    int do_excentric;
-    int do_reconstruction;
-}FLAG;
-
 typedef struct ContrastEnhancementFilter
 {
     /* Paganin Filter */
@@ -168,13 +154,14 @@ typedef struct RingsFilter
     float rings_lambda;         /* Titarenko's regularization parameter */
     TomoAttributes all_stripes; /* All Stripes/Multiaxis parameter */
 }RF;
-
+ 
 typedef struct Alignment
 {
     /* Alignment methods */
-    int method; /* Alignment methods. Options: none yet */
-    int excentric_offset;    /* Excentric offset parameter */
+    int method;                 /* Alignment methods. Options: none, rotaxisM, rotaxis, excentric */
+    int excentric_offset;       /* Excentric offset parameter */
     float rotation_axis_offset; /* Rotation axis offset */
+    int offset_method;          /* Offset computation method. Options: none yet */
 }ALGN;
 
 typedef struct Reconstruction

@@ -5,77 +5,10 @@ import ctypes
 from ctypes import *
 import ctypes.util
 
-# General =========
-import os
-import sys
-import numpy
-import numpy as np
-import json
-import h5py
-import time
-from time import time
-import warnings
-import pathlib
-import inspect
-import matplotlib.pyplot as plt
-
-# Multiprocessing =========
-import multiprocessing
-from multiprocessing import shared_memory
-from multiprocessing.shared_memory import SharedMemory as SM
-import multiprocessing as mp
-
-# wiggle.py ============
-import uuid
-import SharedArray as sa
-from scipy.optimize import minimize
-
-
-# alignment.py =========
-
-import concurrent.futures
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from functools import partial
-from tqdm import tqdm
-
-import skimage
-import scipy
-from skimage.registration import phase_cross_correlation
-from skimage.transform import pyramid_gaussian
-from skimage.transform import pyramid_reduce
-from scipy.ndimage import center_of_mass
-# ======================
+from utils import *
 
 from sscRaft import __version__
 
-'''----------------------------------------------'''
-import logging
-
-console_log_level = 10
-
-logger = logging.getLogger(__name__)
-
-console_handler = logging.StreamHandler(sys.stdout)
-
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console_handler.setFormatter(formatter)
-logger.addHandler(console_handler)
-
-logger.setLevel(logging.DEBUG)
-console_handler.setLevel(console_log_level)
-
-DEBUG = 10
-'''----------------------------------------------'''
-
-#==========================================================
-# Definitions and Constants
-#==========================================================
-LIGHT_VELOCITY = 299792458                         # [m/s]
-PLANK_CONSTANT = 4.135667662E-15                   # [eV.s]
-CONST          = PLANK_CONSTANT * LIGHT_VELOCITY   # [eV.m]
-#==========================================================
-
-nthreads = multiprocessing.cpu_count()
 
 ############# Load required libraries ##############
 
@@ -98,130 +31,10 @@ def load_library(lib,ext):
 
 libraft  = load_library(_lib, ext)
 
-############# Basic functions ##############
 
-def ReconMethod(method):
-    if method.lower() == 'none':
-        return 0
-    elif method.lower() == 'fbp':
-        return 1
-    elif method.lower() == 'bst':
-        return 2
-    elif method.lower() == 'eEMRT':
-        return 3
-    elif method.lower() == 'tEMRT':
-        return 4
-    elif method.lower() == 'tEMFQ':
-        return 5
-    elif method.lower() == 'fdk':
-        return 6
-    else:
-        return 1
-
-def RingsMethod(method):
-    if method.lower() == 'none':
-        return 0
-    elif method.lower() == 'all stripes':
-        return 1
-    elif method.lower() == 'all stripes multiaxis':
-        return 2
-    elif method.lower() == 'titarenko':
-        return 3
-    else:
-        return 1
-
-def AlignMethod(method):
-    if method.lower() == 'none':
-        return 0
-    elif method.lower() == 'rot axis recon':
-        return 1
-    elif method.lower() == 'rot axis':
-        return 2
-    elif method.lower() == 'excentric':
-        return 3
-    else:
-        return 1
-    
-def BckCorrMethod(method):
-    if method.lower() == 'none':
-        return 0
-    elif method.lower() == 'classic':
-        return 1
-    elif method.lower() == 'excentric':
-        return 2
-    else:
-        return 1
-    
-def FilterNumber(mfilter):
-    if mfilter.lower() == 'none':
-        return 0
-    elif mfilter.lower() == 'gaussian':
-        return 1
-    elif mfilter.lower() == 'lorentz':
-        return 2
-    elif mfilter.lower() == 'cosine':
-        return 3
-    elif mfilter.lower() == 'rectangle':
-        return 4
-    elif mfilter.lower() == 'hann':
-        return 5
-    elif mfilter.lower() == 'hamming':
-        return 6
-    elif mfilter.lower() == 'ramp':
-        return 7
-    else:
-        return 6
-
-def ContrastFilterNumber(mfilter):
-    if mfilter.lower() == 'none':
-        return 0
-    elif mfilter.lower() == 'paganin':
-        return 1
-    elif mfilter.lower() == 'paganin_slices':
-        return 2
-    elif mfilter.lower() == 'contrast':
-        return 3
-    else:
-        return 1
-
-def PaddMode(pmode):
-    if pmode.lower() == 'none':
-        return 0
-    elif pmode.lower() == 'zero':
-        return 1
-    elif pmode.lower() == 'edge':
-        return 2
-    elif pmode.lower() == 'ones':
-        return 3
-    else:
-        return 2
-    
-def setInterpolation(name):
-    """ Set interpolation 
-
-    Args:
-        name (str): string name for the interpolation
-
-    Returns:
-        (int): Value defining the interpolation name
-
-    Options:
-        name (str): \'nearest\' and \'bilinear\'
-
-    """
-    if name.lower() == 'nearest':
-        return 0
-    elif name.lower() == 'bilinear':
-        return 1
-    elif name.lower() == 'none':
-        return -1
-    else:
-        logger.warning(f'Interpolation invalid. Using default \'nearest\' interpolation.')
-        return 0
-    
 #########################
 #|      ssc-raft       |#
-#|  Struct prototypes  |#
+#|  Struct Prototypes  |#
 #########################
 
 class coord(ctypes.Structure):
@@ -233,6 +46,77 @@ class dim3(ctypes.Structure):
 class DIM(ctypes.Structure):
     _fields_ = [("size", dim3), ("pad", dim3), ("blocksize", ctypes.c_int), ("padding_mode", ctypes.c_int)]
 
+class GEO(ctypes.Structure):
+    _fields_ = [("detector_pixel", coord), 
+                ("obj_pixel", coord), 
+                ("z1", ctypes.c_float), 
+                ("z2", ctypes.c_float), 
+                ("magnitude", ctypes.c_float), 
+                ("energy", ctypes.c_float), 
+                ("wavelength", ctypes.c_float)
+                ]
+
+class CEF(ctypes.Structure):
+    _fields_ = [("method", ctypes.c_int), 
+                ("beta_delta", ctypes.c_float), 
+                ("regularization", ctypes.c_float),
+                ("post_process", ctypes.c_int)]   
+
+class TomoAttributes(ctypes.Structure):
+    _fields_ = [("n_length", ctypes.c_int), 
+                ("n_angle", ctypes.c_int), 
+                ("n_slice", ctypes.c_int),
+                ("size_median", ctypes.c_int), 
+                ("dim", ctypes.c_int), 
+                ("large_stripes_size", ctypes.c_int),
+                ("background_ratio", ctypes.c_float), 
+                ("drop_ratio", ctypes.c_float)
+            ]
+    
+class RF(ctypes.Structure):
+    _fields_ = [("method", ctypes.c_int), 
+                ("rings_block", ctypes.c_int), 
+                ("rings_lambda", ctypes.c_float),
+                ("all_stripes", TomoAttributes)
+                ]   
+
+class ALGN(ctypes.Structure):
+    _fields_ = [("method", ctypes.c_int), 
+                ("excentric_offset", ctypes.c_int), 
+                ("rotation_axis_offset", ctypes.c_float),
+                ("offset_method", ctypes.c_int)]  
+
+class REC(ctypes.Structure):
+    _fields_ = [("method", ctypes.c_int), 
+                ("filter", ctypes.c_int), 
+                ("filter_reg", ctypes.c_float),
+                ("filter_pad", ctypes.c_int),
+                ("filter_padMode", ctypes.c_int),
+                ("paganin_slices", ctypes.c_float),
+                ("iterations", ctypes.c_int),
+                ("rotation_axis_offset", ctypes.c_float),
+                ("total_variation", ctypes.c_float),
+                ("interpolation", ctypes.c_int)
+                ] 
+
+class CFG(ctypes.Structure):
+    _fields_ = [("back_corr_method", ctypes.c_int),
+                ("geometry", GEO), 
+                ("obj", DIM),
+                ("tomo", DIM),
+                ("flat", DIM),
+                ("dark", DIM),
+                ("ContrastParam", CEF),
+                ("RingsParam", RF),
+                ("AlignParam", ALGN),
+                ("ReconParam", REC)
+                ] 
+
+#########################
+#|      ssc-raft       |#
+#|  Struct Functions   |#
+#########################   
+#        
 def dimension(size, pad = (0,0,0), blocksize = 0, padd_mode = 'none'):
     x, y, z = size
     px      = int(pad[0])
@@ -256,16 +140,6 @@ def dimension(size, pad = (0,0,0), blocksize = 0, padd_mode = 'none'):
 
     return dim_size
 
-class GEO(ctypes.Structure):
-    _fields_ = [("detector_pixel", coord), 
-                ("obj_pixel", coord), 
-                ("z1", ctypes.c_float), 
-                ("z2", ctypes.c_float), 
-                ("magnitude", ctypes.c_float), 
-                ("energy", ctypes.c_float), 
-                ("wavelength", ctypes.c_float)
-                ]
-
 def define_geometry(detector_pixel, obj_pixel, z1, z2, magnitude, energy, wavelength):
 
     detector_pixel_ = coord(x = detector_pixel[0], y = detector_pixel[1], z = detector_pixel[2])
@@ -279,24 +153,6 @@ def define_geometry(detector_pixel, obj_pixel, z1, z2, magnitude, energy, wavele
                           energy         = energy, 
                           wavelength     = wavelength)
     return geometry_
-   
-# class FLAG(ctypes.Structure):
-#     _fields_ = [("do_flat_dark_correction", ctypes.c_int),
-#                 ("do_flat_dark_log", ctypes.c_int),
-#                 ("do_paganin_filter", ctypes.c_int),
-#                 ("do_rings", ctypes.c_int),
-#                 ("do_rotation_axis_offset", ctypes.c_int),
-#                 ("do_rotation_correction", ctypes.c_int),
-#                 ("do_alignment", ctypes.c_int),
-#                 ("do_excentric_offset", ctypes.c_int),
-#                 ("do_excentric", ctypes.c_int),
-#                 ("do_reconstruction", ctypes.c_int)]
-
-class CEF(ctypes.Structure):
-    _fields_ = [("method", ctypes.c_int), 
-                ("beta_delta", ctypes.c_float), 
-                ("regularization", ctypes.c_float),
-                ("post_process", ctypes.c_int)]   
 
 def contrast_param(method, beta_delta, regularization = 0.0, post_process = 0):
     return CEF(method         = method, 
@@ -304,24 +160,7 @@ def contrast_param(method, beta_delta, regularization = 0.0, post_process = 0):
                regularization = regularization, 
                post_process   = post_process)
 
-class TomoAttributes(ctypes.Structure):
-    _fields_ = [("n_length", ctypes.c_int), 
-                ("n_angle", ctypes.c_int), 
-                ("n_slice", ctypes.c_int),
-                ("size_median", ctypes.c_int), 
-                ("dim", ctypes.c_int), 
-                ("large_stripes_size", ctypes.c_int),
-                ("background_ratio", ctypes.c_float), 
-                ("drop_ratio", ctypes.c_float)
-            ]
-    
-class RF(ctypes.Structure):
-    _fields_ = [("method", ctypes.c_int), 
-                ("rings_block", ctypes.c_int), 
-                ("rings_lambda", ctypes.c_float),
-                ("all_stripes", TomoAttributes)
-                ]   
-    
+
 def set_all_tripes_attributes(size, settings):
     
     if len(size) == 2:
@@ -348,7 +187,6 @@ def rings_param(method = 'all stripes', tomosize = (1,1,1), median_s = 21, large
                 rings_block = 1, rings_lambda = -1) -> RF:
     
     methodRings = RingsMethod(method)
-    print(method,methodRings)
 
     all_stripes = set_all_tripes_attributes(size = tomosize, settings = {'size_median': median_s,
                                                                         'large_stripes_size': large_s,
@@ -360,28 +198,14 @@ def rings_param(method = 'all stripes', tomosize = (1,1,1), median_s = 21, large
               rings_block  = rings_block,
               rings_lambda = rings_lambda)
 
-class ALGN(ctypes.Structure):
-    _fields_ = [("method", ctypes.c_int), 
-                ("excentric_offset", ctypes.c_int), 
-                ("rotation_axis_offset", ctypes.c_float)]   
+def align_param(method = 'rot axis', offset_method = 0, excentric_offset = 0, rotation_axis_offset = 0) -> ALGN:
+    
+    methodAlign = AlignMethod(method)
 
-def align_param(method = 0, excentric_offset = 0, rotation_axis_offset = 0) -> ALGN:
-    return ALGN(method               = method,
+    return ALGN(method               = methodAlign,
                 excentric_offset     = excentric_offset,
-                rotation_axis_offset = rotation_axis_offset)
-
-class REC(ctypes.Structure):
-    _fields_ = [("method", ctypes.c_int), 
-                ("filter", ctypes.c_int), 
-                ("filter_reg", ctypes.c_float),
-                ("filter_pad", ctypes.c_int),
-                ("filter_padMode", ctypes.c_int),
-                ("paganin_slices", ctypes.c_float),
-                ("iterations", ctypes.c_int),
-                ("rotation_axis_offset", ctypes.c_float),
-                ("total_variation", ctypes.c_float),
-                ("interpolation", ctypes.c_int)
-                ] 
+                rotation_axis_offset = rotation_axis_offset,
+                offset_method        = offset_method)
     
 def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp', 
                 filter_pad: int = 1, filter_padMode: str = 'zero',
@@ -417,19 +241,6 @@ def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp',
                 total_variation      = total_variation, 
                 interpolation        = interpolationType)
 
-class CFG(ctypes.Structure):
-    _fields_ = [("back_corr_method", ctypes.c_int),
-                ("geometry", GEO), 
-                ("obj", DIM),
-                ("tomo", DIM),
-                ("flat", DIM),
-                ("dark", DIM),
-                ("ContrastParam", CEF),
-                ("RingsParam", RF),
-                ("AlignParam", ALGN),
-                ("ReconParam", REC)
-                ] 
-
 def configs_param(tomo_dim, obj_dim, flat_dim, dark_dim, geometry, rings_param, contrast_param, align_param, recon_param, back_corr_method = 'classic'):
     methodBckCorr = BckCorrMethod(back_corr_method)
     
@@ -447,8 +258,8 @@ def configs_param(tomo_dim, obj_dim, flat_dim, dark_dim, geometry, rings_param, 
 #########################
 
 #########################
-#|       ssc-raft      |#
-#| Function prototypes |#
+#|      ssc-raft       |#
+#| Function Prototypes |#
 #########################
 
 ############# Raft ##############
@@ -823,6 +634,7 @@ except:
     logger.error(f'Cannot find C/CUDA library: -.RAFT_CONEBEAM_RADON_MULTIGPU_RT-')
     pass
 
+######## Raft - PIPELINE C ##########
 try:
     libraft.ReconstructionPipelineMultiGPU.argtypes = [
         CFG, ctypes.c_void_p, ctypes.c_int,
@@ -881,201 +693,6 @@ def pin_array(data):
 
 def unpin_array(data):
     libcudart.cudaHostUnregister(ctypes.c_void_p(data.ctypes.data))
-
-def CNICE(darray,dtype=numpy.float32):
-    if darray.dtype != dtype:
-        return numpy.ascontiguousarray(darray.astype(dtype))
-    elif darray.flags['C_CONTIGUOUS'] == False:
-        return numpy.ascontiguousarray(darray)
-    else:
-        return darray
-
-VERBOSE = False
-def dprint(*x):
-    if VERBOSE:
-        print(*x)
-
-def nice(f): # scientific notation + 2 decimals
-    return "{:.2e}".format(f)
-        
-def set_precision(precision):
-    """Select datatype of numpy array.
-
-    Args:
-        precision (str): precision name
-
-    Returns:
-        (int): Integer value defining the numpy datatype
-        (type): The numpy datatype
-
-    Raises:
-        Invalid datatype
-
-    Options:
-        precision (str): \'float32\', \'uint16\', \'uint8\'
-    """
-    if precision == 'float32':
-        datatype = 5
-        Ndatatype = numpy.float32
-    elif precision == 'uint16':
-        datatype = 2
-        Ndatatype = numpy.uint16
-    elif precision == 'uint8':
-        datatype = 1
-        Ndatatype = numpy.uint8
-    else:
-        logger.error(f'Invalid datatype:{precision}. Options: `float32`, `uint16` and `uint8`.')
-        raise ValueError(f'Invalid datatype:{precision}. Options: `float32`, `uint16` and `uint8`.')
-
-    return datatype, Ndatatype
-
-def sanitize_angles(angles: numpy.ndarray) -> numpy.ndarray:
-    ''' Set angles to start at 0 (zero) radians. 
-    '''
-    angles = angles - min(angles)
-
-    return angles
-
-def get_excentric_obj_dimensions(nx,ny):
-     return 2 * nx, 2 * ny
-
-def get_padding_size(n,pad):
-     return int( (pad * n) / 100 )
-
-def set_input_axis_order(order: str = 'slices_angles_lenght'):
-    # Default is 'slices_angles_lenght'
-
-    if order.lower() == 'angles_slices_lenght':
-        return 0
-    elif order.lower() == 'slices_angles_lenght':
-        return 1
-    elif order.lower() == 'transpose_lenght':
-        return 2
-    else:
-        message = f'The axis input parameter \'{order}\' does not exist. Setting \'slices_angles_lenght\' as default.'
-        logger.warning(message)
-        return 1 
-    
-def power_of_2_padding(size,pad):
-    return int((pow(2, numpy.ceil(numpy.log2(size + 2 * pad))) - size) * 0.5)
-       
-def crop_circle(data, z1, zt, pixeldet, npixels = 0):
-    r"""Function to crop a circle of radius :math:`r` on the xy-plane of a 3D data.
-        
-        - r = (radius - npixels * pixel_size);
-        - radius = (pixel_size * dimension) / 2;
-        - pixel_size = pixel_detector * magnitude;
-        - magnitude = z1/zt
-        - zt = z1+z2
-
-    Args:
-        data (ndarray): 3D data
-        z1 (float): Sample-source distance in meters
-        zt (float): Detector-source distance in meters (z1+z2)
-        pixeldet (float): Detector pixel size in meters 
-        npixels (int, optional): How many pixels to subtract from radius to reduce cropped circle [Default: 0]
-
-    Returns:
-        (ndarray): 3D cropped data
-    """
-    dimx = data.shape[-1]
-    dimy = data.shape[-2]
-
-    pixel_size = pixeldet * ( z1 / zt )
-
-    diameterx = dimx * pixel_size
-    radiusx = diameterx / 2.0
-
-    diametery =  dimy * pixel_size
-    radiusy = diametery / 2.0
-
-    x = numpy.linspace(-radiusx,radiusx,dimx)
-    y = numpy.linspace(-radiusy,radiusy,dimy)
-
-    Xm, Ym = numpy.meshgrid(x,y)
-    radius = max(radiusx,radiusy)
-    r = radius - npixels * pixel_size
-
-    mask = (Xm)**2 + (Ym)**2  <= r**2
-
-    for i in range(data.shape[0]):
-            data[i,:,:] = numpy.where(mask,data[i,:,:],0)
-
-    return data
-
-def crop_ellipse(data, pixeldet, magn = 1, npixelsx = 0, npixelsy = 0):
-    r"""Function to crop an ellipse of radius :math:`a` and :math:`b` on the xy-plane of a 3D data.
-
-    Args:
-        data (ndarray): 3D data
-        pixeldet (float tuple): Detector pixel size (x,y) in x- and y- directions in meters 
-        magn (float): Magnification related to beam geometry (z1+z2)/z1 [Default: 1, parallel geometry]
-        npixelsx (int, optional): How many pixels to subtract from radius ``a`` (x-direction) to reduce cropped circle [Default: 0]
-        npixelsy (int, optional): How many pixels to subtract from radius ``b`` (y-direction) to reduce cropped circle [Default: 0]
-
-    Returns:
-        (ndarray): 3D cropped data
-    """
-    dimx = data.shape[-1]
-    dimy = data.shape[-2]
-
-    pixel_sizex = pixeldet[0] * ( 1 / magn )
-    pixel_sizey = pixeldet[1] * ( 1 / magn )
-
-    diameterx = dimx * pixel_sizex
-    a = diameterx / 2.0 - npixelsy * pixel_sizey
-
-    diametery =  dimy * pixel_sizey
-    b = diametery / 2.0 - npixelsx * pixel_sizex
-
-    x = numpy.linspace(-a,a,dimx)
-    y = numpy.linspace(-b,b,dimy)
-
-    Xm, Ym = numpy.meshgrid(x,y)
-
-    mask = (Xm/a)**2 + (Ym/b)**2  <= 1
-
-    for i in range(data.shape[0]):
-            data[i,:,:] = numpy.where(mask,data[i,:,:],0)
-            
-    return data
-
-def crop_circle_simple(data, pixel_size, npixels = 0):
-    r"""Function to crop a circle of radius :math:`r` on the xy-plane of a 3D data.
-        
-        - r = (radius - npixels * pixel_size);
-
-
-    Args:
-        data (ndarray): 3D data
-        pixel_size (float): Pixel size in meters 
-        npixels (int, optional): How many pixels to subtract from radius to reduce cropped circle [Default: 0]
-
-    Returns:
-        (ndarray): 3D cropped data
-    """
-    dimx = data.shape[-1]
-    dimy = data.shape[-2]
-
-    diameterx = dimx * pixel_size
-    radiusx = diameterx / 2.0
-
-    diametery =  dimy * pixel_size
-    radiusy = diametery / 2.0
-
-    x = numpy.linspace(-radiusx,radiusx,dimx)
-    y = numpy.linspace(-radiusy,radiusy,dimy)
-
-    Xm, Ym = numpy.meshgrid(x,y)
-    radius = max(radiusx,radiusy)
-    r = radius - npixels * pixel_size
-
-    mask = (Xm)**2 + (Ym)**2  <= r**2
-
-    for i in range(data.shape[0]):
-            data[i,:,:] = numpy.where(mask,data[i,:,:],0)
-
-    return data
 
 if __name__ == "__main__":
    pass

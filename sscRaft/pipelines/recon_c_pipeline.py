@@ -1,4 +1,48 @@
 from ..rafttypes import *
+from ..processing.alignments.rotationaxis import Centersino
+from ..processing.alignments.excentric_tomo import getOffsetExcentricTomo
+
+def compute_rotation_axis_offset(rotation_axis_offset,align_method,tomogram,flat,dark,angles):
+    
+    if rotation_axis_offset is None:
+        dangle = angles[1] - angles[0]
+        iangle = ( np.pi / dangle ).astype(int)
+        frame0 = tomogram[:,0,:]
+        frame1 = tomogram[:,iangle-1,:]
+
+        if flat.ndim > 2:
+                ft = flat[:,0,:]
+
+        if dark.ndim > 2:
+                dk = dark[:,0,:]
+
+        offset = Centersino(frame0, frame1, ft, dk)
+    else:
+        offset = rotation_axis_offset
+
+    if align_method == 'rot axis recon':
+        offset_recon = offset
+    else:
+        offset_recon = 0
+
+    return offset, offset_recon
+
+def compute_excentric_offset(excentric_offset, tomogram, blocksize_excentric = 16):
+    
+    if excentric_offset is None:
+        nslices = tomogram.shape[0]
+        nhalf   = nslices // 2
+        nblock  = blocksize_excentric // 2
+
+        if nslices <= ( blocksize_excentric + 2 ):
+            offset = getOffsetExcentricTomo(tomogram, gpus = [0])
+        else:
+            offset = getOffsetExcentricTomo(tomogram[nhalf - nblock:nhalf + nblock], gpus = [0])
+    else:
+        offset = excentric_offset
+
+    return offset
+
 
 def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0], dic = None, **kwargs):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction pipeline in ``C`` and ``CUDA``.
@@ -21,27 +65,28 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0
     gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     angles   = sanitize_angles(numpy.array(angles))
+    print('angles:',angles)
 
     nrays    = tomogram.shape[-1]
     nangles  = tomogram.shape[-2] # Put here a function to assess the dimension against angles list
     nslices  = tomogram.shape[0] if tomogram.ndim > 2 else 1
     objsizex = nrays
     objsizey = nrays
-    nflats   = flat.shape[0] if flat.ndim > 2 else 1
-    print('Python nflats:',nflats)
-    print('Python nflats.ndim:',flat.ndim)
+    nflats   = flat.shape[1] if flat.ndim > 2 else 1
 
     if dark.ndim > 2:
-        dark = dark[0]
+        dark = dark[1]
 
     recon_method   = dic.get('reconstruction method', 'fbp')
     rings_method   = dic.get('rings method', 'none')
-    align_method   = dic.get('align method', 'none')
+    align_method   = dic.get('align method', 'rot axis recon')
+    bckgC_method   = dic.get('background correction method', 'classic')
+
     filter_type    = dic.get('filter', 'ramp')
     beta_delta     = dic.get('beta/delta', 0.0)
     regularization = dic.get('regularization', 1.0)
-    rotation_axis_offset = dic.get('rotation axis offset', 0)
-    excentric_offset = dic.get('excentric offset', 0)
+    rotation_axis_offset = dic.get('rotation axis offset', None)
+    excentric_offset = dic.get('excentric offset', None)
     blocksize      = dic.get('blocksize', 0)
     energy         = dic.get('energy[eV]', 1.0)
     z2             = dic.get('z2[m]', 1.0)
@@ -62,6 +107,9 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0
 
     if align_method == 'excentric':
         objsizex, objsizey = get_excentric_obj_dimensions(objsizex, objsizey)
+        excentric_offset   = compute_excentric_offset(excentric_offset, tomogram, blocksize_excentric = 16)
+
+    rotation_axis_offset, rotation_axis_offset_recon = compute_rotation_axis_offset(rotation_axis_offset, align_method, tomogram, flat, dark, angles)
 
     flat_dim = dimension((   nrays,  nslices,  nflats))
     dark_dim = dimension((   nrays,  nslices,       1))
@@ -88,29 +136,30 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0
                            rings_block  = 2, 
                            rings_lambda = -1)
 
-    Align    = align_param(method = 0, excentric_offset = excentric_offset, rotation_axis_offset = 0)
+    Align    = align_param(method = align_method, excentric_offset = excentric_offset, rotation_axis_offset = rotation_axis_offset)
 
-    Recon    = recon_param(geometry, 
+    Recon    = recon_param(geometry             = geometry, 
                            method               = recon_method, 
                            filter               = filter_type, 
                            filter_pad           = padding, 
                            filter_padMode       = padMode, 
                            beta_delta           = beta_delta, 
-                           rotation_axis_offset = rotation_axis_offset,
+                           rotation_axis_offset = rotation_axis_offset_recon,
                            iterations           = iterations, 
                            filter_reg           = regularization,
                            total_variation      = 0.0, 
                            interpolation        = 'none')
 
-    Configs  = configs_param(tomo_dim       = tomo_dim, 
-                             obj_dim        = obj_dim,
-                             flat_dim       = flat_dim,
-                             dark_dim       = dark_dim, 
-                             geometry       = geometry, 
-                             rings_param    = Rings, 
-                             contrast_param = Contrast,
-                             align_param    = Align, 
-                             recon_param    = Recon)
+    Configs  = configs_param(tomo_dim         = tomo_dim, 
+                             obj_dim          = obj_dim,
+                             flat_dim         = flat_dim,
+                             dark_dim         = dark_dim, 
+                             geometry         = geometry, 
+                             rings_param      = Rings, 
+                             contrast_param   = Contrast,
+                             align_param      = Align, 
+                             recon_param      = Recon,
+                             back_corr_method = bckgC_method)
     
     if obj is None:
         obj = numpy.zeros([nslices, objsizex, objsizey], dtype=numpy.float32)

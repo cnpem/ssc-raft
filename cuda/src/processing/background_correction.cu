@@ -128,8 +128,8 @@ extern "C"{
 	{
         /* 
         frames: tomogram volume with axis (size.x,size.y,size.z) = (nrays, nangles, nslices):
-        flat: Axis (size.x,numflats,nslices,) = (nrays, numflats, nslices)
-        dark: Axis (size.x,        1,nslices) = (nrays,        1, nslices)
+        flat: Axis (size.x,numflats,nslices) = (nrays, numflats, nslices)
+        dark: Axis (size.x,       1,nslices) = (nrays,        1, nslices)
         */
         dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
         dim3 gridBlock = opt::setGridBlock(size, threadsPerBlock);

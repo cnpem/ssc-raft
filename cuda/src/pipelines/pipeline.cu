@@ -110,8 +110,7 @@ extern "C" {
 
 extern "C"{
     void ReconstructionPipelineMultiGPU(CFG configs, int *gpus, int ngpus,
-    float *object, float *data, float *flats, float *darks, float *angles,
-    float *frames)
+    float *object, float *data, float *flats, float *darks, float *angles)
     {
         int i, Maxgpu;
 

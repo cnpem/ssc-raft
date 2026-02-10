@@ -44,6 +44,9 @@ extern "C" {
 
     void getRotAxisCorrectionGPU(float *tomogram, 
     float axis_offset, dim3 tomo_size, int ngpu, int blockSize);
+
+    void getRotAxisCorrection(float *tomogram, 
+        float axis_offset, dim3 tomo_size);
 }
 
 /* Centersino - Find offset for 180 degrees parallel tomogram 
