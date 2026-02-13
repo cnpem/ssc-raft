@@ -117,7 +117,7 @@ def BckCorrMethod(method):
         return 0
     elif method.lower() == 'classic':
         return 1
-    elif method.lower() == 'excentric':
+    elif method.lower() == 'classic no log':
         return 2
     else:
         return 1

@@ -23,9 +23,18 @@ extern "C"{
 
         getBackgroundCorrectionMethods(configs, workspace, tomoblock, nstream);
 
+        // printf("Align.\n");
+        // fflush(stdout);
+
         getAlignMethods(configs, workspace, tomoblock, nstream);
 
+        // printf("Rings.\n");
+        // fflush(stdout);
+
         getRingsMethods(configs, workspace, tomoblock, nstream);
+
+        // printf("Recon.\n");
+        // fflush(stdout);
 
         getReconstructionMethods(configs, workspace, tomoblock, objblock, nstream);
     }

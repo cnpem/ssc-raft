@@ -161,8 +161,8 @@ extern "C"{
         int nx      = configs.obj.size.x;
         int ny      = configs.obj.size.y;
 
-        // printf("Rings method: %d \n", configs.RingsParam.method);
-        // printf("Rings method none: %d \n", static_cast<int>(RingsMethod::none));
+        // printf("Align method: %d \n", configs.AlignParam.method);
+        // printf("Align method none: %d \n", static_cast<int>(AlignMethod::rotaxis));
         // fflush(stdout);
 
         switch (configs.AlignParam.method)
@@ -176,9 +176,11 @@ extern "C"{
             break;
             case static_cast<int>(AlignMethod::rotaxis):
                 /* Centersino Offset */
+                // printf("Rot Axis: %d.\n", configs.AlignParam.rotation_axis_offset);
+                // fflush(stdout);
                 getRotAxisCorrection(workspace->tomo, 
                                      configs.AlignParam.rotation_axis_offset, 
-                                     configs.tomo.size);
+                                     dim3(nrays,nangles,tomoblock));
             break;
             case static_cast<int>(AlignMethod::excentric):
                 /* Excentric Offset */

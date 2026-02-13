@@ -5,7 +5,7 @@ import ctypes
 from ctypes import *
 import ctypes.util
 
-from utils import *
+from .utils import *
 
 from sscRaft import __version__
 

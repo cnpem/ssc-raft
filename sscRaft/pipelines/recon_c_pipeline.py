@@ -10,13 +10,18 @@ def compute_rotation_axis_offset(rotation_axis_offset,align_method,tomogram,flat
         frame0 = tomogram[:,0,:]
         frame1 = tomogram[:,iangle-1,:]
 
+        ft = 0*frame0 + 1
+        dk = 0*frame0
+
         if flat.ndim > 2:
-                ft = flat[:,0,:]
+            ft = flat[:,0,:]
 
         if dark.ndim > 2:
-                dk = dark[:,0,:]
+            dk = dark[:,0,:]
 
         offset = Centersino(frame0, frame1, ft, dk)
+
+        logger.info(f'Computed rotation axis offset: {offset}')
     else:
         offset = rotation_axis_offset
 
@@ -30,6 +35,7 @@ def compute_rotation_axis_offset(rotation_axis_offset,align_method,tomogram,flat
 def compute_excentric_offset(excentric_offset, tomogram, blocksize_excentric = 16):
     
     if excentric_offset is None:
+        offset  = 0
         nslices = tomogram.shape[0]
         nhalf   = nslices // 2
         nblock  = blocksize_excentric // 2
@@ -38,6 +44,8 @@ def compute_excentric_offset(excentric_offset, tomogram, blocksize_excentric = 1
             offset = getOffsetExcentricTomo(tomogram, gpus = [0])
         else:
             offset = getOffsetExcentricTomo(tomogram[nhalf - nblock:nhalf + nblock], gpus = [0])
+
+        logger.info(f'Computed excentric offset: {offset}')
     else:
         offset = excentric_offset
 
