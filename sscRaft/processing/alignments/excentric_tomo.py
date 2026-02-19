@@ -47,7 +47,7 @@ def getOffsetExcentricTomo(tomogram, gpus = [0]):
         return int(offset)
 
     
-def stitchExcentricTomo(tomogram: np.ndarray, offset: int, gpus: list = [0], method: str = 'none') -> np.ndarray:
+def stitchExcentricTomo(tomogram: numpy.ndarray, offset: int, gpus: list = [0], method: str = 'none') -> numpy.ndarray:
     """Computes the transformation of a 360 degree measured tomogram fullview to a 180 degree measured tomogram.
     The transformation considers the input offset and gradually adjust the gray values on the offset interval
 

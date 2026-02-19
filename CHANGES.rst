@@ -1,3 +1,17 @@
+Version 3.4.0 - 2026-02-25
+--------------------------
+*Added:*
+  - Rings method ``all stripes`` and ``all stripes multiaxis`` previously in the package ``ssc-rings``.
+  - Fast ``C`` pipeline with rings method ``all stripes`` for parallel-beam.
+
+*Corrections:*
+  - ``FDK`` memory bug on backprojection.
+
+*Known Bugs:*
+  - ``BST`` works for 180 degrees only on a regular angle mesh.
+  - ``BST`` angles are hardcoded and not as input.
+  - Memory issues on ``EM`` for cone-beam geometry.
+
 Version 3.3.1 - 2026-01-28
 --------------------------
 *Corrections:*
@@ -11,11 +25,6 @@ Version 3.3.1 - 2026-01-28
   - Memory issues on ``EM`` for cone-beam geometry.
   - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
 
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
 
 Version 3.3.0 - 2025-11-13
 --------------------------
@@ -36,12 +45,6 @@ Version 3.3.0 - 2025-11-13
   - Memory issues on ``EM`` for cone-beam geometry.
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
   - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
-
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
 
 Version 3.2.7 - 2025-08-27
 --------------------------
@@ -66,12 +69,6 @@ Version 3.2.6 - 2025-08-07
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
   - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
 
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
-
 Version 3.2.5 - 2025-05-19
 --------------------------
 *Corrections:*
@@ -86,12 +83,6 @@ Version 3.2.5 - 2025-05-19
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
   - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
   - Paganin by frames function has a bug for multiGPU version with ``blocksize = 0``.
-
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
 
 Version 3.2.4 - 2025-05-12
 --------------------------
@@ -112,12 +103,6 @@ Version 3.2.4 - 2025-05-12
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
   - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
 
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
-
 Version 3.2.3 - 2025-04-28
 --------------------------
 *Changed:*
@@ -134,12 +119,6 @@ Version 3.2.3 - 2025-04-28
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
   - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
 
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
-
 Version 3.2.2 - 2025-04-14
 --------------------------
 *Changed:*
@@ -152,13 +131,6 @@ Version 3.2.2 - 2025-04-14
   - Memory issues on ``EM`` for cone-beam geometry.
   - No cuda streams on ``FBP by BST``: bug.
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
-
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
-
 
 Version 3.2.1 - 2025-04-11
 --------------------------
@@ -175,12 +147,6 @@ Version 3.2.1 - 2025-04-11
   - Memory issues on ``EM`` for cone-beam geometry.
   - No cuda streams on ``FBP by BST``: bug.
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
-
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
 
 Version 3.2.0 - 2025-04-01
 --------------------------
@@ -209,13 +175,6 @@ Version 3.2.0 - 2025-04-01
   - No cuda streams on ``FBP by BST``: bug.
   - A few bugs on TOMCAT's CLI rings and paganin methods call.
 
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
-
-
 Version 3.1.1 - 2025-02-26
 --------------------------
 *Added:*
@@ -231,12 +190,6 @@ Version 3.1.1 - 2025-02-26
   - ``BST`` angles are hardcoded and not as input.
   - Memory issues on ``EM`` for cone-beam geometry.
   - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension.
-
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
 
 Version 3.1.0 - 2025-02-20
 --------------------------
@@ -261,13 +214,6 @@ Version 3.1.0 - 2025-02-20
   - Memory issues on ``FDK``: In reconstruction by slices. Supports only blocks divisible by 8.
   - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs.
 
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
-
-
 Version 3.0.3 - 2024-12-11
 --------------------------
 *Changed:*
@@ -284,13 +230,6 @@ Version 3.0.3 - 2024-12-11
   - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs.
   - Problem on Paganin by slices version in the methods ``FBP by RT`` and ``FBP by BST`` where the beta/delta parameter have a difference of 1e-11 of the same parameter for ``FDK`` method.
 
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
-
-
 Version 3.0.2 - 2024-10-24
 --------------------------
 *Added:*
@@ -306,13 +245,6 @@ Version 3.0.2 - 2024-10-24
   - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs.
   - Problem on Paganin by slices version in the methods ``FBP by RT`` and ``FBP by BST`` where the beta/delta parameter have a difference of 1e-11 of the same parameter for ``FDK`` method.
   - Iterative alignment bug: ``FBP`` method call was not updated.
-
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
-
 
 Version 3.0.1 - 2024-10-02
 --------------------------
@@ -334,12 +266,6 @@ Version 3.0.1 - 2024-10-02
   - ``Tomo360`` (parallel-beam): Correction of bug for odd angle dimension and multiple GPUs.
   - Problem on Paganin by slices version in the methods ``FBP by RT`` and ``FBP by BST`` where the beta/delta parameter have a difference of 1e-11 of the same parameter for ``FDK`` method.
   - Iterative alignment bug: ``FBP`` method call was not updated.
-
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.
 
 Version 3.0.0 - 2024-09-10
 --------------------------
@@ -387,8 +313,3 @@ Version 3.0.0 - 2024-09-10
   - ``phase_filter()`` functions.
   - CLI as of now.
 
-*To be done:*
-  - Refactoring ``FDK``.
-  - Refactoring ``EM`` conebeam ray tracing.
-  - Refactoring ``FST`` frequency domain forward method for parallel beam.
-  - Refactoring ``RadonCONE`` ray tracing forward method for conebeam.

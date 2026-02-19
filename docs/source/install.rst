@@ -16,16 +16,13 @@ This package supports nvidia ``GPUs`` with capabilities ``7.0`` or superior and 
 See bellow for build requirements and dependencies.
 
 The library sscRaft can be installed from the source code at `zenodo website <https://zenodo.org/>`_, by our public github or by ``pip``/ ``gitlab``
-if inside the CNPEM network. More information on the ``sscRaft`` package on 
-`sscRaft website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_
-available inside the CNPEM network.
+if inside the CNPEM network. 
 
 Documentation
 *************
 
-The ``sscRaft`` package information can be found on the `sscRaft website <https://gcc.lnls.br/wiki/docs/ssc-raft/>`_ inside the CNEPM network.
+The ``sscRaft`` package information can be found on the `sscRaft website <https://gcc.lnls.br/ssc/ssc-raft/>`_ inside the CNEPM network.
 Also, the `HTML` documentation can be found in the source directory `./docs/build/index.html` and can be opened in your preferred brownser.
-
 
 GITHUB
 ******
@@ -107,7 +104,7 @@ The latest package version can be cloned from CNPEM's `gitlab <https://gitlab.cn
 
 .. code-block:: bash
 
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git
+    git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git
     cd ssc-raft 
     make clean && make
 
@@ -115,7 +112,7 @@ To install a specific version (``<version>``), one can use:
 
 .. code-block:: bash
 
-    git clone  https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
+    git clone  https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v<version> --single-branch
     cd ssc-raft 
     make clean && make
 
@@ -124,7 +121,7 @@ Example, to install version 3.0.3:
 
 .. code-block:: bash
 
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.0.3 --single-branch
+    git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v3.0.3 --single-branch
     cd ssc-raft 
     make clean && make
 
@@ -151,7 +148,7 @@ The build requirements are:
 * ``CUBLAS``
 * ``CUFFT``
 * ``PTHREADS``
-* ``CMAKE>=3.10``
+* ``CMAKE>=3.18``
 * ``scikit-build>=0.17.0``
 * ``setuptools>=64.0.0``
 
@@ -162,7 +159,6 @@ The ``Python3`` dependencies are:
 * ``scipy``
 * ``matplotlib``
 * ``SharedArray``
-* ``uuid``
 * ``h5py``
 
 Uninstall

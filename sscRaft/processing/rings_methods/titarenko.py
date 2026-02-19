@@ -2,7 +2,7 @@ from ...rafttypes import *
 from ...io.io_ import *
 
 def titarenko_rings(tomogram, gpus = [0], dic = None, **kwargs):
-    """Rings artifacts reduction by Generalized Titarenko\'s algorithm [1]_.
+    """Rings artifacts reduction by Generalized Titarenko\'s algorithm [2]_.
 
     Args:
         tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
@@ -12,7 +12,7 @@ def titarenko_rings(tomogram, gpus = [0], dic = None, **kwargs):
         (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
     
     * One or MultiGPUs
-    * Wrapper for function ``TitarenkoRingsGPU()`` [1]_
+    * Wrapper for function ``TitarenkoRingsGPU()`` [2]_
 
     Dictionary parameters:
 
@@ -23,7 +23,7 @@ def titarenko_rings(tomogram, gpus = [0], dic = None, **kwargs):
 
     References:
 
-        .. [1] Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermudez, J.S.V. (2014). Generalized Titarenko\'s algorithm for ring artefacts reduction. J. Synchrotron Rad, 21, 1333-1346. DOI: https://doi.org/10.1107/S1600577514016919
+        .. [2] Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermudez, J.S.V. (2014). Generalized Titarenko\'s algorithm for ring artefacts reduction. J. Synchrotron Rad, 21, 1333-1346. DOI: https://doi.org/10.1107/S1600577514016919
     
     """
     required = ('gpu',)
@@ -43,7 +43,7 @@ def titarenko_rings(tomogram, gpus = [0], dic = None, **kwargs):
     return tomogram
 
 def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block, blocksize = 0):
-    """ Rings artifacts reduction by Generalized Titarenko\'s algorithm [1]_.  
+    """ Rings artifacts reduction by Generalized Titarenko\'s algorithm [3]_.  
 
     Args:
         tomogram (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
@@ -57,7 +57,7 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block, blocksize = 0):
 
     References:
 
-        .. [1] Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermudez, J.S.V. (2014). Generalized Titarenko\'s algorithm for ring artefacts reduction. J. Synchrotron Rad, 21, 1333-1346. DOI: https://doi.org/10.1107/S1600577514016919
+        .. [3] Miqueles, E.X., Rinkel, J., O'Dowd, F. and Bermudez, J.S.V. (2014). Generalized Titarenko\'s algorithm for ring artefacts reduction. J. Synchrotron Rad, 21, 1333-1346. DOI: https://doi.org/10.1107/S1600577514016919
     
     """
     ngpus = len(gpus)

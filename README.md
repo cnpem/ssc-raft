@@ -35,7 +35,7 @@ Sirius Scientific Computing Team: [gcc@lnls.br](malito:gcc@lnls.br)
 
 ## Documentation
 
-The package documentation can be found on the GCC website [https://gcc.lnls.br/ssc/ssc-raft/index.html](https://gcc.lnls.br/ssc/ssc-raft/index.html) inside the CNPEM network.
+The package documentation can be found on the GCC website [https://gcc.lnls.br/ssc/ssc-raft/](https://gcc.lnls.br/ssc/ssc-raft/) inside the CNPEM network.
 Also, the `HTML` documentation can be found in the source directory `./docs/build/index.html` and can be opened with your preferred brownser.
 
 ## Install
@@ -115,7 +115,7 @@ Where `<version>` is the version number of the `sscRaft`
 One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install the latest version by:
 
 ```bash
-git clone https://gitlab.cnpem.br/GCC/ssc-raft.git 
+git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git 
 cd ssc-raft
 make clean && make
 ```
@@ -123,7 +123,7 @@ make clean && make
 For a specific version, one can use:
 
 ```bash
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v<version> --single-branch
+    git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v<version> --single-branch
     cd ssc-raft 
     make clean && make
 ```
@@ -131,7 +131,7 @@ For a specific version, one can use:
 The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 3.1.1
 
 ```bash
-    git clone https://gitlab.cnpem.br/GCC/ssc-raft.git --branch v3.1.1 --single-branch
+    git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v3.1.1 --single-branch
     cd ssc-raft 
     make clean && make
 ```
@@ -158,7 +158,7 @@ The following modules are used:
 * `CUBLAS`
 * `CUFFT`
 * `PTHREADS`
-* `CMAKE>=3.10`
+* `CMAKE>=3.18`
 
 The following `Python3` modules are used:
 

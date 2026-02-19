@@ -115,8 +115,6 @@ html_style = 'css/my_theme.css'
 smv_branch_whitelist = None
 # smv_tag_whitelist = None
 
-
-
 templates_path = ['_templates']
 
 # Add any paths that contain custom static files (such as style sheets) here,
