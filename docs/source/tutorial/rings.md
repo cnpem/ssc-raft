@@ -1,10 +1,23 @@
 (rings)=
 # Rings methods
 
-Here you will find examples of usage of the rings filter algorithms implemented in the package `sscRaft`.
+Ring artifacts are one of the most ubiquitous types of artifacts present at tomographic reconstructions
+and can present quite a challenge when it comes to analyzing and segmenting tomographic images. 
+Here you will find examples of usage of the algorithms implemented in the package `sscRaft`.
 
+## Rings artifacts
+
+Rings artifacts are exactly what the name suggests: they appear as rings at the reconstruction level, as shown in Figure 1. 
+They occur when the measured data present stripes artifacts in its acquisition. These stripes have different categories and are thoroughly discussed at the work 
+[Nghia T. Vo et al (2018)](https://doi.org/10.1364/OE.26.028396), just as in the [sarepy](https://sarepy.readthedocs.io/toc/section2.html) documentation pages.
+
+| ![img](../../static/images/stripes_to_rings_demo_2.png) | 
+| :-------: | 
+| Figure 1: **(a)** Sinogram of a demonstration phantom; **(b)** sinogram in (a) corrupted by vertical stripes; **(c)** reconstruction of sinogram in (a); **(d)** reconstruction of sinogram in (b).| 
 
 ## All Stripes Method
+
+The _all stripes_ algorithm applies a sequence of processing stages that act on some specific categories of stripes in order to mitigate them.
 
 Macul, L. and Miqueles, E.X. (2025). Accelerating Tomographic Artifact Removal Using a Multi-GPU System. Communications in Computer and Information Science, vol 2270. Springer, Cham. [DOI](https://doi.org/10.1007/978-3-031-80084-9_1).
 

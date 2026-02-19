@@ -43,7 +43,7 @@ The final dimension of the padded data is {math}`N + 2 * padsize`, as explained 
 The padding is centered around the image with size {math}`padsize` at the left and at the right. The zero-padding extends the image boundary with zeros, as seen in Figure 1.
 The edge-padding replicates the last column, as seen in Figure 2.
 
-| ![img](images/padzero.png) | ![img](images/padedge.png) |
+| ![img](../../static/images/padzero.png) | ![img](../../static/images/padedge.png) |
 | :-------: | :-------: |
 | Figure 1: Zero-padding | Figure 2: Edge-padding |
 
@@ -53,7 +53,7 @@ The edge-padding replicates the last column, as seen in Figure 2.
 The edge-padding strategy is also very useful to remove the cicle artifact that appears in zoom reconstructions, illustrated in Figure 3. 
 This strategy is applied on the data after the filtering part, and is implemented for now in the functions ``fdk()`` and ``fbp(RT)``.
 
-| ![img](images/padzoom.png) |
+| ![img](../../static/images/padzoom.png) |
 | :-------: | 
 | Figure 3: Zoom reconstruction. On the left, illustration of the cicle artifact. On the right, the artifact removal through edge-padding. | 
 
