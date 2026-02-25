@@ -171,7 +171,6 @@ __device__ void selectionsort_over_angles(float* d_data, int* d_indices,
     }
 }
 
-
 __device__ void batches_sort_over_angles(float* d_data, int* d_indices,
         int n_slices, int n_angles, int n_length,
         size_t idx, size_t idz,

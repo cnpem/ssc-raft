@@ -32,9 +32,8 @@
         },
         {
             "name": "Z. Peixinho, Alan",
-            "affiliation": "Brazilian Synchrotron Light Laboratory",
             "orcid": "0009-0002-6983-2342",
-            "type": "projectmember"
+            "type": "other"
         },
         {
             "name": "R. Tonin, Yuri",
@@ -120,6 +119,10 @@
         {
             "relation": "isPartOf",
             "identifier": "https://doi.org/10.1007/978-3-031-80084-9_18"
+        },
+        {
+            "relation": "isPartOf",
+            "identifier": "https://doi.org/10.1007/978-3-031-80084-9_19"
         }
     ]
 }

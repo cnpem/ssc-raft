@@ -9,11 +9,11 @@
 
 * Larissa M. Moreno, LNLS/CNPEM
 * João F. G. de Albuquerque Oliveira, LNLS/CNPEM
-* Alan Zanoni Peixinho, LNLS/CNPEM
 * Yuri Rossi Tonin, Georg-August-Universität Göttingen
 
 ## Past contributors
 
+* Alan Zanoni Peixinho
 * Otávio M. Paiano
 * Gilberto Martinez Jr.
 * Giovanni Baraldi
