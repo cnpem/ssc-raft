@@ -1,9 +1,11 @@
 #include "geometries/conebeam/fdk.hpp"
 #include "common/logerror.hpp"
 #include "common/opt.hpp"
+#include <cuda_runtime_api.h>
 #include <stdio.h>
 #include <cufft.h>
 
+#include <cstdio>
 #include <iostream>
 #include <iostream>
 #include <fstream>
@@ -79,7 +81,7 @@ float** c_proj, float** c_recon, float** c_beta, Process process)
     N    = process.n_recon;
     M    = process.n_proj;
     Npad = process.n_recon_pad;
-    Mpad = process.n_proj_pad;       
+    Mpad = process.n_proj_pad;
 
     float *dangles;
     HANDLE_ERROR(cudaMalloc((void **)&dangles, lab.nbeta * sizeof(float)));
@@ -87,9 +89,6 @@ float** c_proj, float** c_recon, float** c_beta, Process process)
 
     float *c_tomo = opt::allocGPU<float>((size_t)M);/* Alloc GPU sinograms to receive from CPU (temporary ptr)*/
 
-    HANDLE_ERROR(cudaDeviceSynchronize()); 
-
-    // printf("Allocating gpu memory... c_recon Npad = %lld \n",Npad);
     HANDLE_ERROR(cudaMalloc(c_recon, Npad * sizeof(float)));
 
     // printf("Allocating gpu memory... c_proj M = %lld \n",M);
@@ -125,7 +124,6 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
     // clock_t begin = clock();
 
     HANDLE_ERROR(cudaSetDevice(process.i_gpu));
-    HANDLE_ERROR(cudaDeviceSynchronize()); 
 
     long long int N = process.n_recon;    
 
@@ -148,6 +146,9 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
     opt::remove_paddR2R<<<gridBlock,threadsPerBlock>>>(c_recon, c_rec,
                                                         dim3(lab.nx, lab.ny, process.z_recon),
                                                         dim3(lab.padh, lab.padh, 0));
+
+
+    HANDLE_ERROR(cudaGetLastError());
 
     // printf("gpu = %d, idx recon = %lld. Bloco = %lld \n",process.i_gpu, process.idx_recon,N);
     HANDLE_ERROR(cudaMemcpy(&recon[process.idx_recon], c_rec, N*sizeof(float), cudaMemcpyDeviceToHost));
@@ -174,17 +175,11 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta, Process pro
     n_threads = NUM_THREADS;
     n_blocks  = M/n_threads + (M % n_threads == 0 ? 0:1);   
     
-    HANDLE_ERROR(cudaDeviceSynchronize()); 
-
     HANDLE_ERROR(cudaSetDevice(process.i_gpu));
-
-    // printf("\n Starting Backprojection: GPU %d \n", process.i_gpu);
 
     // clock_t b_begin = clock();
 
     backproj<<<n_blocks, n_threads>>>(recon, proj, beta, lab, process);
-
-    HANDLE_ERROR(cudaDeviceSynchronize()); 
 
     clock_t b_end = clock();
     // printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);
