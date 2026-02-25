@@ -1,3 +1,6 @@
+#include <cuda_runtime_api.h>
+#include <cstddef>
+#include <cstdlib>
 #include "common/logerror.hpp"
 #include "common/opt.hpp"
 #include "geometries/conebeam/fdk.hpp"
@@ -9,7 +12,6 @@ cufftComplex** c_signal, float** W,
 Process process) 
 {
     long long int Npad = process.n_filter_pad;
-    
     // clock_t begin = clock();
     HANDLE_ERROR(cudaSetDevice(process.i_gpu));
 
@@ -90,9 +92,7 @@ void copy_cpu_filter_fft(Lab lab, float* proj, float* c_proj, cufftComplex* c_si
     // clock_t begin = clock();
     HANDLE_ERROR(cudaSetDevice(process.i_gpu));
 
-    HANDLE_ERROR(cudaDeviceSynchronize()); 
-
-    long long int N = process.n_filter; 
+    long long int N = process.n_filter;
 
     float *c_tomo  = opt::allocGPU<float>((size_t)process.n_filter);/* Alloc GPU sinograms to receive from CPU (temporary ptr)*/
     float *padTomo = opt::allocGPU<float>((size_t)process.z_filter * lab.nbeta * lab.nph); /* Alloc zoom padded sinograms (temporary ptr)*/
@@ -111,6 +111,8 @@ void copy_cpu_filter_fft(Lab lab, float* proj, float* c_proj, cufftComplex* c_si
     opt::remove_paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(padTomo, c_tomo,
                                                                dim3(lab.nh, lab.nbeta, process.z_filter),
                                                                dim3(lab.padh, 0, 0));
+
+    HANDLE_ERROR(cudaGetLastError());
 
     HANDLE_ERROR(cudaMemcpy(&proj[process.idx_filter], c_tomo, N*sizeof(float), cudaMemcpyDeviceToHost));
 

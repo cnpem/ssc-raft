@@ -4,12 +4,7 @@
 #include "geometries/conebeam/fdk.hpp"
 #include <cmath>
 #include <cstdio>
-#include <fstream>
-#include <future>
-#include <thread>
 #include <time.h>
-#include <vector>
-#include <iostream>
 
 
 extern "C" {
@@ -138,7 +133,7 @@ extern "C" {
         6 * static_cast<float>(sizeof(float)) * lab.nph  * lab.nbeta + // Tomo zoom padded slice 
         2 * static_cast<float>(sizeof(float)) * lab.npfh * lab.nbeta + // Tomo padded filtered slice 
             static_cast<float>(sizeof(float)) * lab.nbeta              // angles
-        ); 
+        );
 
         int blocksize = lab.blocksize;
 
@@ -151,7 +146,7 @@ extern "C" {
             blocksize          = min(blockgpu, blocksize_aux);
         }
 
-        int n_process = (int)ceil( (float) blockgpu / blocksize ) * ndev;
+        int n_process = (int)ceil(((float)blockgpu / blocksize) * ndev);
 
         // printf("Blocksize: %d \n", blocksize);
         // printf("n_process: %d \n", n_process);
