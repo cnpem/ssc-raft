@@ -101,14 +101,14 @@ def set_wiggle( volume, axis, shiftx, shifty, nproc ):
     (considering a third axis fixed) 
     
     Args:
-        volume (ndarray): a digital volume squared matrices. The axis are [angles,slices,lenght]
+        volume (ndarray): a digital volume squared matrices. The axis are [angles,slices,length]
         axis (int): 0, 1 or 2 (axis to be fixed)
         shiftx (int): shifting array for x
         shifty (int): shifting array for y
         nproc (int): number of processes
              
     Returns:
-        (ndarray): block of sinograms with shape [angles,slices,lenght]
+        (ndarray): block of sinograms with shape [angles,slices,length]
 
     * CPU function
     * This function uses a shared array through package 'SharedArray'.
@@ -145,13 +145,13 @@ def set_wiggle_tomogram( volume, shiftx, shifty, nproc ):
     (considering a third axis fixed) 
     
     Args:
-        volume (ndarray): a digital tomogram (axis=0 for frames and axis=1 for slices). The axis are [angles,slices,lenght]
+        volume (ndarray): a digital tomogram (axis=0 for frames and axis=1 for slices). The axis are [angles,slices,length]
         shiftx (int): shifting matrix for x
         shifty (int): shifting array for y
         nproc (int): number of processes
              
     Returns:
-        (ndarray): block of sinograms with shape [angles,slices,lenght]
+        (ndarray): block of sinograms with shape [angles,slices,length]
 
     * CPU function
     * This function uses a shared array through package 'SharedArray'.
@@ -233,13 +233,13 @@ def set_wiggle_tomogram( volume, shiftx, shifty, nproc ):
     """ Set shifting values for the x,y axis at a given tomogram (considering a third axis fixed) 
     
     Args:
-        volume (ndarray): a digital tomogram (axis=0 for frames and axis=1 for slices). The axis are [angles,slices,lenght]
+        volume (ndarray): a digital tomogram (axis=0 for frames and axis=1 for slices). The axis are [angles,slices,length]
         shiftx (int): shifting matrix for x
         shifty (int): shifting array for y
         nproc (int): number of processes
              
     Returns:
-        (ndarray): block of sinograms with shape [nangles,slices,lenght]
+        (ndarray): block of sinograms with shape [nangles,slices,length]
 
     * CPU function
     * This function uses a shared array through package 'SharedArray'.
@@ -838,13 +838,13 @@ def get_wiggle( tomogram, direction, nproc, idx, *args ):
     """ Get horizontal shifting values for the x,y axis at a given tomogram volume obtained from parallel geometry
     
     Args:
-        tomogram (ndarray): a digital tomogram with shape [angles,slices,lenght] the detector height/lenght (slices/lenght).
+        tomogram (ndarray): a digital tomogram with shape [angles,slices,length] the detector height/length (slices/length).
         direction (str): string ``horizontal`` or ``vertical``
         nproc (int): number of processes.
         idx (int): a given index (from angle axis), to be used as a reference.
 
     Returns:
-        (ndarray): tomogram with shape [nangles,slices,lenght]
+        (ndarray): tomogram with shape [nangles,slices,length]
         
     * CPU function
     * This function uses a shared array through package 'SharedArray'.

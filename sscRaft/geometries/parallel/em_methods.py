@@ -8,7 +8,7 @@ def eEMRT_GPU_(tomo, angles, iterations, gpus, blocksize, obj = None):
     This EM method uses Ray Tracing as forward and inverse operators.
 
     Args:
-        tomo (ndarray): Tomographic 3D data with shape (slices,angles,lenght) 
+        tomo (ndarray): Tomographic 3D data with shape (slices,angles,length) 
         angles (float list): List of angles in radians 
         iterations (int): EM iterations 
         gpus (int list): List of gpus 
@@ -94,8 +94,8 @@ def tEMRT_GPU_(counts, flat, angles, iterations, gpus, blocksize, obj = None):
     This EM method uses Ray Tracing as forward and inverse operators.
 
     Args:
-        counts (ndarray): Photon counts 3D data with shape (slices,angles,lenght) 
-        flat (ndarray): Flat (or background) data with shape (slices,1,lenght) 
+        counts (ndarray): Photon counts 3D data with shape (slices,angles,length) 
+        flat (ndarray): Flat (or background) data with shape (slices,1,length) 
         angles (float list): List of angles in radians 
         iterations (int): EM iterations 
         gpus (int list): List of gpus 
@@ -195,8 +195,8 @@ def tEMFQ_GPU_(count, flat, angles, pad, interpolation,
     Backprojection Slice Theorem (BST) for the inverse operator.
 
     Args:
-        counts (ndarray): Photon counts 3D data with shape (slices,angles,lenght) 
-        flat (ndarray): Flat (or background) data with shape (slices,1,lenght) 
+        counts (ndarray): Photon counts 3D data with shape (slices,angles,length) 
+        flat (ndarray): Flat (or background) data with shape (slices,1,length) 
         angles (float list): List of angles in radians
         pad (int): Data padding - Integer multiple of the data size (0,1,2, etc...)
         interpolation (str): Type of interpolation. Options: \'nearest\' or \'bilinear\'

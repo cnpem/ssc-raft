@@ -5,16 +5,16 @@ def radon_RT(phantom, angles, gpus, pixel = 1.0):
     on a parallel beam geometry.
     
     Args:
-        phantom (ndarray): digital squared input phantom. Axis are (slices, width, lenght) [required]
+        phantom (ndarray): digital squared input phantom. Axis are (slices, width, length) [required]
         angles (float list): list of angles in radians [required]
         gpus (int list): list of GPUs [required]
         pixel (float, optional): pixel size in meters [default: 1.0] 
              
     Returns:
-        (ndarray): Radon transform 2D or 3D. Axis are (slices, angles, lenght)
+        (ndarray): Radon transform 2D or 3D. Axis are (slices, angles, length)
 
     All physical units are in SI.
-    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``pixel`` input argument. 
+    The resulted reconstruction returns coefficients with physical units in meter ``[m]``, considering the pixel size in the ``pixel`` input argument. 
     If no pixel size is passed, the algorithm consider ``pixel = 1.0`` by default.
 
     * MultiGPU function 

@@ -185,7 +185,7 @@ extern "C"{
 //         /* Tomogram and reconstruction filter (v of vertical) */
 //         long long int n_tomo, ind_tomo, n_filter, ind_filter;
 //         int ind, ind_max, indz_filter;
-//         float pos, pos_max, lenght;
+//         float pos, pos_max, length;
 
 //         /* Reconstruction (or object) variables */ 
 //         block    = (int) ( ( configs.obj.zslice1 - configs.obj.zslice0 ) / n_total_processes ); 
@@ -200,15 +200,15 @@ extern "C"{
 //         posz           = - configs.obj.Lz +     indz * configs.obj.dz;
 //         posz_max       = - configs.obj.Lz + indz_max * configs.obj.dz;
                 
-//         lenght      = sqrtf( configs.obj.Lx * configs.obj.Lx + configs.obj.Ly * configs.obj.Ly );
+//         length      = sqrtf( configs.obj.Lx * configs.obj.Lx + configs.obj.Ly * configs.obj.Ly );
         
 //         /* Tomogram (or detector) and filter (with padding) variables */
 //         float z12x  = configs.geometry.z1x + configs.geometry.z2x;
 //         // float z12y  = configs.geometry.z1y + configs.geometry.z2y;
 
 //         /* Tomogram */
-//         pos           = std::max(- configs.tomo.Lz, std::min( z12x * posz     / ( configs.geometry.z1x - lenght ), z12x *     posz / ( configs.geometry.z1x + lenght ) ) );
-//         pos_max       = std::min(+ configs.tomo.Lz, std::max( z12x * posz_max / ( configs.geometry.z1x + lenght ), z12x * posz_max / ( configs.geometry.z1x - lenght ) ) ); 
+//         pos           = std::max(- configs.tomo.Lz, std::min( z12x * posz     / ( configs.geometry.z1x - length ), z12x *     posz / ( configs.geometry.z1x + length ) ) );
+//         pos_max       = std::min(+ configs.tomo.Lz, std::max( z12x * posz_max / ( configs.geometry.z1x + length ), z12x * posz_max / ( configs.geometry.z1x - length ) ) ); 
 
 //         ind        = std::max(                        0, (int) floor( ( pos     + configs.tomo.Lz ) / configs.tomo.dz ) );
 //         ind_max    = std::min( (int)configs.tomo.size.z, (int)  ceil( ( pos_max + configs.tomo.Lz ) / configs.tomo.dz ) );

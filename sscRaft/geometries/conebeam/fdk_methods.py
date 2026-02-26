@@ -6,7 +6,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
     GPU function.
 
     Args:
-        data (ndarray): Cone beam projection tomogram. The axes are [slices, angles, lenght].
+        data (ndarray): Cone beam projection tomogram. The axes are [slices, angles, length].
         dic (dictionary): Dictionary with the parameters.
 
     Returns:
@@ -26,7 +26,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
 
         * ``dic['filter']`` (str,optional): Filter type [Default: \'lorentz\']
 
-            #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
+            #. Options = (\'none\', \'gaussian\', \'lorentz\', \'cosine\', \'rectangle\', \'hann\', \'hamming\', \'ramp\')
 
         * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 2.0]
         * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 

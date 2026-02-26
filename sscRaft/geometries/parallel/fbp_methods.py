@@ -5,7 +5,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     tomogram using the Filtered Backprojection (FBP) method.
 
     Args:
-        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
+        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, length] .
         angles (float list): List of angles in radians
         gpus (int list): List of gpus
         dic (dict): Dictionary with parameters info
@@ -125,10 +125,10 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
 
 def bstGPU(tomogram, angles, gpus, dic, obj = None, nstreams = 1):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction of a parallel beam 
-    tomogram using the Backprojection Slice Theorem (BST) method.
+    tomogram using the Backprojection Slice Theorem (BST) method [1]_.
 
     Args:
-        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
+        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, length].
         angles (float list): List of angles in radians
         gpus (int list): List of gpus
         dic (dict): Dictionary with parameters info

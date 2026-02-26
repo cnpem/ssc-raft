@@ -371,7 +371,7 @@ def read_flat(detector,filepath,hdf5path):
         hdf5path (str): Path inside of HDF5 file to the flat data
 
     Returns:
-        (ndarray): Flat (background) data with shape [number_of_flats = 1,slices,lenght]. The number of flats are fixed as ``1``
+        (ndarray): Flat (background) data with shape [number_of_flats = 1,slices,length]. The number of flats are fixed as ``1``
     """
     start = time.time()
             
@@ -408,7 +408,7 @@ def read_dark(detector,filepath,hdf5path):
         hdf5path (str): Path inside of HDF5 file to the Dark data
 
     Returns:
-        (ndarray): Dark data with shape [number_of_darks = 1,slices,lenght]. The number of darks are fixed as ``1``
+        (ndarray): Dark data with shape [number_of_darks = 1,slices,length]. The number of darks are fixed as ``1``
     """
     start = time.time()
             
@@ -449,8 +449,8 @@ def ReadTomoFlatDark(dic):
 
     Returns:
         (ndarray): Tomographic data with shape determined by the acquisition software
-        (ndarray): Flat (or background) data with shape [height,lenght], the height/lenght are the same as the detector
-        (ndarray): Dark data with shape [height,lenght], the height/lenght are the same as the detector
+        (ndarray): Flat (or background) data with shape [height,length], the height/length are the same as the detector
+        (ndarray): Dark data with shape [height,length], the height/length are the same as the detector
     
     Dictionary parameters:
 

@@ -42,6 +42,8 @@ The ssc-raft algorithm is called as ``sscRaft`` python module.
     tutorial/reconstructions
     tutorial/forward
     tutorial/padding
+    tutorial/pipelines
+    tutorial/references
 
 
 

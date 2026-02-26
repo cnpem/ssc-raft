@@ -5,36 +5,20 @@ Background correction by _flat_, denoted by {math}`D_f`, and _dark_, denoted by 
 transforms the detector raw data into a proper input for the reconstruction algorithms.
 
 The mathematical operations to construct proper data, denoted by {math}`D`, for transmission measurements is
-
-```{math}
-    T = - \log{(\frac{D - D_d}{D_f - D_d})}.
-```
-
-The mathematical operations to construct proper data for phase contrast measurements is
-
-```{math}
-T = \frac{D - D_d}{D_f - D_d},
-```
-
+{math}`T = - \log{(\frac{D - D_d}{D_f - D_d})}`. The mathematical operations to construct proper data for phase contrast measurements is {math}`T = \frac{D - D_d}{D_f - D_d}`,
 where {math}`T` is the corrected tomogram.
+
+## Usage
 
 The input and output data is on the following format:
 
-* {math}`D` - ``data``
+- {math}`D` - ``data``: Three-dimensional raw data. The axes are ``[slices, angles, length]`` in python syntax.
 
-  * Three-dimensional raw data. The axes are ``[slices, angles, rays]`` in python syntax.
+- {math}`T` - ``tomogram``: Three-dimensional output corrected data. The axes are ``[slices, angles, length]`` in python syntax.
 
-* {math}`T` - ``tomogram``
+- {math}`D_f` - ``flat``: Three-dimensional flat measurement. The axes are ``[slices, numberFlats, length]`` in python syntax, where ``numberFlats = 1`` or ``numberFlats = 2``.
 
-  * Three-dimensional output corrected data. The axes are ``[slices, angles, rays]`` in python syntax.
-
-* {math}`D_f` - ``flat``
-
-  * Three-dimensional flat measurement. The axes are ``[slices, numberFlats, rays]`` in python syntax, where ``numberFlats = 1`` or ``numberFlats = 2``.
-
-* {math}`D_d` - ``dark``
-
-  * Three or two-dimensional dark measurement. The axes are ``[slices, 1, rays]`` or ``[slices, rays]`` in python syntax.
+- {math}`D_d` - ``dark``: Three-dimensional dark measurement. The axes are ``[slices, 1, length]`` or ``[slices, length]`` in python syntax.
 
 The function also allows for a linear interpolation of a _before_ and _after_ flat. Because of this, the ``numberFlats`` needs to be at most 2, where the first entry is
 the _before_ flat, taken before the begining of data acquisition, and the second entry the _after_ flat, taken after data acquisition.
@@ -44,8 +28,6 @@ the _before_ flat, taken before the begining of data acquisition, and the second
 > It can also be passed as two-dimensional entries to the reconstruction function.
 > *If the flat is two-dimensional, there will not be a flat interpolation! The correction will follow with one flat.*
 ---
-
-Script example:
 
 ```python
     import sscRaft

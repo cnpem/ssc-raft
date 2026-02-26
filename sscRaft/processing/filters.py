@@ -7,11 +7,11 @@ def lowpass(tomogram, dic = None, **kwargs):
     
 
     Args:
-        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
+        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, length].
         dic (dict, optional): Dictionary with the experiment info [default: None
 
     Returns:
-        (ndarray): Filtered tomogram. The axes are [slices, angles, lenght]
+        (ndarray): Filtered tomogram. The axes are [slices, angles, length]
 
     Dictionary parameters:
 

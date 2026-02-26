@@ -6,13 +6,13 @@ def rings_remove_all_stripes(tomo, ngpus = 1, settings = None, batch = 256):
     """Remove rings artifacts with all stripes method [1]_.
     
     Args:
-        tomo (ndarray): Tomogram. The axes are [slices, angles, lenght].
+        tomo (ndarray): Tomogram. The axes are [slices, angles, length].
         ngpus (int, optional):  Number of GPUs to be used [default: 1]
         settings (dict, optional): Dictionary with the parameters [default: None]
         batch (int, optional): Number of tomogram slice blocks for simultaneous computation [default: 256]
 
     Returns:
-        (ndarray): Filtered tomogram 3D object. The axes are [slices, angles, lenght]
+        (ndarray): Filtered tomogram 3D object. The axes are [slices, angles, length]
 
     * One or MultiGPUs. 
 
@@ -53,13 +53,13 @@ def rings_remove_all_stripes_multiaxis(tomo, ngpus = 1, settings = None, batch =
     """Remove rings artifacts with all stripes multiaxis method.
     
     Args:
-        tomo (ndarray): Tomogram. The axes are [slices, angles, lenght].
+        tomo (ndarray): Tomogram. The axes are [slices, angles, length].
         ngpus (int, optional):  Number of GPUs to be used [default: 1]
         settings (dict, optional): Dictionary with the parameters [default: None]
         batch (int, optional): Number of tomogram slice blocks for simultaneous computation [default: 256]
 
     Returns:
-        (ndarray): Filtered tomogram 3D object. The axes are [slices, angles, lenght]
+        (ndarray): Filtered tomogram 3D object. The axes are [slices, angles, length]
 
     * One or MultiGPUs. 
 

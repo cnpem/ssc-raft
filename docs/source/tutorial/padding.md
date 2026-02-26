@@ -76,4 +76,5 @@ The ``fdk`` example below shows how to call the paddin for zoom images. By defau
                                                   'zoom padd_mode': 'edge'})
 ```
 
-This padding can be, and is by default, applied together with the FFT strategy one.
+
+### Combined padding

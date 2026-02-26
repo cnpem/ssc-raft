@@ -82,11 +82,11 @@ extern "C" {
 
         opt::CPUToGPU<float>(angles, workspace->angles, nAngles);
 
-        printf("blocksize: %d\n",blocksize);
-        printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
-        printf("ind_block: %d\n",ind_block);
-        printf("sizez: %d\n",sizez);
-        fflush(stdout);
+        // printf("blocksize: %d\n",blocksize);
+        // printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
+        // printf("ind_block: %d\n",ind_block);
+        // printf("sizez: %d\n",sizez);
+        // fflush(stdout);
        
         int ptr = 0, subblock; 
 
@@ -142,19 +142,19 @@ extern "C"{
         int ptr       = 0; 
         int subblock;
 
-        printf("tomo shape:\n");
-        printDim(configs.tomo.size);
-        printf("tomo pad shape:\n");
-        printDim(configs.tomo.pad);
-        printf("obj shape:\n");
-        printDim(configs.obj.size);
-        printf("obj pad shape:\n");
-        printDim(configs.obj.pad);
-        printf("nflats: %d\n",nflats);
-        printf("ngpus: %d\n",ngpus);
-        printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
-        printf("subvolume: %d\n",subvolume);
-        fflush(stdout);
+        // printf("tomo shape:\n");
+        // printDim(configs.tomo.size);
+        // printf("tomo pad shape:\n");
+        // printDim(configs.tomo.pad);
+        // printf("obj shape:\n");
+        // printDim(configs.obj.size);
+        // printf("obj pad shape:\n");
+        // printDim(configs.obj.pad);
+        // printf("nflats: %d\n",nflats);
+        // printf("ngpus: %d\n",ngpus);
+        // printf("configs.tomo.blocksize: %d\n",configs.tomo.blocksize);
+        // printf("subvolume: %d\n",subvolume);
+        // fflush(stdout);
 
         if (ngpus == 1){ /* 1 device */
             

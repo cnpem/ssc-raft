@@ -86,11 +86,11 @@ def correct_rotation_axis360(data: numpy.ndarray, dic: dict) -> numpy.ndarray:
     Works with parallel, fan and cone beam sinograms for 360 degrees projections.
 
     Args:
-        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        data (ndarray): Projection tomogram. The axes are [slices, angles, length]
         dic (dictionary): Dictionary with the parameters info
 
     Returns:
-        (ndarray, int): Rotation axis corrected tomogram (3D) with axes [slices, angles, lenght] 
+        (ndarray, int): Rotation axis corrected tomogram (3D) with axes [slices, angles, length] 
         and Number of pixels representing the deviation of the center of rotation
 
     Raises:
@@ -149,7 +149,7 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
     Parameters
     ----------
     tomo : 3 dimensional array_like object
-        Raw tomogram in [angles,slice,lenght] axis.
+        Raw tomogram in [angles,slice,length] axis.
         tomo[m, i, j] selects the value of the pixel at the i-row and j-column in the projection m.
     nx_search : int, optional
         Width of the search. 
@@ -197,6 +197,7 @@ def find_rotation_axis_360(tomo, nx_search=500, nx_window=500, nsinos=None):
             diff_symmetry[i] += numpy.linalg.norm(sino_esq - sino_dir) / mean_sinos
     
     deviation = numpy.argmin(diff_symmetry) - nx_search
+    deviation = - deviation
 
     logger.info(f'Automatic rotation axis correction deviation: {deviation}')
 
@@ -231,11 +232,11 @@ def correct_rotation_axis_int(data: numpy.ndarray, deviation: int) -> numpy.ndar
     The deviation value, with sign, is computed through the sscRaft function ``Centersino()``.
 
     Args:
-        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        data (ndarray): Projection tomogram. The axes are [slices, angles, length]
         deviation (int): Number of pixels representing the rotation axis deviation
 
     Returns:
-        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, 2 * deviation + lenght] 
+        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, 2 * deviation + length] 
 
     * CPU function
     """
@@ -261,11 +262,11 @@ def correct_rotation_axis_cropped(data: numpy.ndarray, deviation: int) -> numpy.
     The deviation value, with sign, is computed through the sscRaft function ``Centersino()``.
 
     Args:
-        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        data (ndarray): Projection tomogram. The axes are [slices, angles, length]
         deviation (int): Number of pixels representing the rotation axis deviation
 
     Returns:
-        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, lenght] 
+        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, length] 
 
     * CPU function
     """
@@ -289,11 +290,11 @@ def correct_rotation_axis(data: numpy.ndarray, axis_offset: float, gpus: list = 
     The deviation value, with sign, is computed through the sscRaft function ``Centersino()``.
 
     Args:
-        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        data (ndarray): Projection tomogram. The axes are [slices, angles, length]
         axis_offset (float): Distance in pixels representing the rotation axis deviation
 
     Returns:
-        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, lenght] 
+        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, length] 
 
     * CPU function
     """
@@ -333,10 +334,10 @@ def Centersino_block(frame0, frame1, flat, dark, block_size) -> list:
         -\log( \\frac{I - d_{0}}{I_{0}} ) 
 
     Args:
-        frame0 (ndarray): First frame of intensity data obtained by detector. The axes are [slices, lenght]
-        frame1 (ndarray): Last frame of intensity data obtained by detector - The axes are [slices, lenght]
-        flat (ndarray): Flat. The axes are [slices, lenght]
-        dark (ndarray): Dark. The axes are [slices, lenght]
+        frame0 (ndarray): First frame of intensity data obtained by detector. The axes are [slices, length]
+        frame1 (ndarray): Last frame of intensity data obtained by detector - The axes are [slices, length]
+        flat (ndarray): Flat. The axes are [slices, length]
+        dark (ndarray): Dark. The axes are [slices, length]
         block_size (int): Number of slices in a block
 
     Returns:
@@ -365,12 +366,12 @@ def correct_rotation_axis_block(data, rotation_axis_list, block_size):
     The rotation_axis_list, with signs, is computed through the sscRaft function ``Centersino_block()``.
 
     Args:
-        data (ndarray): Projection tomogram. The axes are [slices, angles, lenght]
+        data (ndarray): Projection tomogram. The axes are [slices, angles, length]
         rotation_axis_list (int list): List of rotation axis deviation by blocks
         block_size (int): Number of slices in a block
 
     Returns:
-        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, lenght] 
+        (ndarray): Rotation axis corrected tomogram (3D) with shape [slices, angles, length] 
 
     * CPU function
     """

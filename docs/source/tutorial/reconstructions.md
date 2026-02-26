@@ -12,18 +12,19 @@ The methods are divided by beam geometry: cone-beam and parallel-beam.
 
 The methods implemented for this geometry are:
 
-1. Feldkamp, Davis and Kress (FDK).
-2. Expectation Maximization (EM) for transmission data.
+1. Feldkamp, Davis and Kress (FDK) {cite}`fdk1984`.
 
-### Reconstruction Algorithm: Feldkamp, Davis and Kress (FDK) for cone-beam
+### Feldkamp, Davis and Kress - FDK
 
 The FDK Reconstruction Algorithm is a popular method for three-dimensional reconstruction from cone-beam projections.
-It was developed in 1984 by Feldkamp, Davis and Kress as a practical geometry adaptation of existing analytical Filtered Backprojection strategies for reconstruction.
+It was developed in 1984 by Feldkamp, Davis and Kress {cite}`fdk1984` as a practical geometry adaptation of existing analytical Filtered Backprojection strategies for reconstruction.
 
 This reconstruction method consists of:
 
 - Filtering conical projections.
 - Backprojecting to sample reconstructions.
+
+#### Usage 
 
 The input and output data is on the following format:
 
@@ -46,7 +47,6 @@ The input and output data is on the following format:
 ```
 
 For padding usage, we refer to [Padding documentation](padding.md).
-
 The reference to all the input parameters can be found on the {ref}`FDK API documentation <apifdk>`.
 
 ## Parallel-beam Geometry
@@ -57,13 +57,15 @@ The methods implemented for this geometry are:
 2. Expectation Maximization (EM) for transmission and emission data by Ray-Tracing.
 3. Expectation Maximization (EM) for transmission on frequency domain.
 
-### Reconstruction Algorithm: Filtered Back-projection
+### Filtered Back-projection - FBP
 
 This reconstruction method consists of filtering parallel projections with Fourier Transforms
 and backprojecting by two methods:
 
-- Backprojecting by Ray-Tracing to sample reconstructions.
-- Backprojecting by Backprojection Slice Theorem to sample reconstructions.
+- Backprojecting by Ray-Tracing to sample reconstructions {cite}`kak1988`.
+- Backprojecting by Backprojection Slice Theorem to sample reconstructions {cite}`miq2017bst`.
+
+#### Usage
 
 The input and output data is on the following format:
 
@@ -90,10 +92,21 @@ The input and output data is on the following format:
                                                   'z1[m]': 1000e-3, 'z1+z2[m]':2000e-3, 'z2[m]':500e-3, 
                                                   'energy[eV]': 22e3, 'filter': 'hamming'})
 ```
-
+For padding usage, we refer to [Padding documentation](padding.md).
 The reference to all the input parameters can be found on the {ref}`FBP API documentation <apifbp>`.
 
-### Reconstruction Algorithm: Expectation Maximization (EM) for parallel-beam Transmission and Emission data
+#### Parameters selection
+
+The function is composed of direct input arguments and a dictionary (``dic``) with overall parameters. The reference to all the input parameters can be found on the {ref}`FBP API documentation <apifbp>`. Below, we discuss about the dictionary parameters.
+
+- **``gpu (default:[0])``** - A list of GPUs to be used. Example: the {math}`[0,1,2]` select 3 GPUs to be used, numbered 0, 1 and 2.
+
+- **``method (default: 'RT')``** - Selection of the method to be used, the classic Filter Backprojection method (``'RT'``) or the Backprojection Slice Theorem approach (``'BST'``).
+
+- **``angles[rad] (default:None)``** - List of angles in radians. Prefer to pass in a crescent order, starting with {math}`0` degrees. 
+
+
+### Expectation Maximization - EM
 
 There are three EM methods implemented
 
@@ -179,3 +192,5 @@ The input and output data the transmission EM methods is on the following format
 ```
 
 The reference to all the input parameters can be found on the {ref}`EM API documentation <apiem>`.
+
+

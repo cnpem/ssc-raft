@@ -859,3 +859,73 @@ def main(input_file_path: str = "") -> None:
 
 #logging.basicConfig(filename="log_cbradon.txt", format='%(asctime)s %(message)s', level=logging.DEBUG)
 #logging.info("Module cbradon.tomo imported.\n")
+
+def cbradon(phantom: numpy.ndarray, ngpus: int = 1, dic: dict = None):
+    """ Generate coneabeam tomogram using a geometric adaptation of the Radon Transform with Ray Tracing for a given input phantom.
+    The resulting tomogram have angles equally spaced for a :math:`2\pi` rotation, with the number of angles given by the user. 
+    
+    Args:
+        phantom (ndarray): Phantom 3D. Axis are (slices, width, length) 
+        gpus (int, optional): Number of gpus [default: 1]
+        pixel (float, optional): pixel size of phantom in meters [default: 1.0] 
+             
+    Returns:
+        (ndarray): Radon transform 2D or 3D. Axis are (slices, angles, length)
+
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in meter ``[m]``, considering the pixel size in the ``pixel_phantom`` input argument. 
+    If no pixel size is passed, the algorithm consider ``pixel_phantom = 1.0`` by default.
+
+    * MultiGPU function
+
+    Dictionary parameters:
+            
+        * ``dic['z1[m]']`` (float): Source-sample distance in meters [required]
+        * ``dic['z1+z2[m]']`` (float): Source-detector distance in meters [required]
+        * ``dic['number of projections']`` (int): Number of projections [required]
+        * ``dic['phantomPixel[m]']`` (float,optional): Pixel size of phantom in meters [Default: 1.0]
+        * ``dic['detectorPixel[m]']`` (float,optional): Detector pixel size in meters [Default: 1.0]
+
+    """
+    number_of_projections = dic['number of projections']
+    z1                    = dic['z1[m]']
+    z2                    = dic['z1+z2[m]'] - dic['z1[m]']
+    mag_obj               = z1 / (z1 + z2)
+    pixel_det             = dic.get('detectorPixel[m]', 1.0)
+    pixel_p               = dic.get('phantomPixel[m]', 1.0)
+
+    nz, ny, nx            = phantom.shape
+
+    det_half_sizeH  = ( nx * pixel_det ) / 2
+    det_half_sizeV  = ( nz * pixel_det ) / 2
+    phantom_lengthx = ( nx * pixel_p   ) / 2
+    phantom_lengthy = ( ny * pixel_p   ) / 2
+    phantom_lengthz = ( nz * pixel_p   ) / 2
+
+    # calcx = np.round(input_dict['x'] * input_dict['pixel_size'] * mag_obj, 7)
+    # calcy = np.round(input_dict['y'] * input_dict['pixel_size'] * mag_obj, 7)
+    # calcz = np.round(input_dict['z'] * input_dict['pixel_size'] * mag_obj, 7)
+
+    beta = np.linspace(0, -2*np.pi, number_of_projections, endpoint=False)
+
+    data_dict = make_data_dict(
+        phantom = phantom,
+        z1      = z1,
+        z2      = z2,
+        beta    = beta,
+        Lx      = phantom_lengthx, 
+        Ly      = phantom_lengthy, 
+        Lz      = phantom_lengthz, 
+        x0      = 0.0,
+        y0      = 0.0,
+        z0      = 0.0,
+        nh      = nz, 
+        nv      = nx, 
+        H       = det_half_sizeH, 
+        V       = det_half_sizeV,
+        n_ray_points = int(5e3)
+    ) 
+
+    tomo = make_tomo_for_zoom_iterative(data_dict, ngpus, save=False, verbose=False)
+
+    return tomo

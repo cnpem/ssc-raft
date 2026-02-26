@@ -5,13 +5,14 @@ Here you will find examples of usage of algorithms for excentric tomography impl
 
 ## Finding the offset
 
+### Usage
+
 The input and output data is on the following format:
 
 - ``tomogram``: Three-dimensional tomogram data. The axes are ``[slices, angles, rays]`` in python syntax.
 - ``offset``: Integer value that corresponds to the excentric tomography offset. It already takes into account the rotation axis deviation.
 
 The corrected offset can be found using just a few slices, with a minimum of one slice.
-
 
 ---
 > **Note:** The measurement needs to be corrected by flat (or empty) and dark previously.
@@ -27,8 +28,11 @@ The corrected offset can be found using just a few slices, with a minimum of one
 
     offset = sscRaft.getOffsetExcentricTomo(tomogram, gpus = [0])
 ```
+The reference to all the input parameters can be found on the {ref}`API documentation <apistitchA>`.
 
 ## Stitching
+
+### Usage
 
 The input and output data is on the following format:
 
@@ -50,4 +54,4 @@ The resulting stitched tomogram have 180 degrees and is already centered (rotati
 
 The offset value can be found through the function ``getOffsetExcentricTomo()`` above.
 
-The reference to all the input parameters can be found on the {ref}`Alignment API documentation <apistitch>`.
+The reference to all the input parameters can be found on the {ref}`API documentation <apistitchB>`.

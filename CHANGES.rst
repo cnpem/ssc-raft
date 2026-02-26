@@ -1,8 +1,8 @@
-Version 3.4.0 - 2026-02-25
+Version 3.4.0 - 2026-02-27
 --------------------------
 *Added:*
   - Rings method ``all stripes`` and ``all stripes multiaxis`` previously in the package ``ssc-rings``.
-  - Fast ``C`` pipeline with rings method ``all stripes`` for parallel-beam.
+  - Fast ``C`` pipeline with rings method ``all stripes`` for parallel-beam only.
 
 *Corrections:*
   - ``FDK`` memory bug on backprojection.
@@ -277,7 +277,7 @@ Version 3.0.0 - 2024-09-10
   - Wiggle and other methods of alignment.
   - C/C++/CUDA pipeline.
   - ``io.py`` file for io related functions.
-  - ``correct_background()`` function that corrects the background (flat/dark) with data axis as ``[slices,angles,lenght]`` as input.
+  - ``correct_background()`` function that corrects the background (flat/dark) with data axis as ``[slices,angles,length]`` as input.
   - ``correct_rotation_axis()`` function to correct axis deviation.
   - Stitching 360 to 180 degrees tomography functions for parallel beam.
   - ``phase_retrieval()`` function added with Paganin method by frames.

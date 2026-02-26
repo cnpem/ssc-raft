@@ -14,13 +14,13 @@ This page documents the API reference for the sscRaft.
 
 .. toctree::
 
-    api/io
     api/correction
     api/alignment
     api/rings
     api/phaseret
     api/reconstruction
     api/forward
+    api/pipelines
 
 
 

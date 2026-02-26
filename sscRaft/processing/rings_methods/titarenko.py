@@ -5,11 +5,11 @@ def titarenko_rings(tomogram, gpus = [0], dic = None, **kwargs):
     """Rings artifacts reduction by Generalized Titarenko\'s algorithm [2]_.
 
     Args:
-        tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
+        tomogram (ndarray): Tomogram (3D) or sinogram (2D). The axes are [slices, angles, length] (3D) or [angles, length] (2D).
         dic   (dictionary): Dictionary with the parameters.
 
     Returns:
-        (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
+        (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, length] (3D) or [angles, length] (2D).
     
     * One or MultiGPUs
     * Wrapper for function ``TitarenkoRingsGPU()`` [2]_
@@ -18,7 +18,7 @@ def titarenko_rings(tomogram, gpus = [0], dic = None, **kwargs):
 
         * ``dic['gpu']`` (int list): List of GPUs to use [required]
         * ``dic['regularization']`` (float,optional): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
-        * ``dic['blocks']`` (int,optional): Blocks of sinograms to be used. Even values between [1,20] [default: 1] 
+        * ``dic['blocks']`` (int,optional): Blocks of sinograms columns to be used. Even values between [1,20] [default: 1] 
         * ``dic['blocksize']`` (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [default: 0]
 
     References:
@@ -46,14 +46,14 @@ def TitarenkoRingsGPU(tomogram, gpus, rings_lambda, rings_block, blocksize = 0):
     """ Rings artifacts reduction by Generalized Titarenko\'s algorithm [3]_.  
 
     Args:
-        tomogram (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
+        tomogram (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, length] (3D) or [angles, length] (2D).
         gpus (int list): List of GPUs
         rings_lambda (float): Titarenko\'s regularization value. Values between [0,1]. The value -1 compute this parameter automatically
         rings_block (int): Blocks of sinograms to be used. Even values between [1,20]
         blocksize (int, optional): Block of slices size to be processed in one GPU. \'blocksize = 0\' computes it automatically considering the available GPU memory [Default: 0]
 
     Returns:
-        (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, lenght] (3D) or [angles, lenght] (2D).
+        (ndarray): Tomogram (3D) or Sinogram (2D). The axes are [slices, angles, length] (3D) or [angles, length] (2D).
 
     References:
 

@@ -14,7 +14,7 @@ They occur when the measured data present stripes artifacts in its acquisition. 
 | :-------: | 
 | Figure 1: **(a)** Sinogram of a demonstration phantom; **(b)** sinogram in (a) corrupted by vertical stripes; **(c)** reconstruction of sinogram in (a); **(d)** reconstruction of sinogram in (b).| 
 
-## All Stripes Method - Parameters and Usage
+## All Stripes method
 
 The ``ssc-raft`` presents a ``multi-GPU`` implementation of the _all stripes_ algorithm introduced in {cite}`Vo18`, that applies a sequence of processing stages that act on some specific categories of stripes in order to mitigate them. Details can be found in {cite}`macul2024rings`. 
 
@@ -40,10 +40,10 @@ The input and output data is on the following format:
                                                                             'dim':1})
 ```
 
-The reference to all the input parameters can be found on the {ref}`All Stripes API documentation <apiallstripes>`.
-
 (paramAllS)=
 ### Parameters selection 
+
+The function is composed of direct input arguments and a dictionary (``settings``) with overall parameters. The reference to all the input parameters can be found on the {ref}`All Stripes API documentation <apiallstripes>`. Below, we discuss about the dictionary parameters.
 
 - **``background_ratio (default:10.0)``** - in one of the steps of the "remove all stripes" algorithm (referred to as algorithm 4 at {cite}`Vo18`), a segmentation
 stage takes place as a means to separate large stripes from the image's background. In this process, this parameter can be viewed as a form to adjust the
@@ -69,7 +69,7 @@ false stripes detection, which might occur due to high-frequency edges of the si
 this value around _0.8_ but values between _0.1_ and _0.8_ are acceptable. Values above 0.8 are clipped to 0.8 internally and
 the same is valid for values below 0.
 
-## All Stripes Multiaxis Method - Parameters and Usage
+## All Stripes Multiaxis method
 
 This method is a twist of the original _all stripes_ method, where the _all stripes_ method is applied to the tomogram in another axis (``axis 2``) to mitigate horizontal stripes. 
 The input and parameters are the same as the ``rings_remove_all_stripes()`` function.                 
@@ -96,13 +96,11 @@ The input and output data is on the following format:
                                                                                         'dim':1})
 ```
 
-The reference to all the input parameters can be found on the {ref}`All Stripes Multiaxis API documentation <apiallstripesM>`.
-
 ### Parameters selection
 
-Refer to _all stripes_ {ref}`paramAllS`.
+The parameters are the same as _all stripes_ {ref}`paramAllS`. The reference to all the input parameters can be found on the {ref}`All Stripes Multiaxis API documentation <apiallstripesM>`.
 
-## Titarenko Method - Parameters and Usage
+## Titarenko method
 
 This method is based on the work of E.X. Miqueles et al (2014) {cite}`miq2014Titarenko`, developed as a generalization of {cite}`titarenko2010a`.
 
@@ -124,16 +122,14 @@ The input and output data is on the following format:
     output = sscRaft.titarenko_rings(tomogram, dic = {'gpu': [0,1], 'regularization': -1, 'blocks':1})
 ```
 
-The reference to all the input parameters can be found on the {ref}`Titarenko API documentation <apititarenko>`.
-
 ### Parameters selection
 
-- **``regularization (default:-1)``** - Titarenko's regularization value. Values between {math}`[0,1]`. The value -1 compute this parameter automatically.
+The function is composed of direct input arguments and a dictionary (``dic``) with overall parameters. The reference to all the input parameters can be found on the {ref}`Titarenko API documentation <apititarenko>`. Below, we discuss about the dictionary parameters.
+
+- **``gpu (default:[0])``** - A list of GPUs to be used. Example: the {math}`[0,1,2]` select 3 GPUs to be used, numbered 0, 1 and 2.
+
+- **``regularization (default:-1)``** - Titarenko's regularization value. Values are in the interval {math}`[0,1]`. The value -1 compute this parameter automatically.
 
 - **``blocks (default:1)``** - Blocks of sinogram columns to be used. Even values between {math}`[1,20]`.
 
-
-## References
-
-```{bibliography}
 

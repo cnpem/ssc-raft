@@ -4,7 +4,13 @@
 Here you will find examples of usage of phase retrieval algorithms implemented in the package `sscRaft`.
 
 Application of phase retrieval methods based on the Transport of Equation (TIE) approach.
-Currently, the method implemented is based on D. Paganin, S. C. Mayo, T. E. Gureyev, P. R. Miller, S. W. Wilkins 2002 paper, _Simultaneous phase and amplitude extraction from a single defocused image of a homogeneous object_, [DOI](https://doi.org/10.1046/j.1365-2818.2002.01010.x).
+Currently, the method implemented is based on 
+
+## Paganin Filter
+
+This method is an implementation of the classical Paganin filter introduced in {cite}`pag2002`.
+
+### Usage
 
 The input and output data is on the following format:
 
@@ -28,7 +34,7 @@ The input and output data is on the following format:
                                                       'energy[eV]': 22e3, 'magn': 1.1})
 ```
 
-For the classic Paganin method, we have to apply $-\log()$ on the output using the dictionary entry  ``\'post_process\': True``
+For the classic Paganin method, we have to apply {math}`-\log()` on the output using the dictionary entry ``\'post_process\': True``
 
 ```python
     import sscRaft

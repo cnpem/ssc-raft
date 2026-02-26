@@ -94,9 +94,9 @@ extern "C"{
 
         float magn = lab.Dsd / lab.D;
         float z2   = lab.Dsd - lab.D;
-        float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
+        float wavelength = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
+        float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn;
 
         for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (wmax)/(lab.npfh) + (2*i*wmax)/(lab.npfh); 
     
@@ -113,9 +113,9 @@ extern "C"{
         
         float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
-        float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
+        float wavelength = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
+        float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn;
         
         for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2*i*wmax)/(lab.npfh); 
     
@@ -133,9 +133,9 @@ extern "C"{
 
         float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
-        float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
+        float wavelength = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
+        float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn;
 
         for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2*i*wmax)/(lab.npfh); 
     
@@ -152,9 +152,9 @@ extern "C"{
 
         float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
-        float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
+        float wavelength = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
+        float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn;
         
         for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2*i*wmax)/(lab.npfh); 
     
@@ -172,9 +172,9 @@ extern "C"{
 
         float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
-        float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
+        float wavelength = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
+        float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn;
         
         for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2*i*wmax)/(lab.npfh); 
     
@@ -192,9 +192,9 @@ extern "C"{
 
         float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
-        float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
+        float wavelength = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn;
+        float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn;
         
         for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2*i*wmax)/(lab.npfh); 
     
@@ -219,9 +219,9 @@ extern "C"{
 
         float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
-        float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
+        float wavelength = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn; 
+        float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn; 
         
         for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2*i*wmax)/(lab.npfh); 
     
@@ -239,9 +239,9 @@ extern "C"{
 
         float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;
-        float wavelenght = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
+        float wavelength = (lab.reg == 0.0 ? 1.0:( ( plank * vc ) / lab.energy ) );
 
-        float kernelX = wavelenght * z2 * float(M_PI) * lab.reg / magn; 
+        float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn; 
 
         for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2.0f * i * wmax) / ( lab.npfh ); 
     

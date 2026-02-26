@@ -3,29 +3,30 @@
 Alignment API
 #############
 
-.. _apialign:
-.. automodule:: sscRaft.processing.alignments.alignment
-     :members:
-     :undoc-members:
-     :show-inheritance:
+.. _apirotaxisA:
 
-.. _apiwiggle:
+.. autofunction:: sscRaft.processing.alignments.rotationaxis.Centersino
 
-.. automodule:: sscRaft.processing.alignments.wiggle
-     :members:
-     :undoc-members:
-     :show-inheritance:
+.. _apirotaxisB:
 
-.. _apirotaxis:
+.. autofunction:: sscRaft.processing.alignments.rotationaxis.find_rotation_axis_360
 
-.. automodule:: sscRaft.processing.alignments.rotationaxis
-     :members:
-     :undoc-members:
-     :show-inheritance: 
+.. _apirotaxisC:
 
-.. _apistitch:
+.. autofunction:: sscRaft.processing.alignments.rotationaxis.Centersino_block
 
-.. automodule:: sscRaft.processing.alignments.excentric_tomo
-     :members:
-     :undoc-members:
-     :show-inheritance:
+.. _apirotaxisD:
+
+.. autofunction:: sscRaft.processing.alignments.rotationaxis.correct_rotation_axis
+
+.. _apirotaxisE:
+
+.. autofunction:: sscRaft.processing.alignments.rotationaxis.correct_rotation_axis_block
+
+.. _apistitchA:
+
+.. autofunction:: sscRaft.processing.alignments.excentric_tomo.getOffsetExcentricTomo
+
+.. _apistitchB:
+
+.. autofunction:: sscRaft.processing.alignments.excentric_tomo.stitchExcentricTomo

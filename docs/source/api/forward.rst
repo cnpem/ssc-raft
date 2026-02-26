@@ -3,11 +3,10 @@
 Forward methods API
 ###################
 
-.. _apiradon:
+.. _apiradonA:
 
-.. automodule:: sscRaft.geometries.parallel.radon_methods
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. autofunction:: sscRaft.geometries.parallel.radon_methods.radon_RT
 
+.. _apiradonB:
 
+.. autofunction:: sscRaft.geometries.conebeam.radon_methods.cbradon

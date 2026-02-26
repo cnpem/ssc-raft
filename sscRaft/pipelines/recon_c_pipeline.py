@@ -1,6 +1,7 @@
 from ..rafttypes import *
 from ..processing.alignments.rotationaxis import Centersino
 from ..processing.alignments.excentric_tomo import getOffsetExcentricTomo
+# from ..io import SetDictionary
 
 def compute_rotation_axis_offset(rotation_axis_offset,align_method,tomogram,flat,dark,angles):
     
@@ -52,28 +53,81 @@ def compute_excentric_offset(excentric_offset, tomogram, blocksize_excentric = 1
     return offset
 
 
-def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0], dic = None, **kwargs):
+def FastReconPipeline(tomogram, flat, dark, angles = None, gpus = [0], dic = None, obj = None, **kwargs):
     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction pipeline in ``C`` and ``CUDA``.
 
     Args:
-        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
-        flat (ndarray): The flat image for correction.
-        dark (ndarray): The dark image for correction.
+        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, length]
+        flat (ndarray): The flat image for correction with size [slices, number of flats, length]
+        dark (ndarray): The dark image for correction with size [slices, 1, length]
         angles (float list): List of angles in radians
         gpus (int list): List of gpus
-        dic (dict): Dictionary with parameters info
+        dic (dict): Dictionary with parameters 
+        obj (ndarray, optional): Reconstructed 3D object array. The axes are [slices, length, length] [default: None]
 
     Returns:
         (ndarray): Reconstructed sample 3D object. The axes are [z, y, x].
 
+    All physical units are in SI.
+    The resulted reconstruction returns coefficients with physical units in reciprocal meter ``[1/m]``, considering the pixel size in the ``dic['detectorPixel[m]']`` parameter. 
+    If no pixel size is passed, the algorithm consider ``dic['detectorPixel[m]'] = 1.0`` by default.
+
+    * One or MultiGPUs. 
+
+    Dictionary parameters:
+
+        * ``dic['reconstruction method']`` (str,optional):  [Default: 'fbp']
+
+             #. Options = (\'none\', \'fbp\', \'bst\')
+
+        * ``dic['filter']`` (str,optional): Filter type [Default: \'ramp\']
+
+            #. Options = (\'none\', \'gaussian\', \'lorentz\', \'cosine\', \'rectangle\', \'hann\', \'hamming\', \'ramp\')
+                
+        * ``dic['background correction method']`` (str,optional):  [Default: 'classic']
+
+             #. Options = (\'none\', \'classic\', \'classic no log\')
+                             
+        * ``dic['rings method']`` (str,optional):  [Default: 'sll stripes']
+
+             #. Options = (\'none\', \'all stripes\', \'titarenko\')
+
+        * ``dic['rotation axis method']`` (str,optional):  [Default: 'rot axis recon']
+
+             #. Options = (\'none\', \'rot axis\', \'rot axis recon\', \'excentric\')
+
+        * ``dic['detectorPixel[m]']`` (float,optional): Detector pixel size in meters [Default: 1.0]
+        * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 1.0]
+        * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0]
+        * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
+        * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 2.0]
+        * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
+        * ``dic['zoom padding']`` (float,optional): Data padding for zoom - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.0]
+        * ``dic['zoom padd_mode']`` (str,optional): Data padding mode for zoom - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\']         
+        * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
+        * ``dic['rotation axis offset']`` (float,optional): Rotation axis offset value. If None, compute automatically [Default: None]
+        * ``dic['excentric offset']`` (int,optional): Excentric offset value. If None, compute automatically [Default: None]
+        * ``dic['rings size_median']`` (int,optional,rings all stripes): Window size of the median filter to remove small-to-medium stripes [Default: 21]
+        * ``dic['rings large_stripes_size']`` (int,optional,rings all stripes): Window size of the median filter to remove large stripes [Default: 61]
+        * ``dic['rings background_ratio']`` (float,optional,rings all stripes): Signal to noise ratio. Used to locate large stripes or bad pixels stripes. Greater is less sensitive to noise [Default: 10.0]
+        * ``dic['rings drop_ratio']`` (float,optional,rings all stripes): Ratio of pixels to be dropped, which is used to reduce the false detection of stripes [Default: 0.1]
+        * ``dic['rings dim']`` (int,optional,rings all stripes): Dimension of the window. Only supports 1 [default: 1]
+        * ``dic['rings regularization']`` (float,optional,rings titarenko): Regularization parameter. Values between [0,1] [default: -1 (automatic computation)]
+        * ``dic['rings blocks']`` (int,optional,rings titarenko): Blocks of sinograms columns to be used. Even values between [1,20] [default: 1] 
     """
+    # Set default dictionary parameters:
+    # required = None
+    # optional = ('size_median','large_stripes_size','background_ratio','drop_ratio','dim')
+    # default  = (           21,                  61,             10.0,         0.1,     1)
+
+    # dic = SetDictionary(dic,required,optional,default)
+
     ngpus    = len(gpus)
     gpus     = numpy.array(gpus)
     gpus     = CNICE(gpus,numpy.intc)
     gpus_ptr = gpus.ctypes.data_as(ctypes.c_void_p)
 
     angles   = sanitize_angles(numpy.array(angles))
-    print('angles:',angles)
 
     nrays    = tomogram.shape[-1]
     nangles  = tomogram.shape[-2] # Put here a function to assess the dimension against angles list
@@ -86,8 +140,8 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0
         dark = dark[1]
 
     recon_method   = dic.get('reconstruction method', 'fbp')
-    rings_method   = dic.get('rings method', 'none')
-    align_method   = dic.get('align method', 'rot axis recon')
+    rings_method   = dic.get('rings method', 'all stripes')
+    align_method   = dic.get('rotation axis method', 'rot axis recon')
     bckgC_method   = dic.get('background correction method', 'classic')
 
     filter_type    = dic.get('filter', 'ramp')
@@ -107,11 +161,11 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0
     zoom_padding   = dic.get('zoom padding', 0.0)*100 # Multiply by 100 to get an integer value
     zoom_padd_mode = dic.get('zoom padd_mode', 'edge')
 
-    median_s = dic.get('size_median',21)
-    large_s  = dic.get('large_stripes_size',121)
-    b_ratio  = dic.get('background_ratio',10.0)
-    d_ratio  = dic.get('drop_ratio',0.1)
-    d        = dic.get('dim',1)
+    median_s = dic.get('rings size_median',21)
+    large_s  = dic.get('rings large_stripes_size',121)
+    b_ratio  = dic.get('rings background_ratio',10.0)
+    d_ratio  = dic.get('rings drop_ratio',0.1)
+    d        = dic.get('rings dim',1)
 
     if align_method == 'excentric':
         objsizex, objsizey = get_excentric_obj_dimensions(objsizex, objsizey)
@@ -205,7 +259,7 @@ def FastReconPipeline(tomogram, flat, dark, angles = None, obj = None, gpus = [0
 #     """Wrapper fo MultiGPU/CUDA function that computes the reconstruction pipeline in ``C`` and ``CUDA``.
 
 #     Args:
-#         tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
+#         tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, length].
 #         flat (ndarray): The flat image for correction.
 #         dark (ndarray): The dark image for correction.
 #         angles (float list): List of angles in radians

@@ -249,17 +249,17 @@ def get_excentric_obj_dimensions(nx,ny):
 def get_padding_size(n,pad):
      return int( (pad * n) / 100 )
 
-def set_input_axis_order(order: str = 'slices_angles_lenght'):
-    # Default is 'slices_angles_lenght'
+def set_input_axis_order(order: str = 'slices_angles_length'):
+    # Default is 'slices_angles_length'
 
-    if order.lower() == 'angles_slices_lenght':
+    if order.lower() == 'angles_slices_length':
         return 0
-    elif order.lower() == 'slices_angles_lenght':
+    elif order.lower() == 'slices_angles_length':
         return 1
-    elif order.lower() == 'transpose_lenght':
+    elif order.lower() == 'transpose_length':
         return 2
     else:
-        message = f'The axis input parameter \'{order}\' does not exist. Setting \'slices_angles_lenght\' as default.'
+        message = f'The axis input parameter \'{order}\' does not exist. Setting \'slices_angles_length\' as default.'
         logger.warning(message)
         return 1 
     

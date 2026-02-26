@@ -6,7 +6,7 @@ try:
     from .geometries  import *
     from .processing  import *
     from .phase_retrieval  import *
-    from .pipelines   import *
+    from .pipelines.structured   import *
     from .io   import *
 
 except OSError:

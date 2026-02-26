@@ -9,7 +9,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 1, **kwargs)
     or the Backprojection Slice Theorem (BST) method [1]_.
     
     Args:
-        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, lenght].
+        tomogram (ndarray): Parallel beam projection tomogram. The axes are [slices, angles, length].
         angles (float list, optional):  List of angles in radians [default: None]
         obj (ndarray, optional): Reconstructed 3D object array [default: None]
         dic (dict, optional): Dictionary with the experiment info [default: None]
@@ -33,11 +33,11 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 1, **kwargs)
         * ``dic['detectorPixel[m]']`` (float,optional): Detector pixel size in meters [Default: 1.0]
         * ``dic['method']`` (str,optional):  [Default: 'RT']
 
-             #. Options = (\'RT\',\'BST\')
+             #. Options = (\'RT\', \'BST\')
 
         * ``dic['filter']`` (str,optional): Filter type [Default: \'ramp\']
 
-            #. Options = (\'none\',\'gaussian\',\'lorentz\',\'cosine\',\'rectangle\',\'hann\',\'hamming\',\'ramp\')
+            #. Options = (\'none\', \'gaussian\', \'lorentz\', \'cosine\', \'rectangle\', \'hann\', \'hamming\', \'ramp\')
         
         * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 2.0]
         * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
@@ -100,8 +100,8 @@ def em(data, flat = None, angles = None, obj = None, dic = None, **kwargs):
         * ``tEMFQ``: Transmission EM using the Fourier Slice Theorem (FST) for the forward operator and Backprojection Slice Theorem (BST) for the inverse operator.
 
     Args:
-        data (ndarray): Tomographic 3D data. The axis are (slices,angles,rays) 
-        flat (ndarray, optional):  Flat 2D data. Tha axis are (slices,rays) [default: None]
+        data (ndarray): Tomographic 3D data. The axis are (slices,angles,length) 
+        flat (ndarray, optional):  Flat 2D data. Tha axis are (slices,length) [default: None]
         angles (float list, optional):  List of angles in radians [default: None]
         obj (ndarray, optional): Reconstructed 3D object array [default: None]
         dic (dict, optional): input dictionary [default: None]

@@ -22,16 +22,16 @@ def correct_background(data, flat, dark, gpus = [0], is_log = True, blocksize = 
     :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
 
     Args:
-        data (ndarray): Measurament data with axis (slices, angles, lenght) 
-        flat   (ndarray): Flat with size (slices, number of flats, lenght)
-        dark   (ndarray): Dark with size (slices, lenght)
+        data (ndarray): Measurament data with axis (slices, angles, length) 
+        flat   (ndarray): Flat with size (slices, number of flats, length)
+        dark   (ndarray): Dark with size (slices, 1, length)
         gpus  (int list, optional): List of GPUs [Default: [0]]
         is_log    (bool, optional): Apply ``- logarithm()`` or not [Default: True]
         blocksize  (int, optional): Block of slices size to be processed in one GPU. ``blocksize = 0`` computes it automatically considering the available GPU memory [Default: 0]
         nstreams (int, optional): Number of cuda streams `` > 0`` [Default: 1]
 
     Returns:
-        (ndarray): Corrected tomogram with axis (slices, angles, lenght).
+        (ndarray): Corrected tomogram with axis (slices, angles, length).
 
     * One or MultiGPUs. 
     """ 
@@ -44,7 +44,7 @@ def correct_background(data, flat, dark, gpus = [0], is_log = True, blocksize = 
     sizex    = data.shape[-1]
     sizey    = data.shape[-2]
 
-    order_axis = set_input_axis_order('slices_angles_lenght')
+    order_axis = set_input_axis_order('slices_angles_length')
     
     if is_log:
         logger.info(f'Returning corrected data with \'-log()\' applied.')
@@ -119,16 +119,16 @@ def correct_background_frames(data, flat, dark, gpus = [0], is_log = True, block
     :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
 
     Args:
-        data (ndarray): Measurament data with axis (angles, slices, lenght) 
-        flat   (ndarray): Flat with size (number of flats, slices, lenght)
-        dark   (ndarray): Dark with size (slices, lenght)
+        data (ndarray): Measurament data with axis (angles, slices, length) 
+        flat   (ndarray): Flat with size (number of flats, slices, length)
+        dark   (ndarray): Dark with size (slices, length)
         gpus  (int list, optional): List of GPUs [Default: [0]]
         is_log    (bool, optional): Apply ``- logarithm()`` or not [Default: False]
         blocksize  (int, optional): Block of slices size to be processed in one GPU. ``blocksize = 0`` computes it automatically considering the available GPU memory [Default: 0]
         nstreams (int, optional): Number of cuda streams `` > 0`` [Default: 1]
 
     Returns:
-        (ndarray): Corrected tomogram with axis (angles, slices, lenght).
+        (ndarray): Corrected tomogram with axis (angles, slices, length).
 
     * One or MultiGPUs. 
     """ 
@@ -141,7 +141,7 @@ def correct_background_frames(data, flat, dark, gpus = [0], is_log = True, block
     sizex    = data.shape[-1]
     sizey    = data.shape[-2]
 
-    order_axis = set_input_axis_order('angles_slices_lenght')
+    order_axis = set_input_axis_order('angles_slices_length')
     
     if is_log:
         logger.info(f'Returning corrected data with \'-log()\' applied.')
@@ -216,15 +216,15 @@ def correct_background_frames(data, flat, dark, gpus = [0], is_log = True, block
 #     :math:`D_f` is the flat projections and :math:`D_d` is the dark projections
 
 #     Args:
-#         data (ndarray): Measurament data with axis (angles, slices, lenght)
-#         flat   (ndarray): Flat with size (number of flats, slices, lenght)
-#         dark   (ndarray): Dark with size (slices, lenght)
+#         data (ndarray): Measurament data with axis (angles, slices, length)
+#         flat   (ndarray): Flat with size (number of flats, slices, length)
+#         dark   (ndarray): Dark with size (slices, length)
 #         gpus  (int list, optional): List of GPUs [Default: [0]]
 #         is_log    (bool, optional): Apply ``- logarithm()`` or not [Default: False]
 #         blocksize  (int, optional): Block of slices size to be processed in one GPU. ``blocksize = 0`` computes it automatically considering the available GPU memory [Default: 0]
 #         nstreams (int, optional): Number of cuda streams `` > 0`` [Default: 1]
 #     Returns:
-#         (ndarray): Corrected tomogram with axis (slices, angles, lenght).
+#         (ndarray): Corrected tomogram with axis (slices, angles, length).
 
 #     * One or MultiGPUs. 
 #     """ 
@@ -237,7 +237,7 @@ def correct_background_frames(data, flat, dark, gpus = [0], is_log = True, block
 #     sizex    = data.shape[-1]
 #     sizey    = data.shape[-2]
 
-#     order_axis = set_input_axis_order('transpose_lenght')
+#     order_axis = set_input_axis_order('transpose_length')
     
 #     if is_log:
 #         logger.info(f'Returning corrected data with \'-log()\' applied.')

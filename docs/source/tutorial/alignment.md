@@ -6,7 +6,9 @@ alignment of the tomogram before reconstruction.
 
 ## Finding the offset
 
-### Parallel beam method
+### Centersino method
+
+#### Usage
 
 The input and output data is on the following format:
 
@@ -28,8 +30,11 @@ The input and output data is on the following format:
 
     offset = sscRaft.Centersino(frame0, frame1, flat, dark)
 ```
+The reference to all the input parameters can be found on the {ref}`API documentation <apirotaxisA>`.
 
-### Conical beam method
+### 360 degrees rotation data method
+
+#### Usage
 
 The input and output data is on the following format:
 
@@ -50,7 +55,11 @@ The input and output data is on the following format:
     offset = sscRaft.find_rotation_axis_360(tomogram, nx_search=500, nx_window=500, nsinos=None)
 ```
 
+The reference to all the input parameters can be found on the {ref}`API documentation <apirotaxisB>`.
+
 ## Rotational axis correction
+
+### Usage
 
 The input and output data is on the following format:
 
@@ -68,6 +77,6 @@ The input and output data is on the following format:
     tomogram = sscRaft.correct_rotation_axis(tomogram, offset, gpus = [0])
 ```
 
-The offset value can be found through the function ``Centersino()``.
+The offset value can be found through the offsets functions above.
 
-The reference to all the input parameters can be found on the {ref}`Rotational axis API documentation <apirotaxis>`.
+The reference to all the input parameters can be found on the {ref}`API documentation <apirotaxisD>`.
