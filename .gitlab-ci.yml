@@ -13,8 +13,6 @@ build_dgx:
     - python3.10 -m build --wheel
     - python3.11 -m build --wheel
   tags:
-    - x86_64
-    - cuda11
     - docker
   artifacts:
     paths:
@@ -27,8 +25,6 @@ build_sdist:
   script:
     - python3 -m build --sdist
   tags:
-    - x86_64
-    - cuda11
     - docker
   artifacts:
     paths:
@@ -41,8 +37,6 @@ deploy_sdist:
   script:
     - twine upload ./dist/*.tar.gz  --repository-url="$GCC_PYPI_HOST"
   tags:
-    - x86_64
-    - cuda11
     - docker
   dependencies:
     - build_sdist
@@ -55,8 +49,6 @@ deploy_dgx:
   script:
     - twine upload ./dist/*.whl  --repository-url="$GCC_PYPI_HOST"
   tags:
-    - x86_64
-    - cuda11
     - docker
   dependencies:
     - build_dgx
@@ -71,7 +63,6 @@ build_docs:
     - cd docs
     - make
   tags:
-    - x86_64
     - docker
   artifacts:
     paths:
@@ -89,6 +80,7 @@ deploy_docs:
     - rm -rf /var/www/html/ssc/ssc-raft/*
     - sshpass -p "${CI_GCC_VM_PASS}" scp -r ./docs/build/* ci@gcc.lnls.br:/var/www/html/ssc/ssc-raft/
   tags:
+    - docker
   dependencies:
     - build_docs
   only:
