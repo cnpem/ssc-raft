@@ -76,7 +76,7 @@ deploy_docs:
   script:
     - apk add m4 sshpass rsync
     - cat ./docs/assets/index_redirect.html | m4 -DVERSION=$CI_COMMIT_TAG > ./docs/build/index.html
-    - sshpass -p "${CI_GCC_VM_PASS}" rsync --delete -avP ./docs/build/* ci@gcc.lnls.br:/var/www/html/ssc/ssc-raft/
+    - sshpass -p "${CI_GCC_VM_PASS}" rsync --delete -avP ./docs/build ci@gcc.lnls.br:/var/www/html/ssc/ssc-raft
   tags:
     - docker
   dependencies:
