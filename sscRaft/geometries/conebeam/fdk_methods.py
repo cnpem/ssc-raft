@@ -28,7 +28,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
 
             #. Options = (\'none\', \'gaussian\', \'lorentz\', \'cosine\', \'rectangle\', \'hann\', \'hamming\', \'ramp\')
 
-        * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 2.0]
+        * ``dic['padding']`` (float,optional): Filter padding - percentage of data size (0.1,0.5,1.0, etc...) [default: 1.0]
         * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
@@ -93,7 +93,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
 
     # Filter padding
     padMode = PaddMode(dic.get('padd_mode', 'zero'))
-    padding = int( dic.get('padding', 2.0)*100 )# Multiply by 100 to get an integer value
+    padding = int( dic.get('padding', 1.0)*100 )# Multiply by 100 to get an integer value
     npadfh  = get_padding_size(nph,padding)
     npfh    = int( nph + 2 * npadfh )
 
