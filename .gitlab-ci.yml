@@ -87,9 +87,8 @@ deploy_docs:
     - cat ./docs/assets/index_redirect.html | m4 -DVERSION=$CI_COMMIT_TAG > ./docs/build/index.html
     - mkdir -p /var/www/html/ssc/ssc-raft/
     - rm -rf /var/www/html/ssc/ssc-raft/*
-    - cp -r ./docs/build/* /var/www/html/ssc/ssc-raft/
+    - sshpass -p "${CI_GCC_VM_PASS}" scp -r ./docs/build/* ci@gcc.lnls.br:/var/www/html/ssc/ssc-raft/
   tags:
-    - wiki
   dependencies:
     - build_docs
   only:
