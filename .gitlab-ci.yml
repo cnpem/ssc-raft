@@ -59,7 +59,7 @@ build_docs:
   stage: build
   image: gccdockers/python-builder
   script:
-    - python3 -m pip install myst-parser sphinx-multiversion
+    - python3 -m pip install myst-parser sphinx-multiversion sphinxcontrib-bibtex
     - cd docs
     - make
   tags:
