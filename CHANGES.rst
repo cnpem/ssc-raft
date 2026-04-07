@@ -1,3 +1,9 @@
+Version 3.4.1 - 2026-04-07
+--------------------------
+*Corrections:*
+  - ``CMakeLists.txt`` to fix compilation issues in the LNLS cluster.
+  - ``ReadMe.md`` and documentation.
+
 Version 3.4.0 - 2026-02-27
 --------------------------
 *Added:*
@@ -24,7 +30,6 @@ Version 3.3.1 - 2026-01-28
   - ``BST`` angles are hardcoded and not as input.
   - Memory issues on ``EM`` for cone-beam geometry.
   - Return of ``FDK`` memory bug on backprojection function for some dimensions. Probably never fully fixed!
-
 
 Version 3.3.0 - 2025-11-13
 --------------------------

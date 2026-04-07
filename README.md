@@ -96,11 +96,11 @@ To compile the source files, enter the following command inside the folder
 One can install the latest version of sscRaft directly from the `pip server`
 
 ```bash
-    pip install sscRaft==<version> --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+    pip install sscRaft --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 
 ```
 
-Where `<version>` is the version number of the `sscRaft`
+Or install a previous version with `sscRaft==<version>`. Example,
 
 ```bash
     pip install sscRaft==3.0.3 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple

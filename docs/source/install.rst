@@ -83,10 +83,10 @@ One can install the latest version of sscRaft directly from our ``pip server`` i
 
 .. code-block:: bash
 
-    pip install sscRaft==version --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+    pip install sscRaft --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 
 
-Where ``version`` is the version number of the ``sscRaft``. Example:
+Or install a previous version with ``sscRaft==<version>``. Example:
 
 .. code-block:: bash
 

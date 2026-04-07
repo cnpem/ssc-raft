@@ -21,6 +21,7 @@ dependencies = [
     "scikit-image >=0.19.3",
     "scipy",
     "matplotlib",
+    "matplotlib-scalebar",
     "SharedArray",
     "h5py",
     "click >= 8.0.4",
