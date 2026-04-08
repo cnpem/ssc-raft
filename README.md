@@ -58,17 +58,17 @@ make clean && make
 For a specific version, one can use:
 
 ```bash
-    git clone https://github.com/cnpem/ssc-raft.git --branch v<version> --single-branch
-    cd ssc-raft 
-    make clean && make
+git clone https://github.com/cnpem/ssc-raft.git --branch v<version> --single-branch
+cd ssc-raft 
+make clean && make
 ```
 
 The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 3.1.1
 
 ```bash
-    git clone https://github.com/cnpem/ssc-raft.git --branch v3.1.1 --single-branch
-    cd ssc-raft 
-    make clean && make
+git clone https://github.com/cnpem/ssc-raft.git --branch v3.1.1 --single-branch
+cd ssc-raft 
+make clean && make
 ```
 
 ### Source code from Zenodo
@@ -78,13 +78,13 @@ On the left panel, one can find
 the available versions. Select the version want and download the ``ssc-raft.tar.gz`` with the source files, one can decompress by
 
 ```bash
-    tar -xvf ssc-raft.tar.gz
+tar -xvf ssc-raft.tar.gz
 ```
 
 To compile the source files, enter the following command inside the folder
 
 ```bash
-    make clean && make
+make clean && make
 ```
 
 ### PIP
@@ -96,14 +96,14 @@ To compile the source files, enter the following command inside the folder
 One can install the latest version of sscRaft directly from the `pip server`
 
 ```bash
-    pip install sscRaft --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+pip install sscRaft --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 
 ```
 
 Or install a previous version with `sscRaft==<version>`. Example,
 
 ```bash
-    pip install sscRaft==3.0.3 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+pip install sscRaft==3.0.3 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
 ```
 
 ### GITLAB
@@ -123,17 +123,17 @@ make clean && make
 For a specific version, one can use:
 
 ```bash
-    git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v<version> --single-branch
-    cd ssc-raft 
-    make clean && make
+git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v<version> --single-branch
+cd ssc-raft 
+make clean && make
 ```
 
 The `<version>` is the version of the `sscRaft` to be installed. Example, to install version 3.1.1
 
 ```bash
-    git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v3.1.1 --single-branch
-    cd ssc-raft 
-    make clean && make
+git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v3.1.1 --single-branch
+cd ssc-raft 
+make clean && make
 ```
 
 ## Memory
@@ -176,5 +176,5 @@ The following `Python3` modules are used:
 To uninstall `sscRaft` use the command, independent of the instalation method,
 
 ```bash
-    pip uninstall sscRaft 
+pip uninstall sscRaft 
 ```

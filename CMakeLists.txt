@@ -43,6 +43,16 @@ message(STATUS "CUDA lib dir: ${CUDA_LIB_DIR}")
 set_target_properties(raft PROPERTIES
     INSTALL_RPATH "${CUDA_LIB_DIR}"
 )
+
+# set_target_properties(raft PROPERTIES
+#     INSTALL_RPATH "${CUDA_LIB_DIR}"
+#     BUILD_RPATH "${CUDA_LIB_DIR}"
+#     SKIP_BUILD_RPATH OFF
+# )
+
+# set(CMAKE_SKIP_RPATH OFF)
+# set(CMAKE_BUILD_WITH_INSTALL_RPATH OFF)
+# set(CMAKE_INSTALL_RPATH_USE_LINK_PATH ON)
 # -----------------------------------------------------------------
 
 target_link_libraries(raft
