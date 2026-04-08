@@ -4,7 +4,6 @@
 import ctypes
 from ctypes import *
 import ctypes.util
-from shutil import which
 from .utils import *
 
 from sscRaft import __version__
