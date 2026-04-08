@@ -3,6 +3,7 @@ Version 3.4.1 - 2026-04-07
 *Corrections:*
   - ``CMakeLists.txt`` to fix compilation issues in the LNLS cluster.
   - ``ReadMe.md`` and documentation.
+  - Removal of python wheels build on ``CI/CD``, left only ``sdist`` build.
 
 Version 3.4.0 - 2026-02-27
 --------------------------

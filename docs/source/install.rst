@@ -77,10 +77,6 @@ PIP
 
 One can install the latest version of sscRaft directly from our ``pip server`` inside the CNPEM network.
 
-.. warning::
-
-    This installation option is available only inside the CNPEM network.
-
 .. code-block:: bash
 
     pip install sscRaft --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
@@ -91,6 +87,11 @@ Or install a previous version with ``sscRaft==<version>``. Example:
 .. code-block:: bash
 
     pip install sscRaft==3.0.0 --index-url https://gitlab.cnpem.br/api/v4/projects/1978/packages/pypi/simple
+
+
+.. warning::
+
+    To install ``sscRaft`` in the Tepui cluster, first one needs to load the modules ``module load cuda/11.2 python3`` on the **mafalda.lnls.br** login node, and ``module load cuda/11.2.2 python/3.11.11 gcc/9.5.0-jld3zdv`` on the **mafalda-2.lnls.br** login node.
 
 
 GITLAB
