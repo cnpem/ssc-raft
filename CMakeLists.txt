@@ -36,10 +36,6 @@ file(GLOB_RECURSE RAFT_SRC cuda/src/**/*.c*)
 add_library(raft SHARED ${RAFT_SRC})
 
 # ----- Add Cuda library path -------------------------------------
-# get_target_property(CUDART_LOCATION CUDA::cudart IMPORTED_LOCATION)
-# get_filename_component(CUDA_LIB_DIR ${CUDART_LOCATION} DIRECTORY)
-# message(STATUS "CUDA lib dir: ${CUDA_LIB_DIR}")
-
 message(STATUS "CUDA lib dir: ${CUDAToolkit_LIBRARY_DIR}")
 set(CUDA_LIB_DIR ${CUDAToolkit_LIBRARY_DIR})
 
