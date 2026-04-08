@@ -12,7 +12,8 @@ from sscRaft import __version__
 
 ############# Load required libraries ##############
 
-libcudart = ctypes.CDLL('libcudart.so', mode=ctypes.RTLD_GLOBAL)
+# libcudart = ctypes.CDLL('libcudart.so', mode=ctypes.RTLD_GLOBAL)
+libcudart = ctypes.CDLL( ctypes.util.find_library( "libcudart.so" ), mode=ctypes.RTLD_GLOBAL)
 libstdcpp = ctypes.CDLL( ctypes.util.find_library( "stdc++" ), mode=ctypes.RTLD_GLOBAL )
 # libblas   = ctypes.CDLL( ctypes.util.find_library( "blas" ), mode=ctypes.RTLD_GLOBAL )
 # libfftw3  = ctypes.CDLL( ctypes.util.find_library( "fftw3" ), mode=ctypes.RTLD_GLOBAL )

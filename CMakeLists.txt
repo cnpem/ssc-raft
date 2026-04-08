@@ -17,7 +17,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON) #-fPIC
 add_compile_options(-use_fast_math)
 # add_compile_options(-use_fast_math -g -G -Xcompiler -rdynamic -lineinfo)
 
-find_package(CUDAToolkit)
+find_package(CUDAToolkit REQUIRED)
 
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --expt-extended-lambda")
 
@@ -32,9 +32,24 @@ include_directories(
 )
 
 file(GLOB_RECURSE RAFT_SRC cuda/src/**/*.c*)
+
 add_library(raft SHARED ${RAFT_SRC})
 
-target_link_libraries(raft ${CUDA_LIBRARIES} CUDA::cufft CUDA::cublas)
+# ----- Add Cuda library path -------------------------------------
+get_target_property(CUDART_LOCATION CUDA::cudart IMPORTED_LOCATION)
+get_filename_component(CUDA_LIB_DIR ${CUDART_LOCATION} DIRECTORY)
+message(STATUS "CUDA lib dir: ${CUDA_LIB_DIR}")
+
+set_target_properties(raft PROPERTIES
+    INSTALL_RPATH "${CUDA_LIB_DIR}"
+)
+# -----------------------------------------------------------------
+
+target_link_libraries(raft
+    CUDA::cudart
+    CUDA::cufft
+    CUDA::cublas
+)
 
 install(TARGETS raft LIBRARY DESTINATION ${PROJECT_NAME}/lib)
 
