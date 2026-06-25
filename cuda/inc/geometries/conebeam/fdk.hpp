@@ -39,6 +39,7 @@ typedef struct {
     int blocksize;
     int padmode; // Padding for backprojection
     int npfh, padfh, padfmode; // Padding for filter
+    float filter_scaling;
 
 
     /* Filter Types definitions

@@ -90,7 +90,8 @@ extern "C"{
 
     __global__ void filt_Ramp(Lab lab, float* W){
         int i;
-        float wmax = 1.0/(2.0*lab.dh);
+        // float wmax = 1.0/(2.0*lab.dh);
+        float wmax = lab.filter_scaling/lab.dh;
 
         float magn = lab.Dsd / lab.D;
         float z2   = lab.Dsd - lab.D;
@@ -98,18 +99,24 @@ extern "C"{
 
         float kernelX = wavelength * z2 * float(M_PI) * lab.reg / magn;
 
-        for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (wmax)/(lab.npfh) + (2*i*wmax)/(lab.npfh); 
+        for (i = 0; i <= lab.npfh ; i++) W[i] = wmax * fminf( i, lab.npfh - i ) / (lab.npfh);
+        
+        for (i = 0; i <=lab.npfh ; i++) W[i] = W[i] * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
+ 
+
+        // for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2*i*wmax)/(lab.npfh); 
     
-        for (i = 1; i < lab.npfh/2 ; i++) W[lab.npfh/2 + i] = wmax - (2*i*wmax)/(lab.npfh);
+        // for (i = 1; i < lab.npfh/2 ; i++) W[lab.npfh/2 + i] = wmax - (2*i*wmax)/(lab.npfh);
 
-        for (i = 0; i <=lab.npfh/2 ; i++) W[i] = W[i] * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
+        // for (i = 0; i <=lab.npfh/2 ; i++) W[i] = W[i] * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
 
-        for (i = 1; i < lab.npfh/2 ; i++) W[lab.npfh/2 + i] = W[lab.npfh / 2 + i] * ( 1.0f / ( 1.0f + kernelX * W[lab.npfh / 2 + i] * W[lab.npfh / 2 + i] ) );
+        // for (i = 1; i < lab.npfh/2 ; i++) W[lab.npfh/2 + i] = W[lab.npfh / 2 + i] * ( 1.0f / ( 1.0f + kernelX * W[lab.npfh / 2 + i] * W[lab.npfh / 2 + i] ) );
     }
 
     __global__ void filt_W(Lab lab, float* W){
         int i;
-        float wmax = 1.0/(2.0*lab.dh);
+        // float wmax = 1.0/(2.0*lab.dh);
+        float wmax = lab.filter_scaling/lab.dh;
         
         float magn = lab.Dsd / lab.D;
         float z2 = lab.Dsd - lab.D;

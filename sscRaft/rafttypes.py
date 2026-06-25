@@ -546,7 +546,8 @@ class Lab(ctypes.Structure):
                 ("blocksize", ctypes.c_int),
                 ("padmode", ctypes.c_int),
                 ("npfh", ctypes.c_int), 
-                ("padfh", ctypes.c_int), ("padfmode", ctypes.c_int)
+                ("padfh", ctypes.c_int), ("padfmode", ctypes.c_int),
+                ("filter_scaling", ctypes.c_float)
             ]
 
 try:

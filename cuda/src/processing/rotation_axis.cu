@@ -151,7 +151,6 @@ extern "C"{
         return interp;
     }
 
-
     float abs2InterpCubic(complex* data,
             size_t sizex, size_t sizey,
             float posx, float posy) 

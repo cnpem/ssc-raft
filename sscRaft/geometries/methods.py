@@ -44,7 +44,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 1, **kwargs)
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Sample-Detector distance in meters used on Paganin by slices method. [Default: 1.0]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0 ]
-        * ``dic['regularization']`` (float,optional): Regularization value for some filters ( value >= 0 ) [Default: 0.0]
+        * ``dic['regularization']`` (float,optional): Regularization value for some filters ( value >= 0 ) [Default: 1.0]
 
             #. Related filters: \'gaussian\', \'lorentz\' and \'rectangle\'
 
@@ -60,7 +60,7 @@ def fbp(tomogram, angles = None, obj = None, dic = None, nstreams = 1, **kwargs)
     """
     required = None        
     optional = ('gpu','filter','rotation axis offset','padding','padd_mode','regularization','beta/delta','blocksize','energy[eV]','z2[m]','method','detectorPixel[m]', 'zoom padding', 'zoom padd_mode')
-    default  = (  [0],  'ramp',                   0.0,      2.0,     'zero',             0.0,         0.0,          0,         1.0,    1.0,    'RT',               1.0,            0.0,           'edge')
+    default  = (  [0],  'ramp',                   0.0,      2.0,     'zero',             1.0,         0.0,          0,         1.0,    1.0,    'RT',               1.0,            0.0,           'edge')
     
     dic = SetDictionary(dic,required,optional,default)  
 

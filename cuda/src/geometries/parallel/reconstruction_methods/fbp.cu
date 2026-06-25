@@ -102,6 +102,9 @@ extern "C"{
         int filter_padMode = ReconParam.filter_padMode;
         float axis_offset  = ReconParam.rotation_axis_offset;
 
+        printf("Filter reg: %.2f\n",filter_reg);
+        fflush(stdout);
+
         // /* Padding the tomogram data */
         // opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(tomogram, tomoPadded, 
         //                                                     tomo.padding_mode,

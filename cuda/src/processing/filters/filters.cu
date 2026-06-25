@@ -21,8 +21,8 @@ __global__ void fbp_filtering_C2C(Filter filter,
         if ( i >= size.x || j >= size.y || k >= size.z) return;
 
         float w = fminf( i, size.x - i ) / (float)size.x;
-
-        float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
+        // float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
+        float expoent = float(M_PI)/(float)( size.x - 1 ) * filter.axis_offset * i;
 
         w = filter.apply( w );
 
@@ -41,9 +41,12 @@ __global__ void fbp_filtering_C2C(Filter filter,
         
         if ( i >= size.x  || (j >= size.y) ) return;
 
-        float w =  0.5f * fminf( i, size.x - i ) / ((float)size.x);
+        // float w =  2.0f * fminf( i, size.x - i ) / ((float)size.x);
 
-        float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
+        float w = filter.reg * 2.0 * fminf( i, size.x - i ) / ((float)size.x) + ( 1.0f - filter.reg) * 2.0 * i / ((float)size.x);
+        float expoent = float(M_PI)/(float)( size.x - 1 ) * filter.axis_offset * i;
+
+        // float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
 
         w = filter.apply( w );
 

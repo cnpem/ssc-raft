@@ -1,7 +1,7 @@
 from ...rafttypes import *
 import numpy
 
-def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, obj: numpy.ndarray = None) -> numpy.ndarray:
+def fdk(tomogram: numpy.ndarray, dic: dict = {}, scale: float = 0.5, angles: numpy.ndarray = None, obj: numpy.ndarray = None) -> numpy.ndarray:
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
     GPU function.
 
@@ -139,7 +139,8 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, o
                 energy = energy, rotation_axis_offset = offset,
                 blocksize = blocksize, 
                 padmode = zoom_padmode,
-                npfh = npfh, padfh = padding, padfmode = padMode)
+                npfh = npfh, padfh = padding, padfmode = padMode,
+                filter_scaling = scale)
 
     time = numpy.zeros(2)
     time = numpy.ascontiguousarray(time.astype(numpy.float64))
