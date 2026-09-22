@@ -67,7 +67,65 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
     recon[n] = recon[n] * lab.dbeta / 2.0f;
-}}
+}
+__global__ void backproj_metrology(float* recon, float* proj, float* beta,
+float* error_x, float* error_y, float* error_z,
+Lab lab, Process process) {
+    
+    size_t n = (size_t)(blockDim.x * blockIdx.x + threadIdx.x);
+    size_t idx;
+    int i, j, k, m;
+
+    float Rxpad = lab.dx * (float)lab.nph / 2.0f;
+    float Rypad = lab.dy * (float)lab.nph / 2.0f;
+    float Hxpad = lab.dh * (float)lab.nph / 2.0f;
+    float    x, y, z, w;
+    float u, v, X, Z;
+    float cosb, sinb, Q;
+
+    int xi, zk;
+
+    if ( n >= process.n_recon_pad ) return;
+
+    set_recon_idxs(n, &i, &j, &k, lab);
+    x = - Rxpad + i * lab.dx;
+    y = - Rypad + j * lab.dy;
+    z = process.z_ph + k * lab.dz;
+
+    int block = process.z_proj;
+	
+    recon[n] = 0.0;
+
+    for(m = 0; m < lab.nbeta; m++){
+
+        cosb = beta[m];
+        sinb = beta[m+lab.nbeta];
+
+        u = x*cosb - y*sinb + error_x[m];
+        v = x*sinb + y*cosb + error_y[m];
+        w = z + error_z[m];
+
+        X = + lab.Dsd*u/(lab.D + v);
+        Z = + lab.Dsd*w/(lab.D + v);    
+
+        xi = (int) ((X + Hxpad)/lab.dh);
+        zk = (int) ((Z - process.z_det)/lab.dv);
+	
+        if( xi < 0) continue;             
+        if( xi >= lab.nph) continue; 
+        if( zk < 0) continue;    
+        if( zk >= block) continue;   
+        if( zk + process.zi >= lab.nv) continue; 
+
+        idx = (size_t)(zk*lab.nbeta*lab.nph + m*lab.nph + xi); 
+        
+        Q        = proj[idx];   
+        recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
+        // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
+    }
+    recon[n] = recon[n] * lab.dbeta / 2.0f;
+    }
+}
 
 extern "C"{
 void copy_to_gpu_back(Lab lab, 
@@ -165,12 +223,12 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
 }}
 
 extern "C"{
-void backprojection(Lab lab, float* recon, float* proj, float* beta, Process process) {
+void backprojection(Lab lab, float* recon, float* proj, float* beta, Process process, float* error_x, float* error_y, float* error_z) {
     long long int M;	
     long int n_blocks;
     int n_threads;
 
-    M = process.n_recon_pad;   //lab.nx * lab.ny * lab.nz;
+    M = process.n_recon_pad;   // lab.nx * lab.ny * lab.nz;
     
     n_threads = NUM_THREADS;
     n_blocks  = M/n_threads + (M % n_threads == 0 ? 0:1);   
@@ -179,9 +237,27 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta, Process pro
 
     // clock_t b_begin = clock();
 
-    backproj<<<n_blocks, n_threads>>>(recon, proj, beta, lab, process);
+    // printf("errorx: %e\n",error_x[200]);
+    // fflush(stdout);
+    // fflush(stdout);
+    // fflush(stdout);
 
-    clock_t b_end = clock();
+    float *erx = opt::allocGPU<float>(lab.nbeta);
+    float *ery = opt::allocGPU<float>(lab.nbeta);
+    float *erz = opt::allocGPU<float>(lab.nbeta);
+
+    opt::CPUToGPU<float>(error_x, erx, lab.nbeta);
+    opt::CPUToGPU<float>(error_y, ery, lab.nbeta);
+    opt::CPUToGPU<float>(error_z, erz, lab.nbeta);
+
+    // backproj<<<n_blocks, n_threads>>>(recon, proj, beta, lab, process);
+    backproj_metrology<<<n_blocks, n_threads>>>(recon, proj, beta, erx, ery, erz, lab, process);
+
+    HANDLE_ERROR(cudaFree(erx));
+    HANDLE_ERROR(cudaFree(ery));
+    HANDLE_ERROR(cudaFree(erz));
+
+    // clock_t b_end = clock();
     // printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);
     // printf("Time backproj: Gpu %d \n",process.i_gpu);
 }}

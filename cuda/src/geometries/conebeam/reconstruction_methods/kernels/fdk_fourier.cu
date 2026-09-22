@@ -103,7 +103,6 @@ extern "C"{
         
         for (i = 0; i <=lab.npfh ; i++) W[i] = W[i] * ( 1.0f / ( 1.0f + kernelX * W[i] * W[i] ) );
  
-
         // for (i = 0; i <= lab.npfh/2 ; i++) W[i] = (2*i*wmax)/(lab.npfh); 
     
         // for (i = 1; i < lab.npfh/2 ; i++) W[lab.npfh/2 + i] = wmax - (2*i*wmax)/(lab.npfh);

@@ -70,7 +70,7 @@ typedef struct {
 //FDK Functions
 
 extern "C"{
-    void gpu_fdk(Lab lab,  float *recon, float *proj, float *angles, int* gpus, int ndev, double *time);
+    void gpu_fdk(Lab lab,  float *recon, float *proj, float *angles, int* gpus, int ndev, double *time, float* error_x, float* error_y, float* error_z);
     void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
     // void set_process_slices(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
     // void set_process_slices_2(Lab lab, int i, Process* process, int n_process, int* gpus, int ndevs);
@@ -78,7 +78,8 @@ extern "C"{
 
     void set_filtering_fft(Lab lab, float* proj, int n_process,  int ndevs, Process* process);
     // void set_filtering_conv(Lab lab, float* proj, int n_process,  int ndevs, Process* process);
-    void set_backprojection(Lab lab, float* recon, float* proj, float *angles, int n_process,  int ndevs, Process* process);
+    void set_backprojection(Lab lab, float* recon, float* proj, float *angles, int n_process,  int ndevs, Process* process,
+        float* error_x, float* error_y, float* error_z);
     
     void copy_to_gpu_back(Lab lab, float* proj, float* recon, float *angles, float** c_proj, float** c_recon, float** c_beta, Process process);
     void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, float* c_beta, Process process);
@@ -87,8 +88,9 @@ extern "C"{
     void copy_gpu_filter_conv(Lab lab, float* proj, float** c_proj, float** c_Q, Process process) ;
     void copy_cpu_filter_conv(float* proj, float* c_proj, float* c_Q, Process process);
     
-    void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process process);
+    void backprojection(Lab lab, float* recon, float* proj, float* beta,  Process process, float* error_x, float* error_y, float* error_z);
     __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Process process);
+    __global__ void backproj_metrology(float* recon, float* proj, float* beta, float* error_x, float* error_y, float* error_z, Lab lab, Process process);
     __global__ void set_beta(Lab lab, float *dangles, float* beta);
     __device__ void set_recon_idxs(long long int n, int* i, int*j, int* k, Lab lab);
 

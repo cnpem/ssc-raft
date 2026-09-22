@@ -1,7 +1,8 @@
 from ...rafttypes import *
 import numpy
 
-def fdk(tomogram: numpy.ndarray, dic: dict = {}, scale: float = 0.5, angles: numpy.ndarray = None, obj: numpy.ndarray = None) -> numpy.ndarray:
+def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.ndarray = None, error_z: numpy.ndarray = None, 
+        dic: dict = {}, scale: float = 0.5, angles: numpy.ndarray = None, obj: numpy.ndarray = None) -> numpy.ndarray:
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
     GPU function.
 
@@ -151,6 +152,27 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, scale: float = 0.5, angles: num
     gpus = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_p = gpus.ctypes.data_as(ctypes.c_void_p)
 
+    if error_x is None:
+        error_x = numpy.zeros_like(angles)
+    else:
+        error_x   = numpy.array(error_x)
+    error_x   = CNICE(error_x, numpy.float32)
+    error_x_p = error_x.ctypes.data_as(ctypes.c_void_p)
+
+    if error_y is None:
+        error_y = numpy.zeros_like(angles)
+    else:
+        error_y   = numpy.array(error_y)
+    error_y   = CNICE(error_y, numpy.float32)
+    error_y_p = error_y.ctypes.data_as(ctypes.c_void_p)
+
+    if error_z is None:
+        error_z = numpy.zeros_like(angles)
+    else:
+        error_z   = numpy.array(error_z)
+    error_z   = CNICE(error_z, numpy.float32)
+    error_z_p = error_z.ctypes.data_as(ctypes.c_void_p)
+
     angles   = numpy.array(angles)
     angles   = sanitize_angles(angles)
     angles   = CNICE(angles, numpy.float32)
@@ -169,7 +191,7 @@ def fdk(tomogram: numpy.ndarray, dic: dict = {}, scale: float = 0.5, angles: num
     obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     libraft.gpu_fdk(lab, obj_ptr, proj_p, angles_p, gpus_p, 
-                    ctypes.c_int(ndev), time_p)
+                    ctypes.c_int(ndev), time_p, error_x_p, error_y_p, error_z_p)
     
     # Case 180 degrees and conebeam tomogram
     angles_range = numpy.abs(angles[-1] - angles[0])

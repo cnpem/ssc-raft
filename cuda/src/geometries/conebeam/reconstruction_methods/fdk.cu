@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
 extern "C"
 {
     void gpu_fdk(Lab lab, float *recon, float *proj, float *angles,
-                 int *gpus, int ndevs, double *time)
+                 int *gpus, int ndevs, double *time, 
+                 float* error_x, float* error_y, float* error_z)
     {
         int i, n_process;
 
@@ -51,7 +52,7 @@ extern "C"
         // printf("Backprojection:\n");
         // clock_t b_begin = clock();
 
-        set_backprojection(lab, recon, proj, angles, n_process, ndevs, process);
+        set_backprojection(lab, recon, proj, angles, n_process, ndevs, process, error_x, error_y, error_z);
 
         // clock_t b_end = clock();
         // time[1] = double(b_end - b_begin) / CLOCKS_PER_SEC;
@@ -66,16 +67,16 @@ extern "C"
 {
 
     void process_backprojection_worker(Lab lab, float *recon, float* angles, float *proj,
-            Process process)
+            Process process, float* error_x, float* error_y, float* error_z)
     {
         float *c_proj, *c_recon, *c_beta;
         copy_to_gpu_back(lab, proj, recon, angles, &c_proj, &c_recon, &c_beta, process);
-        backprojection(lab, c_recon, c_proj, c_beta, process);
+        backprojection(lab, c_recon, c_proj, c_beta, process, error_x, error_y, error_z);
         copy_to_cpu_back(lab, recon, c_proj, c_recon, c_beta, process);
     }
 
     void set_backprojection(Lab lab, float *recon, float *proj, float *angles,
-            int n_process, int ndevs, Process *process)
+            int n_process, int ndevs, Process *process, float* error_x, float* error_y, float* error_z)
     {
         thread threads[ndevs];
 
@@ -83,7 +84,7 @@ extern "C"
             const int g = k % ndevs;
             if (threads[g].joinable())
                 threads[g].join();
-            threads[g] = thread(process_backprojection_worker, lab, recon, angles, proj, process[k]);
+            threads[g] = thread(process_backprojection_worker, lab, recon, angles, proj, process[k], error_x, error_y, error_z);
         }
 
         for (int g = 0; g < ndevs; ++g) {

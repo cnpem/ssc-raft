@@ -553,7 +553,8 @@ class Lab(ctypes.Structure):
 try:
     libraft.gpu_fdk.argtypes = [
         Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p
+        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p,
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
     ]
     libraft.getBackgroundCorrectionMultiGPU.restype  = None
 except:

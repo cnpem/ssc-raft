@@ -163,8 +163,8 @@ extern "C" {
             // x = t * ctheta - s * stheta;
             // y = t * stheta + s * ctheta;
             
-            indx = (int) ((x + 1)/dx);
-            indy = (int) ((y + 1)/dy);	 
+            indx = (int) ((x + 0.5f)/dx);
+            indy = (int) ((y + 0.5f)/dy);	 
 
             if ((indx >= 0) & (indx < phantom_size.x) & (indy >= 0) & (indy < phantom_size.y) ){
             
