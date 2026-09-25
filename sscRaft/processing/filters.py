@@ -24,6 +24,7 @@ def lowpass(tomogram, dic = None, **kwargs):
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['z2[m]']`` (float,optional): Source-Detector divided by Sample-Detector distance used on Paganin by slices method. [Default: 1.0]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 1.0 ]
+        * ``dic['Magnitude']`` (float,optional): Magnitude of conebeam geometry (dist source-detector/dist source-sample). If parallel beam geometry, magnitude = 1.0 [Default: 1.0 ]
         * ``dic['regularization']`` (float,optional): Regularization value for some filters ( value >= 0 ) [Default: 0.0]
 
             #. Related filters: \'gaussian\', \'lorentz\' and \'rectangle\'
@@ -34,8 +35,8 @@ def lowpass(tomogram, dic = None, **kwargs):
 
     """
     required = ('gpu',)        
-    optional = ('filter','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','detectorPixel[m]')
-    default  = (  'ramp',     2.0,             1.0,         0.0,          0,         1.0,    1.0,               1.0)
+    optional = ('filter','padding','regularization','beta/delta','blocksize','energy[eV]','z2[m]','detectorPixel[m]', 'Magnitude')
+    default  = (  'ramp',      2.0,             1.0,         0.0,          0,         1.0,    1.0,               1.0,         1.0)
     
     dic      = SetDictionary(dic,required,optional,default)  
 
@@ -54,23 +55,30 @@ def lowpass(tomogram, dic = None, **kwargs):
     
     filter_type    = FilterNumber(dic['filter'])
     beta_delta     = dic['beta/delta']
-    regularization = dic['regularization']
+    regularization = dic.get('regularization',1.0)
     offset         = 0.0
     blocksize      = dic['blocksize']
     energy         = dic['energy[eV]']
     z2             = dic['z2[m]']
-    pixel          = dic['detectorPixel[m]']
+    pixel          = dic.get('detectorPixel[m]',1.0)
+    magn           = dic.get('Magnitude',1.0)
     wavelength     = CONST/energy 
     padding        = dic.get('padding', 2.0)*100 # Multiply by 100 to get an integer value
-    padd_mode      = dic.get('padd_mode', 'zero')
+    padding_mode   = dic.get('padd_mode', 'zero')
+    
+    padd      = int(padding)
+    padd_mode = PaddMode(padding_mode)
+
+    if padd_mode == PaddMode('none'):
+        padd = 0
 
     if beta_delta != 0.0:
         beta_delta = 1.0 / beta_delta
-        paganin_slices_regularization = wavelength * z2 * numpy.pi * beta_delta / (pixel * pixel); 
+        paganin_slices_regularization = wavelength * z2 * magn * numpy.pi * beta_delta / (pixel * pixel); 
     else:
         paganin_slices_regularization = 0.0
 
-    tomo_dim     = dimension((nrays, nangles, nslices), (0, 0, 0), blocksize = blocksize, padd_mode = padd_mode)
+    tomo_dim     = dimension((nrays, nangles, nslices), (0, 0, 0), blocksize = blocksize, padd_mode = padding_mode)
     
     geometry     = define_geometry(detector_pixel = (pixel, pixel, pixel),
                                    obj_pixel      = (pixel, pixel, pixel),
@@ -83,7 +91,7 @@ def lowpass(tomogram, dic = None, **kwargs):
     ReconParam   = REC(method               = 0, 
                        filter               = filter_type, 
                        filter_reg           = regularization,  
-                       filter_pad           = padding, 
+                       filter_pad           = padd, 
                        filter_padMode       = padd_mode,
                        paganin_slices       = paganin_slices_regularization, 
                        iterations           = 0, 

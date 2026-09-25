@@ -223,7 +223,7 @@ def recon_param(geometry: GEO, method: str = 'fbp', filter: str = 'ramp',
     # Paganin by Slices here
     if beta_delta != 0.0:
         delta_beta = ( 1.0 / beta_delta )
-        paganin_slices_regularization = geometry.wavelength * geometry.z2 * numpy.pi * delta_beta / ( geometry.detector_pixel.x * geometry.detector_pixel.x ); 
+        paganin_slices_regularization = geometry.wavelength * geometry.z2 * geometry.magnitude * numpy.pi * delta_beta / ( geometry.detector_pixel.x * geometry.detector_pixel.x ); 
     else:
         paganin_slices_regularization = 0.0
 
@@ -531,30 +531,23 @@ class Lab(ctypes.Structure):
                 ("beta_max", ctypes.c_float),
                 ("dbeta", ctypes.c_float),
                 ("nbeta", ctypes.c_int),
-                ("fourier", ctypes.c_int),
                 ("filter_type", ctypes.c_int),
+                ("paganin_slices", ctypes.c_float),
                 ("reg", ctypes.c_float),
-                ("is_slice", ctypes.c_int),
-                ("slice_recon_start", ctypes.c_int),
-                ("slice_recon_end", ctypes.c_int),
-                ("slice_tomo_start", ctypes.c_int),
-                ("slice_tomo_end", ctypes.c_int),
                 ("nph", ctypes.c_int),
                 ("padh", ctypes.c_int),
                 ("energy", ctypes.c_float),
-                ("rotation_axis_offset", ctypes.c_int),
+                ("rotation_axis_offset", ctypes.c_float),
                 ("blocksize", ctypes.c_int),
                 ("padmode", ctypes.c_int),
                 ("npfh", ctypes.c_int), 
-                ("padfh", ctypes.c_int), ("padfmode", ctypes.c_int),
-                ("filter_scaling", ctypes.c_float)
+                ("padfh", ctypes.c_int), ("padfmode", ctypes.c_int)
             ]
 
 try:
     libraft.gpu_fdk.argtypes = [
         Lab, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, 
-        ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p,
-        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p
+        ctypes.c_void_p, ctypes.c_int
     ]
     libraft.getBackgroundCorrectionMultiGPU.restype  = None
 except:

@@ -241,3 +241,44 @@ def update_config_data(user_dictionary: dict) -> dict:
     return updated_data
 
 
+def read_mogno_parameters(name, detector = None):
+    with h5py.File(name, 'r') as f:
+        if detector == 'pimega':
+            z1       = f['snapshot/after/beamline-state/position/micro-station/z1/value'][()] * 1e-3
+            z2       = f['snapshot/after/beamline-state/position/micro-station/z2/value'][()] * 1e-3
+            z12      = f['snapshot/after/beamline-state/position/micro-station/z1+z2/value'][()] * 1e-3
+            pixeldet = f['snapshot/after/beamline-state/position/detector/pixel-size-x/value'][()] * 1e-3
+        else:
+            z1       = f['snapshot/after/beamline-state/position/nano-station/z1/value'][()] * 1e-3
+            z2       = f['snapshot/after/beamline-state/position/nano-station/z2/value'][()] * 1e-3
+            z12      = f['snapshot/after/beamline-state/position/nano-station/z1+z2/value'][()] * 1e-3
+            pixeldet = f['snapshot/after/beamline-state/position/detector/pixel-size-x/value'][()] * 1e-3
+
+    # Return everything in meters
+    return z1, z2, z12, pixeldet
+
+def read_mogno_data(name, frame = None, detector = None):
+    with h5py.File(name, 'r') as f:
+        flat = f['scan/detector/flats'][0,0,:,:].astype(np.float32(), copy=False)
+        dark = f['scan/detector/darks'][0,0,:,:].astype(np.float32(), copy=False)
+
+        if frame is None:
+            data = f['scan/detector/data'][:].astype(np.float32(), copy=False)
+            if detector != 'pimega':
+                data[:,:11,:] = 1.0
+                flat[:11,:] = 1.0
+                dark[:11,:] = 0.0
+        else:
+            data = f['scan/detector/data'][frame].astype(np.float32(), copy=False)
+            if detector != 'pimega':
+                data[:11,:] = 1.0
+                flat[:11,:] = 1.0
+                dark[:11,:] = 0.0
+
+    # Flat/Dark Correction
+
+    print(f'Data shape: {data.shape}')
+    print(f'Flat shape: {flat.shape}')  
+    print(f'Dark shape: {dark.shape}')
+
+    return data, flat, dark

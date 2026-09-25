@@ -14,20 +14,13 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     int nz_gpu_recon, zi_min_recon, zi_max_recon, zi_recon;
     long long int n_recon, idx_recon;
     long long int n_recon_pad, idx_recon_pad;
-    float z_min, z_max, L, Lx;
-
-    float block = 0.0f;
+    float z_min, z_max, L;
 
     // Variables for the projection volume
     float Z_min, Z_max;
     int Zi_min, Zi_max, zi_proj;
     long long int n_proj, idx_proj;
     long long int n_proj_pad, idx_proj_pad;
-
-    // Variables for the filter volumes
-    int nv_gpu_filter, zi_min_filter, zi_max_filter;
-    long long int n_filter, idx_filter, n_filter_pad, idx_filter_pad;
-    int zi_filter, zi_filter_pad;
 
     // Original version:
     nz_gpu_recon = (int) ceil((float) lab.nz / n_process);
@@ -76,22 +69,6 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     n_proj_pad   = (long long int) (Zi_max - Zi_min) * lab.nbeta * lab.nph;
     zi_proj      = (Zi_max - Zi_min);
 
-    // printf("zi_proj: %d \n", zi_proj);
-
-    // --- Calculate filter volumes based on the projection indices ---
-    // Original version:
-    nv_gpu_filter = (int) ceil((float) lab.nv / n_process);
-    zi_min_filter = i * nv_gpu_filter;
-    zi_max_filter = std::min((i + 1) * nv_gpu_filter, lab.nv);
-
-    n_filter   = (long long int) (zi_max_filter - zi_min_filter)*lab.nbeta*lab.nh;
-    idx_filter = (long long int) zi_min_filter*lab.nbeta*lab.nh;
-    zi_filter  = zi_max_filter - zi_min_filter;
-
-    n_filter_pad   = (long long int) (zi_max_filter - zi_min_filter) * lab.nbeta * lab.npfh;
-    idx_filter_pad = (long long int) zi_min_filter * lab.nbeta * lab.npfh;
-    zi_filter_pad  = zi_max_filter - zi_min_filter;
-
     // --- Populate the process structure ---
     (*process).i = i;
     (*process).i_gpu = gpus[i % ndevs];  
@@ -102,14 +79,6 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
     (*process).n_proj = n_proj;
     (*process).idx_proj_pad = idx_proj_pad;
     (*process).n_proj_pad = n_proj_pad;
-
-    (*process).n_filter = n_filter;
-    (*process).idx_filter = idx_filter;
-    (*process).z_filter = zi_filter; 
-
-    (*process).n_filter_pad = n_filter_pad;
-    (*process).idx_filter_pad = idx_filter_pad;
-    (*process).z_filter_pad = zi_filter_pad; 
 
     (*process).n_recon = n_recon;
     (*process).z_recon = zi_recon;

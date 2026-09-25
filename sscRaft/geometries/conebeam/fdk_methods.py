@@ -1,8 +1,8 @@
 from ...rafttypes import *
 import numpy
 
-def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.ndarray = None, error_z: numpy.ndarray = None, 
-        dic: dict = {}, scale: float = 0.5, angles: numpy.ndarray = None, obj: numpy.ndarray = None) -> numpy.ndarray:
+def fdk(tomogram: numpy.ndarray, dic: dict = {}, angles: numpy.ndarray = None, 
+        obj: numpy.ndarray = None) -> numpy.ndarray:
     """Computes the Reconstruction of a Conical Sinogram using the Filtered Backprojection method for conical rays(FDK).
     GPU function.
 
@@ -21,6 +21,7 @@ def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.n
 
         * ``dic['angles[rad]']`` (list): List of angles in radians [required]
         * ``dic['z1[m]']`` (float): Source-sample distance in meters [required]
+        * ``dic['z2[m]']`` (float): Sample-Detector distance in meters used on Paganin by slices method [required]
         * ``dic['z1+z2[m]']`` (float): Source-detector distance in meters [required]
         * ``dic['detectorPixel[m]']`` (float): Detector pixel size in meters [required]
         * ``dic['gpu']`` (int list, optional): List of gpus for processing [Default: [0]]
@@ -33,23 +34,22 @@ def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.n
         * ``dic['padd_mode']`` (str,optional): Filter padding mode - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'zero\'] 
         * ``dic['beta/delta']`` (float,optional): Paganin by slices method ``beta/delta`` ratio [Default: 0.0 (no Paganin applied)]
         * ``dic['energy[eV]']`` (float,optional): beam energy in eV used on Paganin by slices method. [Default: 0.0 (no Paganin applied)]
-        * ``dic['regularization']`` (float,optional): Regularization value for filter ( value >= 0 ) [Default: 1.0]
         * ``dic['zoom padding']`` (float,optional): Data padding for zoom - percentage of data size (0.1,0.5,1.0, etc...) [default: 0.0]
         * ``dic['zoom padd_mode']`` (str,optional): Data padding mode for zoom - options: \'none\', \'zero\', \'ones\', \'edge\' [default: \'edge\'] 
         * ``dic['blocksize']`` (int,optional): Block of slices to be simultaneously computed [Default: 0 (automatic)]
+        * ``dic['rotation axis offset']`` (float,optional): Rotation axis deviation value [Default: 0.0]
 
     """
-    blocksize      = dic.get('blocksize', 0)
-    regularization = dic.get('beta/delta', 0.0)
+    blocksize  = dic.get('blocksize', 0)
+    beta_delta = dic.get('beta/delta', 0.0)
 
-    if regularization != 0.0:
-        regularization = 1.0 / regularization
-
-    Dd     = dic.get('z1[m]', 1.0)
-    Dsd    = dic.get('z1+z2[m]', 1.0)
+    z1     = dic.get('z1[m]', 1.0) # Dd
+    z2     = dic.get('z2[m]', 1.0) 
+    z12    = dic.get('z1+z2[m]', 1.0) # Dsd
     dh     = dic.get('detectorPixel[m]', 1.0) 
     dv     = dh
     energy = dic.get('energy[eV]', 1.0)
+    wavelength     = CONST/energy 
 
     nrays   = tomogram.shape[-1]
     nangles = tomogram.shape[-2]
@@ -71,17 +71,9 @@ def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.n
             message_error = f'Missing angles list.'
             logger.error(message_error) 
             raise ValueError(message_error)
-    
-    start_recon_slice = 0
-    end_recon_slice   = nslices
-    is_slice          = 0
-    logger.info(f'Reconstruct all slices: {start_recon_slice} to {end_recon_slice}.')  
-
+ 
     nx, ny, nz = int(nrays), int(nrays), int(nslices)
     logger.info(f'Set default reconstruction size ({nx},{ny},{nz}) = (x,y,z).')
-
-    start_tomo_slice  = 0
-    end_tomo_slice    = nslices
 
     nh, nv = int(nrays), int(nslices)
     h, v   = nh*dh/2, nv*dv/2
@@ -108,7 +100,8 @@ def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.n
     beta_max = angles[nbeta - 1]
     dbeta    = numpy.abs(angles[1] - angles[0])
 
-    magn       = Dd/Dsd
+    magn       = z1/z12
+    z2eff      = z2*magn
     dx, dy, dz = dh*magn, dh*magn, dv*magn
     x, y, z    = dx*nx/2, dy*ny/2, dz*nslices/2
 
@@ -118,7 +111,13 @@ def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.n
 
     logger.info(f'FDK filter: {filtername}({filter})')
 
-    offset = 0 # dic['rotation axis offset'] -> Bug as of 22/Ago/2024 Paola Ferraz
+    offset = dic.get('rotation axis offset',0.0)
+
+    if beta_delta != 0.0:
+        beta_delta = 1.0 / beta_delta
+        paganin_slices_regularization = wavelength * z2eff * numpy.pi * beta_delta / (dx * dx); 
+    else:
+        paganin_slices_regularization = 0.0
     
     lab = Lab(  x = x, y = y, z = z, 
                 dx = dx, dy = dy, dz = dz, 
@@ -126,52 +125,23 @@ def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.n
                 h = h, v = v, 
                 dh = dh, dv = dv, 
                 nh = nh, nv = nv, 
-                D = Dd, Dsd = Dsd, 
+                D = z1, Dsd = z12, 
                 beta_max = beta_max, 
                 dbeta = dbeta, 
                 nbeta = nbeta,
-                fourier = fourier, 
                 filter_type = filter, 
-                reg = regularization,
-                is_slice = is_slice,
-                slice_recon_start = start_recon_slice, slice_recon_end = end_recon_slice,  
-                slice_tomo_start = start_tomo_slice, slice_tomo_end = end_tomo_slice,
+                paganin_slices = paganin_slices_regularization,
+                reg = 1.0,
                 nph = nph, padh = zoom_padh,
                 energy = energy, rotation_axis_offset = offset,
                 blocksize = blocksize, 
                 padmode = zoom_padmode,
-                npfh = npfh, padfh = padding, padfmode = padMode,
-                filter_scaling = scale)
-
-    time = numpy.zeros(2)
-    time = numpy.ascontiguousarray(time.astype(numpy.float64))
-    time_p = time.ctypes.data_as(ctypes.c_void_p)
+                npfh = npfh, padfh = padding, padfmode = padMode)
 
     gpus = numpy.array(dic.get('gpu', [0]))
     ndev = len(gpus)
     gpus = numpy.ascontiguousarray(gpus.astype(numpy.intc))
     gpus_p = gpus.ctypes.data_as(ctypes.c_void_p)
-
-    if error_x is None:
-        error_x = numpy.zeros_like(angles)
-    else:
-        error_x   = numpy.array(error_x)
-    error_x   = CNICE(error_x, numpy.float32)
-    error_x_p = error_x.ctypes.data_as(ctypes.c_void_p)
-
-    if error_y is None:
-        error_y = numpy.zeros_like(angles)
-    else:
-        error_y   = numpy.array(error_y)
-    error_y   = CNICE(error_y, numpy.float32)
-    error_y_p = error_y.ctypes.data_as(ctypes.c_void_p)
-
-    if error_z is None:
-        error_z = numpy.zeros_like(angles)
-    else:
-        error_z   = numpy.array(error_z)
-    error_z   = CNICE(error_z, numpy.float32)
-    error_z_p = error_z.ctypes.data_as(ctypes.c_void_p)
 
     angles   = numpy.array(angles)
     angles   = sanitize_angles(angles)
@@ -191,11 +161,10 @@ def fdk(tomogram: numpy.ndarray, error_x: numpy.ndarray = None, error_y: numpy.n
     obj_ptr = obj.ctypes.data_as(ctypes.c_void_p)
 
     libraft.gpu_fdk(lab, obj_ptr, proj_p, angles_p, gpus_p, 
-                    ctypes.c_int(ndev), time_p, error_x_p, error_y_p, error_z_p)
+                    ctypes.c_int(ndev))
     
     # Case 180 degrees and conebeam tomogram
     angles_range = numpy.abs(angles[-1] - angles[0])
-    last_angle   = max( numpy.abs( angles[-1] ), numpy.abs( angles[0] ) )
     scale        = 2.0
 
     if angles_range <= numpy.pi:

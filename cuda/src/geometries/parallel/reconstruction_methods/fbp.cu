@@ -77,10 +77,6 @@ extern "C"{
         /* Projection padded size */
         int nrayspad = PDIM(nrays,tomo.pad.x); 
 
-        // /* Projection GPUs padded Grd and Blocks */
-        // dim3 TomothreadsPerBlock(TPBX,TPBY,TPBZ);
-        // dim3 TomogridBlock = opt::setGridBlock(dim3(nrayspad,nangles,blocksize), TomothreadsPerBlock);
-
         /* Reconstruction sizes */
         /* Reconstruction size */
         int sizeImagex = obj.size.x;
@@ -101,15 +97,6 @@ extern "C"{
         int filter_pad     = ReconParam.filter_pad;
         int filter_padMode = ReconParam.filter_padMode;
         float axis_offset  = ReconParam.rotation_axis_offset;
-
-        printf("Filter reg: %.2f\n",filter_reg);
-        fflush(stdout);
-
-        // /* Padding the tomogram data */
-        // opt::paddR2R<<<TomogridBlock,TomothreadsPerBlock>>>(tomogram, tomoPadded, 
-        //                                                     tomo.padding_mode,
-        //                                                     dim3(nrays, nangles, blocksize), 
-        //                                                     tomo.pad);
 
         /* Filter and Paganin by slices (filter) */
         Filter filter(filter_type, paganin_reg, filter_reg, axis_offset, pixel, filter_pad, filter_padMode);
@@ -138,12 +125,6 @@ extern "C"{
                                                                     dim3(padImagex, padImagey, blocksize), 
                                                                     dim3(nrayspad, nangles, blocksize));
 
-        // /* Remove padd from the object (reconstruction) */
-        // opt::remove_paddR2R<<<ObjgridBlock,ObjthreadsPerBlock>>>(objPadded, object, 
-        //                                                          dim3(sizeImagex, sizeImagey, blocksize), 
-        //                                                          obj.pad);
-
-        // HANDLE_ERROR(cudaDeviceSynchronize());
         HANDLE_ERROR(cudaFree(sintable));
         HANDLE_ERROR(cudaFree(costable));  
         HANDLE_FFTERROR(cufftDestroy(mplan));

@@ -257,19 +257,19 @@ struct Process{
     /* Processes*/
     int tomobatch_size, objbatch_size, gpu_proc_ind;
 
-    /* Tomogram (or detector) and reconstruction filter */
-    int tomo_index, filter_index;
-    long long int tomoptr_index, tomoptr_size, filterptr_index, filterptr_size;
+    /* Tomogram (or detector) */
+    int tomo_index;
+    long long int tomoptr_index, tomoptr_size;
     float tomo_pos;
 
     /* Object - Reconstruction */
     long long int objptr_index, objptr_size;
     float obj_pos;
 
-    long long int n_recon, n_recon_pad, n_tomo, n_filter; 
-    int i, i_gpu, zi, z_filter, z_filter_pad, z_proj, z_recon;
-    long long int n_proj, n_proj_pad, n_filter_pad;
-    long long int idx_proj, idx_proj_pad, idx_proj_max, idx_recon, idx_recon_pad, idx_filter, idx_filter_pad;
+    long long int n_recon, n_recon_pad, n_tomo; 
+    int i, i_gpu, zi, z_proj, z_recon;
+    long long int n_proj, n_proj_pad;
+    long long int idx_proj, idx_proj_pad, idx_proj_max, idx_recon, idx_recon_pad;
     float z_ph, z_det;
 };
 

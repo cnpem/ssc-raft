@@ -1,6 +1,7 @@
 #include "geometries/conebeam/fdk.hpp"
 #include "common/logerror.hpp"
 #include "common/opt.hpp"
+#include "processing/filters.hpp"
 #include <cuda_runtime_api.h>
 #include <stdio.h>
 #include <cufft.h>
@@ -64,10 +65,10 @@ __global__ void backproj(float* recon, float* proj, float* beta, Lab lab, Proces
         
         Q        = proj[idx];   
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
-        // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
     recon[n] = recon[n] * lab.dbeta / 2.0f;
 }
+
 __global__ void backproj_metrology(float* recon, float* proj, float* beta,
 float* error_x, float* error_y, float* error_z,
 Lab lab, Process process) {
@@ -121,11 +122,37 @@ Lab lab, Process process) {
         
         Q        = proj[idx];   
         recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + v), 2);
-        // recon[n] = recon[n] + Q*__powf(lab.Dsd/(lab.D + x*sinb - y*cosb), 2);
     }
     recon[n] = recon[n] * lab.dbeta / 2.0f;
     }
 }
+
+extern "C"{
+    __device__ void set_proj_idxs(long long int n, int* i, int*j, int* k, Lab lab, Process process) {
+        long int nij, rem_ij;
+        nij = lab.nph*lab.nbeta;
+        *k = (n) / nij;
+        rem_ij = (n) % nij;
+        *j = rem_ij / lab.nph;
+        *i = rem_ij % lab.nph;
+    }}
+
+extern "C"{
+__global__ void signal_update(Lab lab, float* proj, Process process){
+    long long int npad = blockDim.x * blockIdx.x + threadIdx.x;
+    int i, j, k; 
+    long long int idx;
+    float X, Z, aux;
+
+    set_proj_idxs(npad, &k, &j, &i, lab, process);
+    idx = (long long int) k  + j*lab.nph + i*lab.nph*lab.nbeta;
+
+    X = k*lab.dh - lab.h;
+    Z = (i + process.i*process.z_proj)*lab.dv - lab.v;
+    aux = lab.D/sqrtf(lab.Dsd*lab.Dsd + Z*Z + X*X);
+
+    proj[idx] = proj[idx]*aux;
+}}
 
 extern "C"{
 void copy_to_gpu_back(Lab lab, 
@@ -140,6 +167,9 @@ float** c_proj, float** c_recon, float** c_beta, Process process)
     M    = process.n_proj;
     Npad = process.n_recon_pad;
     Mpad = process.n_proj_pad;
+
+    int n_threads = NUM_THREADS;
+    long long int n_blocks_pad  = Mpad/n_threads + (Mpad % n_threads == 0 ? 0:1);
 
     float *dangles;
     HANDLE_ERROR(cudaMalloc((void **)&dangles, lab.nbeta * sizeof(float)));
@@ -168,14 +198,27 @@ float** c_proj, float** c_recon, float** c_beta, Process process)
     HANDLE_ERROR(cudaMalloc(c_beta, 2 * lab.nbeta * sizeof(float)));
     set_beta<<< 1, 1 >>>(lab,dangles,*c_beta);
 
+    signal_update<<<n_blocks_pad, n_threads>>>(lab, *c_proj, process);
+
+    /* Filter and Paganin by slices (filter) */
+    Filter filter(lab.filter_type, lab.paganin_slices, lab.reg, lab.rotation_axis_offset, lab.dh, lab.padfh, lab.padfmode);
+
+    cufftHandle mplan;
+    cufftHandle mplanI;
+    int filterXpad = lab.npfh; 
+
+    cufftPlan1d(&mplan , filterXpad, CUFFT_R2C, lab.nbeta);
+    cufftPlan1d(&mplanI, filterXpad, CUFFT_C2R, lab.nbeta);
+    
+    if (filter.type != Filter::EType::none)
+        filter_lowpass(mplan, mplanI, filter, *c_proj, dim3(lab.nph, lab.nbeta, process.z_proj));
+    
     HANDLE_ERROR(cudaFree(dangles));
     HANDLE_ERROR(cudaFree(c_tomo));
-
-    // clock_t end = clock();
-    // printf("Time copy_to_gpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
-    // printf("Time copy_to_gpu BKP: Gpu %d/%d \n",process.i_gpu,process.i);
-
+    HANDLE_FFTERROR(cufftDestroy(mplan));
+    HANDLE_FFTERROR(cufftDestroy(mplanI)); 
 }}
+
 
 extern "C"{
 void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, float* c_beta, Process process) {
@@ -215,15 +258,11 @@ void copy_to_cpu_back(Lab lab, float* recon, float* c_proj, float* c_recon, floa
     HANDLE_ERROR(cudaFree(c_recon));
     HANDLE_ERROR(cudaFree(c_beta));
     HANDLE_ERROR(cudaFree(c_rec));
-    
-    // clock_t end = clock();
-    // printf("Time copy_to_cpu: Gpu %d/%d ---- %f \n",process.i_gpu,process.i, double(end - begin)/CLOCKS_PER_SEC);
-    // printf("Time copy_to_cpu BKP: Gpu %d/%d \n",process.i_gpu,process.i);
 
 }}
 
 extern "C"{
-void backprojection(Lab lab, float* recon, float* proj, float* beta, Process process, float* error_x, float* error_y, float* error_z) {
+void backprojection(Lab lab, float* recon, float* proj, float* beta, Process process) {
     long long int M;	
     long int n_blocks;
     int n_threads;
@@ -235,12 +274,21 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta, Process pro
     
     HANDLE_ERROR(cudaSetDevice(process.i_gpu));
 
-    // clock_t b_begin = clock();
+    backproj<<<n_blocks, n_threads>>>(recon, proj, beta, lab, process);
+}}
 
-    // printf("errorx: %e\n",error_x[200]);
-    // fflush(stdout);
-    // fflush(stdout);
-    // fflush(stdout);
+extern "C"{
+void backprojection_metrology(Lab lab, float* recon, float* proj, float* beta, Process process, float* error_x, float* error_y, float* error_z) {
+    long long int M;	
+    long int n_blocks;
+    int n_threads;
+
+    M = process.n_recon_pad;   // lab.nx * lab.ny * lab.nz;
+    
+    n_threads = NUM_THREADS;
+    n_blocks  = M/n_threads + (M % n_threads == 0 ? 0:1);   
+    
+    HANDLE_ERROR(cudaSetDevice(process.i_gpu));  
 
     float *erx = opt::allocGPU<float>(lab.nbeta);
     float *ery = opt::allocGPU<float>(lab.nbeta);
@@ -250,18 +298,13 @@ void backprojection(Lab lab, float* recon, float* proj, float* beta, Process pro
     opt::CPUToGPU<float>(error_y, ery, lab.nbeta);
     opt::CPUToGPU<float>(error_z, erz, lab.nbeta);
 
-    // backproj<<<n_blocks, n_threads>>>(recon, proj, beta, lab, process);
     backproj_metrology<<<n_blocks, n_threads>>>(recon, proj, beta, erx, ery, erz, lab, process);
 
     HANDLE_ERROR(cudaFree(erx));
     HANDLE_ERROR(cudaFree(ery));
     HANDLE_ERROR(cudaFree(erz));
-
-    // clock_t b_end = clock();
-    // printf("Time backproj: Gpu %d ---- %f \n",process.i_gpu, double(b_end - b_begin)/CLOCKS_PER_SEC);
-    // printf("Time backproj: Gpu %d \n",process.i_gpu);
+    
 }}
-
 
 extern "C"{
 __global__ void set_beta(Lab lab, float *dangles, float* beta){

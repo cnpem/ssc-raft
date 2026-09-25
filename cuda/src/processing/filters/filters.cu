@@ -41,9 +41,8 @@ __global__ void fbp_filtering_C2C(Filter filter,
         
         if ( i >= size.x  || (j >= size.y) ) return;
 
-        // float w =  2.0f * fminf( i, size.x - i ) / ((float)size.x);
+        float w =  2.0f * fminf( i, size.x - i ) / ((float)size.x);
 
-        float w = filter.reg * 2.0 * fminf( i, size.x - i ) / ((float)size.x) + ( 1.0f - filter.reg) * 2.0 * i / ((float)size.x);
         float expoent = float(M_PI)/(float)( size.x - 1 ) * filter.axis_offset * i;
 
         // float expoent = 2.0f * float(M_PI)/(float)( 2 * size.x - 2) * filter.axis_offset * i;
@@ -121,38 +120,6 @@ __global__ void fbp_filtering_C2C(Filter filter,
 		HANDLE_FFTERROR(cufftDestroy(mplan));
 	}
 
-    // void filterFBP(Filter filter, 
-    // float *tomogram, dim3 size)
-	// {	
-    //     dim3 threadsPerBlock(TPBX,TPBY,TPBZ);
-    //     dim3 gridBlock( (int)ceil( size.x / TPBX ) + 1,
-    //                     (int)ceil( size.y / TPBY ) + 1,
-    //                     (int)ceil( size.z / TPBZ ) + 1);
-
-    //     dim3 fft_size = dim3( size.x / 2 + 1, size.y, 1 );
-
-    //     cufftHandle mplan;
-    //     cufftHandle mplanI;
-
-	// 	cufftPlan1d(&mplan , size.x, CUFFT_R2C, size.y);
-	// 	cufftPlan1d(&mplanI, size.x, CUFFT_C2R, size.y);
-
-    //     size_t offset; 
-    //     for( int k = 0; k < size.z; k++){  
-            
-    //         offset = (size_t)k * size.x * size.y;
-
-    //         convolution_R2C_C2R_1D(mplan, mplanI, tomogram + offset, fft_size, filter);
-    //     }
-        
-    //     float scale = (float)(size.x) * filter.pixel;
-
-    //     opt::scale<<<gridBlock,threadsPerBlock>>>(tomogram, size, scale);
-
-	// 	HANDLE_FFTERROR(cufftDestroy(mplan));
-    //     HANDLE_FFTERROR(cufftDestroy(mplanI));
-	// }
-
     void filter_lowpass(cufftHandle mplan, cufftHandle mplanI, Filter filter, 
     float *tomogram, dim3 size)
     {	
@@ -174,8 +141,8 @@ __global__ void fbp_filtering_C2C(Filter filter,
                                                            tomoPadd, 
                                                            filter.paddMode,
                                                            dim3(size.x,size.y,1), 
-                                                           dim3(filter.pad, 0.0f, 0.0f));
-
+                                                           dim3(filter.pad, 0, 0));
+            
             convolution_R2C_C2R_1D(mplan, mplanI, tomoPadd, fft_size, filter);
 
             opt::scale<<<gridBlockPad,threadsPerBlock>>>(tomoPadd, dim3(sizeXpad,size.y,1), scale);
@@ -183,7 +150,7 @@ __global__ void fbp_filtering_C2C(Filter filter,
             opt::remove_paddR2R<<<gridBlockPad,threadsPerBlock>>>(tomoPadd, 
                                                                   tomogram + offset, 
                                                                   dim3(size.x,size.y,1), 
-                                                                  dim3(filter.pad, 0.0f, 0.0f));
+                                                                  dim3(filter.pad, 0, 0));
         }
         HANDLE_ERROR(cudaFree(tomoPadd));
     }
@@ -272,7 +239,6 @@ extern "C" {
 		x[blockIdx.y*(sizex/2+1) + idx] *= (1.0f - expf(-20.0f*xs*xs))/sizex;
 	}
 
-	
 	__device__ complex DeltaFilter(complex* img, int sizeimage, float fx, float fy)
 	{
 		fx = fminf(fx, sizeimage/2-1E-4f);
