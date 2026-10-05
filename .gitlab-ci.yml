@@ -37,7 +37,8 @@ pages:
   before_script:
     - pip install -r docs/requirements.txt
   script:
-    - sphinx-build -j $(nproc) -b html docs/ public/
+    - cd docs/
+    - make html
   artifacts:
     paths:
       - public
