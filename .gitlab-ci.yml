@@ -13,7 +13,7 @@ build_sdist:
   script:
     - python3 -m build --sdist
   tags:
-    - docker
+    - "$RUNNER_TAG"
   artifacts:
     paths:
       - ./dist/*tar.gz
