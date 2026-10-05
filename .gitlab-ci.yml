@@ -32,7 +32,7 @@ deploy_sdist:
     - tags
 
 pages:
-  stage: documentation
+  stage: pages
   image: python:3.12
   before_script:
     - pip install -r docs/requirements.txt
