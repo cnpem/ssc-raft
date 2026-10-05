@@ -230,8 +230,7 @@ def tEM_cone(
 
     The algorithm makes the following assumptions:
         1) The sample (reconstruction region) has positive values only. Two remarks about the first assumption: 
-            a) it is obviously true for attenuation/absorption coefficients (imaginary part of refraction index) 
-\sout{if the source is not radioactive}.
+            a) it is obviously true for attenuation/absorption coefficients (imaginary part of refraction index).
             b) for phase coefficient (real part of refraction index - 1) it might have only negative values (low 
 density samples), which is not a problem since...
         2) The flat-field intensity of each pixel for a time interval dt is: 

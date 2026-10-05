@@ -25,7 +25,7 @@ author = 'Sirius Scientific Computing Group'
 
 autodoc_mock_imports = ["h5py", "SharedArray", 
                         "sscRaft.rafttypes","numpy",
-                        "scipy","skimage"] # list all modules to be ignored during compilation of the html
+                        "scipy","skimage","tqdm", "matplotlib", "matplotlib.pyplot"] # list all modules to be ignored during compilation of the html
 
 
 env = {}
@@ -60,48 +60,6 @@ extensions = [
     'sphinx_multiversion',
     'sphinxcontrib.bibtex'
 ]
-# breathe_projects = { "proj": "xml/" }
-# breathe_default_project = "proj"
-
-"""
-Breathe does not support cuda C++, then cuda special words used in function
-declaration must be added as C++ atributes, beacause we'll read cuda C++ as 
-C++.
-"""
-# cpp_index_common_prefix = ['_Complex', 'cufftComplex']
-# cpp_id_attributes = ['__global__', '__device__', '_Complex', 'cufftComplex', '__restrict__', 'restrict']
-# cpp_id_attributes = ['_Complex', '__global__', 'restrict', '__device__', '__host__', '__hevice']
-# cpp_paren_attributes = ['restrict', '__restrict__']
-
-# Setup the exhale extension
-# exhale_args = {
-#     # These arguments are required
-#     "containmentFolder":     "./api",
-#     "rootFileName":          "library_root.rst",
-#     "rootFileTitle":         "Library API",
-#     "doxygenStripFromPath":  "..",
-#     # Suggested optional arguments
-#     "createTreeView":        True,
-#     # TIP: if using the sphinx-bootstrap-theme, you need
-#     # "treeViewIsBootstrap": True,
-#     "exhaleExecutesDoxygen": True,
-#     "exhaleDoxygenStdin":    "INPUT = ../../inc"
-# }
-
-# # Tell sphinx what the primary language being documented is.
-# primary_domain = 'cpp'
-
-# # Tell sphinx what the pygments highlight language should be.
-# highlight_language = 'cpp'
-
-# Add any paths that contain templates here, relative to this directory.
-# templates_path = ['_templates']
-
-# List of patterns, relative to source directory, that match files and
-# directories to ignore when looking for source files.
-# This pattern also affects html_static_path and html_extra_path.
-# exclude_patterns = []
-
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -109,7 +67,6 @@ C++.
 # a list of builtin themes.
 html_theme = 'sphinx_rtd_theme'
 html_style = 'css/my_theme.css'
-# html_theme = 'alabaster'
 
 # smv_remote_whitelist = None
 # no branches only tags for multiversion

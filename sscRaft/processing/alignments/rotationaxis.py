@@ -4,80 +4,80 @@ import numpy
 import ctypes
 
 def Centersino(frame0, frame1, flat, dark):
-        """ Find the offset of a 180 tomogram to correctly align it, computed by cross correlation.
-        It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
-        on the intensity data :math:`I` inside function
+    r""" Find the offset of a 180 tomogram to correctly align it, computed by cross correlation.
+    It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
+    on the intensity data :math:`I` inside function
 
-        .. math:: 
-            -\log( \\frac{I - d_{0}}{I_{0}} ) 
+    .. math:: 
+        -\log( \\frac{I - d_{0}}{I_{0}} ) 
 
-        Args:
-            frame0 (ndarray): First frame of intensity data obtained by detector
-            frame1 (ndarray): Last frame of intensity data obtained by detector
-            flat (ndarray): Flat
-            dark (ndarray): Dark
+    Args:
+        frame0 (ndarray): First frame of intensity data obtained by detector
+        frame1 (ndarray): Last frame of intensity data obtained by detector
+        flat (ndarray): Flat
+        dark (ndarray): Dark
 
-        Returns:
-            (int): Offset
-        """        
+    Returns:
+        (int): Offset
+    """        
 
-        nrays = frame0.shape[-1]
-        nslices = frame0.shape[-2]
+    nrays = frame0.shape[-1]
+    nslices = frame0.shape[-2]
 
-        frame0 = CNICE(frame0, numpy.float32)
-        frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
+    frame0 = CNICE(frame0, numpy.float32)
+    frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
 
-        frame1 = CNICE(frame1, numpy.float32)
-        frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
+    frame1 = CNICE(frame1, numpy.float32)
+    frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
 
-        dark = CNICE(dark, numpy.float32)
-        darkptr = dark.ctypes.data_as(ctypes.c_void_p)
+    dark = CNICE(dark, numpy.float32)
+    darkptr = dark.ctypes.data_as(ctypes.c_void_p)
 
-        flat = CNICE(flat, numpy.float32)
-        flatptr = flat.ctypes.data_as(ctypes.c_void_p)
+    flat = CNICE(flat, numpy.float32)
+    flatptr = flat.ctypes.data_as(ctypes.c_void_p)
 
-        offset = libraft.findcentersino(frame0ptr, frame1ptr, darkptr, flatptr, 
-                                        ctypes.c_int(nrays), ctypes.c_int(nslices))
-        
-        return offset
+    offset = libraft.findcentersino(frame0ptr, frame1ptr, darkptr, flatptr, 
+                                    ctypes.c_int(nrays), ctypes.c_int(nslices))
+    
+    return offset
 
 def Centersino_subpixel(frame0, frame1, flat, dark):
-        """ Find the subpixel offset of a 180 tomogram to correctly align it, computed by cross correlation.
-        It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
-        on the intensity data :math:`I` inside function
+    r""" Find the subpixel offset of a 180 tomogram to correctly align it, computed by cross correlation.
+    It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
+    on the intensity data :math:`I` inside function
 
-        .. math:: 
-            -\log( \\frac{I - d_{0}}{I_{0}} ) 
+    .. math:: 
+        -\log( \\frac{I - d_{0}}{I_{0}} ) 
 
-        Args:
-            frame0 (ndarray): First frame of intensity data obtained by detector
-            frame1 (ndarray): Last frame of intensity data obtained by detector
-            flat (ndarray): Flat
-            dark (ndarray): Dark
+    Args:
+        frame0 (ndarray): First frame of intensity data obtained by detector
+        frame1 (ndarray): Last frame of intensity data obtained by detector
+        flat (ndarray): Flat
+        dark (ndarray): Dark
 
-        Returns:
-            (float): Subpixel offset
-        """        
+    Returns:
+        (float): Subpixel offset
+    """        
 
-        nrays = frame0.shape[-1]
-        nslices = frame0.shape[-2]
+    nrays = frame0.shape[-1]
+    nslices = frame0.shape[-2]
 
-        frame0 = CNICE(frame0, numpy.float32)
-        frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
+    frame0 = CNICE(frame0, numpy.float32)
+    frame0ptr = frame0.ctypes.data_as(ctypes.c_void_p)
 
-        frame1 = CNICE(frame1, numpy.float32)
-        frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
+    frame1 = CNICE(frame1, numpy.float32)
+    frame1ptr = frame1.ctypes.data_as(ctypes.c_void_p)
 
-        dark = CNICE(dark, numpy.float32)
-        darkptr = dark.ctypes.data_as(ctypes.c_void_p)
+    dark = CNICE(dark, numpy.float32)
+    darkptr = dark.ctypes.data_as(ctypes.c_void_p)
 
-        flat = CNICE(flat, numpy.float32)
-        flatptr = flat.ctypes.data_as(ctypes.c_void_p)
+    flat = CNICE(flat, numpy.float32)
+    flatptr = flat.ctypes.data_as(ctypes.c_void_p)
 
-        offset = libraft.findcentersino_subpixel(frame0ptr, frame1ptr, darkptr, flatptr, 
-                                        ctypes.c_int(nrays), ctypes.c_int(nslices))
-        
-        return offset
+    offset = libraft.findcentersino_subpixel(frame0ptr, frame1ptr, darkptr, flatptr, 
+                                    ctypes.c_int(nrays), ctypes.c_int(nslices))
+    
+    return offset
 
 def correct_rotation_axis360(data: numpy.ndarray, dic: dict) -> numpy.ndarray:
     """CPU (python) function: Corrects the rotation axis of a sample measured on more then 180 degrees.
@@ -325,7 +325,7 @@ def correct_rotation_axis(data: numpy.ndarray, axis_offset: float, gpus: list = 
 
 
 def Centersino_block(frame0, frame1, flat, dark, block_size) -> list:
-    """ Find the offset by block of slices of a 180 tomogram 
+    r""" Find the offset by block of slices of a 180 tomogram 
     to correctly align it, computed by cross correlation.
     It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
     on the intensity data :math:`I` inside function

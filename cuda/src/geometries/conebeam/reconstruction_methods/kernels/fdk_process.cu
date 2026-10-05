@@ -34,14 +34,8 @@ void set_process(Lab lab, int i, Process* process, int n_process, int* gpus, int
 
     zi_recon      = (zi_max_recon - zi_min_recon);
 
-    // printf("process: %d \n", i);
-    // printf("zi_recon: %d \n", zi_recon);
-
     z_min = -lab.z + zi_min_recon * lab.dz;
     z_max = -lab.z + zi_max_recon * lab.dz;
-
-    // --- Calculate the required range in the projection volume based on z_min and z_max ---
-    // L = sqrt(lab.x * lab.x + lab.y * lab.y);
 
     // --- Calculate the required range in the PADDED projection volume based on z_min and z_max ---
     float Rxpad = lab.dx * (float)lab.nph / 2.0f;

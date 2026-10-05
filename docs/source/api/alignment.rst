@@ -30,3 +30,7 @@ Alignment API
 .. _apistitchB:
 
 .. autofunction:: sscRaft.processing.alignments.excentric_tomo.stitchExcentricTomo
+
+.. _apiitrepA:
+
+.. autofunction:: sscRaft.processing.alignments.iterative_reprojection.iterative_reprojection

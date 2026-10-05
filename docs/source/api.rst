@@ -3,6 +3,7 @@ API Reference
 
 This page documents the API reference for the sscRaft. 
 
+.. - :ref:`apiutils`
 .. - :ref:`apiio`
 .. - :ref:`apicorrection`
 .. - :ref:`apialignment`
@@ -14,6 +15,7 @@ This page documents the API reference for the sscRaft.
 
 .. toctree::
 
+    api/utils
     api/correction
     api/alignment
     api/rings

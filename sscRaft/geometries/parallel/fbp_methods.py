@@ -118,7 +118,7 @@ def fbpGPU(tomogram, angles, gpus, dic, obj=None):
     # last_angle   = max( numpy.abs( angles[-1] ), numpy.abs( angles[0] ) )
     scale        = 2.0
     
-    if angles_range > numpy.pi:
+    if angles_range > 3*numpy.pi/2:
         obj /= scale
 
     return obj

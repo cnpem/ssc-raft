@@ -13,8 +13,9 @@ Welcome to sscRaft documentation!
     source/tutorial
     source/api
     source/changelog
+    source/tutorial/references
     
-   
+    
 Indices and tables
 ==================
 

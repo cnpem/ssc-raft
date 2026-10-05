@@ -4,7 +4,7 @@ Install
 This package uses ``C``, ``C++``, ``CUDA`` and ``Python3``. 
 Before installation, you will need the following packages installed:
 
-* ``CUDA >= 10.0.0``
+* ``CUDA >= 11.0.0``
 * ``C``
 * ``C++`` 
 * ``Python >= 3.8.0``
@@ -33,6 +33,7 @@ The latest package version can be cloned from our public `github <https://github
 
     git clone https://github.com/cnpem/ssc-raft.git
     cd ssc-raft 
+    pip install -r requirements.txt
     make clean && make
 
 To install a specific version (``<version>``), one can use:
@@ -40,7 +41,8 @@ To install a specific version (``<version>``), one can use:
 .. code-block:: bash
 
     git clone  https://github.com/cnpem/ssc-raft.git --branch v<version> --single-branch
-    cd ssc-raft 
+    cd ssc-raft
+    pip install -r requirements.txt
     make clean && make
 
 
@@ -49,7 +51,8 @@ Example, to install version 3.1.1:
 .. code-block:: bash
 
     git clone https://github.com/cnpem/ssc-raft.git --branch v3.1.1 --single-branch
-    cd ssc-raft 
+    cd ssc-raft
+    pip install -r requirements.txt
     make clean && make
 
 
@@ -91,7 +94,7 @@ Or install a previous version with ``sscRaft==<version>``. Example:
 
 .. warning::
 
-    To install ``sscRaft`` in the Tepui cluster, first one needs to load the modules ``module load cuda/11.2 python3`` on the **mafalda.lnls.br** login node, and ``module load cuda/11.2.2 python/3.11.11 gcc/9.5.0-jld3zdv`` on the **mafalda-2.lnls.br** login node.
+    To install ``sscRaft`` in the Tepui cluster, first one needs to load the modules ``module load cuda/11.2.2 python/3.11.11 gcc/9.5.0-jld3zdv``.
 
 
 GITLAB
@@ -107,6 +110,7 @@ The latest package version can be cloned from CNPEM's `gitlab <https://gitlab.cn
 
     git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git
     cd ssc-raft 
+    pip install -r requirements.txt
     make clean && make
 
 To install a specific version (``<version>``), one can use:
@@ -115,6 +119,7 @@ To install a specific version (``<version>``), one can use:
 
     git clone  https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v<version> --single-branch
     cd ssc-raft 
+    pip install -r requirements.txt
     make clean && make
 
 
@@ -124,6 +129,7 @@ Example, to install version 3.0.3:
 
     git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v3.0.3 --single-branch
     cd ssc-raft 
+    pip install -r requirements.txt
     make clean && make
 
 
@@ -137,7 +143,7 @@ Requirements
 
 Before installation, you will need to have the following packages installed:
 
-* ``CUDA >= 10.0.0``
+* ``CUDA >= 11.0.0``
 * ``C``
 * ``C++`` 
 * ``Python >= 3.8.0``

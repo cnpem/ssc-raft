@@ -72,11 +72,6 @@ extern "C"{
 	size_t nrays, size_t nangles, Filter reg, 
 	cudaStream_t stream);
 
-	// void filterFBPpad(Filter filter, 
-    // float *tomogram, dim3 size, dim3 size_pad, dim3 pad);
-
-    // void filterFBP(Filter filter, float *tomogram, dim3 size);
-
     void filterFBP_Complex(Filter filter, 
     float *tomogram, dim3 size, dim3 size_pad, dim3 pad, float pixel);
 

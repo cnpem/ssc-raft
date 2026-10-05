@@ -13,13 +13,6 @@ all: out html
 out:
 	mkdir -p build
 
-doxygen:
-	doxygen doxyconf
-
-example:
-	cd ../ && python3 setup.py install --user --cuda && cd docs/
-	@for j in example/*.py; do python3 $$j; done
-
 .PHONY: help Makefile all
 
 html:

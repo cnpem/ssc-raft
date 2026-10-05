@@ -2,24 +2,24 @@
 
 ## Authors
 
-* Eduardo X. Miqueles, LNLS/CNPEM
-* Paola Ferraz, LNLS/CNPEM
+* Eduardo X. Miqueles, CNPEM
+* Paola Ferraz, CNPEM
 
 ## Contributors
 
-* Larissa M. Moreno, LNLS/CNPEM
-* João F. G. de Albuquerque Oliveira, LNLS/CNPEM
+* João F. G. de Albuquerque Oliveira, CNPEM
 * Yuri Rossi Tonin, Georg-August-Universität Göttingen
 
 ## Past contributors
 
 * Alan Zanoni Peixinho
+* Larissa M. Moreno, Desy
 * Otávio M. Paiano
 * Gilberto Martinez Jr.
 * Giovanni Baraldi
 * Janito Vaqueiro Ferreira Filho
 * Fernando S. Furusato
-* Matheus F. Sarmento, LNLS/CNPEM
+* Matheus F. Sarmento, CNPEM
 * Nikoley Koshev
 * Elias Helou
 
@@ -52,6 +52,7 @@ One can clone our public [github](https://github.com/cnpem/ssc-raft/) repository
 ```bash
 git clone https://github.com/cnpem/ssc-raft.git 
 cd ssc-raft
+pip install -r requirements.txt
 make clean && make
 ```
 
@@ -60,6 +61,7 @@ For a specific version, one can use:
 ```bash
 git clone https://github.com/cnpem/ssc-raft.git --branch v<version> --single-branch
 cd ssc-raft 
+pip install -r requirements.txt
 make clean && make
 ```
 
@@ -68,6 +70,7 @@ The `<version>` is the version of the `sscRaft` to be installed. Example, to ins
 ```bash
 git clone https://github.com/cnpem/ssc-raft.git --branch v3.1.1 --single-branch
 cd ssc-raft 
+pip install -r requirements.txt
 make clean && make
 ```
 
@@ -117,6 +120,7 @@ One can clone our [gitlab](https://gitlab.cnpem.br/) repository and install the 
 ```bash
 git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git 
 cd ssc-raft
+pip install -r requirements.txt
 make clean && make
 ```
 
@@ -125,6 +129,7 @@ For a specific version, one can use:
 ```bash
 git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v<version> --single-branch
 cd ssc-raft 
+pip install -r requirements.txt
 make clean && make
 ```
 
@@ -133,6 +138,7 @@ The `<version>` is the version of the `sscRaft` to be installed. Example, to ins
 ```bash
 git clone https://gitlab.cnpem.br/sirius/proc-sim-apps/sci/imaging/ssc-raft.git --branch v3.1.1 --single-branch
 cd ssc-raft 
+pip install -r requirements.txt
 make clean && make
 ```
 

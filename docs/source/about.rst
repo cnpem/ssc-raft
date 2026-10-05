@@ -1,11 +1,12 @@
-Sirius Scientific Computing approach for image reconstruction.
+Sirius Scientific Computing (*SSC*) Group approach for image reconstruction.
 RAFT is an acronym to Reconstruction Algorithms For Tomography, and is being developed for more than 10 years,
-as an effort to support imaging beamlines from Sirius - the 4th generation Brazilian synchrotron.
+as an effort to support imaging beamlines from Sirius - the 4th generation Brazilian synchrotron - located at the 
+Brazilian Center for Research in Energy and Materials (CNPEM) in Campinas/Brazil.
 Implemented in low/high level languages, has the purpose of fast and robust image reconstruction for large data-sets.
-This package was initially implemented for the IMX beamline from old storage ring UVX/LNLS.
+This package was initially implemented for the IMX beamline from old storage ring UVX.
 It is now being readapted for future tomographic beamlines using new
 coding strategies and recent mathematical developments regarding image reconstruction,
-which is the case needed for LNLS/Sirius imaging beamlines such as as Carnaúba, Cateretê, Mogno, Quati,
+which is the case needed for Sirius imaging beamlines such as as Carnaúba, Cateretê, Mogno, Quati,
 among others.
 
 Codes and public prototypes are being increasingly included within this project,
@@ -40,22 +41,22 @@ Authors and Contributors
 
     * - Eduardo X. Miqueles
       - Author
-      - LNLS/CNPEM
+      - CNPEM
     * - Paola Ferraz
       - Author
-      - LNLS/CNPEM
-    * - Larissa M. Moreno
-      - Contributor
-      - LNLS/CNPEM
+      - CNPEM
     * - João F. G. de Albuquerque Oliveira
       - Contributor
-      - LNLS/CNPEM
+      - CNPEM
     * - Yuri Rossi Tonin
       - Contributor
       - Georg-August-Universität Göttingen
     * - Alan Zanoni Peixinho
       - Past contributor
       - 
+    * - Larissa M. Moreno
+      - Past contributor
+      - Desy
     * - Otávio M. Paiano
       - Past contributor
       - 
@@ -73,7 +74,7 @@ Authors and Contributors
       -
     * - Matheus F. Sarmento
       - Past contributor
-      - LNLS/CNPEM
+      - CNPEM
     * - Elias Helou
       - Past contributor
       -

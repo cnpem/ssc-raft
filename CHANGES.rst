@@ -1,3 +1,13 @@
+Version 3.4.2 - 2026-09-28
+--------------------------
+*Added:*
+  - Plot functions.
+  
+*Corrections:*
+  - Fixed ``FDK`` filter implementation. Now it is standardized with ``FBP`` and ``BST``.
+  - Fixed ``Radon`` stepsize computation.
+  - Fixed ``low_pass_filter`` function.
+
 Version 3.4.1 - 2026-04-07
 --------------------------
 *Corrections:*

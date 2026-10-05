@@ -1,32 +1,32 @@
 {
     "upload_type": "software",
     "title": "ssc-raft",
-    "version": "3.4.1",
+    "version": "3.4.2",
     "access_right": "open",
     "communities": [
     ],
     "contributors": [
         {
             "name": "X. Miqueles, Eduardo",
-            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "affiliation": "CNPEM - Brazilian Center for Research in Energy and Materials",
             "orcid": "0000-0001-6576-4288",
             "type": "projectleader"
         },
         {
             "name": "Ferraz, Paola",
-            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "affiliation": "CNPEM - Brazilian Center for Research in Energy and Materials",
             "orcid": "0000-0002-1457-705X",
             "type": "researcher"
         },
         {
             "name": "Macul Moreno, Larissa",
-            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "affiliation": "Desy",
             "orcid": "0000-0003-1627-093X",
-            "type": "projectmember"
+            "type": "other"
         },
         {
             "name": "Oliveira, João",
-            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "affiliation": "CNPEM - Brazilian Center for Research in Energy and Materials",
             "orcid": "0000-0003-3053-9608",
             "type": "projectmember"
         },
@@ -77,12 +77,12 @@
     "creators": [
         {
             "name": "Ferraz, Paola",
-            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "affiliation": "CNPEM - Brazilian Center for Research in Energy and Materials",
             "orcid": "0000-0002-1457-705X"
         },
         {
             "name": "X. Miqueles, Eduardo",
-            "affiliation": "Brazilian Synchrotron Light Laboratory",
+            "affiliation": "CNPEM - Brazilian Center for Research in Energy and Materials",
             "orcid": "0000-0001-6576-4288"
         }
     ],
