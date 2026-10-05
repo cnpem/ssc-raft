@@ -4,12 +4,12 @@ import numpy
 import ctypes
 
 def Centersino(frame0, frame1, flat, dark):
-    r""" Find the offset of a 180 tomogram to correctly align it, computed by cross correlation.
+    """ Find the offset of a 180 tomogram to correctly align it, computed by cross correlation.
     It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
     on the intensity data :math:`I` inside function
 
     .. math:: 
-        -\log( \\frac{I - d_{0}}{I_{0}} ) 
+        -\\log( \\frac{I - d_{0}}{I_{0}} ) 
 
     Args:
         frame0 (ndarray): First frame of intensity data obtained by detector
@@ -325,13 +325,13 @@ def correct_rotation_axis(data: numpy.ndarray, axis_offset: float, gpus: list = 
 
 
 def Centersino_block(frame0, frame1, flat, dark, block_size) -> list:
-    r""" Find the offset by block of slices of a 180 tomogram 
+    """ Find the offset by block of slices of a 180 tomogram 
     to correctly align it, computed by cross correlation.
     It does the application of Flatfield :math:`I_{0}` and darkfield :math:`d_{0}` 
     on the intensity data :math:`I` inside function
 
     .. math:: 
-        -\log( \\frac{I - d_{0}}{I_{0}} ) 
+        -\\log( \\frac{I - d_{0}}{I_{0}} ) 
 
     Args:
         frame0 (ndarray): First frame of intensity data obtained by detector. The axes are [slices, length]

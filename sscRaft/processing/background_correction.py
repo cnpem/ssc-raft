@@ -4,14 +4,14 @@ from ..rafttypes import *
 from ..io.io_ import *
 
 def correct_background(data, flat, dark, gpus = [0], is_log = True, blocksize = 0, nstreams = 1):
-    r""" GPU function to correct tomography data background 
+    """ GPU function to correct tomography data background 
     with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
     a sample, to measure the background.
     
     Can be computed in two ways.
 
     .. math::
-        T = - \log{ ( \\frac{D - D_d}{D_f - D_d} ) }
+        T = - \\log{ ( \\frac{D - D_d}{D_f - D_d} ) }
 
     for transmission tomography, and
 
@@ -101,14 +101,14 @@ def correct_background(data, flat, dark, gpus = [0], is_log = True, blocksize = 
     return data 
 
 def correct_background_frames(data, flat, dark, gpus = [0], is_log = True, blocksize = 0, nstreams = 1):
-    r""" GPU function to correct tomography data background 
+    """ GPU function to correct tomography data background 
     with flat (or empty) and dark. Flat (or empty) here is defined by a measurement without
     a sample, to measure the background.
     
     Can be computed in two ways.
 
     .. math::
-        T = - \log{ ( \\frac{D - D_d}{D_f - D_d} ) }
+        T = - \\log{ ( \\frac{D - D_d}{D_f - D_d} ) }
 
     for transmission tomography, and
 
