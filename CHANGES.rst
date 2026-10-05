@@ -8,6 +8,9 @@ Version 3.4.2 - 2026-09-28
   - Fixed ``Radon`` stepsize computation.
   - Fixed ``low_pass_filter`` function.
 
+*Removed:*
+  - ``FDK`` unused filtering files.
+
 Version 3.4.1 - 2026-04-07
 --------------------------
 *Corrections:*
