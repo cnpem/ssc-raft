@@ -38,7 +38,7 @@ pages:
     - pip install -r docs/requirements.txt
   script:
     - cd docs/
-    - make html
+    - make branch
   artifacts:
     paths:
       - public
