@@ -39,7 +39,8 @@ __global__ void _swap_and_copy(float* __restrict__ output, const float* __restri
 
     if (i >= n_slices || j >= n_angles || k >= n_length) return;
 
-    output[i * n_length * n_angles + j * n_length + k] = input[i * n_length * n_angles + j * n_length + k];
+    const size_t idx = (size_t)i * (size_t)n_length * (size_t)n_angles + (size_t)j * (size_t)n_length + (size_t)k;
+    output[idx] = input[idx];
 
 }
 
@@ -48,10 +49,11 @@ __global__ void _swap_and_copy(float* __restrict__ output, const float* __restri
 // Shapes (C-order): [n_slice, n_angles, n_length], with k fastest.
 __global__ void _large_list(float* __restrict__ list, const float* __restrict__ sorted_data, const float* __restrict__ smooth_data, float drop_ratio,int n_slices, int n_angles, int n_length){
 
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int i = idx / (n_length);
-    int k = idx % (n_length);
+    size_t idx = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
+    int i = (int)(idx / (size_t)n_length);
+    int k = (int)(idx % (size_t)n_length);
     if(i >= n_slices || k >= n_length) return;
+    const size_t base_i = (size_t)i * (size_t)n_length * (size_t)n_angles;
     
     drop_ratio = max(0.0, min(0.8, drop_ratio));
     float ndrop = n_angles * drop_ratio / 2;
@@ -59,8 +61,9 @@ __global__ void _large_list(float* __restrict__ list, const float* __restrict__ 
     float sum_1 = 0.0;
     float sum_2 = 0.0;
     for (int j = int(ndrop); j < n_angles - int(ndrop); j++) {
-        sum_1 += abs(sorted_data[i * n_length * n_angles + j * n_length + k]);
-        sum_2 += abs(smooth_data[i * n_length * n_angles + j * n_length + k]);
+        const size_t pos = base_i + (size_t)j * (size_t)n_length + (size_t)k;
+        sum_1 += fabsf(sorted_data[pos]);
+        sum_2 += fabsf(smooth_data[pos]);
     }
     
     if (sum_2 != 0.0 && sum_1 != 0.0) {
@@ -269,16 +272,16 @@ __global__ void _uniform_filter1d_over_angles(float* __restrict__ output, const 
 // list_data[i,k] = sum_j |tomo[i,j,k] - tomo_smooth[i,j,k]|
 // Shapes (C-order): tomo: [n_slices, n_angles, n_length], k is fastest
 __global__ void _list_unresponsive_sum(float* __restrict__ list_data, const float* __restrict__ tomo, const float* __restrict__ tomo_smooth, int n_slices, int n_angles, int n_length) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= n_slices * n_length)
+    size_t idx = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx >= (size_t)n_slices * (size_t)n_length)
       return; // Ensure not processing out of bounds indices
-  
-    int i = idx / n_length;
-    int k = idx % n_length;
+
+    size_t i = idx / (size_t)n_length;
+    size_t k = idx % (size_t)n_length;
     float sum = 0.0;
-  
+
     for (int j = 0; j < n_angles; ++j) {
-      int idx_ = i * n_length * n_angles + j * n_length + k;
+      size_t idx_ = i * (size_t)n_length * (size_t)n_angles + (size_t)j * (size_t)n_length + k;
       sum += fabs(tomo[idx_] - tomo_smooth[idx_]); // Use fabs for floating-point abs
     }
     list_data[idx] = sum;
@@ -290,9 +293,8 @@ __global__ void _list_unresponsive_sum(float* __restrict__ list_data, const floa
 //            smooth_list[i,k] = 1.0                             otherwise
 // Shapes (C-order): [n_slices, n_length]
 __global__ void _list_unresponsive_divide(float* __restrict__ smooth_list, const float* __restrict__ list, int size_median, int n_slices, int n_length) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    // int k = idx % (n_length);
-    if (idx >= n_slices * n_length) return;
+    size_t idx = (size_t)blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx >= (size_t)n_slices * (size_t)n_length) return;
 
     if (smooth_list[idx] < 1e-6)
         smooth_list[idx] = 1.0;
@@ -307,10 +309,11 @@ __global__ void _mask_unresponsive(bool* __restrict__ list_mask, int n_slices, i
     if (idx >= n_slices)
       return;
   
-    list_mask[idx * n_length + 0] = false;
-    list_mask[idx * n_length + 1] = false;
-    list_mask[idx * n_length + n_length - 1] = false;
-    list_mask[idx * n_length + n_length - 2] = false;
+    const size_t row = (size_t)idx * (size_t)n_length;
+    list_mask[row + 0] = false;
+    list_mask[row + 1] = false;
+    list_mask[row + n_length - 1] = false;
+    list_mask[row + n_length - 2] = false;
   }
 
 // out[i,j,k] = mask[i,k] ? interp_between_neighbors : tomo[i,j,k]

@@ -345,9 +345,9 @@ void batch_mergesort_over_angles(float* d_data, int* d_indices,
 
     const size_t vol_size = size_t(n_length) * size_t(n_angles) * size_t(n_slices);
 
-    cudaMalloc(&d_data_tmp, vol_size * sizeof(float));
+    checkCuda(cudaMalloc(&d_data_tmp, vol_size * sizeof(float)));
     if (d_indices != nullptr)
-        cudaMalloc(&d_indices_tmp, vol_size * sizeof(int));
+        checkCuda(cudaMalloc(&d_indices_tmp, vol_size * sizeof(int)));
 
     _batch_mergesort_over_angles<<<nblocks, block_size>>>(d_data, d_indices,
             d_data_tmp, d_indices_tmp,

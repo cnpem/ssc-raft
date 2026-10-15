@@ -19,13 +19,26 @@ extern "C"{
     void remove_all_stripes(float *tomo, TomoAttributes attribute, int ndevs, int batch) {
 
         int slice_blocks = std::min(attribute.n_slice / ndevs, std::min(attribute.n_slice, batch));
+
+        // Limit the number of slices per block so that all device buffers fit in the GPU memory.
+        // Per element: tomo (4B) + sorted_data (4B) + index_sorting (4B) + mergesort temporaries (4B + 4B)
+        size_t free_mem = 0, total_mem = 0;
+        checkCuda(cudaMemGetInfo(&free_mem, &total_mem));
+        const size_t bytes_per_slice = (size_t)attribute.n_angle * (size_t)attribute.n_length * (5 * sizeof(float))
+                                     + (size_t)attribute.n_length * (2 * sizeof(double) + sizeof(bool));
+        const size_t max_slices = std::max((size_t)1, (size_t)((double)free_mem * 0.85 / (double)bytes_per_slice));
+        if ((size_t)slice_blocks > max_slices) {
+            fprintf(stderr, "Reducing batch from %d to %zu slices to fit in GPU memory (%zu MB free).\n", slice_blocks, max_slices, free_mem >> 20);
+            slice_blocks = (int)max_slices;
+        }
+
         int n_process = (attribute.n_slice + slice_blocks - 1) / slice_blocks;
 
         std::vector<std::thread> threads_all_stripes;
         threads_all_stripes.reserve(ndevs);
 
         for (int k = 0; k < n_process; ++k) {
-            int idx = k * slice_blocks * attribute.n_angle * attribute.n_length;
+            size_t idx = (size_t)k * (size_t)slice_blocks * (size_t)attribute.n_angle * (size_t)attribute.n_length;
             int size = (k == n_process - 1) ? (attribute.n_slice % slice_blocks ? attribute.n_slice % slice_blocks : slice_blocks): slice_blocks;
 
             fprintf(stderr, "Process %d %d %d %d!\n", slice_blocks, k, k * slice_blocks, size);
@@ -46,7 +59,7 @@ extern "C"{
         float *sorted_data;
         checkCuda(cudaSetDevice(device));
 
-        int n = n_slices * attribute.n_angle * attribute.n_length;
+        size_t n = (size_t)n_slices * (size_t)attribute.n_angle * (size_t)attribute.n_length;
         // Allocating Memory for Sorting Arrays
         checkCuda(cudaMalloc((void **)&tomo, n * sizeof(float)));
         checkCuda(cudaMalloc((void **)&sorted_data, n * sizeof(float)));
@@ -60,7 +73,7 @@ extern "C"{
         float *list_data;
         float *sorted_list;
 
-        n = n_slices * attribute.n_length;
+        n = (size_t)n_slices * (size_t)attribute.n_length;
 
         // Allocating Memory for Masks
         checkCuda(cudaMalloc((void **)&list_data, n * sizeof(double)));
@@ -70,7 +83,7 @@ extern "C"{
         // Kernel CUDA and Operations
         execute_remove_all_stripes(tomo, sorted_data, index_sorting, list_data, sorted_list, list_mask, attribute, n_slices);
 
-        n = n_slices * attribute.n_angle * attribute.n_length;
+        n = (size_t)n_slices * (size_t)attribute.n_angle * (size_t)attribute.n_length;
         checkCuda(cudaMemcpy(tomo_, tomo, n * sizeof(float), cudaMemcpyDeviceToHost));
 
         checkCuda(cudaFree(tomo));
@@ -83,41 +96,48 @@ extern "C"{
 
     void get_remove_all_stripes(float *tomo, TomoAttributes attribute, int nslices, int nangles, int nrays)
     {
-        // float *tomo;
+        // tomo is already on the device
         int *index_sorting;
         float *sorted_data;
-        // checkCuda(cudaSetDevice(device));
 
-        // printf("Dentro da funcão get_remove_all_stripes() \n");
+        const size_t plane = (size_t)nangles * (size_t)nrays;
 
-        int n = nslices * nangles * nrays;
+        // Process the volume in chunks of slices that fit in the free GPU memory.
+        // Per element: sorted_data (4B) + index_sorting (4B) + mergesort temporaries (4B + 4B)
+        size_t free_mem = 0, total_mem = 0;
+        checkCuda(cudaMemGetInfo(&free_mem, &total_mem));
+        const size_t bytes_per_slice = plane * (3 * sizeof(float) + sizeof(int)) + (size_t)nrays * (2 * sizeof(double) + sizeof(bool));
+        size_t chunk = (size_t)((double)free_mem * 0.7 / (double)bytes_per_slice);
+        if (chunk < 1) chunk = 1;
+        if (chunk > (size_t)nslices) chunk = (size_t)nslices;
+
+        size_t n = chunk * plane;
         // Allocating Memory for Sorting Arrays
-        // checkCuda(cudaMalloc((void **)&tomo, n * sizeof(float)));
         checkCuda(cudaMalloc((void **)&sorted_data, n * sizeof(float)));
         checkCuda(cudaMalloc((void **)&index_sorting, n * sizeof(int)));
-
-        // Copying Tomography to GPU
-        // checkCuda(cudaMemcpy(tomo, tomo_, n * sizeof(float), cudaMemcpyHostToDevice));
-        checkCuda(cudaMemcpy(sorted_data, tomo, n * sizeof(float), cudaMemcpyDeviceToDevice));
 
         bool *list_mask;
         float *list_data;
         float *sorted_list;
 
-        n = nslices * nrays;
+        n = chunk * (size_t)nrays;
 
         // Allocating Memory for Masks
         checkCuda(cudaMalloc((void **)&list_data, n * sizeof(double)));
         checkCuda(cudaMalloc((void **)&list_mask, n * sizeof(bool)));
         checkCuda(cudaMalloc((void **)&sorted_list, n * sizeof(double)));
 
-        // Kernel CUDA and Operations
-        execute_remove_all_stripes(tomo, sorted_data, index_sorting, list_data, sorted_list, list_mask, attribute, nslices);
+        for (size_t s = 0; s < (size_t)nslices; s += chunk) {
+            const int cur = (int)std::min(chunk, (size_t)nslices - s);
+            float *tomo_chunk = tomo + s * plane;
 
-        // n = n_slices * attribute.n_angle * attribute.n_length;
-        // checkCuda(cudaMemcpy(tomo_, tomo, n * sizeof(float), cudaMemcpyDeviceToHost));
+            checkCuda(cudaMemcpy(sorted_data, tomo_chunk, (size_t)cur * plane * sizeof(float), cudaMemcpyDeviceToDevice));
 
-        // checkCuda(cudaFree(tomo));
+            // Kernel CUDA and Operations
+            execute_remove_all_stripes(tomo_chunk, sorted_data, index_sorting, list_data, sorted_list, list_mask, attribute, cur);
+        }
+        checkCuda(cudaDeviceSynchronize());
+
         checkCuda(cudaFree(index_sorting));
         checkCuda(cudaFree(sorted_data));
         checkCuda(cudaFree(list_data));
