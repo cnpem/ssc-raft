@@ -1,3 +1,19 @@
+Version 3.4.3 - 2026-10-15
+--------------------------
+*Added:*
+  - Troubleshooting page in the documentation (``docs/source/troubleshooting.rst``) with the ``cicc: not found`` error (``micromamba`` in ``Singularity``/``Apptainer``), the ``PTX compiled with an unsupported toolchain`` runtime error and the ``UNKNOWN`` package name.
+  - ``requirements.txt`` with the build and runtime dependencies.
+
+*Corrections:*
+  - Rings method ``all stripes``: ``int`` overflow on sizes, offsets and kernel indices (now ``size_t``) that caused ``illegal memory access`` on large volumes, such as excentric tomograms of ``(2048, 4096, 4096)``.
+  - Rings method ``all stripes``: the number of slices per block is limited by the free GPU memory, with a warning when the requested ``batch`` is reduced.
+  - Rings method ``all stripes`` on device pointers (excentric tomo): processing in chunks that fit in the free GPU memory.
+  - ``checkCuda`` aborts after printing a CUDA error, and the ``cudaMalloc`` of the mergesort temporary buffer is checked.
+  - ``CMakeLists.txt``: ``CMAKE_CUDA_ARCHITECTURES`` (default ``70``) can be overridden by environment or ``-D``.
+  - ``pyproject.toml``: ``setuptools>=61`` and ``packaging`` as build requirements, fixing the package name ``UNKNOWN``.
+  - ``README.md`` links to the troubleshooting documentation.
+  - Excentric tomo: ``ExcentricOverlapInterpolation`` now receives the interpolation type as an integer (``0`` linear, ``1`` gaussian, ``2`` cosine, ``3`` sigmoid, any other value for none), fixing the variable type passed from ``ssc-raft-apps``. String names are no longer accepted.
+
 Version 3.4.2 - 2026-09-28
 --------------------------
 *Added:*
