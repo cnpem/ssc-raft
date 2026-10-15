@@ -4,18 +4,17 @@ import ctypes
 
 
 def ExcentricOverlapInterpolation(name):
-    if name.lower() == 'none':
-        return 10
-    elif name.lower() == 'linear':
+    if name == 0:   # linear
         return 0
-    elif name.lower() == 'gaussian':
+    elif name == 1: # gaussian
         return 1
-    elif name.lower() == 'cosine':
+    elif name == 2: # cosine
         return 2
-    elif name.lower() == 'sigmoid':
+    elif name == 3: # sigmoind (preferable)
         return 3
     else:
         return 10
+
     
 def getOffsetExcentricTomo(tomogram, gpus = [0]):
         """Computes the offset of the 360 tomogram fullview to merge the two aquisitions.
