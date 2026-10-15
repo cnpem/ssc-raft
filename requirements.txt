@@ -1,16 +1,28 @@
+# Build requirements (see [build-system] in pyproject.toml)
+setuptools>=61.0
+packaging
+scikit-build>=0.17
+cmake>=3.24
+wheel>=0.42.0
+ninja==1.11.1.1
+
+# Runtime requirements (see [project].dependencies in pyproject.toml)
 numpy
-scikit-image >=0.19.3
+scikit-image>=0.19.3
 scipy
 matplotlib
 matplotlib-scalebar
+cycler
+pyparsing
+python-dateutil
 SharedArray
 h5py
-click >= 8.0.4
-colorama >= 0.4.5
-rich >= 12.6.0
-mdurl >= 0.1.0
-Pygments >= 2.14.0
-shellingham >= 1.5.0
-typer >= 0.9.0
-typing_extensions >= 4.1.1
+click>=8.0.4
+colorama>=0.4.5
+rich>=12.6.0
+mdurl>=0.1.0
+Pygments>=2.14.0
+shellingham>=1.5.0
+typer>=0.9.0
+typing_extensions>=4.1.1
 tqdm

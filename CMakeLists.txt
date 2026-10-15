@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)
+cmake_minimum_required(VERSION 3.24)
 
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
@@ -9,7 +9,9 @@ include(FetchContent)
 set(CMAKE_CUDA_HOST_COMPILER $ENV{CC})
 
 # 2026-04-07 Change the order of this 2 commands, so it can be compiled in mafalda-2
-set(CMAKE_CUDA_ARCHITECTURES 70)
+if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+    set(CMAKE_CUDA_ARCHITECTURES 70)
+endif()
 project(sscRaft LANGUAGES CXX CUDA)
 
 set(CMAKE_CXX_STANDARD 17)
