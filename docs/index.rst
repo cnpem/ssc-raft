@@ -10,6 +10,7 @@ Welcome to sscRaft documentation!
     :caption: Contents
 
     source/install
+    source/troubleshooting
     source/tutorial
     source/api
     source/changelog

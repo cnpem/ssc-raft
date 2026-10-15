@@ -177,6 +177,10 @@ The following `Python3` modules are used:
 * `SharedArray`
 * `h5py`
 
+## Troubleshooting
+
+Build problems (for example, `cicc: not found` when compiling inside a `micromamba` environment in a Singularity/Apptainer container) are described in the documentation: `./docs/source/troubleshooting.rst`.
+
 ## Uninstall
 
 To uninstall `sscRaft` use the command, independent of the instalation method,
