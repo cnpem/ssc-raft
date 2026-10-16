@@ -7,3 +7,6 @@ dist/
 .vscode/
 *.sh
 *.out
+docs/build/
+docs/public/
+.gitlab-ci-local/

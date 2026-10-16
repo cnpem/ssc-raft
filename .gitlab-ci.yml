@@ -3,45 +3,69 @@ variables:
   RUNNER_TAG: "podman"
 
 stages:
-  - build
-  - deploy
-  - pages
+- build
+- deploy
+- pages
+
+build_dgx:
+  stage: build
+  image: gccdockers/python-builder
+  script:
+  - python3 -m build --wheel
+  artifacts:
+    paths:
+    - ./dist/*whl
+    expire_in: 1 day
+  tags:
+  - "$RUNNER_TAG"
+
+deploy_dgx:
+  stage: deploy
+  image: gccdockers/python-builder
+  script:
+  - twine upload ./dist/*.whl --repository-url="$GCC_PYPI_HOST"
+  dependencies:
+  - build_dgx
+  tags:
+  - "$RUNNER_TAG"
+  only:
+  - tags
 
 build_sdist:
   stage: build
   image: gccdockers/python-builder
   script:
-    - python3 -m build --sdist
+  - python3 -m build --sdist
   tags:
-    - "$RUNNER_TAG"
+  - "$RUNNER_TAG"
   artifacts:
     paths:
-      - ./dist/*tar.gz
+    - ./dist/*tar.gz
     expire_in: 1 day
 
 deploy_sdist:
   stage: deploy
   image: gccdockers/python-builder
   script:
-    - twine upload ./dist/*.tar.gz  --repository-url="$GCC_PYPI_HOST"
+  - twine upload ./dist/*.tar.gz  --repository-url="$GCC_PYPI_HOST"
   tags:
-    - "$RUNNER_TAG"
+  - "$RUNNER_TAG"
   dependencies:
-    - build_sdist
+  - build_sdist
   only:
-    - tags
+  - tags
 
 pages:
   stage: pages
   image: python:3.12
   before_script:
-    - pip install -r docs/requirements.txt
+  - pip install -r docs/requirements.txt
   script:
-    - sphinx-build -j $(nproc) -b html docs/ public/
+  - sphinx-build -j $(nproc) -b html docs/ public/
   artifacts:
     paths:
-      - public
+    - public
   only:
-    - tags
+  - tags
   tags:
-    - "$RUNNER_TAG"
+  - "$RUNNER_TAG"
