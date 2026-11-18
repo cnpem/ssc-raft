@@ -1,7 +1,7 @@
 .. _apicorrection:
 
-Background correction API
-#########################
+Background correction
+#####################
 
 .. automodule:: sscRaft.processing.background_correction
      :members:

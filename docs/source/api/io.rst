@@ -1,7 +1,7 @@
 .. _apiio:
 
-Input/Output API
-################
+Input/Output
+############
 
 .. automodule:: sscRaft.io.io_
      :members:

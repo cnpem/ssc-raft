@@ -1,7 +1,9 @@
+.. _apipage:
+
 API Reference
 =============
 
-This page documents the API reference for the sscRaft. 
+This page documents the sscRaft functions. 
 
 .. - :ref:`apiutils`
 .. - :ref:`apiio`

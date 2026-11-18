@@ -1,7 +1,7 @@
 .. _apiphaseretrieval:
 
-Phase Retrieval API
-###################
+Phase Retrieval
+###############
 
 .. automodule:: sscRaft.phase_retrieval.phase
      :members:

@@ -1,7 +1,7 @@
 .. _apireconstruction:
 
-Reconstruction methods API
-##########################
+Reconstruction methods
+######################
 
 .. _apifbp:
 

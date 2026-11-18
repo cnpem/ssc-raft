@@ -1,7 +1,7 @@
 .. _apiforward:
 
-Forward methods API
-###################
+Forward methods
+###############
 
 .. _apiradonA:
 

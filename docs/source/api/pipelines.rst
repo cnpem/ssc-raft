@@ -1,7 +1,7 @@
 .. _apipipe:
 
-Pipelines API
-#############
+Pipelines
+#########
 
 .. _apipipeA:
 

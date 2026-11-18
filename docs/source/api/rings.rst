@@ -1,7 +1,7 @@
 .. _apirings:
 
-Rings API
-#########
+Rings
+#####
 
 .. _apiallstripes:
 

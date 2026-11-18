@@ -1,5 +1,5 @@
 (padd)=
-# Padding
+# Padding Strategy
 
 Padding strategies are a common technique used on numerical transforms, especially Discrete Fourier Transforms (DFTs) implemented via the Fast Fourier Transform (FFT) algorithm.
 Different padding strategies are used depending on what you want to achieve — e.g., controlling edge effects, preserving statistics, or enforcing periodicity.

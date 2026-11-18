@@ -1,7 +1,7 @@
 .. _apiutils:
 
-Utilitary functions API
-#######################
+Utilitary functions
+###################
 
 
 .. autofunction:: sscRaft.utils.plot_imgs

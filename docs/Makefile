@@ -16,10 +16,10 @@ out:
 .PHONY: help Makefile all
 
 html:
-	@$(SPHINXMBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
-branch:
 	@$(SPHINXBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+multiversion:
+	@$(SPHINXMBUILD) "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 clean:
 	rm -rf "$(BUILDDIR)"

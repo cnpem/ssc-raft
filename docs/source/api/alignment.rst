@@ -1,7 +1,7 @@
 .. _apialignment:
 
-Alignment API
-#############
+Alignment
+#########
 
 .. _apirotaxisA:
 
