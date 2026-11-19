@@ -46,7 +46,7 @@ def getOffsetExcentricTomo(tomogram, gpus = [0]):
         return int(offset)
 
     
-def stitchExcentricTomo(tomogram: numpy.ndarray, offset: int, gpus: list = [0], method: str = 'none') -> numpy.ndarray:
+def stitchExcentricTomo(tomogram: numpy.ndarray, offset: int, gpus: list = [0], method: int = None) -> numpy.ndarray:
     """Computes the transformation of a 360 degree measured tomogram fullview to a 180 degree measured tomogram.
     The transformation considers the input offset and gradually adjust the gray values on the offset interval
 
@@ -54,7 +54,7 @@ def stitchExcentricTomo(tomogram: numpy.ndarray, offset: int, gpus: list = [0], 
         tomogram (ndarray): A 360 degree measured tomogram. The axes are [slices, angles, nrays] 
         offset (int): The offset value for the transformation, with sign
         gpus (list of ints, optional): The gpus to be used. [default: [0]]
-        method (str, optional): Intensity interpolation on overlapping area. Options: \'none\', \'linear\', \'gaussian\', \'cosine\', \'sigmoid\' [default: \'none\']
+        method (int, optional): Intensity interpolation on overlapping area. Options: None (no interpolation), 0 (linear), 1 (gaussian), 2 (cosine), 3 (sigmoid) [default: None]
 
     Returns:
         (ndarray): A 180 degree tomogram. The axes are [slices, angles, nrays]
@@ -79,6 +79,9 @@ def stitchExcentricTomo(tomogram: numpy.ndarray, offset: int, gpus: list = [0], 
     else:
         tomogram     = CNICE(tomogram)
         tomogram_ptr = tomogram.ctypes.data_as(ctypes.c_void_p)
+
+    if method is None:
+        method = 10 # No interpolation
 
     Interpolation_method = ExcentricOverlapInterpolation(method)
     
