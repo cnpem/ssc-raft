@@ -169,19 +169,34 @@ def call_shift(args):
     return scipy.ndimage.shift(array, (shift_y, shift_x))
 
 def shift_slices_via_fourier_transform(data,shift_y, shift_x):
+    # Fixed by Yuri in Apr/2026, in Github Issues: https://github.com/cnpem/ssc-raft/issues/2
+
     ft_data = numpy.fft.fftshift(numpy.fft.fft2(data),axes=(1,2))
     ft_freq_y = numpy.fft.fftshift(numpy.fft.fftfreq(data.shape[1],d=1))
     ft_freq_x = numpy.fft.fftshift(numpy.fft.fftfreq(data.shape[2],d=1))
     XX, YY = numpy.meshgrid(ft_freq_x,ft_freq_y)
     
     exponential_part = numpy.exp(1j * 2 * numpy.pi * (shift_y[:, numpy.newaxis, numpy.newaxis] * YY + shift_x[:, numpy.newaxis, numpy.newaxis] * XX))
-    shifted_data = numpy.fft.ifft2(numpy.fft.ifftshift(ft_data*exponential_part))
+    shifted_data = numpy.fft.ifft2(numpy.fft.ifftshift(ft_data*exponential_part, axes=(1,2)))
 
-    return numpy.abs(shifted_data)
+    return shifted_data
+
+# def shift_slices_via_fourier_transform(data,shift_y, shift_x):
+#     # Old version with bug! 
+#     ft_data = numpy.fft.fftshift(numpy.fft.fft2(data),axes=(1,2))
+#     ft_freq_y = numpy.fft.fftshift(numpy.fft.fftfreq(data.shape[1],d=1))
+#     ft_freq_x = numpy.fft.fftshift(numpy.fft.fftfreq(data.shape[2],d=1))
+#     XX, YY = numpy.meshgrid(ft_freq_x,ft_freq_y)
+    
+#     exponential_part = numpy.exp(1j * 2 * numpy.pi * (shift_y[:, numpy.newaxis, numpy.newaxis] * YY + shift_x[:, numpy.newaxis, numpy.newaxis] * XX))
+#     shifted_data = numpy.fft.ifft2(numpy.fft.ifftshift(ft_data*exponential_part))
+
+#     return numpy.abs(shifted_data)
 
 
 def apply_shifts(data,shifts, method='scipy',cpus=32,turn_off_vertical=False,remove_null_borders=True):
-    
+    # Fixed by Yuri in Apr/2026, in Github Issues: https://github.com/cnpem/ssc-raft/issues/2
+
     if turn_off_vertical:
         shifts[:,0] = 0
 
@@ -194,10 +209,15 @@ def apply_shifts(data,shifts, method='scipy',cpus=32,turn_off_vertical=False,rem
             results = list(tqdm(executor.map(call_shift, zip(data,shifts[:,0],shifts[:,1])),total=data.shape[0],desc='Shifting in progress...'))
             for counter, result in enumerate(results):
                 data[counter, :, :] = result
-    elif method == 'fourier_parallel':
+
+    elif method == 'fourier':
         data = shift_slices_via_fourier_transform(data,-shifts[:,0],-shifts[:,1]) # not filling in values with 0
+        data = np.real(data)
+
     elif method == 'fourier_parallel':
         data = shift_slices_via_fourier_transform_parallel(data,-shifts[:,0],-shifts[:,1],fill_in = 0)
+        data = np.real(data)
+
     else:
         sys.exit('Select alignment method correctly')
 
@@ -493,14 +513,6 @@ def iterative_reprojection(original_sinogram, angles,
                                                                        dic,
                                                                        tomo_method=tomo_method,
                                                                        radon_method=radon_method)
-                
-            fig, ax = plt.subplots(1,3,figsize=(12,4),dpi=200)
-            im0 = ax[0].imshow(sinogram[0])
-            fig.colorbar(im0,ax=ax[0])
-            im1=ax[1].imshow(reprojected_sinogram[0])
-            fig.colorbar(im1,ax=ax[1])            
-            im2=ax[2].imshow(numpy.angle(reprojected_sinogram[0]))
-            fig.colorbar(im2,ax=ax[2])
             
             if plot:
                 plot_iterative_reprojection(tomo,sinogram,dic["algorithm_dic"]['angles[rad]'],shifts,cumulative_shifts,plot_type=plot_type)

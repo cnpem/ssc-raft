@@ -13,6 +13,7 @@ Version 3.4.3 - 2026-10-15
   - ``pyproject.toml``: ``setuptools>=61`` and ``packaging`` as build requirements, fixing the package name ``UNKNOWN``.
   - ``README.md`` links to the troubleshooting documentation.
   - Excentric tomo: ``ExcentricOverlapInterpolation`` now receives the interpolation type as an integer (``0`` linear, ``1`` gaussian, ``2`` cosine, ``3`` sigmoid, any other value for none), fixing the variable type passed from ``ssc-raft-apps``. String names are no longer accepted.
+  - Iterative reprojection method: correction of ``Fourier`` option in ``apply_shifts()`` function and axis correction on ``shift_slices_via_fourier_transform()`` function.
 
 Version 3.4.2 - 2026-09-28
 --------------------------
