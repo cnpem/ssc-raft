@@ -363,7 +363,7 @@ def correct_rotation_axis_block(data, rotation_axis_list, block_size):
     """Corrects the rotation axis by blocks of a data according to a deviation value defined 
     by the number of pixels translated form the center of the data.
 
-    The rotation_axis_list, with signs, is computed through the sscRaft function ``Centersino_block()``.
+    The ``rotation_axis_list``, with signs, is computed through the sscRaft function ``Centersino_block()``.
 
     Args:
         data (ndarray): Projection tomogram. The axes are [slices, angles, length]
